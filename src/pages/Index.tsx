@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { RequirementCard } from "@/components/RequirementCard";
@@ -8,6 +9,9 @@ import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Plus, FileText, ClipboardList } from "lucide-react";
+import { DocumentItem } from "@/components/DocumentItem";
+import { TaskItem } from "@/components/TaskItem";
+import { getDocumentsForRequirement, getTasksForRequirement } from "@/utils/isoTemplates";
 
 const Index = () => {
   const [selectedRequirement, setSelectedRequirement] = useState<ISORequirement | null>(null);
@@ -174,9 +178,9 @@ const Index = () => {
               
               <Tabs defaultValue="requirements" className="mt-6">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="requirements">Requirements</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
-                  <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                  <TabsTrigger value="requirements">Requisitos</TabsTrigger>
+                  <TabsTrigger value="documents">Documentos</TabsTrigger>
+                  <TabsTrigger value="tasks">Tarefas</TabsTrigger>
                 </TabsList>
                 <TabsContent value="requirements" className="mt-4">
                   <div className="grid grid-cols-1 gap-4">
@@ -210,34 +214,50 @@ const Index = () => {
                   </div>
                 </TabsContent>
                 <TabsContent value="documents">
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                      <FileText size={28} className="text-muted-foreground" />
+                  {selectedRequirement && getDocumentsForRequirement(selectedRequirement.number).length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 mt-4">
+                      {getDocumentsForRequirement(selectedRequirement.number).map((document) => (
+                        <DocumentItem key={document.id} document={document} />
+                      ))}
                     </div>
-                    <h3 className="text-lg font-medium">No documents yet</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Upload or create documents related to this requirement.
-                    </p>
-                    <Button className="mt-4">
-                      <Plus size={16} className="mr-2" />
-                      Add Document
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
+                        <FileText size={28} className="text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium">Nenhum documento encontrado</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Não há documentos associados a este requisito ainda.
+                      </p>
+                      <Button className="mt-4">
+                        <Plus size={16} className="mr-2" />
+                        Adicionar Documento
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
                 <TabsContent value="tasks">
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                      <ClipboardList size={28} className="text-muted-foreground" />
+                  {selectedRequirement && getTasksForRequirement(selectedRequirement.number).length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 mt-4">
+                      {getTasksForRequirement(selectedRequirement.number).map((task) => (
+                        <TaskItem key={task.id} task={task} />
+                      ))}
                     </div>
-                    <h3 className="text-lg font-medium">No tasks yet</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Create tasks to track work related to this requirement.
-                    </p>
-                    <Button className="mt-4">
-                      <Plus size={16} className="mr-2" />
-                      Add Task
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
+                        <ClipboardList size={28} className="text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium">Nenhuma tarefa encontrada</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Não há tarefas associadas a este requisito ainda.
+                      </p>
+                      <Button className="mt-4">
+                        <Plus size={16} className="mr-2" />
+                        Adicionar Tarefa
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </>
@@ -280,60 +300,76 @@ const Index = () => {
               
               <Tabs defaultValue="details" className="mt-6">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
-                  <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                  <TabsTrigger value="details">Detalhes</TabsTrigger>
+                  <TabsTrigger value="documents">Documentos</TabsTrigger>
+                  <TabsTrigger value="tasks">Tarefas</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details" className="mt-4 space-y-4">
                   <div className="rounded-lg border border-border/40 p-4">
-                    <h4 className="text-sm font-medium mb-2">Implementation Guidance</h4>
+                    <h4 className="text-sm font-medium mb-2">Orientação para Implementação</h4>
                     <p className="text-sm text-muted-foreground">
-                      To fulfill this requirement, you need to establish processes and documentation that demonstrate how your organization addresses this specific aspect of the ISO 9001:2015 standard.
+                      {selectedChildRequirement.recommendedActions || "Para atender a este requisito, você precisa estabelecer processos e documentação que demonstrem como sua organização aborda este aspecto específico da norma ISO 9001:2015."}
                     </p>
                   </div>
                   <div className="rounded-lg border border-border/40 p-4">
-                    <h4 className="text-sm font-medium mb-2">Required Evidence</h4>
+                    <h4 className="text-sm font-medium mb-2">Evidências Necessárias</h4>
                     <p className="text-sm text-muted-foreground">
-                      Document your approach, create procedures, maintain records, and ensure they are accessible to relevant stakeholders.
+                      {selectedChildRequirement.evidence || "Documente sua abordagem, crie procedimentos, mantenha registros e garanta que eles estejam acessíveis às partes interessadas relevantes."}
                     </p>
                   </div>
                   <div className="rounded-lg border border-border/40 p-4">
-                    <h4 className="text-sm font-medium mb-2">Status Update</h4>
+                    <h4 className="text-sm font-medium mb-2">Atualização de Status</h4>
                     <div className="flex space-x-2 mt-2">
-                      <Button variant="outline" size="sm" className="flex-1">Set In Progress</Button>
-                      <Button variant="outline" size="sm" className="flex-1">Mark Completed</Button>
+                      <Button variant="outline" size="sm" className="flex-1">Definir Em Andamento</Button>
+                      <Button variant="outline" size="sm" className="flex-1">Marcar como Concluído</Button>
                     </div>
                   </div>
                 </TabsContent>
                 <TabsContent value="documents">
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                      <FileText size={28} className="text-muted-foreground" />
+                  {selectedChildRequirement && getDocumentsForRequirement(selectedChildRequirement.number).length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 mt-4">
+                      {getDocumentsForRequirement(selectedChildRequirement.number).map((document) => (
+                        <DocumentItem key={document.id} document={document} />
+                      ))}
                     </div>
-                    <h3 className="text-lg font-medium">No documents yet</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Upload or create documents related to this requirement.
-                    </p>
-                    <Button className="mt-4">
-                      <Plus size={16} className="mr-2" />
-                      Add Document
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
+                        <FileText size={28} className="text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium">Nenhum documento encontrado</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Não há documentos associados a este requisito ainda.
+                      </p>
+                      <Button className="mt-4">
+                        <Plus size={16} className="mr-2" />
+                        Adicionar Documento
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
                 <TabsContent value="tasks">
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                      <ClipboardList size={28} className="text-muted-foreground" />
+                  {selectedChildRequirement && getTasksForRequirement(selectedChildRequirement.number).length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3 mt-4">
+                      {getTasksForRequirement(selectedChildRequirement.number).map((task) => (
+                        <TaskItem key={task.id} task={task} />
+                      ))}
                     </div>
-                    <h3 className="text-lg font-medium">No tasks yet</h3>
-                    <p className="text-muted-foreground mt-2">
-                      Create tasks to track work related to this requirement.
-                    </p>
-                    <Button className="mt-4">
-                      <Plus size={16} className="mr-2" />
-                      Add Task
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
+                        <ClipboardList size={28} className="text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium">Nenhuma tarefa encontrada</h3>
+                      <p className="text-muted-foreground mt-2">
+                        Não há tarefas associadas a este requisito ainda.
+                      </p>
+                      <Button className="mt-4">
+                        <Plus size={16} className="mr-2" />
+                        Adicionar Tarefa
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </>
