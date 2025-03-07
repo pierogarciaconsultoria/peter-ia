@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText } from "lucide-react";
+import { Menu, X, Home, FileText, AlertOctagon } from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +23,11 @@ export function Navigation() {
       name: "Documentos",
       icon: <FileText size={18} />,
       path: "/documents",
+    },
+    {
+      name: "Não Conformidade",
+      icon: <AlertOctagon size={18} />,
+      path: "/non-compliance",
     },
     // ... other menu items if they exist
   ];
