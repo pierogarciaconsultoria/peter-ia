@@ -17,9 +17,14 @@ export async function fetchDocumentsForRequirement(requirementId: string): Promi
 }
 
 export async function createDocumentTemplate(document: Partial<ISODocument>): Promise<ISODocument> {
+  // Ensure required fields are present
+  if (!document.associated_requirement || !document.document_type || !document.title) {
+    throw new Error("Missing required fields: associated_requirement, document_type, or title must be provided");
+  }
+  
   const { data, error } = await supabase
     .from('iso_documents')
-    .insert([document])
+    .insert(document)
     .select()
     .single();
   
