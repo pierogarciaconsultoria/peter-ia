@@ -22,9 +22,19 @@ export async function createDocumentTemplate(document: Partial<ISODocument>): Pr
     throw new Error("Missing required fields: associated_requirement, document_type, or title must be provided");
   }
   
+  // Create a properly typed object with required fields
+  const documentToInsert = {
+    associated_requirement: document.associated_requirement,
+    document_type: document.document_type,
+    title: document.title,
+    description: document.description || '',
+    content: document.content || '',
+    status: document.status || 'draft'
+  };
+  
   const { data, error } = await supabase
     .from('iso_documents')
-    .insert(document)
+    .insert(documentToInsert)
     .select()
     .single();
   

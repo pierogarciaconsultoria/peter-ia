@@ -9,7 +9,6 @@ import { FileText, ClipboardList, Plus } from "lucide-react";
 import { DocumentItem } from "@/components/DocumentItem";
 import { TaskItem } from "@/components/TaskItem";
 import { getDocumentsForRequirement, getTasksForRequirement } from "@/utils/isoTemplates";
-import { DocumentTemplates } from "@/components/DocumentTemplates";
 
 interface RequirementDialogProps {
   requirement: ISORequirement;
@@ -40,10 +39,9 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
       />
       
       <Tabs defaultValue="requirements" className="mt-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="requirements">Requisitos</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="templates">Modelos</TabsTrigger>
           <TabsTrigger value="tasks">Tarefas</TabsTrigger>
         </TabsList>
         <TabsContent value="requirements" className="mt-4">
@@ -99,9 +97,6 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
               </Button>
             </div>
           )}
-        </TabsContent>
-        <TabsContent value="templates">
-          <DocumentTemplates requirement={requirement} />
         </TabsContent>
         <TabsContent value="tasks">
           {getTasksForRequirement(requirement.number).length > 0 ? (
