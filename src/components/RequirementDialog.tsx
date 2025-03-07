@@ -9,6 +9,7 @@ import { FileText, ClipboardList, Plus } from "lucide-react";
 import { DocumentItem } from "@/components/DocumentItem";
 import { TaskItem } from "@/components/TaskItem";
 import { getDocumentsForRequirement, getTasksForRequirement } from "@/utils/isoTemplates";
+import { DocumentTemplate } from "@/components/DocumentTemplate";
 
 interface RequirementDialogProps {
   requirement: ISORequirement;
@@ -77,13 +78,13 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
         </TabsContent>
         <TabsContent value="documents">
           {getDocumentsForRequirement(requirement.number).length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 mt-4">
+            <div className="grid grid-cols-1 gap-3 mt-4 mb-6">
               {getDocumentsForRequirement(requirement.number).map((document) => (
                 <DocumentItem key={document.id} document={document} />
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center">
+            <div className="p-8 text-center mb-6">
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
                 <FileText size={28} className="text-muted-foreground" />
               </div>
@@ -97,6 +98,12 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
               </Button>
             </div>
           )}
+          
+          {/* Document template section */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-medium mb-4">Modelo de Formulário para Requisito {requirement.number}</h3>
+            <DocumentTemplate requirement={requirement} />
+          </div>
         </TabsContent>
         <TabsContent value="tasks">
           {getTasksForRequirement(requirement.number).length > 0 ? (
