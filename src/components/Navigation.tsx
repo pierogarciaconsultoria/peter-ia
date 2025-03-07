@@ -1,118 +1,88 @@
-
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  LayoutGrid,
-  ClipboardList,
-  Settings,
-  Users,
-  BarChart,
-  FileText,
-  Search,
-  Menu,
-  X
-} from "lucide-react";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Menu, X, Home, FileText } from "lucide-react";
 
-interface NavigationProps {
-  className?: string;
-}
-
-export function Navigation({ className }: NavigationProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
   
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+  
+  const menuItems = [
+    {
+      name: "Dashboard",
+      icon: <Home size={18} />,
+      path: "/",
+    },
+    {
+      name: "Documentos",
+      icon: <FileText size={18} />,
+      path: "/documents",
+    },
+    // ... other menu items if they exist
+  ];
+  
   return (
     <>
       {/* Mobile menu button */}
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden fixed top-4 right-4 z-50"
-        onClick={toggleMenu}
+        className="fixed top-4 left-4 z-50 md:hidden"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
       </Button>
       
-      {/* Navigation sidebar */}
-      <div 
+      {/* Sidebar navigation */}
+      <div
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-card/80 backdrop-blur-sm border-r border-border/50 p-4 flex flex-col z-40 transition-transform duration-300 ease-in-out",
-          "md:translate-x-0",
-          isMenuOpen ? "translate-x-0" : "-translate-x-full",
-          className
+          "fixed inset-y-0 left-0 z-40 w-64 bg-card/80 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center space-x-2 mb-8 mt-2">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-            <FileText size={18} className="text-primary-foreground" />
+        <div className="flex flex-col h-full">
+          <div className="p-6">
+            <h1 className="text-xl font-bold">ISO 9001 Manager</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Simplificando a conformidade
+            </p>
           </div>
-          <h1 className="text-xl font-semibold">ISO 9001:2015</h1>
-        </div>
-        
-        <div className="relative mb-6">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="pl-8 bg-background/50"
-          />
-        </div>
-        
-        <nav className="space-y-1 flex-1">
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <LayoutGrid size={18} />
-              <span>Dashboard</span>
-            </a>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <ClipboardList size={18} />
-              <span>Requirements</span>
-            </a>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <FileText size={18} />
-              <span>Documents</span>
-            </a>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <Users size={18} />
-              <span>Team</span>
-            </a>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <BarChart size={18} />
-              <span>Reports</span>
-            </a>
-          </Button>
-        </nav>
-        
-        <div className="pt-6 border-t border-border/50 mt-6">
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/" className="flex items-center space-x-3">
-              <Settings size={18} />
-              <span>Settings</span>
-            </a>
-          </Button>
+          
+          <nav className="flex-1 px-4 pb-4">
+            <ul className="space-y-1">
+              {menuItems.map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                      location.pathname === item.path
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item.icon}
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          
+          <div className="p-4 mt-auto">
+            <Button variant="outline" className="w-full">
+              <FileText size={16} className="mr-2" />
+              Exportar Relatório
+            </Button>
+          </div>
         </div>
       </div>
-      
-      {/* Backdrop for mobile */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
-          onClick={toggleMenu}
-        />
-      )}
     </>
   );
 }

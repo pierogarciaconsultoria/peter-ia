@@ -9,7 +9,121 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      document_revisions: {
+        Row: {
+          approved_by: string | null
+          changes: string | null
+          content: string
+          document_id: string
+          id: string
+          revision_date: string | null
+          version: string
+        }
+        Insert: {
+          approved_by?: string | null
+          changes?: string | null
+          content: string
+          document_id: string
+          id?: string
+          revision_date?: string | null
+          version: string
+        }
+        Update: {
+          approved_by?: string | null
+          changes?: string | null
+          content?: string
+          document_id?: string
+          id?: string
+          revision_date?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_revisions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "iso_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iso_documents: {
+        Row: {
+          associated_requirement: string
+          content: string | null
+          created_at: string | null
+          description: string | null
+          document_type: string
+          id: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          associated_requirement: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type: string
+          id?: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          associated_requirement?: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type?: string
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      iso_records: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          data: Json | null
+          document_id: string | null
+          id: string
+          record_type: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          data?: Json | null
+          document_id?: string | null
+          id?: string
+          record_type: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          data?: Json | null
+          document_id?: string | null
+          id?: string
+          record_type?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iso_records_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "iso_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
