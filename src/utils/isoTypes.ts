@@ -31,3 +31,13 @@ export interface ISORecord {
   created_at: string;
   updated_at: string;
 }
+
+// Add this interface to make it compatible with the existing code
+export interface TemplateDocument {
+  id: string;
+  title: string;
+  type: 'policy' | 'procedure' | 'work-instruction' | 'form' | 'record' | 'manual';
+  description: string;
+  requirementIds: string[];
+  template?: string;
+}

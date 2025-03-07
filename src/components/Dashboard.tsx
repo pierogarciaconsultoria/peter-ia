@@ -3,12 +3,17 @@ import { StatisticCard } from "@/components/StatisticCard";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
+import { DocumentForm } from "@/components/DocumentForm";
 
 interface DashboardProps {
   requirements: ISORequirement[];
 }
 
 export function Dashboard({ requirements }: DashboardProps) {
+  const [openDialog, setOpenDialog] = useState(false);
+  
   const calculateTotalProgress = () => {
     const totalRequirements = requirements.length;
     const totalProgress = requirements.reduce((sum, req) => sum + req.progress, 0);
@@ -25,6 +30,14 @@ export function Dashboard({ requirements }: DashboardProps) {
   };
 
   const stats = countByStatus();
+  
+  const handleNewDocument = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
 
   return (
     <header className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
@@ -35,7 +48,7 @@ export function Dashboard({ requirements }: DashboardProps) {
           </span>
           <h1 className="text-3xl font-bold mt-1">Quality Management System</h1>
         </div>
-        <Button className="self-start">
+        <Button className="self-start" onClick={handleNewDocument}>
           <Plus size={16} className="mr-2" />
           New Document
         </Button>
@@ -73,6 +86,12 @@ export function Dashboard({ requirements }: DashboardProps) {
           total={requirements.length} 
         />
       </div>
+      
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DocumentForm document={null} onClose={handleCloseDialog} />
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
