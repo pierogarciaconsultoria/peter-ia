@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
+import NonConformingProducts from "./pages/NonConformingProducts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/non-compliance" element={<NonCompliance />} />
+          <Route path="/non-conforming-products" element={<NonConformingProducts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

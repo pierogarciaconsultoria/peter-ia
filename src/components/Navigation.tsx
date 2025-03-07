@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon } from "lucide-react";
+import { Menu, X, Home, FileText, AlertOctagon, Package } from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +28,11 @@ export function Navigation() {
       name: "Não Conformidade",
       icon: <AlertOctagon size={18} />,
       path: "/non-compliance",
+    },
+    {
+      name: "Produto Não Conforme",
+      icon: <Package size={18} />,
+      path: "/non-conforming-products",
     },
     // ... other menu items if they exist
   ];
