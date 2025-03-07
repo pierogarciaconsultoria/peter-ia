@@ -1,3 +1,4 @@
+
 export interface ISODocument {
   id: string;
   title: string;
@@ -338,6 +339,226 @@ export const getTasksForRequirement = (requirementId: string): ISOTask[] => {
   return standardTasks.filter(task => 
     task.requirementIds.includes(requirementId)
   );
+};
+
+// Function to get fields based on requirement number
+export const getFieldsForRequirement = (requirementNumber: string): string[] => {
+  // Define fields based on the ISO 9001:2015 requirement number
+  switch(requirementNumber) {
+    case "4.1":
+      return [
+        "Questões externas relevantes para o propósito da organização",
+        "Questões internas relevantes para o propósito da organização",
+        "Impacto destas questões na capacidade de atingir os resultados pretendidos",
+        "Método de monitoramento e análise das informações sobre estas questões"
+      ];
+    case "4.2":
+      return [
+        "Partes interessadas relevantes para o SGQ",
+        "Requisitos destas partes interessadas",
+        "Impacto potencial no fornecimento de produtos/serviços",
+        "Método de monitoramento e análise das informações sobre estas partes interessadas"
+      ];
+    case "4.3":
+      return [
+        "Produtos e serviços da organização",
+        "Limites e aplicabilidade do SGQ",
+        "Justificativa para não aplicação de requisitos",
+        "Referências documentadas do escopo"
+      ];
+    case "4.4":
+      return [
+        "Processos necessários para o SGQ",
+        "Sequência e interação destes processos",
+        "Critérios e métodos para operação e controle eficazes",
+        "Recursos necessários e sua disponibilidade",
+        "Responsabilidades e autoridades para estes processos"
+      ];
+    case "5.1":
+      return [
+        "Evidências de comprometimento da liderança com o SGQ",
+        "Ações para foco no cliente",
+        "Estabelecimento da política da qualidade",
+        "Comunicação da importância do SGQ"
+      ];
+    case "5.2":
+      return [
+        "Política da qualidade documentada",
+        "Adequação ao propósito e contexto da organização",
+        "Estrutura para definição dos objetivos da qualidade",
+        "Comprometimento com a melhoria contínua"
+      ];
+    case "5.3":
+      return [
+        "Responsabilidades e autoridades atribuídas",
+        "Comunicação destas responsabilidades",
+        "Responsável por reportar o desempenho do SGQ",
+        "Responsável por promover o foco no cliente"
+      ];
+    case "6.1":
+      return [
+        "Riscos identificados para o SGQ",
+        "Oportunidades identificadas para o SGQ",
+        "Ações planejadas para abordar riscos e oportunidades",
+        "Método de avaliação da eficácia destas ações"
+      ];
+    case "6.2":
+      return [
+        "Objetivos da qualidade estabelecidos",
+        "Planos para atingir os objetivos da qualidade",
+        "Recursos necessários para atingir os objetivos",
+        "Responsáveis e prazos para alcançar os objetivos",
+        "Método de avaliação dos resultados"
+      ];
+    case "6.3":
+      return [
+        "Mudanças planejadas para o SGQ",
+        "Propósito das mudanças e potenciais consequências",
+        "Disponibilidade de recursos para implementar mudanças",
+        "Responsabilidades e autoridades relacionadas às mudanças"
+      ];
+    case "7.1":
+      return [
+        "Recursos necessários para o SGQ",
+        "Pessoas necessárias para operação eficaz",
+        "Infraestrutura necessária",
+        "Ambiente para operação dos processos",
+        "Recursos de monitoramento e medição",
+        "Conhecimento organizacional"
+      ];
+    case "7.2":
+      return [
+        "Competências necessárias para cada função",
+        "Ações para adquirir as competências necessárias",
+        "Eficácia das ações tomadas",
+        "Documentação das competências"
+      ];
+    case "7.3":
+      return [
+        "Evidências de conscientização sobre política da qualidade",
+        "Conscientização sobre objetivos da qualidade",
+        "Conscientização sobre contribuição para eficácia do SGQ",
+        "Consequências de não conformidade com os requisitos do SGQ"
+      ];
+    case "7.4":
+      return [
+        "Comunicações internas relevantes para o SGQ",
+        "Comunicações externas relevantes para o SGQ",
+        "O que será comunicado",
+        "Quando comunicar",
+        "A quem comunicar",
+        "Como comunicar"
+      ];
+    case "7.5":
+      return [
+        "Informação documentada requerida pela norma",
+        "Informação documentada determinada como necessária pela organização",
+        "Sistema de controle da informação documentada",
+        "Método de distribuição, acesso, recuperação e uso"
+      ];
+    case "8.1":
+      return [
+        "Processos necessários para fornecimento de produtos e serviços",
+        "Critérios para processos e aceitação de produtos e serviços",
+        "Recursos necessários para conformidade",
+        "Controles implementados para os processos",
+        "Evidências de que os processos foram realizados conforme planejado"
+      ];
+    case "8.2":
+      return [
+        "Requisitos especificados pelo cliente",
+        "Requisitos não declarados pelo cliente, mas necessários",
+        "Requisitos estatutários e regulamentares",
+        "Requisitos da organização",
+        "Análise crítica dos requisitos"
+      ];
+    case "8.3":
+      return [
+        "Processo de design e desenvolvimento",
+        "Estágios e controles do processo de design e desenvolvimento",
+        "Entradas de design e desenvolvimento",
+        "Controles de design e desenvolvimento",
+        "Saídas de design e desenvolvimento"
+      ];
+    case "8.4":
+      return [
+        "Tipo e extensão do controle de fornecimento externo",
+        "Critérios para avaliação, seleção e monitoramento de fornecedores",
+        "Informações fornecidas aos fornecedores externos",
+        "Verificação dos produtos adquiridos"
+      ];
+    case "8.5":
+      return [
+        "Controles para produção e fornecimento de serviço",
+        "Identificação e rastreabilidade",
+        "Propriedade pertencente a clientes ou fornecedores externos",
+        "Preservação de saídas",
+        "Atividades pós-entrega"
+      ];
+    case "8.6":
+      return [
+        "Evidências de conformidade com critérios de aceitação",
+        "Rastreabilidade da(s) pessoa(s) que autoriza(m) liberação",
+        "Verificações realizadas para liberação"
+      ];
+    case "8.7":
+      return [
+        "Identificação de saídas não conformes",
+        "Ações tomadas para saídas não conformes",
+        "Documentação das não conformidades",
+        "Verificação após correção"
+      ];
+    case "9.1":
+      return [
+        "O que precisa ser monitorado e medido",
+        "Métodos de monitoramento, medição, análise e avaliação",
+        "Quando o monitoramento e medição devem ser realizados",
+        "Quando os resultados devem ser analisados e avaliados",
+        "Avaliação do desempenho e eficácia do SGQ"
+      ];
+    case "9.2":
+      return [
+        "Programa de auditoria interna",
+        "Critérios e escopo para cada auditoria",
+        "Seleção de auditores",
+        "Resultados das auditorias",
+        "Ações corretivas para não conformidades"
+      ];
+    case "9.3":
+      return [
+        "Entradas da análise crítica pela direção",
+        "Saídas da análise crítica pela direção",
+        "Ações resultantes da análise crítica",
+        "Oportunidades de melhoria identificadas"
+      ];
+    case "10.1":
+      return [
+        "Oportunidades de melhoria identificadas",
+        "Ações implementadas para melhoria",
+        "Avaliação da eficácia das melhorias"
+      ];
+    case "10.2":
+      return [
+        "Descrição da não conformidade",
+        "Causas da não conformidade",
+        "Ações corretivas implementadas",
+        "Avaliação da eficácia das ações corretivas",
+        "Atualizações de riscos e oportunidades, se necessário"
+      ];
+    case "10.3":
+      return [
+        "Oportunidades de melhoria contínua",
+        "Ações implementadas para melhoria contínua",
+        "Resultados de melhoria contínua"
+      ];
+    default:
+      return [
+        "Campo 1",
+        "Campo 2",
+        "Campo 3",
+        "Observações"
+      ];
+  }
 };
 
 // Function to get template content based on requirement number
