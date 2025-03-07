@@ -1,4 +1,3 @@
-
 export interface ISODocument {
   id: string;
   title: string;
@@ -340,3 +339,81 @@ export const getTasksForRequirement = (requirementId: string): ISOTask[] => {
     task.requirementIds.includes(requirementId)
   );
 };
+
+// Function to get template content based on requirement number
+export const getTemplateContentForRequirement = (requirementNumber: string): string => {
+  const fields = getFieldsForRequirement(requirementNumber);
+  
+  // Generate a basic template with the fields
+  let template = `FORMULÁRIO: ${getRequirementTitle(requirementNumber)}
+ISO 9001:2015 - Requisito ${requirementNumber}
+
+INFORMAÇÕES GERAIS:
+-------------------
+Data de elaboração: ____/____/________
+Elaborado por: ______________________________
+Revisão: __________
+Aprovado por: ______________________________
+
+CAMPOS DO FORMULÁRIO:
+--------------------
+`;
+
+  // Add fields to the template
+  fields.forEach((field, index) => {
+    template += `
+${index + 1}. ${field}
+_______________________________________________________________
+_______________________________________________________________
+`;
+  });
+
+  // Add footer
+  template += `
+NOTAS ADICIONAIS:
+----------------
+_______________________________________________________________
+_______________________________________________________________
+
+Assinatura Responsável: ______________________________
+
+Data: ____/____/________
+`;
+
+  return template;
+}
+
+// Helper function to get requirement title
+const getRequirementTitle = (requirementNumber: string): string => {
+  switch(requirementNumber) {
+    case "4.1": return "Contexto da Organização";
+    case "4.2": return "Partes Interessadas";
+    case "4.3": return "Escopo do SGQ";
+    case "4.4": return "Sistema de Gestão da Qualidade";
+    case "5.1": return "Liderança e Comprometimento";
+    case "5.2": return "Política da Qualidade";
+    case "5.3": return "Papéis e Responsabilidades";
+    case "6.1": return "Riscos e Oportunidades";
+    case "6.2": return "Objetivos da Qualidade";
+    case "6.3": return "Planejamento de Mudanças";
+    case "7.1": return "Recursos";
+    case "7.2": return "Competência";
+    case "7.3": return "Conscientização";
+    case "7.4": return "Comunicação";
+    case "7.5": return "Informação Documentada";
+    case "8.1": return "Planejamento e Controle Operacional";
+    case "8.2": return "Requisitos para Produtos e Serviços";
+    case "8.3": return "Design e Desenvolvimento";
+    case "8.4": return "Controle de Processos Externos";
+    case "8.5": return "Produção e Fornecimento de Serviço";
+    case "8.6": return "Liberação de Produtos e Serviços";
+    case "8.7": return "Controle de Saídas Não Conformes";
+    case "9.1": return "Monitoramento e Medição";
+    case "9.2": return "Auditoria Interna";
+    case "9.3": return "Análise Crítica pela Direção";
+    case "10.1": return "Melhoria";
+    case "10.2": return "Não Conformidade e Ação Corretiva";
+    case "10.3": return "Melhoria Contínua";
+    default: return "Requisito ISO 9001";
+  }
+}

@@ -1,19 +1,75 @@
 
 import { Button } from "@/components/ui/button";
 import { ISORequirement } from "@/utils/isoRequirements";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Edit, Save } from "lucide-react";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { getTemplateContentForRequirement } from "@/utils/isoTemplates";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DocumentTemplateProps {
   requirement: ISORequirement;
 }
 
 export function DocumentTemplate({ requirement }: DocumentTemplateProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [templateContent, setTemplateContent] = useState(getTemplateContentForRequirement(requirement.number));
+  const [isSaving, setIsSaving] = useState(false);
+
   // Function to generate PDF template (this would be expanded in a real implementation)
   const handleDownloadTemplate = () => {
     // This would be replaced with actual PDF generation code
     console.log(`Downloading template for requirement ${requirement.number}`);
     // For now, we'll just show an alert
     alert(`Template for ${requirement.number} - ${requirement.title} would be downloaded here`);
+  };
+
+  const handleSaveTemplate = async () => {
+    try {
+      setIsSaving(true);
+      
+      // First check if a template already exists for this requirement
+      const { data: existingTemplates } = await supabase
+        .from('iso_documents')
+        .select('id')
+        .eq('document_type', 'template')
+        .eq('associated_requirement', requirement.number);
+      
+      const now = new Date().toISOString();
+      
+      if (existingTemplates && existingTemplates.length > 0) {
+        // Update existing template
+        await supabase
+          .from('iso_documents')
+          .update({
+            content: templateContent,
+            updated_at: now
+          })
+          .eq('id', existingTemplates[0].id);
+      } else {
+        // Create new template
+        await supabase
+          .from('iso_documents')
+          .insert({
+            title: `Template para ${requirement.number} - ${requirement.title}`,
+            document_type: 'template',
+            associated_requirement: requirement.number,
+            content: templateContent,
+            status: 'approved',
+            created_at: now,
+            updated_at: now
+          });
+      }
+      
+      toast.success('Template salvo com sucesso');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast.error('Erro ao salvar o template');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -36,27 +92,33 @@ export function DocumentTemplate({ requirement }: DocumentTemplateProps) {
         
         {/* Template content - this would be customized per requirement in a real implementation */}
         <div className="min-h-[400px] border-dashed border p-4 rounded-lg mb-4">
-          <h3 className="font-medium text-lg mb-2">Formulário para {requirement.title}</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Este formulário atende às exigências do requisito {requirement.number} da ISO 9001:2015
-          </p>
-          
-          {/* Template content would vary by requirement */}
-          <div className="space-y-4">
-            <div className="border-b pb-2">
-              <p className="text-sm font-medium">Descrição do Propósito:</p>
-              <p className="text-sm text-muted-foreground">{requirement.description}</p>
-            </div>
-            
-            <div>
-              <p className="text-sm font-medium mb-1">Campos Relevantes:</p>
-              <ul className="list-disc pl-5 text-sm text-muted-foreground">
-                {getFieldsForRequirement(requirement.number).map((field, index) => (
-                  <li key={index}>{field}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          {isEditing ? (
+            <Textarea
+              value={templateContent}
+              onChange={(e) => setTemplateContent(e.target.value)}
+              className="w-full h-[400px] font-mono text-sm"
+              placeholder="Edite o conteúdo do template..."
+            />
+          ) : (
+            <>
+              <h3 className="font-medium text-lg mb-2">Formulário para {requirement.title}</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Este formulário atende às exigências do requisito {requirement.number} da ISO 9001:2015
+              </p>
+              
+              {/* Template content would vary by requirement */}
+              <div className="space-y-4">
+                <div className="border-b pb-2">
+                  <p className="text-sm font-medium">Descrição do Propósito:</p>
+                  <p className="text-sm text-muted-foreground">{requirement.description}</p>
+                </div>
+                
+                <div className="whitespace-pre-wrap text-sm">
+                  {templateContent}
+                </div>
+              </div>
+            </>
+          )}
         </div>
         
         {/* Footer with contact information */}
@@ -66,11 +128,24 @@ export function DocumentTemplate({ requirement }: DocumentTemplateProps) {
             <p>contato@pierogarcia.com.br</p>
             <p>@pierogarciaconsultoria</p>
           </div>
-          <div>
-            <Button onClick={handleDownloadTemplate} className="w-full sm:w-auto">
-              <Download size={16} className="mr-2" />
-              Baixar Template
-            </Button>
+          <div className="flex space-x-2">
+            {isEditing ? (
+              <Button onClick={handleSaveTemplate} disabled={isSaving}>
+                <Save size={16} className="mr-2" />
+                {isSaving ? 'Salvando...' : 'Salvar Template'}
+              </Button>
+            ) : (
+              <>
+                <Button onClick={handleDownloadTemplate} variant="outline">
+                  <Download size={16} className="mr-2" />
+                  Baixar Template
+                </Button>
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit size={16} className="mr-2" />
+                  Editar Template
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -78,106 +153,3 @@ export function DocumentTemplate({ requirement }: DocumentTemplateProps) {
   );
 }
 
-// Helper function to determine fields based on ISO requirement
-function getFieldsForRequirement(requirementNumber: string): string[] {
-  switch(requirementNumber) {
-    case "4.1":
-      return [
-        "Questões internas e externas relevantes",
-        "Impacto nos resultados do SGQ",
-        "Método de monitoramento e revisão"
-      ];
-    case "4.2":
-      return [
-        "Partes interessadas relevantes",
-        "Requisitos das partes interessadas",
-        "Impacto no SGQ",
-        "Método de monitoramento e revisão"
-      ];
-    case "4.3":
-      return [
-        "Escopo do SGQ",
-        "Produtos e serviços cobertos",
-        "Justificativa para requisitos não aplicáveis"
-      ];
-    case "4.4":
-      return [
-        "Processos necessários para o SGQ",
-        "Sequência e interação dos processos",
-        "Critérios e métodos de controle",
-        "Recursos necessários",
-        "Responsabilidades e autoridades"
-      ];
-    case "5.1":
-      return [
-        "Evidências de comprometimento da liderança",
-        "Foco no cliente",
-        "Comunicação da política da qualidade"
-      ];
-    case "5.2":
-      return [
-        "Política da qualidade",
-        "Método de comunicação",
-        "Data de aprovação",
-        "Assinatura da alta direção"
-      ];
-    case "5.3":
-      return [
-        "Funções organizacionais",
-        "Responsabilidades",
-        "Autoridades",
-        "Comunicação"
-      ];
-    case "6.1":
-      return [
-        "Riscos identificados",
-        "Oportunidades identificadas",
-        "Ações planejadas",
-        "Método de avaliação da eficácia"
-      ];
-    case "6.2":
-      return [
-        "Objetivos da qualidade",
-        "Plano de ação",
-        "Recursos necessários",
-        "Responsáveis",
-        "Prazos",
-        "Método de avaliação"
-      ];
-    case "6.3":
-      return [
-        "Mudança proposta",
-        "Propósito da mudança",
-        "Potenciais consequências",
-        "Recursos necessários",
-        "Responsabilidades",
-        "Autorização"
-      ];
-    case "7.1":
-      return [
-        "Recursos necessários",
-        "Pessoas",
-        "Infraestrutura",
-        "Ambiente",
-        "Recursos de monitoramento e medição",
-        "Conhecimento organizacional"
-      ];
-    case "7.2":
-      return [
-        "Competências necessárias",
-        "Educação",
-        "Treinamento",
-        "Experiência",
-        "Ações para adquirir competências",
-        "Avaliação da eficácia"
-      ];
-    // Add more cases as needed for other requirements
-    default:
-      return [
-        "Campo 1 específico do requisito",
-        "Campo 2 específico do requisito",
-        "Campo 3 específico do requisito",
-        "Campo 4 específico do requisito"
-      ];
-  }
-}
