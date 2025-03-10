@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -43,7 +42,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
   const [periodFilter, setPeriodFilter] = useState<string>("all");
   const [monthsToShow, setMonthsToShow] = useState<number>(6);
   
-  // Filter products by date period
   const filteredProducts = React.useMemo(() => {
     if (periodFilter === "all") return products;
     
@@ -71,7 +69,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
     return products.filter(p => new Date(p.created_at) >= periodStart);
   }, [products, periodFilter]);
 
-  // Calculate department distribution
   const departmentData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     filteredProducts.forEach(product => {
@@ -84,7 +81,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .sort((a, b) => b.value - a.value);
   }, [filteredProducts]);
 
-  // Calculate customer distribution
   const customerData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     filteredProducts.forEach(product => {
@@ -98,7 +94,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .slice(0, 5); // Top 5 customers
   }, [filteredProducts]);
 
-  // Calculate product distribution
   const productData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     filteredProducts.forEach(product => {
@@ -111,7 +106,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .slice(0, 5); // Top 5 products
   }, [filteredProducts]);
 
-  // Calculate non-conformity type distribution
   const nonConformityTypeData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     filteredProducts.forEach(product => {
@@ -124,7 +118,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .sort((a, b) => b.value - a.value);
   }, [filteredProducts]);
 
-  // Calculate immediate action distribution
   const immediateActionData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     filteredProducts.forEach(product => {
@@ -137,7 +130,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .sort((a, b) => b.value - a.value);
   }, [filteredProducts]);
 
-  // Calculate approval status distribution
   const approvalStatusData = React.useMemo(() => {
     const counts = {
       "Aprovado": filteredProducts.filter(p => p.approval_status === "approved").length,
@@ -149,7 +141,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       .map(([name, value]) => ({ name, value }));
   }, [filteredProducts]);
 
-  // Timeline data (monthly accumulation)
   const monthlyData = React.useMemo(() => {
     const now = new Date();
     const monthlyAccumulated: { month: string; count: number; accumulated: number }[] = [];
@@ -159,7 +150,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const month = date.toLocaleString('pt-BR', { month: 'short' });
       
-      // Count products created in this month
       const count = products.filter(p => {
         const productDate = new Date(p.created_at);
         return productDate.getMonth() === date.getMonth() && 
@@ -177,12 +167,10 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
     return monthlyAccumulated;
   }, [products, monthsToShow]);
 
-  // Colors for charts
   const chartColors = ['#8B5CF6', '#D946EF', '#F97316', '#0EA5E9', '#10b981', '#facc15', '#f43f5e'];
 
   return (
     <div className="space-y-6">
-      {/* Filter controls */}
       <div className="flex flex-wrap gap-4 items-center bg-muted p-4 rounded-lg">
         <div>
           <span className="text-sm font-medium mr-2">Período:</span>
@@ -216,7 +204,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Department Distribution (Horizontal Bar Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Distribuição por Setor Responsável</CardTitle>
@@ -226,13 +213,18 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  layout="vertical"
                   data={departmentData}
-                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 60 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={50} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70} 
+                    interval={0}
+                  />
+                  <YAxis />
                   <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
                   <Bar dataKey="value" fill="#8884d8">
                     {departmentData.map((entry, index) => (
@@ -245,7 +237,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           </CardContent>
         </Card>
 
-        {/* Customer Distribution (Horizontal Bar Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Top 5 Clientes</CardTitle>
@@ -255,13 +246,18 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  layout="vertical"
                   data={customerData}
-                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 60 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={50} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70} 
+                    interval={0}
+                  />
+                  <YAxis />
                   <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
                   <Bar dataKey="value" fill="#8884d8">
                     {customerData.map((entry, index) => (
@@ -274,7 +270,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           </CardContent>
         </Card>
 
-        {/* Product Distribution (Horizontal Bar Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Top 5 Produtos</CardTitle>
@@ -284,13 +279,18 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  layout="vertical"
                   data={productData}
-                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 60 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={50} />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70} 
+                    interval={0}
+                  />
+                  <YAxis />
                   <Tooltip formatter={(value) => [`${value} ocorrências`, 'Quantidade']} />
                   <Bar dataKey="value" fill="#8884d8">
                     {productData.map((entry, index) => (
@@ -303,7 +303,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           </CardContent>
         </Card>
 
-        {/* Non-conformity Type Distribution (Ring Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Tipos de Não Conformidade</CardTitle>
@@ -312,31 +311,31 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={nonConformityTypeData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    innerRadius={40}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
+                <BarChart
+                  data={nonConformityTypeData}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={70} 
+                    interval={0}
+                  />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Bar dataKey="value" fill="#8884d8">
                     {nonConformityTypeData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                     ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
-                  <Legend />
-                </PieChart>
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* Immediate Action Distribution (Ring Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Disposição Imediata</CardTitle>
@@ -369,7 +368,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           </CardContent>
         </Card>
 
-        {/* Approval Status Distribution (Ring Chart) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Status de Aprovação</CardTitle>
@@ -402,7 +400,6 @@ export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashb
           </CardContent>
         </Card>
 
-        {/* Monthly Timeline (Line Chart with Accumulation) */}
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Tendência Mensal e Acumulado</CardTitle>
