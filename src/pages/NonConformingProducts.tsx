@@ -9,6 +9,7 @@ import { AlertTriangle, CheckCircle, Clock, Filter, Package } from "lucide-react
 import { Separator } from "@/components/ui/separator";
 import { Dashboard } from "@/components/Dashboard";
 import { isoRequirements } from "@/utils/isoRequirements";
+import NonConformingProductForm from "@/components/NonConformingProductForm";
 
 type NonConformingProduct = {
   id: string;
@@ -67,6 +68,7 @@ const fetchNonConformingProducts = async () => {
 
 const NonConformingProducts = () => {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [registerFormOpen, setRegisterFormOpen] = useState(false);
   
   const { data: nonConformingProducts = [], isLoading, error } = useQuery({
     queryKey: ["nonConformingProducts"],
@@ -148,7 +150,7 @@ const NonConformingProducts = () => {
           
           <div className="flex items-center justify-between my-6">
             <h1 className="text-3xl font-bold">Controle de Produto Não Conforme</h1>
-            <Button>
+            <Button onClick={() => setRegisterFormOpen(true)}>
               <Package size={16} className="mr-2" />
               Registrar Produto Não Conforme
             </Button>
@@ -237,6 +239,12 @@ const NonConformingProducts = () => {
           )}
         </div>
       </main>
+      
+      {/* Non-conforming Product Registration Form */}
+      <NonConformingProductForm
+        open={registerFormOpen}
+        onOpenChange={setRegisterFormOpen}
+      />
     </div>
   );
 };
