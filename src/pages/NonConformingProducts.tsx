@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dashboard } from "@/components/Dashboard";
 import { isoRequirements } from "@/utils/isoRequirements";
 import NonConformingProductForm from "@/components/NonConformingProductForm";
+import { NonConformingProductsDashboard } from "@/components/NonConformingProductsDashboard";
 
 type NonConformingProduct = {
   id: string;
@@ -69,6 +70,7 @@ const fetchNonConformingProducts = async () => {
 const NonConformingProducts = () => {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [registerFormOpen, setRegisterFormOpen] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(true);
   
   const { data: nonConformingProducts = [], isLoading, error } = useQuery({
     queryKey: ["nonConformingProducts"],
@@ -150,92 +152,112 @@ const NonConformingProducts = () => {
           
           <div className="flex items-center justify-between my-6">
             <h1 className="text-3xl font-bold">Controle de Produto Não Conforme</h1>
-            <Button onClick={() => setRegisterFormOpen(true)}>
-              <Package size={16} className="mr-2" />
-              Registrar Produto Não Conforme
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant={showDashboard ? "default" : "outline"}
+                onClick={() => setShowDashboard(true)}
+              >
+                Dashboard
+              </Button>
+              <Button 
+                variant={!showDashboard ? "default" : "outline"}
+                onClick={() => setShowDashboard(false)}
+              >
+                Listagem
+              </Button>
+              <Button onClick={() => setRegisterFormOpen(true)}>
+                <Package size={16} className="mr-2" />
+                Registrar Produto Não Conforme
+              </Button>
+            </div>
           </div>
           
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-sm font-medium mr-2">Filtrar por status:</span>
-            <Button 
-              variant={statusFilter === null ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter(null)}
-            >
-              Todos
-            </Button>
-            <Button 
-              variant={statusFilter === "identified" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("identified")}
-            >
-              Identificados
-            </Button>
-            <Button 
-              variant={statusFilter === "isolated" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("isolated")}
-            >
-              Isolados
-            </Button>
-            <Button 
-              variant={statusFilter === "reviewed" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("reviewed")}
-            >
-              Analisados
-            </Button>
-            <Button 
-              variant={statusFilter === "resolved" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("resolved")}
-            >
-              Resolvidos
-            </Button>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-10">Carregando...</div>
-          ) : error ? (
-            <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
+          {showDashboard ? (
+            <NonConformingProductsDashboard products={nonConformingProducts} />
           ) : (
-            <div className="grid gap-4">
-              {filteredProducts.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(item.status)}
-                        <CardTitle className="text-lg">{item.product_name}</CardTitle>
-                      </div>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
-                        {getSeverityLabel(item.severity)}
-                      </div>
-                    </div>
-                    <CardDescription className="flex items-center justify-between">
-                      <span>Requisito: {item.requirement_id}</span>
-                      <span>Data: {formatDate(item.created_at)}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600">{item.description}</p>
-                  </CardContent>
-                  <CardFooter className="bg-muted/50 flex justify-between pt-2">
-                    <span className="text-sm flex items-center gap-1">
-                      Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
-                    </span>
-                    <Button size="sm" variant="outline">Ver Detalhes</Button>
-                  </CardFooter>
-                </Card>
-              ))}
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-sm font-medium mr-2">Filtrar por status:</span>
+                <Button 
+                  variant={statusFilter === null ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter(null)}
+                >
+                  Todos
+                </Button>
+                <Button 
+                  variant={statusFilter === "identified" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("identified")}
+                >
+                  Identificados
+                </Button>
+                <Button 
+                  variant={statusFilter === "isolated" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("isolated")}
+                >
+                  Isolados
+                </Button>
+                <Button 
+                  variant={statusFilter === "reviewed" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("reviewed")}
+                >
+                  Analisados
+                </Button>
+                <Button 
+                  variant={statusFilter === "resolved" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("resolved")}
+                >
+                  Resolvidos
+                </Button>
+              </div>
               
-              {filteredProducts.length === 0 && (
-                <div className="text-center py-10 bg-muted rounded-lg">
-                  <p className="text-muted-foreground">Nenhum produto não conforme encontrado</p>
+              {isLoading ? (
+                <div className="text-center py-10">Carregando...</div>
+              ) : error ? (
+                <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
+              ) : (
+                <div className="grid gap-4">
+                  {filteredProducts.map((item) => (
+                    <Card key={item.id} className="overflow-hidden">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(item.status)}
+                            <CardTitle className="text-lg">{item.product_name}</CardTitle>
+                          </div>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
+                            {getSeverityLabel(item.severity)}
+                          </div>
+                        </div>
+                        <CardDescription className="flex items-center justify-between">
+                          <span>Requisito: {item.requirement_id}</span>
+                          <span>Data: {formatDate(item.created_at)}</span>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">{item.description}</p>
+                      </CardContent>
+                      <CardFooter className="bg-muted/50 flex justify-between pt-2">
+                        <span className="text-sm flex items-center gap-1">
+                          Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
+                        </span>
+                        <Button size="sm" variant="outline">Ver Detalhes</Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                  
+                  {filteredProducts.length === 0 && (
+                    <div className="text-center py-10 bg-muted rounded-lg">
+                      <p className="text-muted-foreground">Nenhum produto não conforme encontrado</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </main>
