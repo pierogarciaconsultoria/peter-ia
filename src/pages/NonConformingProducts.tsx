@@ -20,6 +20,11 @@ type NonConformingProduct = {
   severity: "low" | "medium" | "high";
   created_at: string;
   requirement_id: string;
+  department: string;
+  customer: string;
+  non_conformity_type: string;
+  immediate_action: string;
+  approval_status: "approved" | "rejected" | "pending";
 };
 
 const fetchNonConformingProducts = async () => {
@@ -33,7 +38,12 @@ const fetchNonConformingProducts = async () => {
       status: "identified",
       severity: "high",
       created_at: new Date().toISOString(),
-      requirement_id: "8.7"
+      requirement_id: "8.7",
+      department: "Produção",
+      customer: "Cliente A",
+      non_conformity_type: "Defeito de acabamento",
+      immediate_action: "Segregação",
+      approval_status: "pending"
     },
     {
       id: "2",
@@ -42,7 +52,12 @@ const fetchNonConformingProducts = async () => {
       status: "isolated",
       severity: "medium",
       created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      requirement_id: "8.7.1"
+      requirement_id: "8.7.1",
+      department: "Controle de Qualidade",
+      customer: "Cliente B",
+      non_conformity_type: "Dimensão incorreta",
+      immediate_action: "Retrabalho",
+      approval_status: "approved"
     },
     {
       id: "3",
@@ -51,7 +66,12 @@ const fetchNonConformingProducts = async () => {
       status: "reviewed",
       severity: "low",
       created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-      requirement_id: "8.7.2"
+      requirement_id: "8.7.2",
+      department: "Engenharia",
+      customer: "Cliente A",
+      non_conformity_type: "Especificação técnica",
+      immediate_action: "Concessão",
+      approval_status: "approved"
     },
     {
       id: "4",
@@ -60,7 +80,54 @@ const fetchNonConformingProducts = async () => {
       status: "resolved",
       severity: "medium",
       created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-      requirement_id: "8.7"
+      requirement_id: "8.7",
+      department: "Produção",
+      customer: "Cliente C",
+      non_conformity_type: "Problema de qualidade",
+      immediate_action: "Retrabalho",
+      approval_status: "approved"
+    },
+    {
+      id: "5",
+      product_name: "Módulo E-345",
+      description: "Componente com falha funcional detectada em teste.",
+      status: "identified",
+      severity: "high",
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7",
+      department: "Teste",
+      customer: "Cliente D",
+      non_conformity_type: "Falha funcional",
+      immediate_action: "Segregação",
+      approval_status: "rejected"
+    },
+    {
+      id: "6",
+      product_name: "Conjunto F-678",
+      description: "Desalinhamento de componentes durante montagem.",
+      status: "isolated",
+      severity: "medium",
+      created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.1",
+      department: "Montagem",
+      customer: "Cliente B",
+      non_conformity_type: "Problema de montagem",
+      immediate_action: "Desmontagem e remontagem",
+      approval_status: "approved"
+    },
+    {
+      id: "7",
+      product_name: "Produto A-123",
+      description: "Matéria-prima fora das especificações.",
+      status: "reviewed",
+      severity: "high",
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.2",
+      department: "Almoxarifado",
+      customer: "Cliente A",
+      non_conformity_type: "Matéria-prima não conforme",
+      immediate_action: "Devolução ao fornecedor",
+      approval_status: "approved"
     }
   ];
   

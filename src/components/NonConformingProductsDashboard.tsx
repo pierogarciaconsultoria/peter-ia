@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   BarChart, 
@@ -16,6 +16,9 @@ import {
   Line,
   Legend
 } from "recharts";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type NonConformingProduct = {
   id: string;
@@ -25,6 +28,11 @@ type NonConformingProduct = {
   severity: "low" | "medium" | "high";
   created_at: string;
   requirement_id: string;
+  department: string;
+  customer: string;
+  non_conformity_type: string;
+  immediate_action: string;
+  approval_status: "approved" | "rejected" | "pending";
 };
 
 interface NonConformingProductsDashboardProps {
@@ -32,175 +40,411 @@ interface NonConformingProductsDashboardProps {
 }
 
 export const NonConformingProductsDashboard: React.FC<NonConformingProductsDashboardProps> = ({ products }) => {
-  // Calculate status distribution
-  const statusData = [
-    { name: 'Identificado', value: products.filter(p => p.status === 'identified').length },
-    { name: 'Isolado', value: products.filter(p => p.status === 'isolated').length },
-    { name: 'Analisado', value: products.filter(p => p.status === 'reviewed').length },
-    { name: 'Resolvido', value: products.filter(p => p.status === 'resolved').length },
-  ];
-
-  // Calculate severity distribution
-  const severityData = [
-    { name: 'Baixa', value: products.filter(p => p.severity === 'low').length },
-    { name: 'Média', value: products.filter(p => p.severity === 'medium').length },
-    { name: 'Alta', value: products.filter(p => p.severity === 'high').length },
-  ];
-
-  // Calculate requirements distribution (top 5)
-  const requirementCounts: Record<string, number> = {};
-  products.forEach(product => {
-    requirementCounts[product.requirement_id] = (requirementCounts[product.requirement_id] || 0) + 1;
-  });
-
-  const requirementData = Object.entries(requirementCounts)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
-
-  // Timeline data (last 6 months)
-  const now = new Date();
-  const monthlyData = [];
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
+  const [monthsToShow, setMonthsToShow] = useState<number>(6);
   
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const month = date.toLocaleString('pt-BR', { month: 'short' });
+  // Filter products by date period
+  const filteredProducts = React.useMemo(() => {
+    if (periodFilter === "all") return products;
     
-    // Count products created in this month
-    const count = products.filter(p => {
-      const productDate = new Date(p.created_at);
-      return productDate.getMonth() === date.getMonth() && 
-             productDate.getFullYear() === date.getFullYear();
-    }).length;
+    const now = new Date();
+    const periodStart = new Date();
     
-    monthlyData.push({
-      month,
-      count
-    });
-  }
+    switch (periodFilter) {
+      case "last30":
+        periodStart.setDate(now.getDate() - 30);
+        break;
+      case "last90":
+        periodStart.setDate(now.getDate() - 90);
+        break;
+      case "last180":
+        periodStart.setDate(now.getDate() - 180);
+        break;
+      case "thisYear":
+        periodStart.setMonth(0, 1);
+        periodStart.setHours(0, 0, 0, 0);
+        break;
+      default:
+        return products;
+    }
+    
+    return products.filter(p => new Date(p.created_at) >= periodStart);
+  }, [products, periodFilter]);
 
-  // Colors for pie charts
-  const statusColors = ['#f97316', '#facc15', '#3b82f6', '#10b981'];
-  const severityColors = ['#3b82f6', '#f97316', '#ef4444'];
+  // Calculate department distribution
+  const departmentData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredProducts.forEach(product => {
+      const dept = product.department || "Não especificado";
+      counts[dept] = (counts[dept] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredProducts]);
+
+  // Calculate customer distribution
+  const customerData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredProducts.forEach(product => {
+      const customer = product.customer || "Não especificado";
+      counts[customer] = (counts[customer] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 customers
+  }, [filteredProducts]);
+
+  // Calculate product distribution
+  const productData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredProducts.forEach(product => {
+      counts[product.product_name] = (counts[product.product_name] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 products
+  }, [filteredProducts]);
+
+  // Calculate non-conformity type distribution
+  const nonConformityTypeData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredProducts.forEach(product => {
+      const type = product.non_conformity_type || "Não especificado";
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredProducts]);
+
+  // Calculate immediate action distribution
+  const immediateActionData = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredProducts.forEach(product => {
+      const action = product.immediate_action || "Não especificado";
+      counts[action] = (counts[action] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredProducts]);
+
+  // Calculate approval status distribution
+  const approvalStatusData = React.useMemo(() => {
+    const counts = {
+      "Aprovado": filteredProducts.filter(p => p.approval_status === "approved").length,
+      "Rejeitado": filteredProducts.filter(p => p.approval_status === "rejected").length,
+      "Pendente": filteredProducts.filter(p => p.approval_status === "pending").length,
+    };
+    
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }));
+  }, [filteredProducts]);
+
+  // Timeline data (monthly accumulation)
+  const monthlyData = React.useMemo(() => {
+    const now = new Date();
+    const monthlyAccumulated: { month: string; count: number; accumulated: number }[] = [];
+    let accumulation = 0;
+    
+    for (let i = monthsToShow - 1; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = date.toLocaleString('pt-BR', { month: 'short' });
+      
+      // Count products created in this month
+      const count = products.filter(p => {
+        const productDate = new Date(p.created_at);
+        return productDate.getMonth() === date.getMonth() && 
+               productDate.getFullYear() === date.getFullYear();
+      }).length;
+      
+      accumulation += count;
+      monthlyAccumulated.push({
+        month,
+        count,
+        accumulated: accumulation
+      });
+    }
+    
+    return monthlyAccumulated;
+  }, [products, monthsToShow]);
+
+  // Colors for charts
+  const chartColors = ['#8B5CF6', '#D946EF', '#F97316', '#0EA5E9', '#10b981', '#facc15', '#f43f5e'];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-      {/* Status Distribution (Ring Chart) */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Distribuição por Status</CardTitle>
-          <CardDescription>Visão geral de produtos não conformes por status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  innerRadius={40}
-                  fill="#8884d8"
-                  dataKey="value"
+    <div className="space-y-6">
+      {/* Filter controls */}
+      <div className="flex flex-wrap gap-4 items-center bg-muted p-4 rounded-lg">
+        <div>
+          <span className="text-sm font-medium mr-2">Período:</span>
+          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Selecione o período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os períodos</SelectItem>
+              <SelectItem value="last30">Últimos 30 dias</SelectItem>
+              <SelectItem value="last90">Últimos 90 dias</SelectItem>
+              <SelectItem value="last180">Últimos 180 dias</SelectItem>
+              <SelectItem value="thisYear">Este ano</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <span className="text-sm font-medium mr-2">Visualização mensal:</span>
+          <Select value={monthsToShow.toString()} onValueChange={(value) => setMonthsToShow(parseInt(value))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Meses para mostrar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">3 meses</SelectItem>
+              <SelectItem value="6">6 meses</SelectItem>
+              <SelectItem value="12">12 meses</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Department Distribution (Horizontal Bar Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Distribuição por Setor Responsável</CardTitle>
+            <CardDescription>Quantidade de produtos não conformes por setor</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={departmentData}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
                 >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={statusColors[index % statusColors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={50} />
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Bar dataKey="value" fill="#8884d8">
+                    {departmentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Severity Distribution (Horizontal Bar Chart) */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Distribuição por Severidade</CardTitle>
-          <CardDescription>Quantidade de produtos por nível de severidade</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                layout="vertical"
-                data={severityData}
-                margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" />
-                <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
-                <Bar dataKey="value" fill="#8884d8">
-                  {severityData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={severityColors[index % severityColors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Customer Distribution (Horizontal Bar Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Top 5 Clientes</CardTitle>
+            <CardDescription>Clientes com mais produtos não conformes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={customerData}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={50} />
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Bar dataKey="value" fill="#8884d8">
+                    {customerData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Requirements Distribution (Horizontal Bar Chart) */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Top Requisitos ISO Relacionados</CardTitle>
-          <CardDescription>Requisitos mais frequentes em produtos não conformes</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                layout="vertical"
-                data={requirementData}
-                margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" />
-                <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
-                <Bar dataKey="value" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Product Distribution (Horizontal Bar Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Top 5 Produtos</CardTitle>
+            <CardDescription>Produtos com mais não conformidades</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={productData}
+                  margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={50} />
+                  <Tooltip formatter={(value) => [`${value} ocorrências`, 'Quantidade']} />
+                  <Bar dataKey="value" fill="#8884d8">
+                    {productData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Timeline (Line Chart) */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Tendência de Produtos Não Conformes</CardTitle>
-          <CardDescription>Quantidade de produtos nos últimos 6 meses</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={monthlyData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  name="Produtos" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Non-conformity Type Distribution (Ring Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Tipos de Não Conformidade</CardTitle>
+            <CardDescription>Distribuição por tipo de não conformidade</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={nonConformityTypeData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    innerRadius={40}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {nonConformityTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Immediate Action Distribution (Ring Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Disposição Imediata</CardTitle>
+            <CardDescription>Distribuição por tipo de disposição imediata</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={immediateActionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    innerRadius={40}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {immediateActionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Approval Status Distribution (Ring Chart) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Status de Aprovação</CardTitle>
+            <CardDescription>Distribuição por status de aprovação</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={approvalStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    innerRadius={40}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {approvalStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} produtos`, 'Quantidade']} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Monthly Timeline (Line Chart with Accumulation) */}
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Tendência Mensal e Acumulado</CardTitle>
+            <CardDescription>Quantidade mensal e acumulada de produtos não conformes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={monthlyData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip formatter={(value, name) => {
+                    const label = name === 'count' ? 'Mensal' : 'Acumulado';
+                    return [`${value} produtos`, label];
+                  }} />
+                  <Legend />
+                  <Line 
+                    yAxisId="left"
+                    type="monotone" 
+                    dataKey="count" 
+                    name="Mensal" 
+                    stroke="#8884d8" 
+                    activeDot={{ r: 8 }} 
+                  />
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="accumulated" 
+                    name="Acumulado" 
+                    stroke="#82ca9d" 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
