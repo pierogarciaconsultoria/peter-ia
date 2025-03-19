@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -112,6 +113,15 @@ export function IndicatorForm({ indicator, onClose, afterSubmit }: IndicatorForm
       };
       return updateIndicator(indicator!.id, indicatorData);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["indicators"] });
+      afterSubmit();
+    },
+  });
+  
+  // Delete mutation - This was missing
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteIndicator(indicator!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["indicators"] });
       afterSubmit();
