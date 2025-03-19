@@ -75,7 +75,28 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
           description: "A ação foi atualizada com sucesso",
         });
       } else {
-        await createAction(values);
+        // Ensure all required properties are present when creating a new action
+        const newAction = {
+          ...values,
+          // These properties are required in the Action5W2H type but not in the form
+          title: values.title,
+          what: values.what,
+          why: values.why,
+          where: values.where,
+          responsible: values.responsible,
+          due_date: values.due_date,
+          how: values.how,
+          status: values.status,
+          priority: values.priority,
+          process_area: values.process_area,
+          // Optional properties that might be undefined
+          start_date: values.start_date,
+          how_much: values.how_much,
+          currency: values.currency || "BRL",
+          comments: values.comments || ""
+        };
+        
+        await createAction(newAction);
         toast({
           title: "Ação criada",
           description: "A ação foi criada com sucesso",
