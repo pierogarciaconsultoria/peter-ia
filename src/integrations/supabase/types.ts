@@ -110,6 +110,47 @@ export type Database = {
           },
         ]
       }
+      indicator_measurements: {
+        Row: {
+          created_at: string
+          id: string
+          indicator_id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          value: number
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indicator_id: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          value: number
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indicator_id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          value?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicator_measurements_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "performance_indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iso_documents: {
         Row: {
           associated_requirement: string
@@ -226,6 +267,45 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      performance_indicators: {
+        Row: {
+          calculation_type: string
+          created_at: string
+          description: string | null
+          goal_type: string
+          goal_value: number
+          id: string
+          name: string
+          process: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          calculation_type: string
+          created_at?: string
+          description?: string | null
+          goal_type: string
+          goal_value: number
+          id?: string
+          name: string
+          process: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calculation_type?: string
+          created_at?: string
+          description?: string | null
+          goal_type?: string
+          goal_value?: number
+          id?: string
+          name?: string
+          process?: string
+          unit?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
