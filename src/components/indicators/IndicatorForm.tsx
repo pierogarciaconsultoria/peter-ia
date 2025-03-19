@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,7 +78,19 @@ export function IndicatorForm({ indicator, onClose, afterSubmit }: IndicatorForm
   
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: createIndicator,
+    mutationFn: (data: IndicatorFormValues) => {
+      // Ensure all required fields are present
+      const indicatorData: Omit<IndicatorType, "id" | "created_at" | "updated_at"> = {
+        name: data.name,
+        description: data.description,
+        process: data.process,
+        goal_type: data.goal_type,
+        goal_value: data.goal_value,
+        calculation_type: data.calculation_type,
+        unit: data.unit
+      };
+      return createIndicator(indicatorData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["indicators"] });
       afterSubmit();
@@ -88,17 +99,19 @@ export function IndicatorForm({ indicator, onClose, afterSubmit }: IndicatorForm
   
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: IndicatorFormValues) => 
-      updateIndicator(indicator!.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["indicators"] });
-      afterSubmit();
+    mutationFn: (data: IndicatorFormValues) => {
+      // Ensure all required fields are present
+      const indicatorData: Omit<IndicatorType, "id" | "created_at" | "updated_at"> = {
+        name: data.name,
+        description: data.description,
+        process: data.process,
+        goal_type: data.goal_type,
+        goal_value: data.goal_value,
+        calculation_type: data.calculation_type,
+        unit: data.unit
+      };
+      return updateIndicator(indicator!.id, indicatorData);
     },
-  });
-  
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteIndicator(indicator!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["indicators"] });
       afterSubmit();

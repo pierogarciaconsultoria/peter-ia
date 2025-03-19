@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { IndicatorType, MeasurementType } from "@/types/indicators";
 
@@ -15,7 +14,11 @@ export async function getAllIndicators(): Promise<IndicatorType[]> {
     throw new Error(error.message);
   }
   
-  return data;
+  return data.map(item => ({
+    ...item,
+    goal_type: item.goal_type as "higher_better" | "lower_better" | "target",
+    calculation_type: item.calculation_type as "sum" | "average"
+  }));
 }
 
 export async function getIndicatorById(id: string): Promise<IndicatorType> {
@@ -30,7 +33,11 @@ export async function getIndicatorById(id: string): Promise<IndicatorType> {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    goal_type: data.goal_type as "higher_better" | "lower_better" | "target",
+    calculation_type: data.calculation_type as "sum" | "average"
+  };
 }
 
 export async function createIndicator(indicator: Omit<IndicatorType, "id" | "created_at" | "updated_at">): Promise<IndicatorType> {
@@ -45,7 +52,11 @@ export async function createIndicator(indicator: Omit<IndicatorType, "id" | "cre
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    goal_type: data.goal_type as "higher_better" | "lower_better" | "target",
+    calculation_type: data.calculation_type as "sum" | "average"
+  };
 }
 
 export async function updateIndicator(
@@ -67,7 +78,11 @@ export async function updateIndicator(
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    goal_type: data.goal_type as "higher_better" | "lower_better" | "target",
+    calculation_type: data.calculation_type as "sum" | "average"
+  };
 }
 
 export async function deleteIndicator(id: string): Promise<void> {
@@ -133,7 +148,6 @@ export async function getMeasurementById(id: string): Promise<MeasurementType> {
 export async function createMeasurement(
   measurement: Omit<MeasurementType, "id" | "created_at" | "updated_at">
 ): Promise<MeasurementType> {
-  // Check if a measurement for this indicator/month/year already exists
   const { data: existingData } = await supabase
     .from("indicator_measurements")
     .select("id")
@@ -142,7 +156,6 @@ export async function createMeasurement(
     .eq("year", measurement.year)
     .maybeSingle();
   
-  // If it exists, update instead of creating
   if (existingData) {
     return updateMeasurement(existingData.id, measurement);
   }

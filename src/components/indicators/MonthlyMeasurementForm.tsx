@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,11 +88,17 @@ export function MonthlyMeasurementForm({
   
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: MeasurementFormValues) => 
-      createMeasurement({
-        ...data,
+    mutationFn: (data: MeasurementFormValues) => {
+      // Ensure all required fields are present
+      const measurementData: Omit<MeasurementType, "id" | "created_at" | "updated_at"> = {
         indicator_id: indicator.id,
-      }),
+        month: data.month,
+        year: data.year,
+        value: data.value,
+        notes: data.notes
+      };
+      return createMeasurement(measurementData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["measurements"] });
       afterSubmit();
@@ -102,11 +107,17 @@ export function MonthlyMeasurementForm({
   
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: MeasurementFormValues) => 
-      updateMeasurement(existingMeasurement!.id, {
-        ...data,
+    mutationFn: (data: MeasurementFormValues) => {
+      // Ensure all required fields are present
+      const measurementData: Omit<MeasurementType, "id" | "created_at" | "updated_at"> = {
         indicator_id: indicator.id,
-      }),
+        month: data.month,
+        year: data.year,
+        value: data.value,
+        notes: data.notes
+      };
+      return updateMeasurement(existingMeasurement!.id, measurementData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["measurements"] });
       afterSubmit();
