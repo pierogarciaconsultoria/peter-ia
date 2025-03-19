@@ -1,8 +1,26 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon, Package } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  Home, 
+  FileText, 
+  AlertOctagon, 
+  Package, 
+  Activity,
+  MessageSquareWarning, 
+  UserCheck,
+  Ruler,
+  GraduationCap,
+  PackageCheck,
+  CalendarCheck,
+  CalendarCheck2,
+  TriangleAlert,
+  Building
+} from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +52,56 @@ export function Navigation() {
       icon: <Package size={18} />,
       path: "/non-conforming-products",
     },
-    // ... other menu items if they exist
+    {
+      name: "Indicadores de Desempenho",
+      icon: <Activity size={18} />,
+      path: "/performance-indicators",
+    },
+    {
+      name: "Reclamação de Cliente",
+      icon: <MessageSquareWarning size={18} />,
+      path: "/customer-complaints",
+    },
+    {
+      name: "Avaliação de Fornecedores",
+      icon: <UserCheck size={18} />,
+      path: "/supplier-evaluation",
+    },
+    {
+      name: "Calibração de Equipamentos",
+      icon: <Ruler size={18} />,
+      path: "/equipment-calibration",
+    },
+    {
+      name: "Controle de Treinamentos",
+      icon: <GraduationCap size={18} />,
+      path: "/training-control",
+    },
+    {
+      name: "Inspeção de Matéria Prima",
+      icon: <PackageCheck size={18} />,
+      path: "/raw-material-inspection",
+    },
+    {
+      name: "Cronograma de Ação",
+      icon: <CalendarCheck size={18} />,
+      path: "/action-schedule",
+    },
+    {
+      name: "Cronograma de Auditoria",
+      icon: <CalendarCheck2 size={18} />,
+      path: "/audit-schedule",
+    },
+    {
+      name: "Gestão de Riscos",
+      icon: <TriangleAlert size={18} />,
+      path: "/risk-management",
+    },
+    {
+      name: "Contexto da Organização",
+      icon: <Building size={18} />,
+      path: "/organization-context",
+    },
   ];
   
   return (
@@ -64,7 +131,7 @@ export function Navigation() {
             </p>
           </div>
           
-          <nav className="flex-1 px-4 pb-4">
+          <nav className="flex-1 px-4 pb-4 overflow-y-auto">
             <ul className="space-y-1">
               {menuItems.map((item) => (
                 <li key={item.path}>

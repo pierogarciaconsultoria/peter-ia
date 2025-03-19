@@ -1,0 +1,21 @@
+
+import { Navigation } from "@/components/Navigation";
+
+const RawMaterialInspection = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="md:pl-64 p-6 transition-all duration-300">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Inspeção de Matéria Prima</h1>
+          <p className="text-muted-foreground">
+            Controle as inspeções de recebimento de matérias-primas e acompanhe os resultados.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default RawMaterialInspection;

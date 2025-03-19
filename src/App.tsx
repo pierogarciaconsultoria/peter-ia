@@ -10,6 +10,18 @@ import NonCompliance from "./pages/NonCompliance";
 import NonConformingProducts from "./pages/NonConformingProducts";
 import NotFound from "./pages/NotFound";
 
+// Importando as novas páginas que serão criadas
+import PerformanceIndicators from "./pages/PerformanceIndicators";
+import CustomerComplaints from "./pages/CustomerComplaints";
+import SupplierEvaluation from "./pages/SupplierEvaluation";
+import EquipmentCalibration from "./pages/EquipmentCalibration";
+import TrainingControl from "./pages/TrainingControl";
+import RawMaterialInspection from "./pages/RawMaterialInspection";
+import ActionSchedule from "./pages/ActionSchedule";
+import AuditSchedule from "./pages/AuditSchedule";
+import RiskManagement from "./pages/RiskManagement";
+import OrganizationContext from "./pages/OrganizationContext";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -23,6 +35,19 @@ const App = () => (
           <Route path="/documents" element={<Documents />} />
           <Route path="/non-compliance" element={<NonCompliance />} />
           <Route path="/non-conforming-products" element={<NonConformingProducts />} />
+          
+          {/* Novas rotas */}
+          <Route path="/performance-indicators" element={<PerformanceIndicators />} />
+          <Route path="/customer-complaints" element={<CustomerComplaints />} />
+          <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
+          <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
+          <Route path="/training-control" element={<TrainingControl />} />
+          <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
+          <Route path="/action-schedule" element={<ActionSchedule />} />
+          <Route path="/audit-schedule" element={<AuditSchedule />} />
+          <Route path="/risk-management" element={<RiskManagement />} />
+          <Route path="/organization-context" element={<OrganizationContext />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
