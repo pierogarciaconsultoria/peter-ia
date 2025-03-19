@@ -9,6 +9,7 @@ import { StatisticCard } from "@/components/StatisticCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndicatorForm } from "@/components/indicators/IndicatorForm";
 import { IndicatorsTable } from "@/components/indicators/IndicatorsTable";
+import { ProcessDashboard } from "@/components/indicators/ProcessDashboard";
 import { MonthlyMeasurementForm } from "@/components/indicators/MonthlyMeasurementForm";
 import { getAllIndicators, getAllMeasurements } from "@/services/indicatorService";
 import { IndicatorType, MeasurementType } from "@/types/indicators";
@@ -59,6 +60,9 @@ const PerformanceIndicators = () => {
     setIsMeasurementDialogOpen(true);
   };
 
+  // Get unique processes for dashboards
+  const uniqueProcesses = getUniqueProcesses(indicators);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -102,11 +106,36 @@ const PerformanceIndicators = () => {
             />
           </div>
           
-          <Tabs defaultValue="table" className="w-full">
+          <Tabs defaultValue="dashboards" className="w-full">
             <TabsList className="mb-4">
+              <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
               <TabsTrigger value="table">Tabela de Indicadores</TabsTrigger>
               <TabsTrigger value="processes">Por Processo</TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="dashboards">
+              {(isLoadingIndicators || isLoadingMeasurements) ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>Carregando dashboards...</p>
+                </div>
+              ) : indicatorsError ? (
+                <div className="flex justify-center items-center h-64 text-destructive">
+                  <AlertCircle className="mr-2" />
+                  <p>Erro ao carregar os indicadores</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {uniqueProcesses.map(process => (
+                    <ProcessDashboard 
+                      key={process}
+                      process={process}
+                      indicators={indicators}
+                      measurements={measurements}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
             
             <TabsContent value="table">
               {(isLoadingIndicators || isLoadingMeasurements) ? (
