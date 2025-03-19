@@ -9,32 +9,95 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          active_modules: string[]
+          created_at: string
+          id: string
+          name: string
+          plan: string
+          settings: Json
+          slug: string
+        }
+        Insert: {
+          active_modules?: string[]
+          created_at?: string
+          id?: string
+          name: string
+          plan?: string
+          settings?: Json
+          slug: string
+        }
+        Update: {
+          active_modules?: string[]
+          created_at?: string
+          id?: string
+          name?: string
+          plan?: string
+          settings?: Json
+          slug?: string
+        }
+        Relationships: []
+      }
+      disc_assessments: {
+        Row: {
+          created_at: string
+          date: string
+          email: string
+          id: string
+          invited_by: string | null
+          name: string
+          primary_type: string
+          scores: Json
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          name: string
+          primary_type: string
+          scores: Json
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          name?: string
+          primary_type?: string
+          scores?: Json
+        }
+        Relationships: []
+      }
       document_revisions: {
         Row: {
           approved_by: string | null
           changes: string | null
           content: string
-          document_id: string
+          document_id: string | null
           id: string
-          revision_date: string | null
+          revision_date: string
           version: string
         }
         Insert: {
           approved_by?: string | null
           changes?: string | null
           content: string
-          document_id: string
+          document_id?: string | null
           id?: string
-          revision_date?: string | null
+          revision_date?: string
           version: string
         }
         Update: {
           approved_by?: string | null
           changes?: string | null
           content?: string
-          document_id?: string
+          document_id?: string | null
           id?: string
-          revision_date?: string | null
+          revision_date?: string
           version?: string
         }
         Relationships: [
@@ -51,68 +114,68 @@ export type Database = {
         Row: {
           associated_requirement: string
           content: string | null
-          created_at: string | null
+          created_at: string
           description: string | null
           document_type: string
           id: string
           status: string | null
           title: string
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           associated_requirement: string
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           document_type: string
           id?: string
           status?: string | null
           title: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           associated_requirement?: string
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           document_type?: string
           id?: string
           status?: string | null
           title?: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       iso_records: {
         Row: {
-          created_at: string | null
+          created_at: string
           created_by: string | null
           data: Json | null
           document_id: string | null
           id: string
           record_type: string
           title: string
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string | null
           data?: Json | null
           document_id?: string | null
           id?: string
           record_type: string
           title: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string | null
           data?: Json | null
           document_id?: string | null
           id?: string
           record_type?: string
           title?: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -120,6 +183,199 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "iso_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          description: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          price: number
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          price?: number
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      "Morada do Sol": {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          action: string
+          description: string | null
+          id: string
+          module_id: string | null
+        }
+        Insert: {
+          action: string
+          description?: string | null
+          id?: string
+          module_id?: string | null
+        }
+        Update: {
+          action?: string
+          description?: string | null
+          id?: string
+          module_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          granted: boolean
+          id: string
+          permission_id: string | null
+          role_id: string | null
+        }
+        Insert: {
+          granted?: boolean
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+        }
+        Update: {
+          granted?: boolean
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          is_company_admin: boolean
+          is_super_admin: boolean
+          last_login: string | null
+          last_name: string | null
+          role_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id: string
+          is_company_admin?: boolean
+          is_super_admin?: boolean
+          last_login?: string | null
+          last_name?: string | null
+          role_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          is_company_admin?: boolean
+          is_super_admin?: boolean
+          last_login?: string | null
+          last_name?: string | null
+          role_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_profiles_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_profiles_role"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
