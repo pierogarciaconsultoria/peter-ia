@@ -13,13 +13,13 @@ export async function getAllActions(): Promise<Action5W2H[]> {
     throw error;
   }
   
-  return data as Action5W2H[] || [];
+  return (data as unknown) as Action5W2H[] || [];
 }
 
 export async function createAction(action: Omit<Action5W2H, 'id' | 'created_at' | 'updated_at' | 'completed_at'>): Promise<Action5W2H> {
   const { data, error } = await supabase
     .from('quality_actions')
-    .insert(action)
+    .insert((action as any))
     .select()
     .single();
     
@@ -28,13 +28,13 @@ export async function createAction(action: Omit<Action5W2H, 'id' | 'created_at' 
     throw error;
   }
   
-  return data as Action5W2H;
+  return (data as unknown) as Action5W2H;
 }
 
 export async function updateAction(id: string, action: Partial<Action5W2H>): Promise<Action5W2H> {
   const { data, error } = await supabase
     .from('quality_actions')
-    .update(action)
+    .update((action as any))
     .eq('id', id)
     .select()
     .single();
@@ -44,7 +44,7 @@ export async function updateAction(id: string, action: Partial<Action5W2H>): Pro
     throw error;
   }
   
-  return data as Action5W2H;
+  return (data as unknown) as Action5W2H;
 }
 
 export async function deleteAction(id: string): Promise<void> {
