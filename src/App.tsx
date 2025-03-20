@@ -21,6 +21,7 @@ import ActionSchedule from "./pages/ActionSchedule";
 import AuditSchedule from "./pages/AuditSchedule";
 import RiskManagement from "./pages/RiskManagement";
 import OrganizationContext from "./pages/OrganizationContext";
+import CriticalAnalysis from "./pages/CriticalAnalysis";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/audit-schedule" element={<AuditSchedule />} />
           <Route path="/risk-management" element={<RiskManagement />} />
           <Route path="/organization-context" element={<OrganizationContext />} />
+          <Route path="/critical-analysis" element={<CriticalAnalysis />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

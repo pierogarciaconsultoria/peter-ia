@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Building } from "lucide-react";
+import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Building, Search } from "lucide-react";
+
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -11,6 +13,7 @@ export function Navigation() {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
   const menuItems = [{
     name: "Dashboard",
     icon: <Home size={18} />,
@@ -67,7 +70,12 @@ export function Navigation() {
     name: "Contexto da Organização",
     icon: <Building size={18} />,
     path: "/organization-context"
+  }, {
+    name: "Análise Crítica",
+    icon: <Search size={18} />,
+    path: "/critical-analysis"
   }];
+
   return <>
       {/* Mobile menu button */}
       <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-50 md:hidden" onClick={() => setIsOpen(!isOpen)}>
