@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Building, Search } from "lucide-react";
+import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Building, Search, ThumbsUp } from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,6 +50,10 @@ export function Navigation() {
     name: "Controle de Treinamentos",
     icon: <GraduationCap size={18} />,
     path: "/training-control"
+  }, {
+    name: "Pesquisa de Satisfação",
+    icon: <ThumbsUp size={18} />,
+    path: "/satisfaction-survey"
   }, {
     name: "Inspeção de Matéria Prima",
     icon: <PackageCheck size={18} />,

@@ -22,6 +22,7 @@ import AuditSchedule from "./pages/AuditSchedule";
 import RiskManagement from "./pages/RiskManagement";
 import OrganizationContext from "./pages/OrganizationContext";
 import CriticalAnalysis from "./pages/CriticalAnalysis";
+import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
           <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
           <Route path="/training-control" element={<TrainingControl />} />
+          <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
           <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
           <Route path="/action-schedule" element={<ActionSchedule />} />
           <Route path="/audit-schedule" element={<AuditSchedule />} />
