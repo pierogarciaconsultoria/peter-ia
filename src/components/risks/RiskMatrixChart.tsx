@@ -98,14 +98,38 @@ export function RiskMatrixChart() {
       ctx.fillText(label, -15, (i + 0.5) * cellHeight);
     });
     
-    // Plot sample data points
-    const risks = [
-      { id: "1", prob: 2, impact: 0, label: "R1", title: "Falha em equipamento crítico", level: "Crítico", process: "Produção", status: "Aberto" }, // High prob, high impact
-      { id: "2", prob: 1, impact: 0, label: "R2", title: "Perda de fornecedor principal", level: "Alto", process: "Compras", status: "Em tratamento" }, // Medium prob, high impact
-      { id: "3", prob: 0, impact: 0, label: "R3", title: "Não conformidade regulatória", level: "Médio", process: "Qualidade", status: "Tratado" }, // Low prob, high impact
-      { id: "4", prob: 1, impact: 1, label: "R4", title: "Falha no sistema ERP", level: "Médio", process: "TI", status: "Monitorando" }, // Medium prob, medium impact
-      { id: "5", prob: 2, impact: 2, label: "R5", title: "Queda de energia prolongada", level: "Médio", process: "Infraestrutura", status: "Em tratamento" }  // High prob, low impact
-    ];
+    // Map real risks from mockRisks to the matrix
+    const risks = mockRisks.map(risk => {
+      // Convert text values to numeric coordinates for the matrix
+      let probValue;
+      switch(risk.probability.toLowerCase()) {
+        case 'alta': probValue = 2; break;
+        case 'média': probValue = 1; break;
+        default: probValue = 0; // Baixa
+      }
+      
+      let impactValue;
+      switch(risk.impact.toLowerCase()) {
+        case 'alto': impactValue = 0; break;
+        case 'médio': impactValue = 1; break;
+        default: impactValue = 2; // Baixo
+      }
+      
+      // Find label (R1, R2, etc.) based on ID
+      const labelNum = parseInt(risk.id);
+      const label = labelNum ? `R${labelNum}` : `R${risk.id}`;
+      
+      return {
+        id: risk.id,
+        prob: probValue,
+        impact: impactValue,
+        label: label,
+        title: risk.title,
+        level: risk.level,
+        process: risk.process,
+        status: risk.status
+      };
+    });
     
     // Add event listener for mouse movement
     canvas.onmousemove = (event) => {
@@ -154,11 +178,6 @@ export function RiskMatrixChart() {
     
   }, []);
 
-  // Get risks by level for hovering over cells
-  const getRisksByLevel = (level) => {
-    return mockRisks.filter(risk => risk.level === level);
-  };
-  
   return (
     <div className="w-full h-[400px] relative p-10">
       <canvas 
@@ -168,17 +187,17 @@ export function RiskMatrixChart() {
       
       {hoveredRisk && (
         <div 
-          className="absolute bg-white border rounded-md shadow-md p-3 z-50"
+          className="absolute bg-white border rounded-md shadow-md p-3 z-50 max-w-[250px]"
           style={{ 
             left: `${mousePosition.x}px`, 
             top: `${mousePosition.y + 10}px`,
             transform: 'translate(-50%, 0)' 
           }}
         >
-          <div className="font-bold">{hoveredRisk.title}</div>
-          <div className="text-sm">Processo: {hoveredRisk.process}</div>
-          <div className="text-sm">Nível: {hoveredRisk.level}</div>
-          <div className="text-sm">Status: {hoveredRisk.status}</div>
+          <div className="font-bold text-base">{hoveredRisk.title}</div>
+          <div className="text-sm mt-1 font-medium">Processo: <span className="font-normal">{hoveredRisk.process}</span></div>
+          <div className="text-sm font-medium">Nível: <span className="font-normal">{hoveredRisk.level}</span></div>
+          <div className="text-sm font-medium">Status: <span className="font-normal">{hoveredRisk.status}</span></div>
         </div>
       )}
       
