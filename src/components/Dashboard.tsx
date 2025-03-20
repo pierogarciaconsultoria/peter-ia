@@ -37,9 +37,7 @@ export function Dashboard({
   } as React.CSSProperties}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <span className="text-sm font-medium text-muted-foreground">
-            ISO 9001:2015 Implementation
-          </span>
+          <span className="text-sm font-medium text-muted-foreground">ISO 9001:2015</span>
           <h1 className="text-3xl font-bold mt-1">Sistema de Gestão da Qualidade
         </h1>
         </div>
