@@ -58,15 +58,15 @@ export const RiskMatrixCanvas: React.FC<RiskMatrixCanvasProps> = ({
         ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         
         // Draw borders
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.strokeRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
       }
     }
     
     // Add labels
-    ctx.fillStyle = '#000';
-    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 14px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
@@ -95,6 +95,38 @@ export const RiskMatrixCanvas: React.FC<RiskMatrixCanvasProps> = ({
       ctx.fillText(label, -15, (i + 0.5) * cellHeight);
     });
     
+    // Draw risk points
+    risks.forEach(risk => {
+      const x = (risk.prob + 0.5) * cellWidth;
+      const y = (risk.impact + 0.5) * cellHeight;
+      
+      // Draw circle with shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fill();
+      
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Draw border
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Draw label
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText(risk.label, x, y);
+    });
+    
     // Add event listener for mouse movement
     canvas.onmousemove = (event) => {
       const rect = canvas.getBoundingClientRect();
@@ -116,32 +148,15 @@ export const RiskMatrixCanvas: React.FC<RiskMatrixCanvasProps> = ({
       
       if (!foundRisk) {
         onRiskHover(null, 0, 0);
+        canvas.style.cursor = 'default';
+      } else {
+        canvas.style.cursor = 'pointer';
       }
     };
     
     canvas.onmouseleave = () => {
       onRiskHover(null, 0, 0);
     };
-    
-    // Draw risk points
-    risks.forEach(risk => {
-      const x = (risk.prob + 0.5) * cellWidth;
-      const y = (risk.impact + 0.5) * cellHeight;
-      
-      // Draw circle
-      ctx.beginPath();
-      ctx.arc(x, y, 15, 0, 2 * Math.PI);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fill();
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      // Draw label
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(risk.label, x, y);
-    });
     
   }, [risks, onRiskHover]);
 

@@ -19,15 +19,17 @@ export function RiskMatrixChart() {
   };
 
   return (
-    <div className="w-full h-[400px] relative p-10">
-      <RiskMatrixCanvas 
-        onRiskHover={handleRiskHover}
-        risks={risks}
-      />
-      
-      {hoveredRisk && (
-        <RiskTooltip risk={hoveredRisk} position={mousePosition} />
-      )}
+    <div className="w-full flex flex-col space-y-4">
+      <div className="w-full h-[400px] relative p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-sm border border-gray-100">
+        <RiskMatrixCanvas 
+          onRiskHover={handleRiskHover}
+          risks={risks}
+        />
+        
+        {hoveredRisk && (
+          <RiskTooltip risk={hoveredRisk} position={mousePosition} />
+        )}
+      </div>
       
       <RiskMatrixLegend />
     </div>
