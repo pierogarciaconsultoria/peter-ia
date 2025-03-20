@@ -10,7 +10,7 @@ import { Edit, Eye, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 // Sample data for development
-const mockRisks = [
+export const mockRisks = [
   {
     id: "1",
     title: "Falha em equipamento crítico",

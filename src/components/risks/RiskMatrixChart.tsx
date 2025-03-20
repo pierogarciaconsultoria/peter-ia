@@ -1,9 +1,17 @@
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { 
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { mockRisks } from "./RisksList";
 
 export function RiskMatrixChart() {
   const canvasRef = useRef(null);
+  const [hoveredRisk, setHoveredRisk] = useState(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -92,12 +100,38 @@ export function RiskMatrixChart() {
     
     // Plot sample data points
     const risks = [
-      { prob: 2, impact: 0, label: "R1" }, // High prob, high impact
-      { prob: 1, impact: 0, label: "R2" }, // Medium prob, high impact
-      { prob: 0, impact: 0, label: "R3" }, // Low prob, high impact
-      { prob: 1, impact: 1, label: "R4" }, // Medium prob, medium impact
-      { prob: 2, impact: 2, label: "R5" }  // High prob, low impact
+      { id: "1", prob: 2, impact: 0, label: "R1", title: "Falha em equipamento crítico", level: "Crítico", process: "Produção", status: "Aberto" }, // High prob, high impact
+      { id: "2", prob: 1, impact: 0, label: "R2", title: "Perda de fornecedor principal", level: "Alto", process: "Compras", status: "Em tratamento" }, // Medium prob, high impact
+      { id: "3", prob: 0, impact: 0, label: "R3", title: "Não conformidade regulatória", level: "Médio", process: "Qualidade", status: "Tratado" }, // Low prob, high impact
+      { id: "4", prob: 1, impact: 1, label: "R4", title: "Falha no sistema ERP", level: "Médio", process: "TI", status: "Monitorando" }, // Medium prob, medium impact
+      { id: "5", prob: 2, impact: 2, label: "R5", title: "Queda de energia prolongada", level: "Médio", process: "Infraestrutura", status: "Em tratamento" }  // High prob, low impact
     ];
+    
+    // Add event listener for mouse movement
+    canvas.onmousemove = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      
+      // Check if mouse is over any risk point
+      let foundRisk = null;
+      risks.forEach(risk => {
+        const x = (risk.prob + 0.5) * cellWidth;
+        const y = (risk.impact + 0.5) * cellHeight;
+        const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+        
+        if (distance < 15) {
+          foundRisk = risk;
+          setMousePosition({ x: event.clientX, y: event.clientY });
+        }
+      });
+      
+      setHoveredRisk(foundRisk);
+    };
+    
+    canvas.onmouseleave = () => {
+      setHoveredRisk(null);
+    };
     
     risks.forEach(risk => {
       const x = (risk.prob + 0.5) * cellWidth;
@@ -119,13 +153,34 @@ export function RiskMatrixChart() {
     });
     
   }, []);
+
+  // Get risks by level for hovering over cells
+  const getRisksByLevel = (level) => {
+    return mockRisks.filter(risk => risk.level === level);
+  };
   
   return (
     <div className="w-full h-[400px] relative p-10">
       <canvas 
         ref={canvasRef} 
-        className="w-full h-full"
+        className="w-full h-full cursor-pointer"
       />
+      
+      {hoveredRisk && (
+        <div 
+          className="absolute bg-white border rounded-md shadow-md p-3 z-50"
+          style={{ 
+            left: `${mousePosition.x}px`, 
+            top: `${mousePosition.y + 10}px`,
+            transform: 'translate(-50%, 0)' 
+          }}
+        >
+          <div className="font-bold">{hoveredRisk.title}</div>
+          <div className="text-sm">Processo: {hoveredRisk.process}</div>
+          <div className="text-sm">Nível: {hoveredRisk.level}</div>
+          <div className="text-sm">Status: {hoveredRisk.status}</div>
+        </div>
+      )}
       
       <div className="absolute bottom-2 right-2 space-y-1">
         <div className="flex items-center gap-2">
