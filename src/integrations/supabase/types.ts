@@ -338,6 +338,69 @@ export type Database = {
           },
         ]
       }
+      quality_actions: {
+        Row: {
+          comments: string | null
+          completed_at: string | null
+          created_at: string
+          currency: string | null
+          due_date: string
+          how: string
+          how_much: number | null
+          id: string
+          priority: string
+          process_area: string
+          responsible: string
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          what: string
+          where: string
+          why: string
+        }
+        Insert: {
+          comments?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          due_date: string
+          how: string
+          how_much?: number | null
+          id?: string
+          priority: string
+          process_area: string
+          responsible: string
+          start_date?: string | null
+          status: string
+          title: string
+          updated_at?: string | null
+          what: string
+          where: string
+          why: string
+        }
+        Update: {
+          comments?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          due_date?: string
+          how?: string
+          how_much?: number | null
+          id?: string
+          priority?: string
+          process_area?: string
+          responsible?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          what?: string
+          where?: string
+          why?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           granted: boolean
