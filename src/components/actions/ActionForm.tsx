@@ -10,14 +10,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { createAction, updateAction } from "@/services/actionService";
-import { Action5W2H, ActionStatus, ActionPriority, ProcessArea } from "@/types/actions";
+import { Action5W2H, ActionStatus, ActionPriority, ProcessArea, ActionSource } from "@/types/actions";
 
 const actionSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  source: z.enum([
+    "planning", "audit", "non_conformity", "corrective_action", "critical_analysis", 
+    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "other"
+  ]),
   what: z.string().min(3, "O que deve ser feito deve ter pelo menos 3 caracteres"),
   why: z.string().min(3, "Por que deve ser feito deve ter pelo menos 3 caracteres"),
   where: z.string().min(2, "Onde deve ser feito deve ter pelo menos 2 caracteres"),
   responsible: z.string().min(2, "Quem é responsável deve ter pelo menos 2 caracteres"),
+  involved_people: z.string().optional(),
   due_date: z.string().min(1, "Data de conclusão é obrigatória"),
   start_date: z.string().optional(),
   how: z.string().min(3, "Como deve ser feito deve ter pelo menos 3 caracteres"),
@@ -46,12 +51,15 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
     defaultValues: action ? {
       ...action,
       how_much: action.how_much || null,
+      involved_people: action.involved_people || "",
     } : {
       title: "",
+      source: "planning" as ActionSource,
       what: "",
       why: "",
       where: "",
       responsible: "",
+      involved_people: "",
       due_date: new Date().toISOString().split("T")[0],
       start_date: new Date().toISOString().split("T")[0],
       how: "",
@@ -80,10 +88,12 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
           ...values,
           // These properties are required in the Action5W2H type but not in the form
           title: values.title,
+          source: values.source,
           what: values.what,
           why: values.why,
           where: values.where,
           responsible: values.responsible,
+          involved_people: values.involved_people,
           due_date: values.due_date,
           how: values.how,
           status: values.status,
@@ -136,6 +146,34 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
                 <FormLabel>Título</FormLabel>
                 <FormControl>
                   <Input placeholder="Título da ação" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {/* Origem da Ação */}
+          <FormField
+            control={form.control}
+            name="source"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Origem da Ação</FormLabel>
+                <FormControl>
+                  <select 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    {...field}
+                  >
+                    <option value="planning">Planejamento</option>
+                    <option value="audit">Auditoria</option>
+                    <option value="non_conformity">Não Conformidade</option>
+                    <option value="corrective_action">Ação Corretiva</option>
+                    <option value="critical_analysis">Análise Crítica</option>
+                    <option value="customer_satisfaction">Pesquisa de Satisfação de Cliente</option>
+                    <option value="supplier_evaluation">Avaliação de Provedor Externo</option>
+                    <option value="customer_complaint">Reclamação de Cliente</option>
+                    <option value="other">Outro</option>
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -205,6 +243,21 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
               )}
             />
           </div>
+          
+          {/* Envolvidos */}
+          <FormField
+            control={form.control}
+            name="involved_people"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Envolvidos</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Pessoas envolvidas na execução da ação" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* When */}
