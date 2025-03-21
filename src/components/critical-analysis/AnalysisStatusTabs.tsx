@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnalysisTable } from "./AnalysisTable";
@@ -12,6 +11,7 @@ interface AnalysisStatusTabsProps {
   handleViewReport: (analysis: CriticalAnalysisItem) => void;
   handleDeleteAttachment: (analysisId: string, attachmentId: string) => void;
   handleEditAnalysis: (analysis: CriticalAnalysisItem) => void;
+  handleDeleteAnalysis: (analysisId: string) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
   getFileIcon: (fileType: string) => React.ReactNode;
@@ -26,6 +26,7 @@ export function AnalysisStatusTabs({
   handleViewReport,
   handleDeleteAttachment,
   handleEditAnalysis,
+  handleDeleteAnalysis,
   getStatusColor,
   getStatusText,
   getFileIcon,
@@ -84,6 +85,7 @@ export function AnalysisStatusTabs({
             handleViewReport={handleViewReport}
             handleDeleteAttachment={handleDeleteAttachment}
             handleEditAnalysis={handleEditAnalysis}
+            handleDeleteAnalysis={handleDeleteAnalysis}
             getStatusColor={getStatusColor}
             getStatusText={getStatusText}
             getFileIcon={getFileIcon}
@@ -106,6 +108,7 @@ export function AnalysisStatusTabs({
             handleViewReport={handleViewReport}
             handleDeleteAttachment={handleDeleteAttachment}
             handleEditAnalysis={handleEditAnalysis}
+            handleDeleteAnalysis={handleDeleteAnalysis}
             getStatusColor={getStatusColor}
             getStatusText={getStatusText}
             getFileIcon={getFileIcon}
@@ -128,6 +131,7 @@ export function AnalysisStatusTabs({
             handleViewReport={handleViewReport}
             handleDeleteAttachment={handleDeleteAttachment}
             handleEditAnalysis={handleEditAnalysis}
+            handleDeleteAnalysis={handleDeleteAnalysis}
             getStatusColor={getStatusColor}
             getStatusText={getStatusText}
             getFileIcon={getFileIcon}
@@ -150,6 +154,7 @@ export function AnalysisStatusTabs({
             handleViewReport={handleViewReport}
             handleDeleteAttachment={handleDeleteAttachment}
             handleEditAnalysis={handleEditAnalysis}
+            handleDeleteAnalysis={handleDeleteAnalysis}
             getStatusColor={getStatusColor}
             getStatusText={getStatusText}
             getFileIcon={getFileIcon}

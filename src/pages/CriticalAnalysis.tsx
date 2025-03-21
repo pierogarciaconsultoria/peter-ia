@@ -200,6 +200,12 @@ export default function CriticalAnalysis() {
     setOpen(true);
   };
   
+  // Add delete analysis functionality
+  const handleDeleteAnalysis = (analysisId: string) => {
+    setAnalyses(prev => prev.filter(analysis => analysis.id !== analysisId));
+    toast.success("Análise crítica excluída com sucesso!");
+  };
+  
   const handleAddAttachment = async () => {
     if (!currentAnalysisId) return;
     
@@ -293,6 +299,7 @@ export default function CriticalAnalysis() {
           handleViewReport={handleViewReport}
           handleDeleteAttachment={handleDeleteAttachment}
           handleEditAnalysis={handleEditAnalysis}
+          handleDeleteAnalysis={handleDeleteAnalysis}
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
           getFileIcon={getFileIcon}
