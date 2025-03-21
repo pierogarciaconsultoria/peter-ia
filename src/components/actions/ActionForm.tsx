@@ -17,8 +17,8 @@ const actionSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
   source: z.enum([
     "planning", "audit", "non_conformity", "corrective_action", "critical_analysis", 
-    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "other"
-  ]),
+    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "performance_indicator", "other"
+  ] as const),
   what: z.string().min(3, "O que deve ser feito deve ter pelo menos 3 caracteres"),
   why: z.string().min(3, "Por que deve ser feito deve ter pelo menos 3 caracteres"),
   where: z.string().min(2, "Onde deve ser feito deve ter pelo menos 2 caracteres"),
@@ -29,9 +29,9 @@ const actionSchema = z.object({
   how: z.string().min(3, "Como deve ser feito deve ter pelo menos 3 caracteres"),
   how_much: z.number().nullable(),
   currency: z.string().optional(),
-  status: z.enum(["planned", "in_progress", "completed", "delayed", "cancelled"]),
-  priority: z.enum(["low", "medium", "high", "critical"]),
-  process_area: z.enum(["manufacturing", "quality", "management", "hr", "sales", "supply_chain", "other"]),
+  status: z.enum(["planned", "in_progress", "completed", "delayed", "cancelled"] as const),
+  priority: z.enum(["low", "medium", "high", "critical"] as const),
+  process_area: z.enum(["manufacturing", "quality", "management", "hr", "sales", "supply_chain", "other"] as const),
   comments: z.string().optional(),
 });
 
