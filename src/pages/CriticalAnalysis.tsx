@@ -27,7 +27,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -79,7 +78,7 @@ const mockAnalysis: CriticalAnalysisItem[] = [
     status: "completed",
     participants: ["Diretor Geral", "Gerente da Qualidade", "RH"],
     documents: ["Política da Qualidade", "Objetivos Estratégicos"],
-    previousActionsStatus: "Implementação do sistema de gestão documental concluída. Pendente revisão dos procedimentos operacionais.",
+    previousActionsStatus: "Implementação do sistema de gestão documental concluída. Pendente revis��o dos procedimentos operacionais.",
     externalInternalChanges: "Novas exigências de clientes relacionadas à sustentabilidade. Mudança na direção de operações.",
     performanceInfo: "Objetivos da qualidade atingidos em 85%. Aumento de 12% nas vendas para clientes com requisitos específicos de qualidade.",
     resourceSufficiency: "Recursos financeiros para treinamentos abaixo do planejado.",
@@ -379,6 +378,13 @@ export default function CriticalAnalysis() {
   const handleViewReport = (analysis: CriticalAnalysisItem) => {
     setSelectedAnalysis(analysis);
     setReportDialogOpen(true);
+  };
+
+  const handleAnalysisUpdate = (updatedAnalysis: CriticalAnalysisItem) => {
+    setAnalyses(prev => prev.map(item => 
+      item.id === updatedAnalysis.id ? updatedAnalysis : item
+    ));
+    setSelectedAnalysis(updatedAnalysis);
   };
 
   return (
@@ -1108,8 +1114,10 @@ export default function CriticalAnalysis() {
           analysis={selectedAnalysis}
           open={reportDialogOpen}
           onOpenChange={setReportDialogOpen}
+          onAnalysisUpdate={handleAnalysisUpdate}
         />
       </main>
     </div>
   );
 }
+

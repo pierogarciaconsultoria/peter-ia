@@ -49,6 +49,19 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
         return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
       }
     };
+
+    // Função para renderizar conteúdo markdown em HTML
+    const renderMarkdown = (markdown: string) => {
+      // Uma implementação simples para formatação básica
+      // Em uma aplicação real, você usaria uma biblioteca como marked ou remark
+      return markdown
+        .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold my-4">$1</h1>')
+        .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold my-3">$1</h2>')
+        .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold my-2">$1</h3>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br />');
+    };
     
     return (
       <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto" id="analysis-report">
@@ -66,82 +79,90 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <h3 className="font-semibold text-sm">Participantes:</h3>
-            <p>{analysis.participants.join(", ")}</p>
+        {analysis.aiGeneratedContent ? (
+          <div className="mb-6 prose prose-slate max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(analysis.aiGeneratedContent) }} />
           </div>
-          <div>
-            <h3 className="font-semibold text-sm">Documentos de Referência:</h3>
-            <p>{analysis.documents.join(", ")}</p>
-          </div>
-        </div>
-        
-        <Separator className="my-6" />
-        
-        <div className="mb-6">
-          <h2 className="text-lg font-bold mb-4">Requisitos para Entrada da Análise Crítica</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold">Situação de Ações Anteriores:</h3>
-              <p className="mt-1">{analysis.previousActionsStatus}</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <h3 className="font-semibold text-sm">Participantes:</h3>
+                <p>{analysis.participants.join(", ")}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Documentos de Referência:</h3>
+                <p>{analysis.documents.join(", ")}</p>
+              </div>
             </div>
             
-            <div>
-              <h3 className="font-semibold">Mudanças Externas e Internas:</h3>
-              <p className="mt-1">{analysis.externalInternalChanges}</p>
+            <Separator className="my-6" />
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-4">Requisitos para Entrada da Análise Crítica</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold">Situação de Ações Anteriores:</h3>
+                  <p className="mt-1">{analysis.previousActionsStatus}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Mudanças Externas e Internas:</h3>
+                  <p className="mt-1">{analysis.externalInternalChanges}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Informações de Desempenho:</h3>
+                  <p className="mt-1">{analysis.performanceInfo}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Suficiência de Recursos:</h3>
+                  <p className="mt-1">{analysis.resourceSufficiency}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Eficácia de Ações para Riscos:</h3>
+                  <p className="mt-1">{analysis.riskActionsEffectiveness}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Oportunidades de Melhoria Identificadas:</h3>
+                  <p className="mt-1">{analysis.improvementOpportunities}</p>
+                </div>
+              </div>
             </div>
             
-            <div>
-              <h3 className="font-semibold">Informações de Desempenho:</h3>
-              <p className="mt-1">{analysis.performanceInfo}</p>
-            </div>
+            <Separator className="my-6" />
             
-            <div>
-              <h3 className="font-semibold">Suficiência de Recursos:</h3>
-              <p className="mt-1">{analysis.resourceSufficiency}</p>
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-4">Resultados da Análise Crítica</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold">Oportunidades para Melhoria:</h3>
+                  <p className="mt-1">{analysis.improvementResults}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Necessidades de Mudança no SGQ:</h3>
+                  <p className="mt-1">{analysis.systemChangeNeeds}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Necessidade de Recursos:</h3>
+                  <p className="mt-1">{analysis.resourceNeeds}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold">Resultados Gerais:</h3>
+                  <p className="mt-1">{analysis.results}</p>
+                </div>
+              </div>
             </div>
-            
-            <div>
-              <h3 className="font-semibold">Eficácia de Ações para Riscos:</h3>
-              <p className="mt-1">{analysis.riskActionsEffectiveness}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold">Oportunidades de Melhoria Identificadas:</h3>
-              <p className="mt-1">{analysis.improvementOpportunities}</p>
-            </div>
-          </div>
-        </div>
-        
-        <Separator className="my-6" />
-        
-        <div className="mb-6">
-          <h2 className="text-lg font-bold mb-4">Resultados da Análise Crítica</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold">Oportunidades para Melhoria:</h3>
-              <p className="mt-1">{analysis.improvementResults}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold">Necessidades de Mudança no SGQ:</h3>
-              <p className="mt-1">{analysis.systemChangeNeeds}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold">Necessidade de Recursos:</h3>
-              <p className="mt-1">{analysis.resourceNeeds}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold">Resultados Gerais:</h3>
-              <p className="mt-1">{analysis.results}</p>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
         
         {analysis.attachments.length > 0 && (
           <>
