@@ -134,10 +134,12 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
       });
       
       if (error) {
+        console.error("Erro ao chamar função:", error);
         throw new Error(error.message);
       }
       
       if (!data || !data.report) {
+        console.error("Resposta inválida:", data);
         throw new Error("Não foi possível gerar o relatório");
       }
       
@@ -153,7 +155,7 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
       toast.success("Relatório gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar relatório:", error);
-      toast.error("Ocorreu um erro ao gerar o relatório. Tente novamente.");
+      toast.error(`Ocorreu um erro ao gerar o relatório: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     } finally {
       setIsGenerating(false);
     }
