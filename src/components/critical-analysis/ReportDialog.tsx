@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { 
   Dialog, 
@@ -14,7 +13,7 @@ import { CriticalAnalysisItem } from "@/types/critical-analysis";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useSupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReportDialogProps {
   analysis: CriticalAnalysisItem | null;
@@ -26,7 +25,6 @@ interface ReportDialogProps {
 export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }: ReportDialogProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const supabase = useSupabaseClient();
 
   const handlePrint = () => {
     if (!reportRef.current) return;
@@ -67,7 +65,6 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
     printWindow.document.close();
     printWindow.focus();
     
-    // Aguardar a renderização da página antes de imprimir
     setTimeout(() => {
       printWindow.print();
     }, 500);
@@ -87,7 +84,6 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
       
       const imgData = canvas.toDataURL('image/png');
       
-      // A4 dimensions in mm: 210 x 297
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -99,14 +95,11 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
       
       let position = 0;
       
-      // Se o conteúdo for maior que uma página A4
       while (position < imgHeight) {
-        // Adicionar nova página se não for a primeira
         if (position > 0) {
           pdf.addPage();
         }
         
-        // Adicionar parte da imagem à página atual
         pdf.addImage(
           imgData, 
           'PNG', 
@@ -116,10 +109,9 @@ export function ReportDialog({ analysis, open, onOpenChange, onAnalysisUpdate }:
           imgHeight
         );
         
-        position += 265; // Altura aproximada da página A4 com margens
+        position += 265;
       }
       
-      // Nome do arquivo com data
       const fileName = `analise-critica-${analysis.subject.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
       
       pdf.save(fileName);
