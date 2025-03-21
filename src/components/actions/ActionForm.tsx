@@ -11,6 +11,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useToast } from "@/hooks/use-toast";
 import { createAction, updateAction } from "@/services/actionService";
 import { Action5W2H, ActionStatus, ActionPriority, ProcessArea, ActionSource } from "@/types/actions";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const actionSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
@@ -128,7 +129,7 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
   }
   
   return (
-    <DialogContent className="sm:max-w-[700px]">
+    <DialogContent className="sm:max-w-[700px] max-h-[90vh]">
       <DialogHeader>
         <DialogTitle>{action ? "Editar Ação" : "Nova Ação"}</DialogTitle>
         <DialogDescription>
@@ -136,282 +137,43 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
         </DialogDescription>
       </DialogHeader>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Título</FormLabel>
-                <FormControl>
-                  <Input placeholder="Título da ação" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          {/* Origem da Ação */}
-          <FormField
-            control={form.control}
-            name="source"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Origem da Ação</FormLabel>
-                <FormControl>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    {...field}
-                  >
-                    <option value="planning">Planejamento</option>
-                    <option value="audit">Auditoria</option>
-                    <option value="non_conformity">Não Conformidade</option>
-                    <option value="corrective_action">Ação Corretiva</option>
-                    <option value="critical_analysis">Análise Crítica</option>
-                    <option value="customer_satisfaction">Pesquisa de Satisfação de Cliente</option>
-                    <option value="supplier_evaluation">Avaliação de Provedor Externo</option>
-                    <option value="customer_complaint">Reclamação de Cliente</option>
-                    <option value="other">Outro</option>
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* What */}
+      <ScrollArea className="max-h-[70vh] pr-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="what"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>O que? (What)</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="O que deve ser feito" {...field} />
+                    <Input placeholder="Título da ação" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {/* Why */}
+            {/* Origem da Ação */}
             <FormField
               control={form.control}
-              name="why"
+              name="source"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Por que? (Why)</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Por que deve ser feito" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Where */}
-            <FormField
-              control={form.control}
-              name="where"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Onde? (Where)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Onde deve ser feito" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Who */}
-            <FormField
-              control={form.control}
-              name="responsible"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quem? (Who)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Quem é responsável" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          {/* Envolvidos */}
-          <FormField
-            control={form.control}
-            name="involved_people"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Envolvidos</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Pessoas envolvidas na execução da ação" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* When */}
-            <FormField
-              control={form.control}
-              name="start_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quando começar? (When)</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="due_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quando terminar? (When)</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          {/* How */}
-          <FormField
-            control={form.control}
-            name="how"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Como? (How)</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Como deve ser feito" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* How Much */}
-            <FormField
-              control={form.control}
-              name="how_much"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quanto custa? (How Much)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="0.00" 
-                      {...field}
-                      value={field.value === null ? '' : field.value}
-                      onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Moeda</FormLabel>
+                  <FormLabel>Origem da Ação</FormLabel>
                   <FormControl>
                     <select 
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       {...field}
                     >
-                      <option value="BRL">R$ (BRL)</option>
-                      <option value="USD">$ (USD)</option>
-                      <option value="EUR">€ (EUR)</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prioridade</FormLabel>
-                  <FormControl>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      {...field}
-                    >
-                      <option value="low">Baixa</option>
-                      <option value="medium">Média</option>
-                      <option value="high">Alta</option>
-                      <option value="critical">Crítica</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <FormControl>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      {...field}
-                    >
-                      <option value="planned">Planejada</option>
-                      <option value="in_progress">Em Andamento</option>
-                      <option value="completed">Concluída</option>
-                      <option value="delayed">Atrasada</option>
-                      <option value="cancelled">Cancelada</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="process_area"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Área de Processo</FormLabel>
-                  <FormControl>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      {...field}
-                    >
-                      <option value="manufacturing">Produção</option>
-                      <option value="quality">Qualidade</option>
-                      <option value="management">Gestão</option>
-                      <option value="hr">Recursos Humanos</option>
-                      <option value="sales">Vendas</option>
-                      <option value="supply_chain">Cadeia de Suprimentos</option>
+                      <option value="planning">Planejamento</option>
+                      <option value="audit">Auditoria</option>
+                      <option value="non_conformity">Não Conformidade</option>
+                      <option value="corrective_action">Ação Corretiva</option>
+                      <option value="critical_analysis">Análise Crítica</option>
+                      <option value="customer_satisfaction">Pesquisa de Satisfação de Cliente</option>
+                      <option value="supplier_evaluation">Avaliação de Provedor Externo</option>
+                      <option value="customer_complaint">Reclamação de Cliente</option>
                       <option value="other">Outro</option>
                     </select>
                   </FormControl>
@@ -419,32 +181,273 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
                 </FormItem>
               )}
             />
-          </div>
-          
-          <FormField
-            control={form.control}
-            name="comments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Comentários Adicionais</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Observações ou comentários adicionais" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : action ? "Atualizar" : "Criar"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* What */}
+              <FormField
+                control={form.control}
+                name="what"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>O que? (What)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="O que deve ser feito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Why */}
+              <FormField
+                control={form.control}
+                name="why"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Por que? (Why)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Por que deve ser feito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Where */}
+              <FormField
+                control={form.control}
+                name="where"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Onde? (Where)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Onde deve ser feito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Who */}
+              <FormField
+                control={form.control}
+                name="responsible"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quem? (Who)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Quem é responsável" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Envolvidos */}
+            <FormField
+              control={form.control}
+              name="involved_people"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Envolvidos</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Pessoas envolvidas na execução da ação" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* When */}
+              <FormField
+                control={form.control}
+                name="start_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quando começar? (When)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="due_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quando terminar? (When)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* How */}
+            <FormField
+              control={form.control}
+              name="how"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Como? (How)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Como deve ser feito" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* How Much */}
+              <FormField
+                control={form.control}
+                name="how_much"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quanto custa? (How Much)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0.00" 
+                        {...field}
+                        value={field.value === null ? '' : field.value}
+                        onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Moeda</FormLabel>
+                    <FormControl>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        {...field}
+                      >
+                        <option value="BRL">R$ (BRL)</option>
+                        <option value="USD">$ (USD)</option>
+                        <option value="EUR">€ (EUR)</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prioridade</FormLabel>
+                    <FormControl>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        {...field}
+                      >
+                        <option value="low">Baixa</option>
+                        <option value="medium">Média</option>
+                        <option value="high">Alta</option>
+                        <option value="critical">Crítica</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <FormControl>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        {...field}
+                      >
+                        <option value="planned">Planejada</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="completed">Concluída</option>
+                        <option value="delayed">Atrasada</option>
+                        <option value="cancelled">Cancelada</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="process_area"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Área de Processo</FormLabel>
+                    <FormControl>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        {...field}
+                      >
+                        <option value="manufacturing">Produção</option>
+                        <option value="quality">Qualidade</option>
+                        <option value="management">Gestão</option>
+                        <option value="hr">Recursos Humanos</option>
+                        <option value="sales">Vendas</option>
+                        <option value="supply_chain">Cadeia de Suprimentos</option>
+                        <option value="other">Outro</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="comments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Comentários Adicionais</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Observações ou comentários adicionais" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Salvando..." : action ? "Atualizar" : "Criar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </ScrollArea>
     </DialogContent>
   );
 }
