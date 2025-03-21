@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audits: {
+        Row: {
+          area: string
+          audit_date: string
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          findings: string | null
+          id: string
+          responsible: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          audit_date: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          responsible: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          audit_date?: string
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          responsible?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           active_modules: string[]
@@ -36,6 +78,141 @@ export type Database = {
           plan?: string
           settings?: Json
           slug?: string
+        }
+        Relationships: []
+      }
+      critical_analysis: {
+        Row: {
+          analysis_date: string
+          attachments: Json | null
+          created_at: string
+          created_by: string
+          id: string
+          inputs: Json | null
+          participants: string[]
+          results: Json | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_date: string
+          attachments?: Json | null
+          created_at?: string
+          created_by: string
+          id?: string
+          inputs?: Json | null
+          participants: string[]
+          results?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_date?: string
+          attachments?: Json | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          inputs?: Json | null
+          participants?: string[]
+          results?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_complaints: {
+        Row: {
+          assigned_to: string | null
+          closed_at: string | null
+          complaint_date: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          customer_name: string
+          description: string
+          id: string
+          priority: string
+          resolution: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          complaint_date: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_name: string
+          description: string
+          id?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          complaint_date?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_name?: string
+          description?: string
+          id?: string
+          priority?: string
+          resolution?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_satisfaction_surveys: {
+        Row: {
+          created_at: string
+          customer_name: string
+          delivery_satisfaction: number | null
+          id: string
+          overall_satisfaction: number | null
+          product_quality: number | null
+          service_quality: number | null
+          status: string
+          suggestions: string | null
+          survey_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          delivery_satisfaction?: number | null
+          id?: string
+          overall_satisfaction?: number | null
+          product_quality?: number | null
+          service_quality?: number | null
+          status?: string
+          suggestions?: string | null
+          survey_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          delivery_satisfaction?: number | null
+          id?: string
+          overall_satisfaction?: number | null
+          product_quality?: number | null
+          service_quality?: number | null
+          status?: string
+          suggestions?: string | null
+          survey_date?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -109,6 +286,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      equipment_calibrations: {
+        Row: {
+          calibration_date: string
+          calibration_entity: string
+          certificate_number: string | null
+          created_at: string
+          equipment_id: string
+          equipment_name: string
+          id: string
+          next_calibration_date: string
+          observations: string | null
+          responsible: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          calibration_date: string
+          calibration_entity: string
+          certificate_number?: string | null
+          created_at?: string
+          equipment_id: string
+          equipment_name: string
+          id?: string
+          next_calibration_date: string
+          observations?: string | null
+          responsible: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          calibration_date?: string
+          calibration_entity?: string
+          certificate_number?: string | null
+          created_at?: string
+          equipment_id?: string
+          equipment_name?: string
+          id?: string
+          next_calibration_date?: string
+          observations?: string | null
+          responsible?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       indicator_measurements: {
         Row: {
@@ -270,6 +492,129 @@ export type Database = {
         }
         Relationships: []
       }
+      non_conforming_products: {
+        Row: {
+          approval_status: string
+          created_at: string
+          customer: string | null
+          department: string
+          description: string
+          id: string
+          immediate_action: string
+          non_conformity_type: string
+          product_name: string
+          requirement_id: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          created_at?: string
+          customer?: string | null
+          department: string
+          description: string
+          id?: string
+          immediate_action: string
+          non_conformity_type: string
+          product_name: string
+          requirement_id: string
+          severity: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          created_at?: string
+          customer?: string | null
+          department?: string
+          description?: string
+          id?: string
+          immediate_action?: string
+          non_conformity_type?: string
+          product_name?: string
+          requirement_id?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      non_conformities: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          department: string
+          description: string
+          id: string
+          requirement_id: string
+          responsible: string
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          department: string
+          description: string
+          id?: string
+          requirement_id: string
+          responsible: string
+          severity: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          department?: string
+          description?: string
+          id?: string
+          requirement_id?: string
+          responsible?: string
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      organization_context: {
+        Row: {
+          analysis: string | null
+          context_type: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          update_date: string
+          updated_at: string
+        }
+        Insert: {
+          analysis?: string | null
+          context_type: string
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          update_date: string
+          updated_at?: string
+        }
+        Update: {
+          analysis?: string | null
+          context_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          update_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       performance_indicators: {
         Row: {
           calculation_type: string
@@ -401,6 +746,102 @@ export type Database = {
         }
         Relationships: []
       }
+      raw_material_inspections: {
+        Row: {
+          batch_number: string
+          created_at: string
+          id: string
+          inspection_date: string
+          inspection_result: string
+          inspector: string
+          material_name: string
+          observations: string | null
+          parameters: Json | null
+          quantity: number
+          supplier: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          batch_number: string
+          created_at?: string
+          id?: string
+          inspection_date: string
+          inspection_result?: string
+          inspector: string
+          material_name: string
+          observations?: string | null
+          parameters?: Json | null
+          quantity: number
+          supplier: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          batch_number?: string
+          created_at?: string
+          id?: string
+          inspection_date?: string
+          inspection_result?: string
+          inspector?: string
+          material_name?: string
+          observations?: string | null
+          parameters?: Json | null
+          quantity?: number
+          supplier?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      risks: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          impact: number
+          mitigation_plan: string | null
+          probability: number
+          process: string
+          responsible: string
+          risk_level: number | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          impact: number
+          mitigation_plan?: string | null
+          probability: number
+          process: string
+          responsible: string
+          risk_level?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          impact?: number
+          mitigation_plan?: string | null
+          probability?: number
+          process?: string
+          responsible?: string
+          risk_level?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           granted: boolean
@@ -468,6 +909,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supplier_evaluations: {
+        Row: {
+          category: string
+          comments: string | null
+          created_at: string
+          delivery_score: number | null
+          evaluation_date: string
+          evaluator: string
+          id: string
+          price_score: number | null
+          quality_score: number | null
+          status: string
+          supplier_name: string
+          support_score: number | null
+          total_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          comments?: string | null
+          created_at?: string
+          delivery_score?: number | null
+          evaluation_date: string
+          evaluator: string
+          id?: string
+          price_score?: number | null
+          quality_score?: number | null
+          status?: string
+          supplier_name: string
+          support_score?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          comments?: string | null
+          created_at?: string
+          delivery_score?: number | null
+          evaluation_date?: string
+          evaluator?: string
+          id?: string
+          price_score?: number | null
+          quality_score?: number | null
+          status?: string
+          supplier_name?: string
+          support_score?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainings: {
+        Row: {
+          created_at: string
+          department: string
+          description: string | null
+          duration: number
+          evaluation_method: string | null
+          id: string
+          participants: Json | null
+          status: string
+          title: string
+          trainer: string
+          training_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          description?: string | null
+          duration: number
+          evaluation_method?: string | null
+          id?: string
+          participants?: Json | null
+          status?: string
+          title: string
+          trainer: string
+          training_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          description?: string | null
+          duration?: number
+          evaluation_method?: string | null
+          id?: string
+          participants?: Json | null
+          status?: string
+          title?: string
+          trainer?: string
+          training_date?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
