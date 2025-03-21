@@ -37,4 +37,7 @@ export interface CriticalAnalysisItem {
   
   // Conteúdo gerado por IA
   aiGeneratedContent?: string;
+  
+  // Novo campo para data planejada (para análises futuras)
+  plannedDate?: Date;
 }

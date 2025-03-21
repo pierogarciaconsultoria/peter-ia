@@ -1,21 +1,8 @@
 
 import React from "react";
-import { format } from "date-fns";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { CriticalAnalysisItem } from "@/types/critical-analysis";
 import { AnalysisTable } from "./AnalysisTable";
+import { CriticalAnalysisItem } from "@/types/critical-analysis";
 
 interface AnalysisStatusTabsProps {
   analyses: CriticalAnalysisItem[];
@@ -24,6 +11,7 @@ interface AnalysisStatusTabsProps {
   handleAttachmentClick: (analysisId: string) => void;
   handleViewReport: (analysis: CriticalAnalysisItem) => void;
   handleDeleteAttachment: (analysisId: string, attachmentId: string) => void;
+  handleEditAnalysis: (analysis: CriticalAnalysisItem) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
   getFileIcon: (fileType: string) => React.ReactNode;
@@ -37,182 +25,137 @@ export function AnalysisStatusTabs({
   handleAttachmentClick,
   handleViewReport,
   handleDeleteAttachment,
+  handleEditAnalysis,
   getStatusColor,
   getStatusText,
   getFileIcon,
   formatFileSize
 }: AnalysisStatusTabsProps) {
+  const plannedAnalyses = analyses.filter(analysis => analysis.status === "planned");
+  const inProgressAnalyses = analyses.filter(analysis => analysis.status === "in-progress");
+  const completedAnalyses = analyses.filter(analysis => analysis.status === "completed");
+  
   return (
-    <Tabs defaultValue="all" className="mb-8">
+    <Tabs defaultValue="planned" className="space-y-4">
       <TabsList>
-        <TabsTrigger value="all">Todas</TabsTrigger>
-        <TabsTrigger value="planned">Planejadas</TabsTrigger>
-        <TabsTrigger value="in-progress">Em Andamento</TabsTrigger>
-        <TabsTrigger value="completed">Concluídas</TabsTrigger>
+        <TabsTrigger value="planned" className="relative">
+          Planejadas
+          {plannedAnalyses.length > 0 && (
+            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
+              {plannedAnalyses.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="in-progress" className="relative">
+          Em Andamento
+          {inProgressAnalyses.length > 0 && (
+            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
+              {inProgressAnalyses.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="completed" className="relative">
+          Concluídas
+          {completedAnalyses.length > 0 && (
+            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
+              {completedAnalyses.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="all">
+          Todas
+          <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
+            {analyses.length}
+          </span>
+        </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="all">
-        <Card>
-          <CardHeader>
-            <CardTitle>Todas as Análises Críticas</CardTitle>
-            <CardDescription>
-              Visualize todas as reuniões de análise crítica pela direção
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Buscar análises críticas..."
-                  className="pl-8"
-                />
-              </div>
-            </div>
-            <AnalysisTable 
-              analyses={analyses}
-              expandedItems={expandedItems}
-              toggleExpand={toggleExpand}
-              handleAttachmentClick={handleAttachmentClick}
-              handleViewReport={handleViewReport}
-              handleDeleteAttachment={handleDeleteAttachment}
-              getStatusColor={getStatusColor}
-              getStatusText={getStatusText}
-              getFileIcon={getFileIcon}
-              formatFileSize={formatFileSize}
-            />
-          </CardContent>
-        </Card>
+      <TabsContent value="planned" className="space-y-4">
+        {plannedAnalyses.length === 0 ? (
+          <div className="text-center p-4 bg-muted rounded-md">
+            <p className="text-muted-foreground">Nenhuma análise crítica planejada.</p>
+          </div>
+        ) : (
+          <AnalysisTable 
+            analyses={plannedAnalyses}
+            expandedItems={expandedItems}
+            toggleExpand={toggleExpand}
+            handleAttachmentClick={handleAttachmentClick}
+            handleViewReport={handleViewReport}
+            handleDeleteAttachment={handleDeleteAttachment}
+            handleEditAnalysis={handleEditAnalysis}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+        )}
       </TabsContent>
       
-      <TabsContent value="planned">
-        <Card>
-          <CardHeader>
-            <CardTitle>Análises Críticas Planejadas</CardTitle>
-            <CardDescription>
-              Visualize as reuniões de análise crítica planejadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Assunto</TableHead>
-                  <TableHead>Participantes</TableHead>
-                  <TableHead>Documentos</TableHead>
-                  <TableHead>Detalhes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analyses.filter(a => a.status === "planned").map((analysis) => (
-                  <TableRow key={analysis.id}>
-                    <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
-                    <TableCell className="font-medium">{analysis.subject}</TableCell>
-                    <TableCell>{analysis.participants.join(", ")}</TableCell>
-                    <TableCell>{analysis.documents.join(", ")}</TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => toggleExpand(analysis.id)}
-                      >
-                        {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      <TabsContent value="in-progress" className="space-y-4">
+        {inProgressAnalyses.length === 0 ? (
+          <div className="text-center p-4 bg-muted rounded-md">
+            <p className="text-muted-foreground">Nenhuma análise crítica em andamento.</p>
+          </div>
+        ) : (
+          <AnalysisTable 
+            analyses={inProgressAnalyses}
+            expandedItems={expandedItems}
+            toggleExpand={toggleExpand}
+            handleAttachmentClick={handleAttachmentClick}
+            handleViewReport={handleViewReport}
+            handleDeleteAttachment={handleDeleteAttachment}
+            handleEditAnalysis={handleEditAnalysis}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+        )}
       </TabsContent>
       
-      <TabsContent value="in-progress">
-        <Card>
-          <CardHeader>
-            <CardTitle>Análises Críticas em Andamento</CardTitle>
-            <CardDescription>
-              Visualize as reuniões de análise crítica em andamento
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Assunto</TableHead>
-                  <TableHead>Participantes</TableHead>
-                  <TableHead>Documentos</TableHead>
-                  <TableHead>Detalhes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analyses.filter(a => a.status === "in-progress").map((analysis) => (
-                  <TableRow key={analysis.id}>
-                    <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
-                    <TableCell className="font-medium">{analysis.subject}</TableCell>
-                    <TableCell>{analysis.participants.join(", ")}</TableCell>
-                    <TableCell>{analysis.documents.join(", ")}</TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => toggleExpand(analysis.id)}
-                      >
-                        {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      <TabsContent value="completed" className="space-y-4">
+        {completedAnalyses.length === 0 ? (
+          <div className="text-center p-4 bg-muted rounded-md">
+            <p className="text-muted-foreground">Nenhuma análise crítica concluída.</p>
+          </div>
+        ) : (
+          <AnalysisTable 
+            analyses={completedAnalyses}
+            expandedItems={expandedItems}
+            toggleExpand={toggleExpand}
+            handleAttachmentClick={handleAttachmentClick}
+            handleViewReport={handleViewReport}
+            handleDeleteAttachment={handleDeleteAttachment}
+            handleEditAnalysis={handleEditAnalysis}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+        )}
       </TabsContent>
       
-      <TabsContent value="completed">
-        <Card>
-          <CardHeader>
-            <CardTitle>Análises Críticas Concluídas</CardTitle>
-            <CardDescription>
-              Visualize as reuniões de análise crítica concluídas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Assunto</TableHead>
-                  <TableHead>Participantes</TableHead>
-                  <TableHead>Resultados</TableHead>
-                  <TableHead>Detalhes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analyses.filter(a => a.status === "completed").map((analysis) => (
-                  <TableRow key={analysis.id}>
-                    <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
-                    <TableCell className="font-medium">{analysis.subject}</TableCell>
-                    <TableCell>{analysis.participants.join(", ")}</TableCell>
-                    <TableCell className="truncate max-w-xs">{analysis.results}</TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => toggleExpand(analysis.id)}
-                      >
-                        {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      <TabsContent value="all" className="space-y-4">
+        {analyses.length === 0 ? (
+          <div className="text-center p-4 bg-muted rounded-md">
+            <p className="text-muted-foreground">Nenhuma análise crítica registrada.</p>
+          </div>
+        ) : (
+          <AnalysisTable 
+            analyses={analyses}
+            expandedItems={expandedItems}
+            toggleExpand={toggleExpand}
+            handleAttachmentClick={handleAttachmentClick}
+            handleViewReport={handleViewReport}
+            handleDeleteAttachment={handleDeleteAttachment}
+            handleEditAnalysis={handleEditAnalysis}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+        )}
       </TabsContent>
     </Tabs>
   );

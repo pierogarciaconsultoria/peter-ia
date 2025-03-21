@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import * as React from "react";
 import { Navigation } from "@/components/Navigation";
-import { Download, Plus, Trash } from "lucide-react";
+import { Download, Plus, Trash, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CriticalAnalysisItem, Attachment } from "@/types/critical-analysis";
@@ -15,6 +16,7 @@ const mockAnalysis: CriticalAnalysisItem[] = [
   {
     id: "1",
     date: new Date(2023, 10, 15),
+    plannedDate: new Date(2023, 10, 10),
     subject: "Análise de Desempenho Q4 2023",
     status: "completed",
     participants: ["Diretor Geral", "Gerente da Qualidade", "Gerente de Produção"],
@@ -134,6 +136,9 @@ export default function CriticalAnalysis() {
   
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState<CriticalAnalysisItem | null>(null);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [analysisToEdit, setAnalysisToEdit] = useState<CriticalAnalysisItem | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -180,7 +185,19 @@ export default function CriticalAnalysis() {
   };
 
   const handleAddAnalysis = (newAnalysis: CriticalAnalysisItem) => {
-    setAnalyses([...analyses, newAnalysis]);
+    if (isEditing) {
+      setAnalyses(prev => prev.map(item => item.id === newAnalysis.id ? newAnalysis : item));
+      setIsEditing(false);
+      setAnalysisToEdit(null);
+    } else {
+      setAnalyses([...analyses, newAnalysis]);
+    }
+  };
+  
+  const handleEditAnalysis = (analysis: CriticalAnalysisItem) => {
+    setAnalysisToEdit(analysis);
+    setIsEditing(true);
+    setOpen(true);
   };
   
   const handleAddAttachment = async () => {
@@ -255,13 +272,16 @@ export default function CriticalAnalysis() {
               </p>
             </div>
             
-            <NewAnalysisDialog 
-              open={open}
-              setOpen={setOpen}
-              onAddAnalysis={handleAddAnalysis}
-              getFileIcon={getFileIcon}
-              formatFileSize={formatFileSize}
-            />
+            <div>
+              <Button onClick={() => {
+                setAnalysisToEdit(null);
+                setIsEditing(false);
+                setOpen(true);
+              }}>
+                <Plus size={16} className="mr-2" />
+                Nova Análise Crítica
+              </Button>
+            </div>
           </div>
         </header>
         
@@ -272,6 +292,7 @@ export default function CriticalAnalysis() {
           handleAttachmentClick={handleAttachmentClick}
           handleViewReport={handleViewReport}
           handleDeleteAttachment={handleDeleteAttachment}
+          handleEditAnalysis={handleEditAnalysis}
           getStatusColor={getStatusColor}
           getStatusText={getStatusText}
           getFileIcon={getFileIcon}
@@ -290,6 +311,15 @@ export default function CriticalAnalysis() {
           handleAddAttachment={handleAddAttachment}
           getFileIcon={getFileIcon}
           formatFileSize={formatFileSize}
+        />
+        
+        <NewAnalysisDialog 
+          open={open}
+          setOpen={setOpen}
+          onAddAnalysis={handleAddAnalysis}
+          getFileIcon={getFileIcon}
+          formatFileSize={formatFileSize}
+          analysisToEdit={analysisToEdit}
         />
         
         <ReportDialog

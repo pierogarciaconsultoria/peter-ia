@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -15,6 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Plus, Trash, CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,6 +37,7 @@ interface NewAnalysisDialogProps {
   onAddAnalysis: (analysis: CriticalAnalysisItem) => void;
   getFileIcon: (fileType: string) => React.ReactNode;
   formatFileSize: (bytes: number) => string;
+  analysisToEdit?: CriticalAnalysisItem | null;
 }
 
 export function NewAnalysisDialog({ 
@@ -36,27 +45,32 @@ export function NewAnalysisDialog({
   setOpen, 
   onAddAnalysis,
   getFileIcon,
-  formatFileSize
+  formatFileSize,
+  analysisToEdit = null
 }: NewAnalysisDialogProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [subject, setSubject] = useState("");
-  const [participants, setParticipants] = useState("");
-  const [documents, setDocuments] = useState("");
+  const [date, setDate] = useState<Date | undefined>(analysisToEdit ? analysisToEdit.date : new Date());
+  const [subject, setSubject] = useState(analysisToEdit ? analysisToEdit.subject : "");
+  const [participants, setParticipants] = useState(analysisToEdit ? analysisToEdit.participants.join(", ") : "");
+  const [documents, setDocuments] = useState(analysisToEdit ? analysisToEdit.documents.join(", ") : "");
+  const [status, setStatus] = useState<"planned" | "in-progress" | "completed">(analysisToEdit ? analysisToEdit.status : "planned");
+  const [plannedDate, setPlannedDate] = useState<Date | undefined>(analysisToEdit?.plannedDate);
   
-  const [previousActionsStatus, setPreviousActionsStatus] = useState("");
-  const [externalInternalChanges, setExternalInternalChanges] = useState("");
-  const [performanceInfo, setPerformanceInfo] = useState("");
-  const [resourceSufficiency, setResourceSufficiency] = useState("");
-  const [riskActionsEffectiveness, setRiskActionsEffectiveness] = useState("");
-  const [improvementOpportunities, setImprovementOpportunities] = useState("");
+  const [previousActionsStatus, setPreviousActionsStatus] = useState(analysisToEdit ? analysisToEdit.previousActionsStatus : "");
+  const [externalInternalChanges, setExternalInternalChanges] = useState(analysisToEdit ? analysisToEdit.externalInternalChanges : "");
+  const [performanceInfo, setPerformanceInfo] = useState(analysisToEdit ? analysisToEdit.performanceInfo : "");
+  const [resourceSufficiency, setResourceSufficiency] = useState(analysisToEdit ? analysisToEdit.resourceSufficiency : "");
+  const [riskActionsEffectiveness, setRiskActionsEffectiveness] = useState(analysisToEdit ? analysisToEdit.riskActionsEffectiveness : "");
+  const [improvementOpportunities, setImprovementOpportunities] = useState(analysisToEdit ? analysisToEdit.improvementOpportunities : "");
   
-  const [improvementResults, setImprovementResults] = useState("");
-  const [systemChangeNeeds, setSystemChangeNeeds] = useState("");
-  const [resourceNeeds, setResourceNeeds] = useState("");
-  const [results, setResults] = useState("");
+  const [improvementResults, setImprovementResults] = useState(analysisToEdit ? analysisToEdit.improvementResults : "");
+  const [systemChangeNeeds, setSystemChangeNeeds] = useState(analysisToEdit ? analysisToEdit.systemChangeNeeds : "");
+  const [resourceNeeds, setResourceNeeds] = useState(analysisToEdit ? analysisToEdit.resourceNeeds : "");
+  const [results, setResults] = useState(analysisToEdit ? analysisToEdit.results : "");
 
   const [inputAttachments, setInputAttachments] = useState<File[]>([]);
   const [outputAttachments, setOutputAttachments] = useState<File[]>([]);
+
+  const isEditing = !!analysisToEdit;
 
   const handleInputFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -95,6 +109,8 @@ export function NewAnalysisDialog({
     setSubject("");
     setParticipants("");
     setDocuments("");
+    setStatus("planned");
+    setPlannedDate(undefined);
     setPreviousActionsStatus("");
     setExternalInternalChanges("");
     setPerformanceInfo("");
@@ -115,10 +131,11 @@ export function NewAnalysisDialog({
       const outputAttachmentsList = await uploadFiles(outputAttachments, "output");
       
       const newAnalysis: CriticalAnalysisItem = {
-        id: Date.now().toString(),
+        id: analysisToEdit ? analysisToEdit.id : Date.now().toString(),
         date: date || new Date(),
         subject,
-        status: "planned",
+        status,
+        plannedDate,
         participants: participants.split(',').map(p => p.trim()),
         documents: documents.split(',').map(d => d.trim()),
         
@@ -135,16 +152,16 @@ export function NewAnalysisDialog({
         
         results,
         
-        attachments: [...inputAttachmentsList, ...outputAttachmentsList]
+        attachments: [...(analysisToEdit ? analysisToEdit.attachments : []), ...inputAttachmentsList, ...outputAttachmentsList]
       };
 
       onAddAnalysis(newAnalysis);
       setOpen(false);
-      toast.success("Análise crítica criada com sucesso!");
+      toast.success(isEditing ? "Análise crítica atualizada com sucesso!" : "Análise crítica criada com sucesso!");
       resetForm();
     } catch (error) {
       console.error("Erro ao salvar análise crítica:", error);
-      toast.error("Erro ao criar análise crítica. Tente novamente.");
+      toast.error(isEditing ? "Erro ao atualizar análise crítica. Tente novamente." : "Erro ao criar análise crítica. Tente novamente.");
     }
   };
 
@@ -158,9 +175,9 @@ export function NewAnalysisDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Nova Análise Crítica</DialogTitle>
+          <DialogTitle>{isEditing ? "Editar Análise Crítica" : "Nova Análise Crítica"}</DialogTitle>
           <DialogDescription>
-            Registre uma nova reunião de análise crítica pela direção.
+            {isEditing ? "Edite os detalhes da análise crítica existente." : "Registre uma nova reunião de análise crítica pela direção."}
           </DialogDescription>
         </DialogHeader>
         
@@ -194,6 +211,55 @@ export function NewAnalysisDialog({
                   </PopoverContent>
                 </Popover>
               </div>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="plannedDate" className="text-right">
+                Data Planejada
+              </Label>
+              <div className="col-span-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !plannedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {plannedDate ? format(plannedDate, "PPP", { locale: ptBR }) : <span>Selecione a data planejada (opcional)</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={plannedDate}
+                      onSelect={setPlannedDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Status
+              </Label>
+              <Select value={status} onValueChange={(value: "planned" | "in-progress" | "completed") => setStatus(value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecione o status da análise" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Status</SelectLabel>
+                    <SelectItem value="planned">Planejada</SelectItem>
+                    <SelectItem value="in-progress">Em Andamento</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
@@ -350,6 +416,27 @@ export function NewAnalysisDialog({
                     ))}
                   </div>
                 )}
+                
+                {analysisToEdit && analysisToEdit.attachments.filter(att => att.category === "input").length > 0 && (
+                  <div className="mt-2">
+                    <h4 className="text-sm font-medium">Anexos atuais:</h4>
+                    <div className="mt-2 space-y-2">
+                      {analysisToEdit.attachments
+                        .filter(att => att.category === "input")
+                        .map((attachment) => (
+                          <div key={attachment.id} className="flex items-center bg-muted p-2 rounded">
+                            <div className="flex items-center">
+                              {getFileIcon(attachment.type)}
+                              <span className="ml-2 text-sm">{attachment.name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({formatFileSize(attachment.size)})
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -443,6 +530,27 @@ export function NewAnalysisDialog({
                     ))}
                   </div>
                 )}
+                
+                {analysisToEdit && analysisToEdit.attachments.filter(att => att.category === "output").length > 0 && (
+                  <div className="mt-2">
+                    <h4 className="text-sm font-medium">Anexos atuais:</h4>
+                    <div className="mt-2 space-y-2">
+                      {analysisToEdit.attachments
+                        .filter(att => att.category === "output")
+                        .map((attachment) => (
+                          <div key={attachment.id} className="flex items-center bg-muted p-2 rounded">
+                            <div className="flex items-center">
+                              {getFileIcon(attachment.type)}
+                              <span className="ml-2 text-sm">{attachment.name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({formatFileSize(attachment.size)})
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -450,7 +558,7 @@ export function NewAnalysisDialog({
         
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={handleSave}>Salvar</Button>
+          <Button onClick={handleSave}>{isEditing ? "Atualizar" : "Salvar"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -11,7 +11,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Download, FilesIcon, Upload, Trash } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, FilesIcon, Upload, Trash, Edit } from "lucide-react";
 import { CriticalAnalysisItem } from "@/types/critical-analysis";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,6 +22,7 @@ interface AnalysisTableProps {
   handleAttachmentClick: (analysisId: string) => void;
   handleViewReport: (analysis: CriticalAnalysisItem) => void;
   handleDeleteAttachment: (analysisId: string, attachmentId: string) => void;
+  handleEditAnalysis: (analysis: CriticalAnalysisItem) => void;
   getStatusColor: (status: string) => string;
   getStatusText: (status: string) => string;
   getFileIcon: (fileType: string) => React.ReactNode;
@@ -35,6 +36,7 @@ export function AnalysisTable({
   handleAttachmentClick, 
   handleViewReport, 
   handleDeleteAttachment,
+  handleEditAnalysis,
   getStatusColor,
   getStatusText,
   getFileIcon,
@@ -56,7 +58,14 @@ export function AnalysisTable({
         {analyses.map((analysis) => (
           <React.Fragment key={analysis.id}>
             <TableRow>
-              <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
+              <TableCell className="whitespace-nowrap">
+                {format(analysis.date, "dd/MM/yyyy")}
+                {analysis.plannedDate && (
+                  <div className="text-xs text-muted-foreground">
+                    Planejada: {format(analysis.plannedDate, "dd/MM/yyyy")}
+                  </div>
+                )}
+              </TableCell>
               <TableCell className="font-medium">{analysis.subject}</TableCell>
               <TableCell className={getStatusColor(analysis.status)}>
                 {getStatusText(analysis.status)}
@@ -96,6 +105,14 @@ export function AnalysisTable({
                   >
                     <FilesIcon size={14} className="mr-1" />
                     Relatório
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditAnalysis(analysis)}
+                  >
+                    <Edit size={14} className="mr-1" />
+                    Editar
                   </Button>
                 </div>
               </TableCell>
