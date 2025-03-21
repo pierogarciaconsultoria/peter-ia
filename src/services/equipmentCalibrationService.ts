@@ -27,7 +27,10 @@ export async function getEquipmentCalibrations(): Promise<EquipmentCalibration[]
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as EquipmentCalibration['status'],
+  }));
 }
 
 export async function getEquipmentCalibrationById(id: string): Promise<EquipmentCalibration> {
@@ -42,7 +45,10 @@ export async function getEquipmentCalibrationById(id: string): Promise<Equipment
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as EquipmentCalibration['status'],
+  };
 }
 
 export async function createEquipmentCalibration(calibration: Omit<EquipmentCalibration, 'id' | 'created_at' | 'updated_at'>): Promise<EquipmentCalibration> {
@@ -57,7 +63,10 @@ export async function createEquipmentCalibration(calibration: Omit<EquipmentCali
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as EquipmentCalibration['status'],
+  };
 }
 
 export async function updateEquipmentCalibration(id: string, calibration: Partial<Omit<EquipmentCalibration, 'id' | 'created_at' | 'updated_at'>>): Promise<EquipmentCalibration> {
@@ -76,7 +85,10 @@ export async function updateEquipmentCalibration(id: string, calibration: Partia
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as EquipmentCalibration['status'],
+  };
 }
 
 export async function deleteEquipmentCalibration(id: string): Promise<void> {

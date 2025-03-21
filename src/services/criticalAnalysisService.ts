@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface CriticalAnalysisInput {
   previousActionsStatus?: string;
@@ -31,6 +32,17 @@ export interface CriticalAnalysis {
   updated_at: string;
 }
 
+// Helper to safely convert JSON to expected types
+function convertInputs(jsonData: Json | null): CriticalAnalysisInput | undefined {
+  if (!jsonData) return undefined;
+  return jsonData as unknown as CriticalAnalysisInput;
+}
+
+function convertResults(jsonData: Json | null): CriticalAnalysisResult | undefined {
+  if (!jsonData) return undefined;
+  return jsonData as unknown as CriticalAnalysisResult;
+}
+
 export async function getCriticalAnalyses(): Promise<CriticalAnalysis[]> {
   const { data, error } = await supabase
     .from('critical_analysis')
@@ -42,7 +54,12 @@ export async function getCriticalAnalyses(): Promise<CriticalAnalysis[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as CriticalAnalysis['status'],
+    inputs: convertInputs(item.inputs),
+    results: convertResults(item.results),
+  }));
 }
 
 export async function getCriticalAnalysisById(id: string): Promise<CriticalAnalysis> {
@@ -57,13 +74,30 @@ export async function getCriticalAnalysisById(id: string): Promise<CriticalAnaly
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CriticalAnalysis['status'],
+    inputs: convertInputs(data.inputs),
+    results: convertResults(data.results),
+  };
 }
 
 export async function createCriticalAnalysis(analysis: Omit<CriticalAnalysis, 'id' | 'created_at' | 'updated_at'>): Promise<CriticalAnalysis> {
+  // Convert the complex objects to JSON for storage
+  const dataToInsert = {
+    title: analysis.title,
+    analysis_date: analysis.analysis_date,
+    participants: analysis.participants,
+    status: analysis.status,
+    inputs: analysis.inputs as unknown as Json,
+    results: analysis.results as unknown as Json,
+    attachments: analysis.attachments,
+    created_by: analysis.created_by
+  };
+
   const { data, error } = await supabase
     .from('critical_analysis')
-    .insert([analysis])
+    .insert([dataToInsert])
     .select()
     .single();
   
@@ -72,16 +106,32 @@ export async function createCriticalAnalysis(analysis: Omit<CriticalAnalysis, 'i
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CriticalAnalysis['status'],
+    inputs: convertInputs(data.inputs),
+    results: convertResults(data.results),
+  };
 }
 
 export async function updateCriticalAnalysis(id: string, analysis: Partial<Omit<CriticalAnalysis, 'id' | 'created_at' | 'updated_at'>>): Promise<CriticalAnalysis> {
+  // Convert the complex objects to JSON for storage
+  const updates: any = {
+    ...analysis,
+    updated_at: new Date().toISOString()
+  };
+
+  if (analysis.inputs) {
+    updates.inputs = analysis.inputs as unknown as Json;
+  }
+  
+  if (analysis.results) {
+    updates.results = analysis.results as unknown as Json;
+  }
+  
   const { data, error } = await supabase
     .from('critical_analysis')
-    .update({
-      ...analysis,
-      updated_at: new Date().toISOString()
-    })
+    .update(updates)
     .eq('id', id)
     .select()
     .single();
@@ -91,7 +141,12 @@ export async function updateCriticalAnalysis(id: string, analysis: Partial<Omit<
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CriticalAnalysis['status'],
+    inputs: convertInputs(data.inputs),
+    results: convertResults(data.results),
+  };
 }
 
 export async function deleteCriticalAnalysis(id: string): Promise<void> {

@@ -26,7 +26,11 @@ export async function getNonConformities(): Promise<NonConformity[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as NonConformity['status'],
+    severity: item.severity as NonConformity['severity'],
+  }));
 }
 
 export async function getNonConformityById(id: string): Promise<NonConformity> {
@@ -41,7 +45,11 @@ export async function getNonConformityById(id: string): Promise<NonConformity> {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformity['status'],
+    severity: data.severity as NonConformity['severity'],
+  };
 }
 
 export async function createNonConformity(nonConformity: Omit<NonConformity, 'id' | 'created_at' | 'updated_at' | 'closed_at'>): Promise<NonConformity> {
@@ -56,7 +64,11 @@ export async function createNonConformity(nonConformity: Omit<NonConformity, 'id
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformity['status'],
+    severity: data.severity as NonConformity['severity'],
+  };
 }
 
 export async function updateNonConformity(id: string, nonConformity: Partial<Omit<NonConformity, 'id' | 'created_at' | 'updated_at'>>): Promise<NonConformity> {
@@ -82,7 +94,11 @@ export async function updateNonConformity(id: string, nonConformity: Partial<Omi
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformity['status'],
+    severity: data.severity as NonConformity['severity'],
+  };
 }
 
 export async function deleteNonConformity(id: string): Promise<void> {

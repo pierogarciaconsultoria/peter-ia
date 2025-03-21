@@ -23,7 +23,10 @@ export async function getOrganizationContexts(): Promise<OrganizationContext[]> 
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    context_type: item.context_type as OrganizationContext['context_type'],
+  }));
 }
 
 export async function getOrganizationContextById(id: string): Promise<OrganizationContext> {
@@ -38,7 +41,10 @@ export async function getOrganizationContextById(id: string): Promise<Organizati
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    context_type: data.context_type as OrganizationContext['context_type'],
+  };
 }
 
 export async function createOrganizationContext(context: Omit<OrganizationContext, 'id' | 'created_at' | 'updated_at'>): Promise<OrganizationContext> {
@@ -53,7 +59,10 @@ export async function createOrganizationContext(context: Omit<OrganizationContex
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    context_type: data.context_type as OrganizationContext['context_type'],
+  };
 }
 
 export async function updateOrganizationContext(id: string, context: Partial<Omit<OrganizationContext, 'id' | 'created_at' | 'updated_at'>>): Promise<OrganizationContext> {
@@ -72,7 +81,10 @@ export async function updateOrganizationContext(id: string, context: Partial<Omi
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    context_type: data.context_type as OrganizationContext['context_type'],
+  };
 }
 
 export async function deleteOrganizationContext(id: string): Promise<void> {

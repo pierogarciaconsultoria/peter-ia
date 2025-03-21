@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface RawMaterialInspection {
   id: string;
@@ -28,7 +29,10 @@ export async function getRawMaterialInspections(): Promise<RawMaterialInspection
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    inspection_result: item.inspection_result as RawMaterialInspection['inspection_result'],
+  }));
 }
 
 export async function getRawMaterialInspectionById(id: string): Promise<RawMaterialInspection> {
@@ -43,7 +47,10 @@ export async function getRawMaterialInspectionById(id: string): Promise<RawMater
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    inspection_result: data.inspection_result as RawMaterialInspection['inspection_result'],
+  };
 }
 
 export async function createRawMaterialInspection(inspection: Omit<RawMaterialInspection, 'id' | 'created_at' | 'updated_at'>): Promise<RawMaterialInspection> {
@@ -58,7 +65,10 @@ export async function createRawMaterialInspection(inspection: Omit<RawMaterialIn
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    inspection_result: data.inspection_result as RawMaterialInspection['inspection_result'],
+  };
 }
 
 export async function updateRawMaterialInspection(id: string, inspection: Partial<Omit<RawMaterialInspection, 'id' | 'created_at' | 'updated_at'>>): Promise<RawMaterialInspection> {
@@ -77,7 +87,10 @@ export async function updateRawMaterialInspection(id: string, inspection: Partia
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    inspection_result: data.inspection_result as RawMaterialInspection['inspection_result'],
+  };
 }
 
 export async function deleteRawMaterialInspection(id: string): Promise<void> {

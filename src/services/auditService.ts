@@ -26,7 +26,10 @@ export async function getAudits(): Promise<Audit[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as Audit['status'],
+  }));
 }
 
 export async function getAuditById(id: string): Promise<Audit> {
@@ -41,7 +44,10 @@ export async function getAuditById(id: string): Promise<Audit> {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Audit['status'],
+  };
 }
 
 export async function createAudit(audit: Omit<Audit, 'id' | 'created_at' | 'updated_at'>): Promise<Audit> {
@@ -56,7 +62,10 @@ export async function createAudit(audit: Omit<Audit, 'id' | 'created_at' | 'upda
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Audit['status'],
+  };
 }
 
 export async function updateAudit(id: string, audit: Partial<Omit<Audit, 'id' | 'created_at' | 'updated_at'>>): Promise<Audit> {
@@ -75,7 +84,10 @@ export async function updateAudit(id: string, audit: Partial<Omit<Audit, 'id' | 
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Audit['status'],
+  };
 }
 
 export async function deleteAudit(id: string): Promise<void> {

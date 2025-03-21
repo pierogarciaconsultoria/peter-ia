@@ -28,7 +28,12 @@ export async function getNonConformingProducts(): Promise<NonConformingProduct[]
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as NonConformingProduct['status'],
+    severity: item.severity as NonConformingProduct['severity'],
+    approval_status: item.approval_status as NonConformingProduct['approval_status'],
+  }));
 }
 
 export async function getNonConformingProductById(id: string): Promise<NonConformingProduct> {
@@ -43,7 +48,12 @@ export async function getNonConformingProductById(id: string): Promise<NonConfor
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformingProduct['status'],
+    severity: data.severity as NonConformingProduct['severity'],
+    approval_status: data.approval_status as NonConformingProduct['approval_status'],
+  };
 }
 
 export async function createNonConformingProduct(product: Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>): Promise<NonConformingProduct> {
@@ -58,7 +68,12 @@ export async function createNonConformingProduct(product: Omit<NonConformingProd
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformingProduct['status'],
+    severity: data.severity as NonConformingProduct['severity'],
+    approval_status: data.approval_status as NonConformingProduct['approval_status'],
+  };
 }
 
 export async function updateNonConformingProduct(id: string, product: Partial<Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>>): Promise<NonConformingProduct> {
@@ -77,7 +92,12 @@ export async function updateNonConformingProduct(id: string, product: Partial<Om
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as NonConformingProduct['status'],
+    severity: data.severity as NonConformingProduct['severity'],
+    approval_status: data.approval_status as NonConformingProduct['approval_status'],
+  };
 }
 
 export async function deleteNonConformingProduct(id: string): Promise<void> {

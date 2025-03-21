@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface Training {
   id: string;
@@ -27,7 +28,10 @@ export async function getTrainings(): Promise<Training[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as Training['status'],
+  }));
 }
 
 export async function getTrainingById(id: string): Promise<Training> {
@@ -42,7 +46,10 @@ export async function getTrainingById(id: string): Promise<Training> {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Training['status'],
+  };
 }
 
 export async function createTraining(training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<Training> {
@@ -57,7 +64,10 @@ export async function createTraining(training: Omit<Training, 'id' | 'created_at
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Training['status'],
+  };
 }
 
 export async function updateTraining(id: string, training: Partial<Omit<Training, 'id' | 'created_at' | 'updated_at'>>): Promise<Training> {
@@ -76,7 +86,10 @@ export async function updateTraining(id: string, training: Partial<Omit<Training
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Training['status'],
+  };
 }
 
 export async function deleteTraining(id: string): Promise<void> {

@@ -28,7 +28,10 @@ export async function getRisks(): Promise<Risk[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as Risk['status'],
+  }));
 }
 
 export async function getRiskById(id: string): Promise<Risk> {
@@ -43,7 +46,10 @@ export async function getRiskById(id: string): Promise<Risk> {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Risk['status'],
+  };
 }
 
 export async function createRisk(risk: Omit<Risk, 'id' | 'created_at' | 'updated_at'>): Promise<Risk> {
@@ -63,7 +69,10 @@ export async function createRisk(risk: Omit<Risk, 'id' | 'created_at' | 'updated
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Risk['status'],
+  };
 }
 
 export async function updateRisk(id: string, risk: Partial<Omit<Risk, 'id' | 'created_at' | 'updated_at'>>): Promise<Risk> {
@@ -100,7 +109,10 @@ export async function updateRisk(id: string, risk: Partial<Omit<Risk, 'id' | 'cr
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Risk['status'],
+  };
 }
 
 export async function deleteRisk(id: string): Promise<void> {

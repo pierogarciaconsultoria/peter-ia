@@ -27,7 +27,10 @@ export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as SatisfactionSurvey['status'],
+  }));
 }
 
 export async function getSatisfactionSurveyById(id: string): Promise<SatisfactionSurvey> {
@@ -42,7 +45,10 @@ export async function getSatisfactionSurveyById(id: string): Promise<Satisfactio
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
+  };
 }
 
 export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>): Promise<SatisfactionSurvey> {
@@ -57,7 +63,10 @@ export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
+  };
 }
 
 export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>>): Promise<SatisfactionSurvey> {
@@ -76,7 +85,10 @@ export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
+  };
 }
 
 export async function deleteSatisfactionSurvey(id: string): Promise<void> {

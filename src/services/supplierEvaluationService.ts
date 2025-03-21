@@ -29,7 +29,10 @@ export async function getSupplierEvaluations(): Promise<SupplierEvaluation[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as SupplierEvaluation['status'],
+  }));
 }
 
 export async function getSupplierEvaluationById(id: string): Promise<SupplierEvaluation> {
@@ -44,7 +47,10 @@ export async function getSupplierEvaluationById(id: string): Promise<SupplierEva
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
+  };
 }
 
 export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<SupplierEvaluation> {
@@ -59,7 +65,10 @@ export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluati
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
+  };
 }
 
 export async function updateSupplierEvaluation(id: string, evaluation: Partial<Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>>): Promise<SupplierEvaluation> {
@@ -78,7 +87,10 @@ export async function updateSupplierEvaluation(id: string, evaluation: Partial<O
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
+  };
 }
 
 export async function deleteSupplierEvaluation(id: string): Promise<void> {

@@ -28,7 +28,11 @@ export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as CustomerComplaint['status'],
+    priority: item.priority as CustomerComplaint['priority'],
+  }));
 }
 
 export async function getCustomerComplaintById(id: string): Promise<CustomerComplaint> {
@@ -43,7 +47,11 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CustomerComplaint['status'],
+    priority: data.priority as CustomerComplaint['priority'],
+  };
 }
 
 export async function createCustomerComplaint(complaint: Omit<CustomerComplaint, 'id' | 'created_at' | 'updated_at' | 'closed_at'>): Promise<CustomerComplaint> {
@@ -58,7 +66,11 @@ export async function createCustomerComplaint(complaint: Omit<CustomerComplaint,
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CustomerComplaint['status'],
+    priority: data.priority as CustomerComplaint['priority'],
+  };
 }
 
 export async function updateCustomerComplaint(id: string, complaint: Partial<Omit<CustomerComplaint, 'id' | 'created_at' | 'updated_at'>>): Promise<CustomerComplaint> {
@@ -83,7 +95,11 @@ export async function updateCustomerComplaint(id: string, complaint: Partial<Omi
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as CustomerComplaint['status'],
+    priority: data.priority as CustomerComplaint['priority'],
+  };
 }
 
 export async function deleteCustomerComplaint(id: string): Promise<void> {
