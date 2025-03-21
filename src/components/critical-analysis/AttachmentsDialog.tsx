@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Attachment } from "@/types/critical-analysis";
 import { Trash } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AttachmentsDialogProps {
   open: boolean;
@@ -50,71 +51,73 @@ export function AttachmentsDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div>
-            <h3 className="font-medium mb-2">Adicionar anexos de requisitos</h3>
-            <Input
-              type="file"
-              multiple
-              onChange={handleInputFileChange}
-              className="w-full"
-            />
-            {inputAttachments.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {inputAttachments.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
-                    <div className="flex items-center">
-                      {getFileIcon(file.type)}
-                      <span className="ml-2 text-sm">{file.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({formatFileSize(file.size)})
-                      </span>
+        <ScrollArea className="max-h-[60vh]">
+          <div className="grid gap-4 py-4 pr-4">
+            <div>
+              <h3 className="font-medium mb-2">Adicionar anexos de requisitos</h3>
+              <Input
+                type="file"
+                multiple
+                onChange={handleInputFileChange}
+                className="w-full"
+              />
+              {inputAttachments.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {inputAttachments.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                      <div className="flex items-center">
+                        {getFileIcon(file.type)}
+                        <span className="ml-2 text-sm">{file.name}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          ({formatFileSize(file.size)})
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveInputFile(index)}
+                      >
+                        <Trash size={14} />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveInputFile(index)}
-                    >
-                      <Trash size={14} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <h3 className="font-medium mb-2">Adicionar anexos de resultados</h3>
-            <Input
-              type="file"
-              multiple
-              onChange={handleOutputFileChange}
-              className="w-full"
-            />
-            {outputAttachments.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {outputAttachments.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
-                    <div className="flex items-center">
-                      {getFileIcon(file.type)}
-                      <span className="ml-2 text-sm">{file.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({formatFileSize(file.size)})
-                      </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <h3 className="font-medium mb-2">Adicionar anexos de resultados</h3>
+              <Input
+                type="file"
+                multiple
+                onChange={handleOutputFileChange}
+                className="w-full"
+              />
+              {outputAttachments.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {outputAttachments.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                      <div className="flex items-center">
+                        {getFileIcon(file.type)}
+                        <span className="ml-2 text-sm">{file.name}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          ({formatFileSize(file.size)})
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveOutputFile(index)}
+                      >
+                        <Trash size={14} />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveOutputFile(index)}
-                    >
-                      <Trash size={14} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </ScrollArea>
         
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
