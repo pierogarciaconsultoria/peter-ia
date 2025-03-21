@@ -67,6 +67,21 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
     }
   };
   
+  const getSourceText = (source: string) => {
+    switch (source) {
+      case "planning": return "Planejamento";
+      case "audit": return "Auditoria";
+      case "non_conformity": return "Não Conformidade";
+      case "corrective_action": return "Ação Corretiva";
+      case "critical_analysis": return "Análise Crítica";
+      case "customer_satisfaction": return "Pesquisa de Satisfação";
+      case "supplier_evaluation": return "Avaliação de Fornecedor";
+      case "customer_complaint": return "Reclamação de Cliente";
+      case "other": return "Outro";
+      default: return source;
+    }
+  };
+  
   return (
     <DialogContent className="sm:max-w-[700px] max-h-[90vh]">
       <DialogHeader>
@@ -75,7 +90,7 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
       
       <ScrollArea className="max-h-[70vh] pr-4">
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Status:</p>
               <p className="font-medium">{getStatusText(action.status)}</p>
@@ -83,6 +98,10 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Prioridade:</p>
               <p className="font-medium">{getPriorityText(action.priority)}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Origem:</p>
+              <p className="font-medium">{getSourceText(action.source)}</p>
             </div>
           </div>
           

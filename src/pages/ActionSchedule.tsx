@@ -19,6 +19,8 @@ const ActionSchedule = () => {
     setStatusFilter,
     processFilter,
     setProcessFilter,
+    sourceFilter,
+    setSourceFilter,
     handleEdit,
     handleView,
     handleDelete,
@@ -59,6 +61,8 @@ const ActionSchedule = () => {
           <ActionFilters
             processFilter={processFilter}
             onProcessFilterChange={setProcessFilter}
+            sourceFilter={sourceFilter}
+            onSourceFilterChange={setSourceFilter}
             filteredCount={filteredActions.length}
           />
           

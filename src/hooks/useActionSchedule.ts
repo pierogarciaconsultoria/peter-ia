@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllActions, deleteAction } from "@/services/actionService";
 import { useToast } from "@/hooks/use-toast";
-import { Action5W2H, ActionStatus, ProcessArea } from "@/types/actions";
+import { Action5W2H, ActionStatus, ProcessArea, ActionSource } from "@/types/actions";
 
 export function useActionSchedule() {
   const { toast } = useToast();
@@ -18,6 +18,7 @@ export function useActionSchedule() {
   // Filter states
   const [statusFilter, setStatusFilter] = useState<ActionStatus | "all">("all");
   const [processFilter, setProcessFilter] = useState<ProcessArea | "all">("all");
+  const [sourceFilter, setSourceFilter] = useState<ActionSource | "all">("all");
   
   // Fetch all actions
   const { 
@@ -70,7 +71,8 @@ export function useActionSchedule() {
   const filteredActions = actions.filter(action => {
     const matchesStatus = statusFilter === "all" || action.status === statusFilter;
     const matchesProcess = processFilter === "all" || action.process_area === processFilter;
-    return matchesStatus && matchesProcess;
+    const matchesSource = sourceFilter === "all" || action.source === sourceFilter;
+    return matchesStatus && matchesProcess && matchesSource;
   });
   
   // Count status
@@ -99,6 +101,8 @@ export function useActionSchedule() {
     setStatusFilter,
     processFilter,
     setProcessFilter,
+    sourceFilter,
+    setSourceFilter,
     handleEdit,
     handleView,
     handleDelete,

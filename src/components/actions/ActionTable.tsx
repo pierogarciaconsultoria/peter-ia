@@ -57,6 +57,34 @@ export function ActionTable({ actions, onEdit, onDelete, onView }: ActionTablePr
     }
   };
 
+  const getSourceText = (source: string) => {
+    switch (source) {
+      case "planning": return "Planejamento";
+      case "audit": return "Auditoria";
+      case "non_conformity": return "Não Conformidade";
+      case "corrective_action": return "Ação Corretiva";
+      case "critical_analysis": return "Análise Crítica";
+      case "customer_satisfaction": return "Pesquisa de Satisfação";
+      case "supplier_evaluation": return "Avaliação de Fornecedor";
+      case "customer_complaint": return "Reclamação de Cliente";
+      case "other": return "Outro";
+      default: return source;
+    }
+  };
+
+  const getProcessText = (process: string) => {
+    switch (process) {
+      case "manufacturing": return "Produção";
+      case "quality": return "Qualidade";
+      case "management": return "Gestão";
+      case "hr": return "Recursos Humanos";
+      case "sales": return "Vendas";
+      case "supply_chain": return "Cadeia de Suprimentos";
+      case "other": return "Outro";
+      default: return process;
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
@@ -84,6 +112,8 @@ export function ActionTable({ actions, onEdit, onDelete, onView }: ActionTablePr
             <TableHead>Título</TableHead>
             <TableHead>Responsável</TableHead>
             <TableHead>Data Limite</TableHead>
+            <TableHead>Origem</TableHead>
+            <TableHead>Processo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Prioridade</TableHead>
             <TableHead>Custo</TableHead>
@@ -93,7 +123,7 @@ export function ActionTable({ actions, onEdit, onDelete, onView }: ActionTablePr
         <TableBody>
           {actions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4">
+              <TableCell colSpan={9} className="text-center py-4">
                 Nenhuma ação encontrada
               </TableCell>
             </TableRow>
@@ -103,6 +133,8 @@ export function ActionTable({ actions, onEdit, onDelete, onView }: ActionTablePr
                 <TableCell className="font-medium">{action.title}</TableCell>
                 <TableCell>{action.responsible}</TableCell>
                 <TableCell>{formatDate(action.due_date)}</TableCell>
+                <TableCell>{getSourceText(action.source)}</TableCell>
+                <TableCell>{getProcessText(action.process_area)}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(action.status)}`}>
                     {getStatusText(action.status)}
