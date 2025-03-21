@@ -55,6 +55,7 @@ export function ActionFilters({
             <option value="customer_satisfaction">Pesquisa de Satisfação</option>
             <option value="supplier_evaluation">Avaliação de Fornecedor</option>
             <option value="customer_complaint">Reclamação de Cliente</option>
+            <option value="performance_indicator">Indicador de Desempenho</option>
             <option value="other">Outro</option>
           </select>
         </div>

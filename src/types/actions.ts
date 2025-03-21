@@ -2,7 +2,7 @@
 export type ActionStatus = 'planned' | 'in_progress' | 'completed' | 'delayed' | 'cancelled';
 export type ActionPriority = 'low' | 'medium' | 'high' | 'critical';
 export type ProcessArea = 'manufacturing' | 'quality' | 'management' | 'hr' | 'sales' | 'supply_chain' | 'other';
-export type ActionSource = 'planning' | 'audit' | 'non_conformity' | 'corrective_action' | 'critical_analysis' | 'customer_satisfaction' | 'supplier_evaluation' | 'customer_complaint' | 'other';
+export type ActionSource = 'planning' | 'audit' | 'non_conformity' | 'corrective_action' | 'critical_analysis' | 'customer_satisfaction' | 'supplier_evaluation' | 'customer_complaint' | 'performance_indicator' | 'other';
 
 export interface Action5W2H {
   id: string;
