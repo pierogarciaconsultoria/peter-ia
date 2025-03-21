@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import * as React from "react"; // Add this import to fix React references
+import * as React from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +12,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge"; // Add Badge import
+import { Badge } from "@/components/ui/badge";
 import { 
   Dialog, 
   DialogContent, 
@@ -32,50 +31,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, ChevronDown, ChevronUp, Download, FileText, Plus, Search, Trash, Upload } from "lucide-react";
+import { CalendarIcon, ChevronDown, ChevronUp, Download, FileText, FilesIcon, Plus, Search, Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CriticalAnalysisItem, Attachment } from "@/types/critical-analysis";
+import { ReportDialog } from "@/components/critical-analysis/ReportDialog";
 
-// Interface para anexos
-interface Attachment {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url?: string;
-  category: "input" | "output"; // Categoria do anexo: requisito de entrada ou resultado
-}
-
-// Tipos para a análise crítica
-interface CriticalAnalysisItem {
-  id: string;
-  date: Date;
-  subject: string;
-  status: "planned" | "in-progress" | "completed";
-  participants: string[];
-  documents: string[];
-  
-  // Requisitos para entrada da análise crítica
-  previousActionsStatus: string;
-  externalInternalChanges: string;
-  performanceInfo: string;
-  resourceSufficiency: string;
-  riskActionsEffectiveness: string;
-  improvementOpportunities: string;
-  
-  // Resultados da análise crítica
-  improvementResults: string;
-  systemChangeNeeds: string;
-  resourceNeeds: string;
-  
-  // Campo geral de resultados (manter para compatibilidade)
-  results: string;
-  
-  // Nova propriedade para anexos
-  attachments: Attachment[];
-}
-
-// Dados de exemplo atualizados com os novos campos
 const mockAnalysis: CriticalAnalysisItem[] = [
   {
     id: "1",
@@ -194,7 +155,6 @@ export default function CriticalAnalysis() {
   const [participants, setParticipants] = useState("");
   const [documents, setDocuments] = useState("");
   
-  // Estados para requisitos de entrada
   const [previousActionsStatus, setPreviousActionsStatus] = useState("");
   const [externalInternalChanges, setExternalInternalChanges] = useState("");
   const [performanceInfo, setPerformanceInfo] = useState("");
@@ -202,22 +162,21 @@ export default function CriticalAnalysis() {
   const [riskActionsEffectiveness, setRiskActionsEffectiveness] = useState("");
   const [improvementOpportunities, setImprovementOpportunities] = useState("");
   
-  // Estados para resultados
   const [improvementResults, setImprovementResults] = useState("");
   const [systemChangeNeeds, setSystemChangeNeeds] = useState("");
   const [resourceNeeds, setResourceNeeds] = useState("");
   const [results, setResults] = useState("");
 
-  // Estado para controlar expansão de detalhes
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
   
-  // Estado para anexos
   const [inputAttachments, setInputAttachments] = useState<File[]>([]);
   const [outputAttachments, setOutputAttachments] = useState<File[]>([]);
   
-  // Estado para dialog de anexos
   const [attachmentsDialogOpen, setAttachmentsDialogOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
+  
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<CriticalAnalysisItem | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -254,7 +213,6 @@ export default function CriticalAnalysis() {
   };
   
   const uploadFiles = async (files: File[], category: "input" | "output"): Promise<Attachment[]> => {
-    // Simulação de upload - em uma implementação real, isso enviaria arquivos para o Supabase Storage
     return files.map((file, index) => ({
       id: `new-att-${Date.now()}-${index}`,
       name: file.name,
@@ -266,7 +224,6 @@ export default function CriticalAnalysis() {
 
   const handleSave = async () => {
     try {
-      // Upload de arquivos
       const inputAttachmentsList = await uploadFiles(inputAttachments, "input");
       const outputAttachmentsList = await uploadFiles(outputAttachments, "output");
       
@@ -278,7 +235,6 @@ export default function CriticalAnalysis() {
         participants: participants.split(',').map(p => p.trim()),
         documents: documents.split(',').map(d => d.trim()),
         
-        // Requisitos de entrada
         previousActionsStatus,
         externalInternalChanges,
         performanceInfo,
@@ -286,15 +242,12 @@ export default function CriticalAnalysis() {
         riskActionsEffectiveness,
         improvementOpportunities,
         
-        // Resultados
         improvementResults,
         systemChangeNeeds,
         resourceNeeds,
         
-        // Campo geral de resultados
         results,
         
-        // Anexos
         attachments: [...inputAttachmentsList, ...outputAttachmentsList]
       };
 
@@ -312,11 +265,9 @@ export default function CriticalAnalysis() {
     if (!currentAnalysisId) return;
     
     try {
-      // Upload de anexos
       const inputAttachmentsList = await uploadFiles(inputAttachments, "input");
       const outputAttachmentsList = await uploadFiles(outputAttachments, "output");
       
-      // Atualiza a análise com os novos anexos
       setAnalyses(prev => prev.map(analysis => {
         if (analysis.id === currentAnalysisId) {
           return {
@@ -423,6 +374,11 @@ export default function CriticalAnalysis() {
     } else {
       return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
+  };
+
+  const handleViewReport = (analysis: CriticalAnalysisItem) => {
+    setSelectedAnalysis(analysis);
+    setReportDialogOpen(true);
   };
 
   return (
@@ -780,7 +736,7 @@ export default function CriticalAnalysis() {
                       <TableHead>Status</TableHead>
                       <TableHead>Participantes</TableHead>
                       <TableHead>Anexos</TableHead>
-                      <TableHead>Detalhes</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -807,18 +763,28 @@ export default function CriticalAnalysis() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => toggleExpand(analysis.id)}
-                            >
-                              {expandedItems[analysis.id] ? (
-                                <ChevronUp size={16} />
-                              ) : (
-                                <ChevronDown size={16} />
-                              )}
-                              {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => toggleExpand(analysis.id)}
+                              >
+                                {expandedItems[analysis.id] ? (
+                                  <ChevronUp size={16} />
+                                ) : (
+                                  <ChevronDown size={16} />
+                                )}
+                                {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewReport(analysis)}
+                              >
+                                <FilesIcon size={14} className="mr-1" />
+                                Relatório
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                         
@@ -1056,7 +1022,6 @@ export default function CriticalAnalysis() {
           </TabsContent>
         </Tabs>
         
-        {/* Dialog para gerenciar anexos */}
         <Dialog open={attachmentsDialogOpen} onOpenChange={setAttachmentsDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -1138,6 +1103,12 @@ export default function CriticalAnalysis() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        
+        <ReportDialog
+          analysis={selectedAnalysis}
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
+        />
       </main>
     </div>
   );
