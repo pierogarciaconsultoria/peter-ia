@@ -34,4 +34,7 @@ export interface CriticalAnalysisItem {
   
   // Nova propriedade para anexos
   attachments: Attachment[];
+  
+  // Conteúdo gerado por IA
+  aiGeneratedContent?: string;
 }

@@ -6,6 +6,7 @@ import { FileText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CriticalAnalysisItem, Attachment } from "@/types/critical-analysis";
+import ReactMarkdown from 'react-markdown';
 
 interface AnalysisReportProps {
   analysis: CriticalAnalysisItem;
@@ -50,6 +51,31 @@ export const AnalysisReport = forwardRef<HTMLDivElement, AnalysisReportProps>(
       }
     };
     
+    // Se houver conteúdo gerado por IA, mostrar apenas ele
+    if (analysis.aiGeneratedContent) {
+      return (
+        <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto prose prose-slate" id="analysis-report">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold">Relatório de Análise Crítica</h1>
+            <p className="text-muted-foreground">
+              {format(analysis.date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            </p>
+          </div>
+          
+          <ReactMarkdown>
+            {analysis.aiGeneratedContent}
+          </ReactMarkdown>
+          
+          <div className="mt-8 pt-8 border-t">
+            <p className="text-center text-sm text-muted-foreground">
+              Documento gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Mostrar o formato padrão se não houver conteúdo gerado por IA
     return (
       <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto" id="analysis-report">
         <div className="text-center mb-6">

@@ -1,1 +1,3 @@
-project_id = "kxkcgbtsgfyisbrtjmvv"
+
+project_id = "supabaseprojectid" # this should already be set
+# Add any other settings if they already exist in the file
