@@ -30,8 +30,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, ChevronDown, ChevronUp, Plus, Search } from "lucide-react";
+import { CalendarIcon, ChevronDown, ChevronUp, Download, FileText, Plus, Search, Trash, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+// Interface para anexos
+interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url?: string;
+  category: "input" | "output"; // Categoria do anexo: requisito de entrada ou resultado
+}
 
 // Tipos para a análise crítica
 interface CriticalAnalysisItem {
@@ -57,6 +68,9 @@ interface CriticalAnalysisItem {
   
   // Campo geral de resultados (manter para compatibilidade)
   results: string;
+  
+  // Nova propriedade para anexos
+  attachments: Attachment[];
 }
 
 // Dados de exemplo atualizados com os novos campos
@@ -77,7 +91,23 @@ const mockAnalysis: CriticalAnalysisItem[] = [
     improvementResults: "Implementar sistema automatizado de inspeção final. Revisar processo de rastreabilidade.",
     systemChangeNeeds: "Atualização do manual da qualidade para refletir a nova estrutura organizacional.",
     resourceNeeds: "Contratação de um analista de qualidade adicional. Investimento em software de gestão documental.",
-    results: "Metas atingidas em 80%. Necessidade de melhorias no processo de inspeção final."
+    results: "Metas atingidas em 80%. Necessidade de melhorias no processo de inspeção final.",
+    attachments: [
+      {
+        id: "att-1",
+        name: "relatorio-indicadores-q4.pdf",
+        type: "application/pdf",
+        size: 1500000,
+        category: "input"
+      },
+      {
+        id: "att-2",
+        name: "apresentacao-analise.pptx",
+        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        size: 2500000,
+        category: "output"
+      }
+    ]
   },
   {
     id: "2",
@@ -95,7 +125,16 @@ const mockAnalysis: CriticalAnalysisItem[] = [
     improvementResults: "Implementar programa de comunicação interna. Revisar treinamentos introdutórios.",
     systemChangeNeeds: "Inclusão de requisitos de sustentabilidade na política da qualidade.",
     resourceNeeds: "Aumento de orçamento para treinamentos em 10%.",
-    results: "Política atualizada com novos objetivos de sustentabilidade."
+    results: "Política atualizada com novos objetivos de sustentabilidade.",
+    attachments: [
+      {
+        id: "att-3",
+        name: "politica-qualidade-revisada.docx",
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        size: 850000,
+        category: "input"
+      }
+    ]
   },
   {
     id: "3",
@@ -113,7 +152,16 @@ const mockAnalysis: CriticalAnalysisItem[] = [
     improvementResults: "Em análise",
     systemChangeNeeds: "Em análise",
     resourceNeeds: "Em análise",
-    results: "Em andamento"
+    results: "Em andamento",
+    attachments: [
+      {
+        id: "att-4",
+        name: "relatorio-acoes-corretivas.xlsx",
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        size: 1200000,
+        category: "input"
+      }
+    ]
   },
   {
     id: "4",
@@ -131,7 +179,8 @@ const mockAnalysis: CriticalAnalysisItem[] = [
     improvementResults: "A ser definido",
     systemChangeNeeds: "A ser definido",
     resourceNeeds: "A ser definido",
-    results: "Pendente"
+    results: "Pendente",
+    attachments: []
   }
 ];
 
@@ -159,6 +208,14 @@ export default function CriticalAnalysis() {
 
   // Estado para controlar expansão de detalhes
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
+  
+  // Estado para anexos
+  const [inputAttachments, setInputAttachments] = useState<File[]>([]);
+  const [outputAttachments, setOutputAttachments] = useState<File[]>([]);
+  
+  // Estado para dialog de anexos
+  const [attachmentsDialogOpen, setAttachmentsDialogOpen] = useState(false);
+  const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -166,37 +223,135 @@ export default function CriticalAnalysis() {
       [id]: !prev[id]
     }));
   };
+  
+  const handleAttachmentClick = (analysisId: string) => {
+    setCurrentAnalysisId(analysisId);
+    setAttachmentsDialogOpen(true);
+  };
 
-  const handleSave = () => {
-    const newAnalysis: CriticalAnalysisItem = {
-      id: Date.now().toString(),
-      date: date || new Date(),
-      subject,
-      status: "planned",
-      participants: participants.split(',').map(p => p.trim()),
-      documents: documents.split(',').map(d => d.trim()),
-      
-      // Requisitos de entrada
-      previousActionsStatus,
-      externalInternalChanges,
-      performanceInfo,
-      resourceSufficiency,
-      riskActionsEffectiveness,
-      improvementOpportunities,
-      
-      // Resultados
-      improvementResults,
-      systemChangeNeeds,
-      resourceNeeds,
-      
-      // Campo geral de resultados
-      results
-    };
+  const handleInputFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setInputAttachments(prev => [...prev, ...newFiles]);
+    }
+  };
+  
+  const handleOutputFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setOutputAttachments(prev => [...prev, ...newFiles]);
+    }
+  };
+  
+  const handleRemoveInputFile = (index: number) => {
+    setInputAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const handleRemoveOutputFile = (index: number) => {
+    setOutputAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const uploadFiles = async (files: File[], category: "input" | "output"): Promise<Attachment[]> => {
+    // Simulação de upload - em uma implementação real, isso enviaria arquivos para o Supabase Storage
+    return files.map((file, index) => ({
+      id: `new-att-${Date.now()}-${index}`,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      category
+    }));
+  };
 
-    setAnalyses([...analyses, newAnalysis]);
-    setOpen(false);
-    toast.success("Análise crítica criada com sucesso!");
-    resetForm();
+  const handleSave = async () => {
+    try {
+      // Upload de arquivos
+      const inputAttachmentsList = await uploadFiles(inputAttachments, "input");
+      const outputAttachmentsList = await uploadFiles(outputAttachments, "output");
+      
+      const newAnalysis: CriticalAnalysisItem = {
+        id: Date.now().toString(),
+        date: date || new Date(),
+        subject,
+        status: "planned",
+        participants: participants.split(',').map(p => p.trim()),
+        documents: documents.split(',').map(d => d.trim()),
+        
+        // Requisitos de entrada
+        previousActionsStatus,
+        externalInternalChanges,
+        performanceInfo,
+        resourceSufficiency,
+        riskActionsEffectiveness,
+        improvementOpportunities,
+        
+        // Resultados
+        improvementResults,
+        systemChangeNeeds,
+        resourceNeeds,
+        
+        // Campo geral de resultados
+        results,
+        
+        // Anexos
+        attachments: [...inputAttachmentsList, ...outputAttachmentsList]
+      };
+
+      setAnalyses([...analyses, newAnalysis]);
+      setOpen(false);
+      toast.success("Análise crítica criada com sucesso!");
+      resetForm();
+    } catch (error) {
+      console.error("Erro ao salvar análise crítica:", error);
+      toast.error("Erro ao criar análise crítica. Tente novamente.");
+    }
+  };
+  
+  const handleAddAttachment = async () => {
+    if (!currentAnalysisId) return;
+    
+    try {
+      // Upload de anexos
+      const inputAttachmentsList = await uploadFiles(inputAttachments, "input");
+      const outputAttachmentsList = await uploadFiles(outputAttachments, "output");
+      
+      // Atualiza a análise com os novos anexos
+      setAnalyses(prev => prev.map(analysis => {
+        if (analysis.id === currentAnalysisId) {
+          return {
+            ...analysis,
+            attachments: [
+              ...analysis.attachments,
+              ...inputAttachmentsList,
+              ...outputAttachmentsList
+            ]
+          };
+        }
+        return analysis;
+      }));
+      
+      setAttachmentsDialogOpen(false);
+      setCurrentAnalysisId(null);
+      setInputAttachments([]);
+      setOutputAttachments([]);
+      toast.success("Anexos adicionados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao adicionar anexos:", error);
+      toast.error("Erro ao adicionar anexos. Tente novamente.");
+    }
+  };
+  
+  const handleDeleteAttachment = (analysisId: string, attachmentId: string) => {
+    setAnalyses(prev => prev.map(analysis => {
+      if (analysis.id === analysisId) {
+        return {
+          ...analysis,
+          attachments: analysis.attachments.filter(att => att.id !== attachmentId)
+        };
+      }
+      return analysis;
+    }));
+    
+    toast.success("Anexo removido com sucesso!");
   };
 
   const resetForm = () => {
@@ -214,6 +369,8 @@ export default function CriticalAnalysis() {
     setSystemChangeNeeds("");
     setResourceNeeds("");
     setResults("");
+    setInputAttachments([]);
+    setOutputAttachments([]);
   };
 
   const getStatusColor = (status: string) => {
@@ -239,6 +396,30 @@ export default function CriticalAnalysis() {
         return "Concluída";
       default:
         return status;
+    }
+  };
+  
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes("pdf")) {
+      return <FileText className="text-red-500" size={16} />;
+    } else if (fileType.includes("spreadsheet") || fileType.includes("excel") || fileType.includes("xlsx")) {
+      return <FileText className="text-green-500" size={16} />;
+    } else if (fileType.includes("document") || fileType.includes("word") || fileType.includes("docx")) {
+      return <FileText className="text-blue-500" size={16} />;
+    } else if (fileType.includes("presentation") || fileType.includes("powerpoint") || fileType.includes("pptx")) {
+      return <FileText className="text-orange-500" size={16} />;
+    } else {
+      return <FileText className="text-gray-500" size={16} />;
+    }
+  };
+  
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) {
+      return bytes + ' bytes';
+    } else if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(2) + ' KB';
+    } else {
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
   };
 
@@ -422,6 +603,43 @@ export default function CriticalAnalysis() {
                     />
                   </div>
                   
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="inputAttachments" className="text-right pt-2">
+                      Anexos de requisitos
+                    </Label>
+                    <div className="col-span-3">
+                      <Input
+                        id="inputAttachments"
+                        type="file"
+                        multiple
+                        onChange={handleInputFileChange}
+                        className="w-full"
+                      />
+                      {inputAttachments.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {inputAttachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                              <div className="flex items-center">
+                                {getFileIcon(file.type)}
+                                <span className="ml-2 text-sm">{file.name}</span>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  ({formatFileSize(file.size)})
+                                </span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveInputFile(index)}
+                              >
+                                <Trash size={14} />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="border-t pt-4">
                     <h3 className="font-medium mb-2">Resultados da análise crítica:</h3>
                   </div>
@@ -477,6 +695,43 @@ export default function CriticalAnalysis() {
                       placeholder="Resumo dos resultados gerais da análise crítica"
                     />
                   </div>
+                  
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="outputAttachments" className="text-right pt-2">
+                      Anexos de resultados
+                    </Label>
+                    <div className="col-span-3">
+                      <Input
+                        id="outputAttachments"
+                        type="file"
+                        multiple
+                        onChange={handleOutputFileChange}
+                        className="w-full"
+                      />
+                      {outputAttachments.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {outputAttachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                              <div className="flex items-center">
+                                {getFileIcon(file.type)}
+                                <span className="ml-2 text-sm">{file.name}</span>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  ({formatFileSize(file.size)})
+                                </span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveOutputFile(index)}
+                              >
+                                <Trash size={14} />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <DialogFooter>
@@ -522,19 +777,33 @@ export default function CriticalAnalysis() {
                       <TableHead>Assunto</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Participantes</TableHead>
+                      <TableHead>Anexos</TableHead>
                       <TableHead>Detalhes</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {analyses.map((analysis) => (
-                      <>
-                        <TableRow key={analysis.id}>
+                      <React.Fragment key={analysis.id}>
+                        <TableRow>
                           <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
                           <TableCell className="font-medium">{analysis.subject}</TableCell>
                           <TableCell className={getStatusColor(analysis.status)}>
                             {getStatusText(analysis.status)}
                           </TableCell>
                           <TableCell>{analysis.participants.join(", ")}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span>{analysis.attachments.length}</span>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleAttachmentClick(analysis.id)}
+                              >
+                                <Upload size={14} className="mr-1" />
+                                Gerenciar
+                              </Button>
+                            </div>
+                          </TableCell>
                           <TableCell>
                             <Button 
                               variant="ghost" 
@@ -553,7 +822,7 @@ export default function CriticalAnalysis() {
                         
                         {expandedItems[analysis.id] && (
                           <TableRow className="bg-muted/30">
-                            <TableCell colSpan={5} className="p-4">
+                            <TableCell colSpan={6} className="p-4">
                               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
                                   <h3 className="font-medium text-base mb-3">Requisitos para entrada da análise crítica</h3>
@@ -582,6 +851,43 @@ export default function CriticalAnalysis() {
                                       <h4 className="text-sm font-medium">Oportunidades de melhoria:</h4>
                                       <p className="text-sm text-muted-foreground mt-1">{analysis.improvementOpportunities}</p>
                                     </div>
+                                    
+                                    {analysis.attachments.filter(att => att.category === "input").length > 0 && (
+                                      <div className="mt-4">
+                                        <h4 className="text-sm font-medium">Anexos de requisitos:</h4>
+                                        <div className="mt-2 space-y-2">
+                                          {analysis.attachments
+                                            .filter(att => att.category === "input")
+                                            .map((attachment) => (
+                                              <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                                                <div className="flex items-center">
+                                                  {getFileIcon(attachment.type)}
+                                                  <span className="ml-2 text-sm">{attachment.name}</span>
+                                                  <span className="ml-2 text-xs text-muted-foreground">
+                                                    ({formatFileSize(attachment.size)})
+                                                  </span>
+                                                </div>
+                                                <div className="flex">
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {}}
+                                                  >
+                                                    <Download size={14} />
+                                                  </Button>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteAttachment(analysis.id, attachment.id)}
+                                                  >
+                                                    <Trash size={14} />
+                                                  </Button>
+                                                </div>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                                 
@@ -612,13 +918,50 @@ export default function CriticalAnalysis() {
                                         <p className="text-sm text-muted-foreground mt-1">{analysis.results}</p>
                                       </div>
                                     )}
+                                    
+                                    {analysis.attachments.filter(att => att.category === "output").length > 0 && (
+                                      <div className="mt-4">
+                                        <h4 className="text-sm font-medium">Anexos de resultados:</h4>
+                                        <div className="mt-2 space-y-2">
+                                          {analysis.attachments
+                                            .filter(att => att.category === "output")
+                                            .map((attachment) => (
+                                              <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                                                <div className="flex items-center">
+                                                  {getFileIcon(attachment.type)}
+                                                  <span className="ml-2 text-sm">{attachment.name}</span>
+                                                  <span className="ml-2 text-xs text-muted-foreground">
+                                                    ({formatFileSize(attachment.size)})
+                                                  </span>
+                                                </div>
+                                                <div className="flex">
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {}}
+                                                  >
+                                                    <Download size={14} />
+                                                  </Button>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteAttachment(analysis.id, attachment.id)}
+                                                  >
+                                                    <Trash size={14} />
+                                                  </Button>
+                                                </div>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
                             </TableCell>
                           </TableRow>
                         )}
-                      </>
+                      </React.Fragment>
                     ))}
                   </TableBody>
                 </Table>
@@ -642,6 +985,7 @@ export default function CriticalAnalysis() {
                       <TableHead>Assunto</TableHead>
                       <TableHead>Participantes</TableHead>
                       <TableHead>Documentos</TableHead>
+                      <TableHead>Anexos</TableHead>
                       <TableHead>Detalhes</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -649,12 +993,25 @@ export default function CriticalAnalysis() {
                     {analyses
                       .filter((a) => a.status === "planned")
                       .map((analysis) => (
-                        <>
-                          <TableRow key={analysis.id}>
+                        <React.Fragment key={analysis.id}>
+                          <TableRow>
                             <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
                             <TableCell className="font-medium">{analysis.subject}</TableCell>
                             <TableCell>{analysis.participants.join(", ")}</TableCell>
                             <TableCell>{analysis.documents.join(", ")}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span>{analysis.attachments.length}</span>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleAttachmentClick(analysis.id)}
+                                >
+                                  <Upload size={14} className="mr-1" />
+                                  Gerenciar
+                                </Button>
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <Button 
                                 variant="ghost" 
@@ -673,7 +1030,7 @@ export default function CriticalAnalysis() {
                           
                           {expandedItems[analysis.id] && (
                             <TableRow className="bg-muted/30">
-                              <TableCell colSpan={5} className="p-4">
+                              <TableCell colSpan={6} className="p-4">
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                   <div>
                                     <h3 className="font-medium text-base mb-3">Requisitos para entrada da análise crítica</h3>
@@ -727,6 +1084,43 @@ export default function CriticalAnalysis() {
                                           </div>
                                         </div>
                                       </div>
+                                      
+                                      {analysis.attachments.filter(att => att.category === "input").length > 0 && (
+                                        <div className="mt-4">
+                                          <h4 className="text-sm font-medium">Anexos de requisitos:</h4>
+                                          <div className="mt-2 space-y-2">
+                                            {analysis.attachments
+                                              .filter(att => att.category === "input")
+                                              .map((attachment) => (
+                                                <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                                                  <div className="flex items-center">
+                                                    {getFileIcon(attachment.type)}
+                                                    <span className="ml-2 text-sm">{attachment.name}</span>
+                                                    <span className="ml-2 text-xs text-muted-foreground">
+                                                      ({formatFileSize(attachment.size)})
+                                                    </span>
+                                                  </div>
+                                                  <div className="flex">
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => {}}
+                                                    >
+                                                      <Download size={14} />
+                                                    </Button>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => handleDeleteAttachment(analysis.id, attachment.id)}
+                                                    >
+                                                      <Trash size={14} />
+                                                    </Button>
+                                                  </div>
+                                                </div>
+                                              ))}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   
@@ -745,13 +1139,50 @@ export default function CriticalAnalysis() {
                                         <h4 className="text-sm font-medium">Necessidade de recursos:</h4>
                                         <p className="text-sm text-muted-foreground mt-1">{analysis.resourceNeeds || "A ser definido"}</p>
                                       </div>
+                                      
+                                      {analysis.attachments.filter(att => att.category === "output").length > 0 && (
+                                        <div className="mt-4">
+                                          <h4 className="text-sm font-medium">Anexos de resultados:</h4>
+                                          <div className="mt-2 space-y-2">
+                                            {analysis.attachments
+                                              .filter(att => att.category === "output")
+                                              .map((attachment) => (
+                                                <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                                                  <div className="flex items-center">
+                                                    {getFileIcon(attachment.type)}
+                                                    <span className="ml-2 text-sm">{attachment.name}</span>
+                                                    <span className="ml-2 text-xs text-muted-foreground">
+                                                      ({formatFileSize(attachment.size)})
+                                                    </span>
+                                                  </div>
+                                                  <div className="flex">
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => {}}
+                                                    >
+                                                      <Download size={14} />
+                                                    </Button>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => handleDeleteAttachment(analysis.id, attachment.id)}
+                                                    >
+                                                      <Trash size={14} />
+                                                    </Button>
+                                                  </div>
+                                                </div>
+                                              ))}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
                               </TableCell>
                             </TableRow>
                           )}
-                        </>
+                        </React.Fragment>
                       ))}
                   </TableBody>
                 </Table>
@@ -987,8 +1418,142 @@ export default function CriticalAnalysis() {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Dialog para gerenciar anexos */}
+        <Dialog open={attachmentsDialogOpen} onOpenChange={setAttachmentsDialogOpen}>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>Gerenciar Anexos</DialogTitle>
+              <DialogDescription>
+                Adicione ou remova anexos para evidenciar os requisitos de entrada e resultados da análise crítica.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-2">Anexos para Requisitos de Entrada:</h3>
+              </div>
+              
+              <div>
+                <Input
+                  id="addInputAttachments"
+                  type="file"
+                  multiple
+                  onChange={handleInputFileChange}
+                  className="w-full"
+                />
+                {inputAttachments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {inputAttachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <div className="flex items-center">
+                          {getFileIcon(file.type)}
+                          <span className="ml-2 text-sm">{file.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveInputFile(index)}
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-2">Anexos para Resultados:</h3>
+              </div>
+              
+              <div>
+                <Input
+                  id="addOutputAttachments"
+                  type="file"
+                  multiple
+                  onChange={handleOutputFileChange}
+                  className="w-full"
+                />
+                {outputAttachments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {outputAttachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <div className="flex items-center">
+                          {getFileIcon(file.type)}
+                          <span className="ml-2 text-sm">{file.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveOutputFile(index)}
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-2">Anexos Existentes:</h3>
+              </div>
+              
+              {currentAnalysisId && (
+                <div className="space-y-2">
+                  {analyses
+                    .find(a => a.id === currentAnalysisId)?.attachments.map((attachment) => (
+                      <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <div className="flex items-center">
+                          {getFileIcon(attachment.type)}
+                          <span className="ml-2 text-sm">{attachment.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({formatFileSize(attachment.size)})
+                          </span>
+                          <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {attachment.category === "input" ? "Requisito" : "Resultado"}
+                          </span>
+                        </div>
+                        <div className="flex">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {}}
+                          >
+                            <Download size={14} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteAttachment(currentAnalysisId, attachment.id)}
+                          >
+                            <Trash size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setAttachmentsDialogOpen(false);
+                setInputAttachments([]);
+                setOutputAttachments([]);
+              }}>Cancelar</Button>
+              <Button onClick={handleAddAttachment}>Adicionar Anexos</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
 }
-
