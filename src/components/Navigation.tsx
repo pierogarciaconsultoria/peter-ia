@@ -63,7 +63,7 @@ export function Navigation() {
     icon: <CalendarCheck size={18} />,
     path: "/action-schedule"
   }, {
-    name: "Cronograma de Auditoria",
+    name: "Auditoria",
     icon: <CalendarCheck2 size={18} />,
     path: "/audit-schedule"
   }, {

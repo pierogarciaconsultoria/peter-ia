@@ -8,7 +8,7 @@ const AuditSchedule = () => {
       
       <main className="md:pl-64 p-6 transition-all duration-300">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Cronograma de Auditoria</h1>
+          <h1 className="text-3xl font-bold mb-6">Auditoria</h1>
           <p className="text-muted-foreground">
             Planeje e acompanhe o cronograma de auditorias internas da sua organização.
           </p>
