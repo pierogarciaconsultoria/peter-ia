@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import * as React from "react"; // Add this import to fix React references
 import { Navigation } from "@/components/Navigation";
@@ -851,3 +852,292 @@ export default function CriticalAnalysis() {
                                       <h4 className="text-sm font-medium">Oportunidades de melhoria:</h4>
                                       <p className="text-sm text-muted-foreground mt-1">{analysis.improvementOpportunities}</p>
                                     </div>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <h3 className="font-medium text-base mb-3">Resultados da análise crítica</h3>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h4 className="text-sm font-medium">Oportunidades para melhoria:</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">{analysis.improvementResults}</p>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-medium">Necessidade de mudanças no SGQ:</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">{analysis.systemChangeNeeds}</p>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-medium">Necessidade de recursos:</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">{analysis.resourceNeeds}</p>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-medium">Resultados gerais:</h4>
+                                      <p className="text-sm text-muted-foreground mt-1">{analysis.results}</p>
+                                    </div>
+                                    
+                                    {analysis.attachments.length > 0 && (
+                                      <div>
+                                        <h4 className="text-sm font-medium mt-6">Anexos:</h4>
+                                        <div className="mt-2 space-y-2">
+                                          {analysis.attachments.map((attachment) => (
+                                            <div key={attachment.id} className="flex items-center justify-between bg-muted p-2 rounded">
+                                              <div className="flex items-center">
+                                                {getFileIcon(attachment.type)}
+                                                <span className="ml-2 text-sm">{attachment.name}</span>
+                                                <span className="ml-2 text-xs text-muted-foreground">
+                                                  ({formatFileSize(attachment.size)})
+                                                </span>
+                                                <Badge 
+                                                  variant="outline" 
+                                                  className={`ml-2 ${attachment.category === "input" ? "bg-blue-50" : "bg-green-50"}`}
+                                                >
+                                                  {attachment.category === "input" ? "Requisito" : "Resultado"}
+                                                </Badge>
+                                              </div>
+                                              <div className="flex">
+                                                <Button variant="ghost" size="sm">
+                                                  <Download size={14} />
+                                                </Button>
+                                                <Button 
+                                                  variant="ghost" 
+                                                  size="sm" 
+                                                  onClick={() => handleDeleteAttachment(analysis.id, attachment.id)}
+                                                >
+                                                  <Trash size={14} />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="planned">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análises Críticas Planejadas</CardTitle>
+                <CardDescription>
+                  Visualize as reuniões de análise crítica planejadas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Assunto</TableHead>
+                      <TableHead>Participantes</TableHead>
+                      <TableHead>Documentos</TableHead>
+                      <TableHead>Detalhes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analyses.filter(a => a.status === "planned").map((analysis) => (
+                      <TableRow key={analysis.id}>
+                        <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="font-medium">{analysis.subject}</TableCell>
+                        <TableCell>{analysis.participants.join(", ")}</TableCell>
+                        <TableCell>{analysis.documents.join(", ")}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleExpand(analysis.id)}
+                          >
+                            {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="in-progress">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análises Críticas em Andamento</CardTitle>
+                <CardDescription>
+                  Visualize as reuniões de análise crítica em andamento
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Assunto</TableHead>
+                      <TableHead>Participantes</TableHead>
+                      <TableHead>Documentos</TableHead>
+                      <TableHead>Detalhes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analyses.filter(a => a.status === "in-progress").map((analysis) => (
+                      <TableRow key={analysis.id}>
+                        <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="font-medium">{analysis.subject}</TableCell>
+                        <TableCell>{analysis.participants.join(", ")}</TableCell>
+                        <TableCell>{analysis.documents.join(", ")}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleExpand(analysis.id)}
+                          >
+                            {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="completed">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análises Críticas Concluídas</CardTitle>
+                <CardDescription>
+                  Visualize as reuniões de análise crítica concluídas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Assunto</TableHead>
+                      <TableHead>Participantes</TableHead>
+                      <TableHead>Resultados</TableHead>
+                      <TableHead>Detalhes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {analyses.filter(a => a.status === "completed").map((analysis) => (
+                      <TableRow key={analysis.id}>
+                        <TableCell>{format(analysis.date, "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="font-medium">{analysis.subject}</TableCell>
+                        <TableCell>{analysis.participants.join(", ")}</TableCell>
+                        <TableCell className="truncate max-w-xs">{analysis.results}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleExpand(analysis.id)}
+                          >
+                            {expandedItems[analysis.id] ? "Ocultar" : "Mostrar"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        {/* Dialog para gerenciar anexos */}
+        <Dialog open={attachmentsDialogOpen} onOpenChange={setAttachmentsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Gerenciar Anexos</DialogTitle>
+              <DialogDescription>
+                Adicione ou remova anexos para esta análise crítica.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div>
+                <h3 className="font-medium mb-2">Adicionar anexos de requisitos</h3>
+                <Input
+                  type="file"
+                  multiple
+                  onChange={handleInputFileChange}
+                  className="w-full"
+                />
+                {inputAttachments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {inputAttachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <div className="flex items-center">
+                          {getFileIcon(file.type)}
+                          <span className="ml-2 text-sm">{file.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveInputFile(index)}
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-2">Adicionar anexos de resultados</h3>
+                <Input
+                  type="file"
+                  multiple
+                  onChange={handleOutputFileChange}
+                  className="w-full"
+                />
+                {outputAttachments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {outputAttachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <div className="flex items-center">
+                          {getFileIcon(file.type)}
+                          <span className="ml-2 text-sm">{file.name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveOutputFile(index)}
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAttachmentsDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={handleAddAttachment}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </main>
+    </div>
+  );
+}
