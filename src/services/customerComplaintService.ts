@@ -15,6 +15,9 @@ export interface CustomerComplaint {
   created_at: string;
   updated_at: string;
   closed_at?: string;
+  invoice_number?: string;
+  product?: string;
+  return_deadline?: string;
 }
 
 export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {

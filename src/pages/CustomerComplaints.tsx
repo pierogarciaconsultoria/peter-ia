@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +7,15 @@ import {
   MessageSquareWarning, 
   Clock, 
   CheckCircle, 
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 import { getCustomerComplaints, CustomerComplaint } from "@/services/customerComplaintService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { CustomerComplaintFormDialog } from "@/components/customer-complaints/CustomerComplaintFormDialog";
+import { Footer } from "@/components/Footer";
 
 const CustomerComplaints = () => {
   const [complaints, setComplaints] = useState<CustomerComplaint[]>([]);
@@ -42,10 +45,10 @@ const CustomerComplaints = () => {
   const resolvedComplaints = complaints.filter(c => c.status === 'resolved' || c.status === 'closed');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -199,6 +202,8 @@ const CustomerComplaints = () => {
           </Tabs>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };
@@ -286,6 +291,31 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
+          {/* Display the new fields */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+            {complaint.invoice_number && (
+              <div className="flex items-center text-sm">
+                <FileText className="h-4 w-4 mr-1 text-muted-foreground" />
+                <span className="text-muted-foreground mr-1">NF:</span>
+                <span className="font-medium">{complaint.invoice_number}</span>
+              </div>
+            )}
+            {complaint.product && (
+              <div className="text-sm">
+                <span className="text-muted-foreground mr-1">Produto:</span>
+                <span className="font-medium">{complaint.product}</span>
+              </div>
+            )}
+            {complaint.return_deadline && (
+              <div className="text-sm">
+                <span className="text-muted-foreground mr-1">Prazo de Retorno:</span>
+                <span className="font-medium">
+                  {format(new Date(complaint.return_deadline), 'PPP', { locale: ptBR })}
+                </span>
+              </div>
+            )}
+          </div>
+          
           <p className="text-sm">{complaint.description}</p>
           {complaint.assigned_to && (
             <div className="mt-4 text-sm text-muted-foreground">

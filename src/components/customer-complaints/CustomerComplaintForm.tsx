@@ -38,6 +38,9 @@ const formSchema = z.object({
   description: z.string().min(10, { message: "Descrição deve ter pelo menos 10 caracteres" }),
   priority: z.enum(["low", "medium", "high", "critical"]),
   assigned_to: z.string().optional(),
+  invoice_number: z.string().optional().or(z.literal("")),
+  product: z.string().optional().or(z.literal("")),
+  return_deadline: z.string().optional().or(z.literal(""))
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -63,6 +66,9 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
       description: "",
       priority: "medium",
       assigned_to: "",
+      invoice_number: "",
+      product: "",
+      return_deadline: format(new Date(), "yyyy-MM-dd")
     },
   });
 
@@ -112,6 +118,9 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
         description: values.description,
         priority: values.priority,
         assigned_to: values.assigned_to || "",
+        invoice_number: values.invoice_number || "",
+        product: values.product || "",
+        return_deadline: values.return_deadline || "",
         status: "open",
         resolution: ""
       });
@@ -189,6 +198,37 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
           />
         </div>
 
+        {/* New fields: Invoice Number and Product */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="invoice_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número da NF</FormLabel>
+                <FormControl>
+                  <Input placeholder="Número da Nota Fiscal" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="product"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Produto</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nome do Produto" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="description"
@@ -207,7 +247,7 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
           )}
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <FormField
             control={form.control}
             name="priority"
@@ -247,6 +287,21 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
                 <FormDescription>
                   Responsável pelo tratamento da reclamação
                 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* New field: Return Deadline */}
+          <FormField
+            control={form.control}
+            name="return_deadline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prazo de Retorno</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
