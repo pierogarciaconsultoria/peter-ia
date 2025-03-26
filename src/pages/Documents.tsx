@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { DocumentsList } from "@/components/DocumentsList";
 import { DocumentForm } from "@/components/DocumentForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,10 +55,10 @@ const Documents = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Documentos ISO 9001</h1>
@@ -83,6 +84,8 @@ const Documents = () => {
           />
         </DialogContent>
       </Dialog>
+      
+      <Footer />
     </div>
   );
 };

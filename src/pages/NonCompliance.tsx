@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,10 +124,10 @@ const NonCompliance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Não Conformidades</h1>
@@ -209,6 +210,8 @@ const NonCompliance = () => {
           )}
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };

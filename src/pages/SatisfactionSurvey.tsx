@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,10 +21,10 @@ const SatisfactionSurvey = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -125,6 +126,8 @@ const SatisfactionSurvey = () => {
           </Tabs>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 };

@@ -16,34 +16,34 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 272 62% 30%;
+    --primary: 195 32% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 271 49% 41%;
+    --secondary: 195 25% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 271 20% 92%;
-    --muted-foreground: 271 10% 45%;
+    --muted: 195 15% 85%;
+    --muted-foreground: 195 20% 45%;
 
-    --accent: 292 86% 28%;
+    --accent: 195 40% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 271 10% 85%;
-    --input: 271 10% 85%;
-    --ring: 271 49% 41%;
+    --border: 195 15% 85%;
+    --input: 195 15% 85%;
+    --ring: 195 32% 45%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 272 62% 30%;
+    --sidebar-background: 195 32% 45%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 272 62% 30%;
-    --sidebar-accent: 271 40% 40%;
+    --sidebar-primary-foreground: 195 32% 45%;
+    --sidebar-accent: 195 25% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 271 50% 25%;
+    --sidebar-border: 195 30% 30%;
     --sidebar-ring: 0 0% 100%;
   }
 
@@ -57,7 +57,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 271 49% 41%;
+    --primary: 195 32% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 18%;
@@ -66,7 +66,7 @@
     --muted: 217 33% 18%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 292 86% 28%;
+    --accent: 195 40% 35%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
@@ -74,7 +74,7 @@
 
     --border: 217 33% 18%;
     --input: 217 33% 18%;
-    --ring: 271 49% 41%;
+    --ring: 195 32% 45%;
   }
 }
 
@@ -98,5 +98,9 @@
     @apply opacity-0 animate-fade-in;
     animation-fill-mode: forwards;
     animation-delay: calc(var(--delay, 0) * 100ms);
+  }
+
+  .app-footer {
+    @apply mt-auto py-4 px-6 border-t border-border/40 text-sm text-muted-foreground bg-background/80 backdrop-blur-sm;
   }
 }

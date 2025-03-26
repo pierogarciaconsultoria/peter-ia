@@ -1,6 +1,7 @@
 
 import { Dialog } from "@/components/ui/dialog";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { AlertCircle } from "lucide-react";
 import { ActionTable } from "@/components/actions/ActionTable";
 import { ActionForm } from "@/components/actions/ActionForm";
@@ -36,10 +37,10 @@ const ActionSchedule = () => {
   } = useActionSchedule();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-7xl mx-auto">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <ActionHeader onAddAction={() => setIsAddDialogOpen(true)} />
@@ -86,6 +87,8 @@ const ActionSchedule = () => {
           )}
         </div>
       </main>
+      
+      <Footer />
       
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
