@@ -23,11 +23,13 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { getOrganizationContexts, OrganizationContext as OrganizationContextType } from "@/services/organizationContextService";
+import { ContextFormDialog } from "@/components/organization-context/ContextFormDialog";
 
 const OrganizationContext = () => {
   const [contexts, setContexts] = useState<OrganizationContextType[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("internal_factor");
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchContexts();
@@ -97,7 +99,7 @@ const OrganizationContext = () => {
                 Defina e acompanhe o contexto da sua organização, incluindo fatores internos e externos relevantes.
               </p>
             </div>
-            <Button>
+            <Button onClick={() => setFormDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Item
             </Button>
@@ -199,6 +201,12 @@ const OrganizationContext = () => {
           </Tabs>
         </div>
       </main>
+      
+      <ContextFormDialog 
+        open={formDialogOpen} 
+        onOpenChange={setFormDialogOpen}
+        onSuccess={fetchContexts}
+      />
     </div>
   );
 };
