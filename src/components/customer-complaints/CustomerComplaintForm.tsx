@@ -105,8 +105,15 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
       // For now, we're not handling photo upload to Supabase storage
       // We'll just submit the form data
       await createCustomerComplaint({
-        ...values,
+        customer_name: values.customer_name,
+        contact_email: values.contact_email || "",
+        contact_phone: values.contact_phone || "",
+        complaint_date: values.complaint_date,
+        description: values.description,
+        priority: values.priority,
+        assigned_to: values.assigned_to || "",
         status: "open",
+        resolution: ""
       });
       
       toast.success("Reclamação criada com sucesso!");
