@@ -1,11 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Plus, 
   MessageSquareWarning, 
   Clock, 
   CheckCircle, 
@@ -15,6 +12,7 @@ import { getCustomerComplaints, CustomerComplaint } from "@/services/customerCom
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { CustomerComplaintFormDialog } from "@/components/customer-complaints/CustomerComplaintFormDialog";
 
 const CustomerComplaints = () => {
   const [complaints, setComplaints] = useState<CustomerComplaint[]>([]);
@@ -56,10 +54,7 @@ const CustomerComplaints = () => {
                 Gerencie as reclamações de clientes e acompanhe o processo de resolução.
               </p>
             </div>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Reclamação
-            </Button>
+            <CustomerComplaintFormDialog onSuccess={fetchComplaints} />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -208,9 +203,7 @@ const CustomerComplaints = () => {
   );
 };
 
-// ComplaintCard component to display each complaint
 const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
-  // Map status to badge color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
@@ -226,7 +219,6 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
     }
   };
   
-  // Map status to display text
   const getStatusText = (status: string) => {
     switch (status) {
       case 'open':
@@ -242,7 +234,6 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
     }
   };
   
-  // Map priority to badge color
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'low':
@@ -258,7 +249,6 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
     }
   };
   
-  // Map priority to display text
   const getPriorityText = (priority: string) => {
     switch (priority) {
       case 'low':
