@@ -25,10 +25,20 @@ const formSchema = z.object({
   context_type: z.enum(["internal_factor", "external_factor", "interested_party", "swot"], {
     required_error: "O tipo de contexto é obrigatório",
   }),
+  swot_category: z.enum(["strength", "weakness", "opportunity", "threat"]).optional(),
   analysis: z.string().optional(),
   update_date: z.date({ required_error: "A data de atualização é obrigatória" }),
   created_by: z.string({ required_error: "Responsável é obrigatório" })
     .min(3, "O nome do responsável deve ter pelo menos 3 caracteres"),
+}).refine(data => {
+  // If context_type is swot, then swot_category is required
+  if (data.context_type === "swot") {
+    return !!data.swot_category;
+  }
+  return true;
+}, {
+  message: "A categoria SWOT é obrigatória para análise SWOT",
+  path: ["swot_category"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -54,6 +64,21 @@ const getContextTypeLabel = (type: string) => {
   }
 };
 
+const getSwotCategoryLabel = (category: string) => {
+  switch (category) {
+    case "strength":
+      return "Ponto Forte";
+    case "weakness":
+      return "Ponto Fraco";
+    case "opportunity":
+      return "Oportunidade";
+    case "threat":
+      return "Ameaça";
+    default:
+      return category;
+  }
+};
+
 export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextFormDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -64,15 +89,19 @@ export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextForm
       update_date: new Date(),
       created_by: "",
     },
+    mode: "onChange",
   });
 
   const isLoading = form.formState.isSubmitting;
+  const contextType = form.watch("context_type");
+  const isSwotSelected = contextType === "swot";
 
   async function onSubmit(values: FormValues) {
     try {
       await createOrganizationContext({
         description: values.description,
         context_type: values.context_type,
+        swot_category: values.swot_category,
         analysis: values.analysis || "",
         update_date: format(values.update_date, "yyyy-MM-dd"),
         created_by: values.created_by,
@@ -108,7 +137,13 @@ export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextForm
                   <FormLabel>Tipo de Contexto</FormLabel>
                   <Select
                     disabled={isLoading}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      // Reset SWOT category when changing context type
+                      if (value !== "swot") {
+                        form.setValue("swot_category", undefined);
+                      }
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -129,6 +164,38 @@ export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextForm
                 </FormItem>
               )}
             />
+            
+            {isSwotSelected && (
+              <FormField
+                control={form.control}
+                name="swot_category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoria SWOT</FormLabel>
+                    <Select
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria SWOT" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="strength">Ponto Forte</SelectItem>
+                          <SelectItem value="weakness">Ponto Fraco</SelectItem>
+                          <SelectItem value="opportunity">Oportunidade</SelectItem>
+                          <SelectItem value="threat">Ameaça</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             
             <FormField
               control={form.control}

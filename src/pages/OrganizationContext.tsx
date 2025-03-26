@@ -17,7 +17,11 @@ import {
   Users, 
   TrendingUp,
   Edit,
-  Trash
+  Trash,
+  ArrowUp,
+  ArrowDown,
+  Star,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -54,37 +58,11 @@ const OrganizationContext = () => {
   const interestedParties = contexts.filter(c => c.context_type === 'interested_party');
   const swotAnalysis = contexts.filter(c => c.context_type === 'swot');
 
-  // Helper function to get icon for context card
-  const getContextIcon = (type: string) => {
-    switch (type) {
-      case 'internal_factor':
-        return <Building className="h-5 w-5 text-blue-500" />;
-      case 'external_factor':
-        return <Globe className="h-5 w-5 text-green-500" />;
-      case 'interested_party':
-        return <Users className="h-5 w-5 text-amber-500" />;
-      case 'swot':
-        return <TrendingUp className="h-5 w-5 text-purple-500" />;
-      default:
-        return <Building className="h-5 w-5" />;
-    }
-  };
-
-  // Helper function to get type text
-  const getTypeText = (type: string) => {
-    switch (type) {
-      case 'internal_factor':
-        return 'Fator Interno';
-      case 'external_factor':
-        return 'Fator Externo';
-      case 'interested_party':
-        return 'Parte Interessada';
-      case 'swot':
-        return 'Análise SWOT';
-      default:
-        return type;
-    }
-  };
+  // SWOT specific filters
+  const strengths = swotAnalysis.filter(c => c.swot_category === 'strength');
+  const weaknesses = swotAnalysis.filter(c => c.swot_category === 'weakness');
+  const opportunities = swotAnalysis.filter(c => c.swot_category === 'opportunity');
+  const threats = swotAnalysis.filter(c => c.swot_category === 'threat');
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,10 +161,98 @@ const OrganizationContext = () => {
                 
                 <TabsContent value="swot">
                   {swotAnalysis.length > 0 ? (
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {swotAnalysis.map((item) => (
-                        <ContextCard key={item.id} context={item} />
-                      ))}
+                    <div className="grid gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="border-green-200">
+                          <CardHeader className="pb-2 bg-green-50/50 rounded-t-lg">
+                            <CardTitle className="text-lg flex items-center gap-2 text-green-700">
+                              <ArrowUp className="h-5 w-5 text-green-600" />
+                              Pontos Fortes
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            {strengths.length > 0 ? (
+                              <div className="grid gap-3">
+                                {strengths.map((item) => (
+                                  <ContextCard key={item.id} context={item} compact />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-4">
+                                Nenhum ponto forte cadastrado.
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="border-red-200">
+                          <CardHeader className="pb-2 bg-red-50/50 rounded-t-lg">
+                            <CardTitle className="text-lg flex items-center gap-2 text-red-700">
+                              <ArrowDown className="h-5 w-5 text-red-600" />
+                              Pontos Fracos
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            {weaknesses.length > 0 ? (
+                              <div className="grid gap-3">
+                                {weaknesses.map((item) => (
+                                  <ContextCard key={item.id} context={item} compact />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-4">
+                                Nenhum ponto fraco cadastrado.
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="border-blue-200">
+                          <CardHeader className="pb-2 bg-blue-50/50 rounded-t-lg">
+                            <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
+                              <Star className="h-5 w-5 text-blue-600" />
+                              Oportunidades
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            {opportunities.length > 0 ? (
+                              <div className="grid gap-3">
+                                {opportunities.map((item) => (
+                                  <ContextCard key={item.id} context={item} compact />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-4">
+                                Nenhuma oportunidade cadastrada.
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="border-amber-200">
+                          <CardHeader className="pb-2 bg-amber-50/50 rounded-t-lg">
+                            <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+                              <AlertTriangle className="h-5 w-5 text-amber-600" />
+                              Ameaças
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            {threats.length > 0 ? (
+                              <div className="grid gap-3">
+                                {threats.map((item) => (
+                                  <ContextCard key={item.id} context={item} compact />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-muted-foreground py-4">
+                                Nenhuma ameaça cadastrada.
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
                   ) : (
                     <Card>
@@ -212,9 +278,9 @@ const OrganizationContext = () => {
 };
 
 // ContextCard component to display each context item
-const ContextCard = ({ context }: { context: OrganizationContextType }) => {
+const ContextCard = ({ context, compact = false }: { context: OrganizationContextType; compact?: boolean }) => {
   // Helper function to get icon for context card
-  const getContextIcon = (type: string) => {
+  const getContextIcon = (type: string, category?: string) => {
     switch (type) {
       case 'internal_factor':
         return <Building className="h-5 w-5 text-blue-500" />;
@@ -223,18 +289,68 @@ const ContextCard = ({ context }: { context: OrganizationContextType }) => {
       case 'interested_party':
         return <Users className="h-5 w-5 text-amber-500" />;
       case 'swot':
+        if (category === 'strength') return <ArrowUp className="h-5 w-5 text-green-600" />;
+        if (category === 'weakness') return <ArrowDown className="h-5 w-5 text-red-600" />;
+        if (category === 'opportunity') return <Star className="h-5 w-5 text-blue-600" />;
+        if (category === 'threat') return <AlertTriangle className="h-5 w-5 text-amber-600" />;
         return <TrendingUp className="h-5 w-5 text-purple-500" />;
       default:
         return <Building className="h-5 w-5" />;
     }
   };
 
+  const getSwotCategoryLabel = (category?: string) => {
+    switch (category) {
+      case 'strength':
+        return 'Ponto Forte';
+      case 'weakness':
+        return 'Ponto Fraco';
+      case 'opportunity':
+        return 'Oportunidade';
+      case 'threat':
+        return 'Ameaça';
+      default:
+        return '';
+    }
+  };
+
+  if (compact) {
+    return (
+      <Card className="shadow-sm">
+        <CardContent className="p-3">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center">
+              {getContextIcon(context.context_type, context.swot_category)}
+              <CardTitle className="ml-2 text-base">{context.description}</CardTitle>
+            </div>
+            <div className="flex space-x-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Trash className="h-3.5 w-3.5 text-red-500" />
+              </Button>
+            </div>
+          </div>
+          {context.analysis && (
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground">{context.analysis}</p>
+            </div>
+          )}
+          <div className="mt-1 text-[10px] text-muted-foreground">
+            {context.created_by} • {format(new Date(context.update_date), 'dd/MM/yyyy', { locale: ptBR })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="flex items-center">
-            {getContextIcon(context.context_type)}
+            {getContextIcon(context.context_type, context.swot_category)}
             <CardTitle className="ml-2 text-lg">{context.description}</CardTitle>
           </div>
           <div className="flex space-x-2">
@@ -247,6 +363,9 @@ const ContextCard = ({ context }: { context: OrganizationContextType }) => {
           </div>
         </div>
         <CardDescription>
+          {context.context_type === 'swot' && context.swot_category && (
+            <span className="font-medium mr-2">{getSwotCategoryLabel(context.swot_category)} • </span>
+          )}
           Atualizado em: {format(new Date(context.update_date), 'dd/MM/yyyy', { locale: ptBR })}
         </CardDescription>
       </CardHeader>

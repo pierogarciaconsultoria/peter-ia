@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface OrganizationContext {
   id: string;
   context_type: 'internal_factor' | 'external_factor' | 'interested_party' | 'swot';
+  swot_category?: 'strength' | 'weakness' | 'opportunity' | 'threat';
   description: string;
   analysis?: string;
   created_by: string;
@@ -26,6 +27,7 @@ export async function getOrganizationContexts(): Promise<OrganizationContext[]> 
   return (data || []).map(item => ({
     ...item,
     context_type: item.context_type as OrganizationContext['context_type'],
+    swot_category: item.swot_category as OrganizationContext['swot_category'],
   }));
 }
 
@@ -44,6 +46,7 @@ export async function getOrganizationContextById(id: string): Promise<Organizati
   return {
     ...data,
     context_type: data.context_type as OrganizationContext['context_type'],
+    swot_category: data.swot_category as OrganizationContext['swot_category'],
   };
 }
 
@@ -62,6 +65,7 @@ export async function createOrganizationContext(context: Omit<OrganizationContex
   return {
     ...data,
     context_type: data.context_type as OrganizationContext['context_type'],
+    swot_category: data.swot_category as OrganizationContext['swot_category'],
   };
 }
 
@@ -84,6 +88,7 @@ export async function updateOrganizationContext(id: string, context: Partial<Omi
   return {
     ...data,
     context_type: data.context_type as OrganizationContext['context_type'],
+    swot_category: data.swot_category as OrganizationContext['swot_category'],
   };
 }
 
