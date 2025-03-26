@@ -1423,6 +1423,7 @@ export type Database = {
           created_by: string
           description: string
           id: string
+          swot_category: string | null
           update_date: string
           updated_at: string
         }
@@ -1433,6 +1434,7 @@ export type Database = {
           created_by: string
           description: string
           id?: string
+          swot_category?: string | null
           update_date: string
           updated_at?: string
         }
@@ -1443,6 +1445,7 @@ export type Database = {
           created_by?: string
           description?: string
           id?: string
+          swot_category?: string | null
           update_date?: string
           updated_at?: string
         }
