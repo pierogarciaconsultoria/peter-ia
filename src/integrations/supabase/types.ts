@@ -655,6 +655,48 @@ export type Database = {
           },
         ]
       }
+      diagnostic_submissions: {
+        Row: {
+          analysis: Json
+          company_segment: string
+          created_at: string
+          email: string
+          employee_count: string
+          full_name: string
+          id: string
+          phone: string
+          results: Json
+          submission_id: string
+          timestamp: string
+        }
+        Insert: {
+          analysis: Json
+          company_segment: string
+          created_at?: string
+          email: string
+          employee_count: string
+          full_name: string
+          id?: string
+          phone: string
+          results: Json
+          submission_id: string
+          timestamp: string
+        }
+        Update: {
+          analysis?: Json
+          company_segment?: string
+          created_at?: string
+          email?: string
+          employee_count?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          results?: Json
+          submission_id?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       disc_assessments: {
         Row: {
           created_at: string
@@ -2095,6 +2137,42 @@ export type Database = {
           },
         ]
       }
+      user_audit_logs: {
+        Row: {
+          action: string
+          company_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           allowed_modules: string[] | null
@@ -2104,6 +2182,7 @@ export type Database = {
           email: string
           first_name: string | null
           id: string
+          is_active: boolean | null
           is_company_admin: boolean
           is_super_admin: boolean
           last_login: string | null
@@ -2112,6 +2191,8 @@ export type Database = {
           lgpd_consent_date: string | null
           phone: string | null
           role_id: string | null
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
           allowed_modules?: string[] | null
@@ -2121,6 +2202,7 @@ export type Database = {
           email: string
           first_name?: string | null
           id: string
+          is_active?: boolean | null
           is_company_admin?: boolean
           is_super_admin?: boolean
           last_login?: string | null
@@ -2129,6 +2211,8 @@ export type Database = {
           lgpd_consent_date?: string | null
           phone?: string | null
           role_id?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
           allowed_modules?: string[] | null
@@ -2138,6 +2222,7 @@ export type Database = {
           email?: string
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           is_company_admin?: boolean
           is_super_admin?: boolean
           last_login?: string | null
@@ -2146,6 +2231,8 @@ export type Database = {
           lgpd_consent_date?: string | null
           phone?: string | null
           role_id?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {

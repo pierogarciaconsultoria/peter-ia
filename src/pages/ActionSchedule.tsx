@@ -2,13 +2,18 @@
 import { Dialog } from "@/components/ui/dialog";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Download } from "lucide-react";
 import { ActionTable } from "@/components/actions/ActionTable";
 import { ActionForm } from "@/components/actions/ActionForm";
 import { ActionDetails } from "@/components/actions/ActionDetails";
 import { ActionHeader } from "@/components/actions/ActionHeader";
 import { ActionStatusCards } from "@/components/actions/ActionStatusCards";
 import { ActionFilters } from "@/components/actions/ActionFilters";
+import { ActionViewToggle } from "@/components/actions/ActionViewToggle";
+import { ActionKanban } from "@/components/actions/kanban/ActionKanban";
+import { ActionGantt } from "@/components/actions/gantt/ActionGantt";
+import { ActionsByResponsible } from "@/components/actions/responsible/ActionsByResponsible";
+import { Button } from "@/components/ui/button";
 import { useActionSchedule } from "@/hooks/useActionSchedule";
 
 const ActionSchedule = () => {
@@ -33,7 +38,10 @@ const ActionSchedule = () => {
     setIsViewDialogOpen,
     selectedAction,
     statusCounts,
-    invalidateActions
+    invalidateActions,
+    viewFormat,
+    setViewFormat,
+    handleExportToPDF
   } = useActionSchedule();
 
   return (
@@ -58,16 +66,30 @@ const ActionSchedule = () => {
             onFilterChange={setStatusFilter}
           />
           
-          {/* Filters */}
-          <ActionFilters
-            processFilter={processFilter}
-            onProcessFilterChange={setProcessFilter}
-            sourceFilter={sourceFilter}
-            onSourceFilterChange={setSourceFilter}
-            filteredCount={filteredActions.length}
-          />
+          {/* Filters and View Controls */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <ActionFilters
+              processFilter={processFilter}
+              onProcessFilterChange={setProcessFilter}
+              sourceFilter={sourceFilter}
+              onSourceFilterChange={setSourceFilter}
+              filteredCount={filteredActions.length}
+            />
+            
+            <div className="flex items-center gap-4">
+              <ActionViewToggle
+                viewFormat={viewFormat}
+                onViewFormatChange={setViewFormat}
+              />
+              
+              <Button variant="outline" onClick={handleExportToPDF}>
+                <Download className="mr-2 h-4 w-4" />
+                Exportar PDF
+              </Button>
+            </div>
+          </div>
           
-          {/* Actions Table */}
+          {/* Actions Content Based on View Format */}
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p>Carregando ações...</p>
@@ -78,12 +100,41 @@ const ActionSchedule = () => {
               <p>Erro ao carregar as ações</p>
             </div>
           ) : (
-            <ActionTable 
-              actions={filteredActions} 
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
-            />
+            <>
+              {viewFormat === 'table' && (
+                <ActionTable 
+                  actions={filteredActions} 
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+              
+              {viewFormat === 'kanban' && (
+                <ActionKanban 
+                  actions={filteredActions}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+              
+              {viewFormat === 'gantt' && (
+                <ActionGantt 
+                  actions={filteredActions}
+                  onAction={handleView}
+                />
+              )}
+              
+              {viewFormat === 'responsible' && (
+                <ActionsByResponsible 
+                  actions={filteredActions}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+            </>
           )}
         </div>
       </main>

@@ -4,6 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllActions, deleteAction } from "@/services/actionService";
 import { useToast } from "@/hooks/use-toast";
 import { Action5W2H, ActionStatus, ProcessArea, ActionSource } from "@/types/actions";
+import { exportActionsToPDF } from "@/components/actions/utils/pdf-export";
+import { toast } from "sonner";
+
+export type ViewFormat = 'table' | 'kanban' | 'gantt' | 'responsible';
 
 export function useActionSchedule() {
   const { toast } = useToast();
@@ -19,6 +23,9 @@ export function useActionSchedule() {
   const [statusFilter, setStatusFilter] = useState<ActionStatus | "all">("all");
   const [processFilter, setProcessFilter] = useState<ProcessArea | "all">("all");
   const [sourceFilter, setSourceFilter] = useState<ActionSource | "all">("all");
+  
+  // View format state
+  const [viewFormat, setViewFormat] = useState<ViewFormat>('table');
   
   // Fetch all actions
   const { 
@@ -92,6 +99,20 @@ export function useActionSchedule() {
     queryClient.invalidateQueries({ queryKey: ["actions"] });
   };
   
+  // Export to PDF
+  const handleExportToPDF = async () => {
+    try {
+      await exportActionsToPDF(filteredActions, { 
+        status: statusFilter, 
+        process: processFilter, 
+        source: sourceFilter 
+      });
+    } catch (error) {
+      console.error("Error exporting to PDF:", error);
+      toast.error("Ocorreu um erro ao exportar para PDF");
+    }
+  };
+  
   return {
     actions,
     filteredActions,
@@ -114,6 +135,9 @@ export function useActionSchedule() {
     setIsViewDialogOpen,
     selectedAction,
     statusCounts,
-    invalidateActions
+    invalidateActions,
+    viewFormat,
+    setViewFormat,
+    handleExportToPDF
   };
 }
