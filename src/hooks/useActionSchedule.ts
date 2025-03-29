@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllActions, deleteAction } from "@/services/actionService";
@@ -10,7 +9,7 @@ import { toast } from "sonner";
 export type ViewFormat = 'table' | 'kanban' | 'gantt' | 'responsible';
 
 export function useActionSchedule() {
-  const { toast } = useToast();
+  const { toast: toastUI } = useToast();
   const queryClient = useQueryClient();
   
   // Dialog states
@@ -42,14 +41,14 @@ export function useActionSchedule() {
     mutationFn: (id: string) => deleteAction(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["actions"] });
-      toast({
+      toastUI({
         title: "Ação excluída",
         description: "A ação foi excluída com sucesso",
       });
     },
     onError: (error) => {
       console.error("Error deleting action:", error);
-      toast({
+      toastUI({
         title: "Erro",
         description: "Ocorreu um erro ao excluir a ação",
         variant: "destructive",

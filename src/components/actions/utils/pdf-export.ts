@@ -195,7 +195,7 @@ export const exportActionsToPDF = async (
     }
     
     // Add footer with page numbers
-    const totalPages = pdf.internal.getNumberOfPages();
+    const totalPages = pdf.internal.pages.length - 1;
     for (let i = 1; i <= totalPages; i++) {
       pdf.setPage(i);
       pdf.setFontSize(8);
