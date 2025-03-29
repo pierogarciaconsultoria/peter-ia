@@ -1,4 +1,3 @@
-
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
@@ -194,7 +193,7 @@ export const exportActionsToPDF = async (
       y += 10;
     }
     
-    // Add footer with page numbers
+    // Add footer with page numbers - Fixed to use pdf.internal.pages.length - 1
     const totalPages = pdf.internal.pages.length - 1;
     for (let i = 1; i <= totalPages; i++) {
       pdf.setPage(i);
