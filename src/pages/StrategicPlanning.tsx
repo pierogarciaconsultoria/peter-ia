@@ -7,6 +7,7 @@ import { StrategicIdentityForm } from "@/components/strategic-planning/Strategic
 import { SwotAnalysis } from "@/components/strategic-planning/SwotAnalysis";
 import { BalancedScorecard } from "@/components/strategic-planning/BalancedScorecard";
 import { BusinessModelCanvas } from "@/components/strategic-planning/BusinessModelCanvas";
+import { StrategicAssistant } from "@/components/strategic-planning/StrategicAssistant";
 import { getStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { StrategicIdentity } from "@/types/strategic-planning";
 
@@ -78,6 +79,7 @@ const StrategicPlanning = () => {
         </div>
       </main>
       
+      <StrategicAssistant />
       <Footer />
     </div>
   );
