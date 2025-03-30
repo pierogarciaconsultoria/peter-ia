@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Users, Award, GraduationCap, AlertTriangle } from "lucide-react";
-import { MaturityThermometer } from "./MaturityThermometer";
+import { MaturityThermometer } from "@/components/MaturityThermometer";
 
 export function HRDashboard() {
   // These would come from the API in a real implementation
@@ -90,14 +90,7 @@ export function HRDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
-        <div className="md:col-span-2">
-          <MaturityThermometer 
-            score={maturityScore}
-            modulesCompletion={modulesCompletion}
-            goalsAchievement={goalsAchievement}
-          />
-        </div>
-        <div className="md:col-span-3">
+        <div className="md:col-span-5">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Atenção</AlertTitle>
