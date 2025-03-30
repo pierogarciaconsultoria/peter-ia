@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomerComplaint {
@@ -18,6 +17,9 @@ export interface CustomerComplaint {
   invoice_number?: string;
   product?: string;
   return_deadline?: string;
+  identification_code?: string;
+  treatment_option?: 'return' | 'credit' | 'warranty' | 'other';
+  action_schedule_id?: string;
 }
 
 export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
@@ -35,6 +37,7 @@ export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
     ...item,
     status: item.status as CustomerComplaint['status'],
     priority: item.priority as CustomerComplaint['priority'],
+    treatment_option: item.treatment_option as CustomerComplaint['treatment_option'],
   }));
 }
 
@@ -54,6 +57,7 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
+    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
   };
 }
 
@@ -73,6 +77,7 @@ export async function createCustomerComplaint(complaint: Omit<CustomerComplaint,
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
+    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
   };
 }
 
@@ -102,6 +107,7 @@ export async function updateCustomerComplaint(id: string, complaint: Partial<Omi
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
+    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
   };
 }
 

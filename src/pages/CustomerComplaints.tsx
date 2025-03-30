@@ -8,7 +8,9 @@ import {
   Clock, 
   CheckCircle, 
   Users,
-  FileText
+  FileText,
+  CalendarClock,
+  Tag
 } from "lucide-react";
 import { getCustomerComplaints, CustomerComplaint } from "@/services/customerComplaintService";
 import { format } from "date-fns";
@@ -16,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { CustomerComplaintFormDialog } from "@/components/customer-complaints/CustomerComplaintFormDialog";
 import { Footer } from "@/components/Footer";
+import { Link } from "react-router-dom";
 
 const CustomerComplaints = () => {
   const [complaints, setComplaints] = useState<CustomerComplaint[]>([]);
@@ -268,13 +271,37 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
         return priority;
     }
   };
+  
+  const getTreatmentOptionText = (option?: string) => {
+    if (!option) return null;
+    
+    switch (option) {
+      case 'return':
+        return 'Devolução';
+      case 'credit':
+        return 'Crédito';
+      case 'warranty':
+        return 'Garantia';
+      case 'other':
+        return 'Outro';
+      default:
+        return option;
+    }
+  };
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg">{complaint.customer_name}</CardTitle>
+            <div className="flex items-center gap-2 mb-1">
+              {complaint.identification_code && (
+                <span className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-md">
+                  {complaint.identification_code}
+                </span>
+              )}
+              <CardTitle className="text-lg">{complaint.customer_name}</CardTitle>
+            </div>
             <CardDescription className="text-sm mt-1">
               Data: {format(new Date(complaint.complaint_date), 'PPP', { locale: ptBR })}
             </CardDescription>
@@ -291,7 +318,6 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {/* Display the new fields */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
             {complaint.invoice_number && (
               <div className="flex items-center text-sm">
@@ -315,6 +341,26 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
               </div>
             )}
           </div>
+          
+          {/* New treatment option display */}
+          {complaint.treatment_option && (
+            <div className="flex items-center text-sm mb-2">
+              <Tag className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="text-muted-foreground mr-1">Tratativa:</span>
+              <span className="font-medium">{getTreatmentOptionText(complaint.treatment_option)}</span>
+            </div>
+          )}
+          
+          {/* Action schedule link */}
+          {complaint.action_schedule_id && (
+            <div className="flex items-center text-sm mb-2">
+              <CalendarClock className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="text-muted-foreground mr-1">Ação Vinculada:</span>
+              <Link to={`/action-schedule?id=${complaint.action_schedule_id}`} className="text-primary hover:underline">
+                {complaint.action_schedule_id}
+              </Link>
+            </div>
+          )}
           
           <p className="text-sm">{complaint.description}</p>
           {complaint.assigned_to && (

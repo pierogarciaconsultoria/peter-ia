@@ -6,7 +6,8 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { ImagePlus, X, Upload } from "lucide-react";
+import { ImagePlus, X, Upload, Calendar, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group";
 import { createCustomerComplaint } from "@/services/customerComplaintService";
+import { generateRandomCode } from "@/utils/codeGenerator";
 
 // Define the form schema with Zod
 const formSchema = z.object({
@@ -40,7 +46,10 @@ const formSchema = z.object({
   assigned_to: z.string().optional(),
   invoice_number: z.string().optional().or(z.literal("")),
   product: z.string().optional().or(z.literal("")),
-  return_deadline: z.string().optional().or(z.literal(""))
+  return_deadline: z.string().optional().or(z.literal("")),
+  identification_code: z.string(),
+  treatment_option: z.enum(["return", "credit", "warranty", "other"]),
+  action_schedule_id: z.string().optional().or(z.literal(""))
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -68,7 +77,10 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
       assigned_to: "",
       invoice_number: "",
       product: "",
-      return_deadline: format(new Date(), "yyyy-MM-dd")
+      return_deadline: format(new Date(), "yyyy-MM-dd"),
+      identification_code: generateRandomCode("RC"),
+      treatment_option: "return",
+      action_schedule_id: ""
     },
   });
 
@@ -121,6 +133,9 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
         invoice_number: values.invoice_number || "",
         product: values.product || "",
         return_deadline: values.return_deadline || "",
+        identification_code: values.identification_code,
+        treatment_option: values.treatment_option,
+        action_schedule_id: values.action_schedule_id || "",
         status: "open",
         resolution: ""
       });
@@ -141,14 +156,16 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="customer_name"
+            name="identification_code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nome do Cliente</FormLabel>
+                <FormLabel>Código de Identificação</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome do Cliente" {...field} />
+                  <Input {...field} readOnly />
                 </FormControl>
-                <FormMessage />
+                <FormDescription>
+                  Código único para identificar esta reclamação
+                </FormDescription>
               </FormItem>
             )}
           />
@@ -161,6 +178,67 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
                 <FormLabel>Data da Reclamação</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="customer_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome do Cliente</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nome do Cliente" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="treatment_option"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormLabel>Opção de Tratativa</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col space-y-1"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="return" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Devolução</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="credit" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Crédito</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="warranty" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Garantia</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="other" />
+                        </FormControl>
+                        <FormLabel className="font-normal">Outro</FormLabel>
+                      </FormItem>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -198,7 +276,6 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
           />
         </div>
 
-        {/* New fields: Invoice Number and Product */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
@@ -292,7 +369,6 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
             )}
           />
 
-          {/* New field: Return Deadline */}
           <FormField
             control={form.control}
             name="return_deadline"
@@ -302,6 +378,39 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
+          <h3 className="font-medium mb-2 flex items-center">
+            <Calendar className="mr-2 h-4 w-4" />
+            Cronograma de Ação
+          </h3>
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/action-schedule"
+              className="text-primary flex items-center hover:underline"
+              target="_blank"
+            >
+              Criar nova ação
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+          <FormField
+            control={form.control}
+            name="action_schedule_id"
+            render={({ field }) => (
+              <FormItem className="mt-2">
+                <FormLabel>ID da Ação</FormLabel>
+                <FormControl>
+                  <Input placeholder="Código da ação relacionada" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Associe esta reclamação a uma ação existente no cronograma
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
