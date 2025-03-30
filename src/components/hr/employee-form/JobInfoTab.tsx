@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,11 +34,9 @@ export function JobInfoTab({
     setFormData({ ...formData, department: value });
   };
 
-  // Function to handle job position selection
   const handleJobPositionSelect = (position: JobPosition | null) => {
     setSelectedJobPosition(position);
     if (position) {
-      // Update job title and department based on selected position
       setFormData({
         ...formData,
         jobTitle: position.title,
@@ -164,10 +161,10 @@ export function JobInfoTab({
               <Label>Descrição e Requisitos do Cargo</Label>
               <div className="p-4 border rounded-md bg-muted/50 max-h-40 overflow-y-auto">
                 <p className="text-sm">{selectedJobPosition.description}</p>
-                {selectedJobPosition.requirements && (
+                {selectedJobPosition.skill_requirements && (
                   <>
                     <h4 className="font-medium mt-2 mb-1 text-sm">Requisitos:</h4>
-                    <p className="text-sm">{selectedJobPosition.requirements}</p>
+                    <p className="text-sm">{selectedJobPosition.skill_requirements}</p>
                   </>
                 )}
               </div>

@@ -7,12 +7,12 @@ import ReactFlow, {
   ReactFlowProvider, 
   useNodesState, 
   useEdgesState,
-  Position
+  Position as FlowPosition
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useDepartments } from "@/hooks/useDepartments";
 
-interface Position {
+interface JobPosition {
   id: string;
   title: string;
   department: string;
@@ -22,7 +22,7 @@ interface Position {
 }
 
 interface DepartmentOrgChartProps {
-  positions: Position[];
+  positions: JobPosition[];
 }
 
 interface OrgChartNode extends FlowNode {
@@ -47,7 +47,7 @@ function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
   
   // Group positions by department for more organized layout
   const departmentGroups = React.useMemo(() => {
-    const deptMap = new Map<string, Position[]>();
+    const deptMap = new Map<string, JobPosition[]>();
     
     positions.forEach(pos => {
       if (!deptMap.has(pos.department)) {
@@ -91,8 +91,8 @@ function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
             department: position.department,
             isDepartmentHead: position.isDepartmentHead
           },
-          sourcePosition: Position.Bottom,
-          targetPosition: Position.Top,
+          sourcePosition: FlowPosition.Bottom,
+          targetPosition: FlowPosition.Top,
         });
         
         // Add edge from parent to this position
