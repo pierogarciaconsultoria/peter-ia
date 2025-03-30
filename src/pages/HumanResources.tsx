@@ -6,8 +6,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HRDashboard } from "@/components/hr/HRDashboard";
 import { EmployeeDirectory } from "@/components/hr/EmployeeDirectory";
 import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, Plus, Upload } from "lucide-react";
+import { 
+  Download, 
+  FileSpreadsheet, 
+  Plus, 
+  Upload,
+  FileCheck,
+  FileSearch,
+  ClipboardCheck,
+  Trophy,
+  BarChart4,
+  MessageCircle,
+  LineChart,
+  Newspaper,
+  AlertTriangle,
+  Stethoscope
+} from "lucide-react";
 import { HRFilters } from "@/components/hr/HRFilters";
+import { RecruitmentSelection } from "@/components/hr/RecruitmentSelection";
+import { ApprovedPositions } from "@/components/hr/ApprovedPositions";
+import { OnlineAdmission } from "@/components/hr/OnlineAdmission";
+import { TrialEvaluation } from "@/components/hr/TrialEvaluation";
+import { PerformanceEvaluation } from "@/components/hr/PerformanceEvaluation";
+import { JobSalaryPlan } from "@/components/hr/JobSalaryPlan";
+import { FeedbackManagement } from "@/components/hr/FeedbackManagement";
+import { ClimateResearch } from "@/components/hr/ClimateResearch";
+import { EmployeeBoard } from "@/components/hr/EmployeeBoard";
+import { OccurrenceManagement } from "@/components/hr/OccurrenceManagement";
+import { MedicalCertificateManagement } from "@/components/hr/MedicalCertificateManagement";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -49,13 +75,21 @@ const HumanResources = () => {
           <HRFilters />
           
           <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6">
+            <TabsList className="mb-6 flex flex-wrap">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="employees">Funcionários</TabsTrigger>
+              <TabsTrigger value="recruitment">Recrutamento</TabsTrigger>
+              <TabsTrigger value="positions">Quadro Aprovado</TabsTrigger>
+              <TabsTrigger value="admission">Admissão Online</TabsTrigger>
+              <TabsTrigger value="trial">Avaliação de Experiência</TabsTrigger>
+              <TabsTrigger value="performance">Avaliação de Desempenho</TabsTrigger>
+              <TabsTrigger value="job-plan">Cargos e Salários</TabsTrigger>
+              <TabsTrigger value="feedback">Feedbacks</TabsTrigger>
+              <TabsTrigger value="climate">Clima Organizacional</TabsTrigger>
+              <TabsTrigger value="board">Mural do Colaborador</TabsTrigger>
+              <TabsTrigger value="occurrence">Ocorrências</TabsTrigger>
+              <TabsTrigger value="certificates">Atestados</TabsTrigger>
               <TabsTrigger value="departments">Departamentos</TabsTrigger>
-              <TabsTrigger value="positions">Cargos</TabsTrigger>
-              <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
-              <TabsTrigger value="trainings">Treinamentos</TabsTrigger>
             </TabsList>
             
             <TabsContent value="dashboard">
@@ -65,28 +99,54 @@ const HumanResources = () => {
             <TabsContent value="employees">
               <EmployeeDirectory />
             </TabsContent>
+
+            <TabsContent value="recruitment">
+              <RecruitmentSelection />
+            </TabsContent>
+
+            <TabsContent value="positions">
+              <ApprovedPositions />
+            </TabsContent>
+
+            <TabsContent value="admission">
+              <OnlineAdmission />
+            </TabsContent>
+
+            <TabsContent value="trial">
+              <TrialEvaluation />
+            </TabsContent>
+
+            <TabsContent value="performance">
+              <PerformanceEvaluation />
+            </TabsContent>
+
+            <TabsContent value="job-plan">
+              <JobSalaryPlan />
+            </TabsContent>
+
+            <TabsContent value="feedback">
+              <FeedbackManagement />
+            </TabsContent>
+
+            <TabsContent value="climate">
+              <ClimateResearch />
+            </TabsContent>
+
+            <TabsContent value="board">
+              <EmployeeBoard />
+            </TabsContent>
+
+            <TabsContent value="occurrence">
+              <OccurrenceManagement />
+            </TabsContent>
+
+            <TabsContent value="certificates">
+              <MedicalCertificateManagement />
+            </TabsContent>
             
             <TabsContent value="departments">
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Módulo de Departamentos será implementado em breve.</p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="positions">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Módulo de Cargos será implementado em breve.</p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="evaluations">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Módulo de Avaliações será implementado em breve.</p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="trainings">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Módulo de Treinamentos será implementado em breve.</p>
               </div>
             </TabsContent>
           </Tabs>
