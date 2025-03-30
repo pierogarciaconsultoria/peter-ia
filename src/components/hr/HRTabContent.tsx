@@ -24,11 +24,6 @@ import { DiscAssessment } from "@/components/hr/disc-assessment/DiscAssessment";
 import { OrgStructurePage } from "@/components/hr/organizational-structure/OrgStructurePage";
 import { useLocation } from "react-router-dom";
 
-type HRTabContentProps = {
-  activeTab: string;
-  onTabChange: (value: string) => void;
-};
-
 export function HRTabContent({ 
   activeTab, 
   onTabChange 

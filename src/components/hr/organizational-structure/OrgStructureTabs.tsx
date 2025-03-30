@@ -11,7 +11,7 @@ export function OrgStructureTabs() {
   const navigate = useNavigate();
   
   const handleViewJobPositions = () => {
-    navigate("/human-resources", { state: { activeTab: "job-salary" } });
+    navigate("/human-resources", { state: { activeTab: "job-plan" } });
   };
   
   return (
