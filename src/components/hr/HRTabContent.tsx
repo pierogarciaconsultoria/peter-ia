@@ -1,3 +1,5 @@
+
+import { useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { HRDashboard } from "@/components/hr/HRDashboard";
 import { EmployeeDirectory } from "@/components/hr/EmployeeDirectory";
@@ -20,6 +22,7 @@ import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
 import { DepartmentManagement } from "@/components/hr/DepartmentManagement";
 import { DiscAssessment } from "@/components/hr/disc-assessment/DiscAssessment";
 import { OrgStructurePage } from "@/components/hr/organizational-structure/OrgStructurePage";
+import { useLocation } from "react-router-dom";
 
 type HRTabContentProps = {
   activeTab: string;
@@ -33,13 +36,15 @@ export function HRTabContent({
   activeTab: string, 
   onTabChange: (tabId: string) => void 
 }) {
+  const location = useLocation();
+  
   useEffect(() => {
-    const location = window.location;
     if (location.state && location.state.activeTab && activeTab !== location.state.activeTab) {
       onTabChange(location.state.activeTab);
+      // After handling the state, clear it to prevent continual redirects
       window.history.replaceState({}, document.title);
     }
-  }, [activeTab, onTabChange]);
+  }, [activeTab, onTabChange, location]);
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="mt-6">
