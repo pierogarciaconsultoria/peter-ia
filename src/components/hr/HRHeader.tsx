@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, Plus, Upload } from "lucide-react";
+import { NewEmployeeDialog } from "./NewEmployeeDialog";
 
 export function HRHeader() {
   return (
@@ -25,10 +26,7 @@ export function HRHeader() {
           <FileSpreadsheet className="h-4 w-4 mr-2" />
           Relatórios
         </Button>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Funcionário
-        </Button>
+        <NewEmployeeDialog />
       </div>
     </div>
   );

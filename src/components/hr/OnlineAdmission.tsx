@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { NewEmployeeDialog } from "./NewEmployeeDialog";
 
 export function OnlineAdmission() {
   // Mock data for admission processes
@@ -86,10 +87,12 @@ export function OnlineAdmission() {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Admissão Online</h2>
-        <Button>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Nova Admissão
-        </Button>
+        <NewEmployeeDialog triggerButton={
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Nova Admissão
+          </Button>
+        } />
       </div>
       
       <div className="grid gap-6 md:grid-cols-3">
