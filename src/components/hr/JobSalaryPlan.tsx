@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -19,9 +18,10 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Briefcase, Edit, LineChart, Plus, TrendingUp } from "lucide-react";
+import { Briefcase, Edit, LineChart, Plus, TrendingUp, Users } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DepartmentOrgChart } from "./DepartmentOrgChart";
 
 export function JobSalaryPlan() {
   // Mock data for job positions
@@ -214,6 +214,7 @@ export function JobSalaryPlan() {
           <TabsTrigger value="positions">Cargos</TabsTrigger>
           <TabsTrigger value="market">Análise de Mercado</TabsTrigger>
           <TabsTrigger value="career">Planos de Carreira</TabsTrigger>
+          <TabsTrigger value="orgchart">Organograma</TabsTrigger>
         </TabsList>
         
         <TabsContent value="positions">
@@ -309,6 +310,18 @@ export function JobSalaryPlan() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="orgchart">
+          <DepartmentOrgChart 
+            positions={jobPositions.map(job => ({
+              id: job.id,
+              title: job.title,
+              department: job.department,
+              level: job.level,
+              parentPosition: null
+            }))}
+          />
         </TabsContent>
       </Tabs>
     </div>

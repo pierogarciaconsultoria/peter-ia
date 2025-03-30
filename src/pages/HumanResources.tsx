@@ -20,7 +20,8 @@ import {
   LineChart,
   Newspaper,
   AlertTriangle,
-  Stethoscope
+  Stethoscope,
+  Users
 } from "lucide-react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { RecruitmentSelection } from "@/components/hr/RecruitmentSelection";
