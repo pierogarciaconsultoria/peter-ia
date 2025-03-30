@@ -136,8 +136,8 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             <ManualIdentityForm
               mission={mission}
               setMission={setMission}
-              vision={setVision}
               vision={vision}
+              setVision={setVision}
               values={values}
               setValues={setValues}
               isLoading={loading}
