@@ -1,8 +1,5 @@
 
 import { useState } from "react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -10,24 +7,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useDiscAssessments, DiscType, DiscScore } from "@/hooks/useDiscAssessments";
+import { useDiscAssessments } from "@/hooks/useDiscAssessments";
 import { DiscQuestionnaireForm } from "./DiscQuestionnaireForm";
-
-// Esquema de validação para o formulário de informações básicas
-const basicInfoSchema = z.object({
-  name: z.string().min(3, { message: "Nome deve ter pelo menos 3 caracteres" }),
-  email: z.string().email({ message: "E-mail inválido" }),
-});
+import { BasicInfoForm, BasicInfoFormData } from "./BasicInfoForm";
+import { DiscScore } from "@/hooks/useDiscAssessments";
 
 interface NewAssessmentDialogProps {
   isOpen: boolean;
@@ -43,17 +26,9 @@ export function NewAssessmentDialog({
   const { createAssessment } = useDiscAssessments();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"basicInfo" | "questionnaire">("basicInfo");
-  const [basicInfo, setBasicInfo] = useState<{ name: string; email: string } | null>(null);
+  const [basicInfo, setBasicInfo] = useState<BasicInfoFormData | null>(null);
   
-  const form = useForm<z.infer<typeof basicInfoSchema>>({
-    resolver: zodResolver(basicInfoSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-    },
-  });
-  
-  const handleBasicInfoSubmit = async (values: z.infer<typeof basicInfoSchema>) => {
+  const handleBasicInfoSubmit = (values: BasicInfoFormData) => {
     setBasicInfo(values);
     setStep("questionnaire");
   };
@@ -64,10 +39,10 @@ export function NewAssessmentDialog({
     setIsSubmitting(true);
     try {
       // Determine primary type based on highest score
-      const scoreEntries = Object.entries(scores) as [DiscType, number][];
+      const scoreEntries = Object.entries(scores) as [keyof DiscScore, number][];
       const primaryType = scoreEntries.reduce(
         (max, [type, score]) => score > max.score ? { type, score } : max, 
-        { type: 'D' as DiscType, score: -1 }
+        { type: 'D' as keyof DiscScore, score: -1 }
       ).type;
       
       await createAssessment({
@@ -77,7 +52,6 @@ export function NewAssessmentDialog({
         primary_type: primaryType,
       });
       
-      form.reset();
       setStep("basicInfo");
       setBasicInfo(null);
       onSuccess();
@@ -102,7 +76,6 @@ export function NewAssessmentDialog({
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {
         // Reset form when dialog is closed
-        form.reset();
         setStep("basicInfo");
         setBasicInfo(null);
       }
@@ -119,50 +92,10 @@ export function NewAssessmentDialog({
         </DialogHeader>
         
         {step === "basicInfo" ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleBasicInfoSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do participante" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Email do participante" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-  
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  Próximo
-                </Button>
-              </div>
-            </form>
-          </Form>
+          <BasicInfoForm 
+            onSubmit={handleBasicInfoSubmit}
+            onCancel={() => onOpenChange(false)}
+          />
         ) : (
           <DiscQuestionnaireForm 
             onComplete={handleQuestionnaireComplete}

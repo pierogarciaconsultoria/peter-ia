@@ -22,6 +22,14 @@ export interface DiscAssessment {
   date: string;
 }
 
+interface CreateDiscAssessmentInput {
+  name: string;
+  email: string;
+  scores: DiscScore;
+  primary_type: string;
+  invited_by?: string;
+}
+
 export function useDiscAssessments() {
   const [assessments, setAssessments] = useState<DiscAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +52,7 @@ export function useDiscAssessments() {
         id: item.id,
         name: item.name,
         email: item.email,
-        scores: item.scores as unknown as DiscScore, // Type assertion for scores
+        scores: item.scores as DiscScore,
         primary_type: item.primary_type as DiscType,
         invited_by: item.invited_by,
         date: item.date
@@ -64,15 +72,14 @@ export function useDiscAssessments() {
     }
   };
 
-  const createAssessment = async (assessment: Omit<DiscAssessment, 'id' | 'date'>) => {
+  const createAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
-      // Convert the scores to JSONB format that Supabase expects
       const { data, error } = await supabase
         .from("disc_assessments")
         .insert({
           name: assessment.name,
           email: assessment.email,
-          scores: assessment.scores as unknown as any, // Type assertion for Supabase
+          scores: assessment.scores,
           primary_type: assessment.primary_type,
           invited_by: assessment.invited_by
         })

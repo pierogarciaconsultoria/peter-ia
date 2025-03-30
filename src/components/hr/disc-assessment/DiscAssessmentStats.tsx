@@ -8,8 +8,14 @@ interface DiscAssessmentStatsProps {
   assessments: DiscAssessment[];
 }
 
+interface ChartDataPoint {
+  name: string;
+  value: number;
+  color: string;
+}
+
 export function DiscAssessmentStats({ assessments }: DiscAssessmentStatsProps) {
-  const primaryTypeCounts = useMemo(() => {
+  const primaryTypeCounts = useMemo((): ChartDataPoint[] => {
     const counts = { D: 0, I: 0, S: 0, C: 0 };
     
     assessments.forEach(assessment => {
@@ -24,8 +30,8 @@ export function DiscAssessmentStats({ assessments }: DiscAssessmentStatsProps) {
     ];
   }, [assessments]);
   
-  const averageScores = useMemo(() => {
-    if (assessments.length === 0) return { D: 0, I: 0, S: 0, C: 0 };
+  const averageScores = useMemo((): ChartDataPoint[] => {
+    if (assessments.length === 0) return [];
     
     const totals = { D: 0, I: 0, S: 0, C: 0 };
     
@@ -103,7 +109,7 @@ export function DiscAssessmentStats({ assessments }: DiscAssessmentStatsProps) {
               >
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value.toFixed(1)} pontos`, 'Média']} />
+                <Tooltip formatter={(value: number) => [`${value.toFixed(1)} pontos`, 'Média']} />
                 <Bar dataKey="value">
                   {averageScores.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
