@@ -8,6 +8,7 @@ import HumanResources from "./pages/HumanResources";
 import DocumentUpload from "./pages/DocumentUpload";
 import StrategicPlanning from "./pages/StrategicPlanning"; 
 import NotFound from "./pages/NotFound";
+import Documents from "./pages/Documents";
 
 const router = createBrowserRouter([
   {
@@ -18,17 +19,18 @@ const router = createBrowserRouter([
     path: "/human-resources",
     element: <HumanResources />,
   },
-  // Adicionar a nova rota para upload de documentos
   {
     path: "/document-upload/:token",
     element: <DocumentUpload />,
   },
-  // Adicionar a rota para planejamento estratégico
   {
     path: "/strategic-planning",
     element: <StrategicPlanning />,
   },
-  // Adicionar rota para tratamento de 404
+  {
+    path: "/documents",
+    element: <Documents />,
+  },
   {
     path: "*",
     element: <NotFound />,
