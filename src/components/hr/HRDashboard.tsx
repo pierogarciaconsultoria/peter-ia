@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Users, Award, GraduationCap, AlertTriangle } from "lucide-react";
+import { MaturityThermometer } from "./MaturityThermometer";
 
 export function HRDashboard() {
   // These would come from the API in a real implementation
@@ -13,10 +14,29 @@ export function HRDashboard() {
     departments: 6
   };
 
+  // Mock data for maturity calculation
+  const modulesCompletion = [
+    { module: "Recrutamento e Seleção", completion: 75, weight: 0.2 },
+    { module: "Onboarding", completion: 60, weight: 0.15 },
+    { module: "Avaliações", completion: 45, weight: 0.2 },
+    { module: "Desenvolvimento", completion: 30, weight: 0.25 },
+    { module: "Processos de Saída", completion: 50, weight: 0.2 },
+  ];
+  
+  // Calculate overall score
+  const completionScore = modulesCompletion.reduce(
+    (sum, module) => sum + (module.completion * module.weight), 0
+  );
+  
+  const goalsAchievement = 65; // Mock data for goals achievement
+  
+  // Final maturity score (70% from modules completion, 30% from goals)
+  const maturityScore = Math.round((completionScore * 0.7) + (goalsAchievement * 0.3));
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Funcionários</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -69,14 +89,25 @@ export function HRDashboard() {
         </Card>
       </div>
 
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Atenção</AlertTitle>
-        <AlertDescription>
-          Existem 3 funcionários com avaliações de desempenho atrasadas. 
-          Verifique a aba "Avaliações" para mais detalhes.
-        </AlertDescription>
-      </Alert>
+      <div className="grid gap-4 md:grid-cols-5">
+        <div className="md:col-span-2">
+          <MaturityThermometer 
+            score={maturityScore}
+            modulesCompletion={modulesCompletion}
+            goalsAchievement={goalsAchievement}
+          />
+        </div>
+        <div className="md:col-span-3">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Atenção</AlertTitle>
+            <AlertDescription>
+              Existem 3 funcionários com avaliações de desempenho atrasadas. 
+              Verifique a aba "Avaliações" para mais detalhes.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
