@@ -39,7 +39,18 @@ export function useDiscAssessments() {
       
       if (error) throw error;
       
-      setAssessments(data);
+      // Transform the data to match our interface
+      const formattedData: DiscAssessment[] = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        scores: item.scores as unknown as DiscScore, // Type assertion for scores
+        primary_type: item.primary_type as DiscType,
+        invited_by: item.invited_by,
+        date: item.date
+      }));
+      
+      setAssessments(formattedData);
     } catch (err: any) {
       console.error("Error fetching DISC assessments:", err);
       setError(err.message || "Erro ao carregar avaliações DISC");
@@ -55,12 +66,13 @@ export function useDiscAssessments() {
 
   const createAssessment = async (assessment: Omit<DiscAssessment, 'id' | 'date'>) => {
     try {
+      // Convert the scores to JSONB format that Supabase expects
       const { data, error } = await supabase
         .from("disc_assessments")
         .insert({
           name: assessment.name,
           email: assessment.email,
-          scores: assessment.scores,
+          scores: assessment.scores as unknown as any, // Type assertion for Supabase
           primary_type: assessment.primary_type,
           invited_by: assessment.invited_by
         })
