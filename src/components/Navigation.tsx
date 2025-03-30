@@ -79,7 +79,7 @@ export function Navigation() {
     icon: <Search size={18} />,
     path: "/critical-analysis"
   }, {
-    name: "Gestão de Pessoas",
+    name: "Gente e Gestão",
     icon: <Users size={18} />,
     path: "/human-resources"
   }, {
