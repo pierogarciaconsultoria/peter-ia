@@ -22,6 +22,9 @@ export interface DiscAssessment {
   date: string;
 }
 
+// Type for Supabase JSON
+type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
 interface CreateDiscAssessmentInput {
   name: string;
   email: string;
@@ -47,16 +50,27 @@ export function useDiscAssessments() {
       
       if (error) throw error;
       
-      // Transform the data to match our interface
-      const formattedData: DiscAssessment[] = data.map(item => ({
-        id: item.id,
-        name: item.name,
-        email: item.email,
-        scores: item.scores as DiscScore,
-        primary_type: item.primary_type as DiscType,
-        invited_by: item.invited_by,
-        date: item.date
-      }));
+      // Transform the data to match our interface with proper type checking
+      const formattedData: DiscAssessment[] = data.map(item => {
+        // Safely cast the scores from Json to DiscScore
+        const scoresData = item.scores as Record<string, number>;
+        const scores: DiscScore = {
+          D: scoresData.D || 0,
+          I: scoresData.I || 0,
+          S: scoresData.S || 0,
+          C: scoresData.C || 0
+        };
+        
+        return {
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          scores: scores,
+          primary_type: item.primary_type as DiscType,
+          invited_by: item.invited_by,
+          date: item.date
+        };
+      });
       
       setAssessments(formattedData);
     } catch (err: any) {
@@ -74,12 +88,20 @@ export function useDiscAssessments() {
 
   const createAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
+      // Convert DiscScore to a format acceptable by Supabase (plain object)
+      const scoresForDb = {
+        D: assessment.scores.D,
+        I: assessment.scores.I,
+        S: assessment.scores.S,
+        C: assessment.scores.C
+      };
+
       const { data, error } = await supabase
         .from("disc_assessments")
         .insert({
           name: assessment.name,
           email: assessment.email,
-          scores: assessment.scores,
+          scores: scoresForDb,  // Use the plain object which is compatible with Json type
           primary_type: assessment.primary_type,
           invited_by: assessment.invited_by
         })
