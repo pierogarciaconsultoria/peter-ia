@@ -163,7 +163,7 @@ const HumanResources = () => {
           </div>
           
           <div className="border rounded-md">
-            <ScrollArea className="w-full" orientation="horizontal">
+            <ScrollArea className="w-full">
               <div className="flex p-1 min-w-max">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="flex w-full h-auto flex-wrap bg-transparent p-0 gap-1">
