@@ -14,10 +14,10 @@ export interface ExitInterviewData {
   department: string;
   exitDate: Date;
   reason: string;
-  feedback?: string;
+  feedback: string; // Changed from optional to required
   overallExperience: string;
   wouldRecommend: string;
-  improvementSuggestions?: string;
+  improvementSuggestions: string; // Changed from optional to required
 }
 
 interface ExitInterviewFormDialogProps {
@@ -45,7 +45,7 @@ export function ExitInterviewFormDialog({
         
         <ExitInterviewForm 
           onSubmit={(data) => {
-            onSubmit(data);
+            onSubmit(data as ExitInterviewData); // Add type assertion to ensure compatibility
             onOpenChange(false);
           }}
           onCancel={() => onOpenChange(false)}

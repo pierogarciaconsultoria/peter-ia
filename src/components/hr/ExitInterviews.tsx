@@ -83,7 +83,10 @@ export function ExitInterviews() {
     const newInterview = {
       id: `exit${exitInterviews.length + 1}`,
       ...data,
-      status: "realizada"
+      status: "realizada",
+      // Ensure required fields have default values if they're missing
+      feedback: data.feedback || "",
+      improvementSuggestions: data.improvementSuggestions || ""
     };
     
     setExitInterviews([newInterview, ...exitInterviews]);

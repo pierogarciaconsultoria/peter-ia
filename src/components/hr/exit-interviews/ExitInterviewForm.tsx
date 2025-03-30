@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -40,10 +39,10 @@ const exitInterviewSchema = z.object({
   department: z.string().min(1, "Departamento é obrigatório"),
   exitDate: z.date({ required_error: "Data de saída é obrigatória" }),
   reason: z.string().min(1, "Motivo do desligamento é obrigatório"),
-  feedback: z.string().optional(),
+  feedback: z.string().min(1, "Feedback é obrigatório"),
   overallExperience: z.string().min(1, "Avaliação geral é obrigatória"),
   wouldRecommend: z.string().min(1, "Recomendação é obrigatória"),
-  improvementSuggestions: z.string().optional(),
+  improvementSuggestions: z.string().min(1, "Sugestões de melhoria são obrigatórias"),
 });
 
 type ExitInterviewFormValues = z.infer<typeof exitInterviewSchema>;
