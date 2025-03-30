@@ -1,3 +1,4 @@
+
 export const hrTabGroups = [
   {
     label: "Principais",
@@ -7,6 +8,7 @@ export const hrTabGroups = [
       { value: "employees", label: "Funcionários" },
       { value: "recruitment", label: "Recrutamento" },
       { value: "positions", label: "Quadro Aprovado" },
+      { value: "org-structure", label: "Organograma" },
       { value: "admission", label: "Admissão Online" },
       { value: "onboarding", label: "Onboarding" }
     ]

@@ -20,6 +20,7 @@ import { VacationManagement } from "@/components/hr/VacationManagement";
 import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
 import { DepartmentManagement } from "@/components/hr/DepartmentManagement";
 import { DiscAssessment } from "@/components/hr/disc-assessment/DiscAssessment";
+import { OrgStructurePage } from "@/components/hr/organizational-structure/OrgStructurePage";
 
 type HRTabContentProps = {
   activeTab: string;
@@ -47,6 +48,10 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
 
       <TabsContent value="positions">
         <ApprovedPositions />
+      </TabsContent>
+
+      <TabsContent value="org-structure">
+        <OrgStructurePage />
       </TabsContent>
 
       <TabsContent value="admission">

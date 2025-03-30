@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,6 @@ import { DepartmentFormDialog } from "./departments/DepartmentFormDialog";
 import { DeleteConfirmDialog } from "./departments/DeleteConfirmDialog";
 import { DepartmentHeader } from "./departments/DepartmentHeader";
 import { DepartmentListCard } from "./departments/DepartmentListCard";
-import { DepartmentOrgStructure } from "./departments/DepartmentOrgStructure";
 import { TemplateDepartmentsDialog } from "./departments/TemplateDepartmentsDialog";
 
 export function DepartmentManagement() {
@@ -169,8 +167,6 @@ export function DepartmentManagement() {
         onAddDepartment={() => handleOpenForm()}
         onShowTemplates={handleOpenTemplatesDialog}
       />
-
-      <DepartmentOrgStructure />
 
       <DepartmentFormDialog
         isOpen={isFormOpen}
