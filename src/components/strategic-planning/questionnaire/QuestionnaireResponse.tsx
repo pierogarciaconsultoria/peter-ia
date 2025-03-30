@@ -6,15 +6,23 @@ interface QuestionnaireResponseProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  placeholder?: string;
+  rows?: number;
 }
 
-export function QuestionnaireResponse({ value, onChange, disabled }: QuestionnaireResponseProps) {
+export function QuestionnaireResponse({
+  value,
+  onChange,
+  disabled,
+  placeholder = "Digite sua resposta aqui...",
+  rows = 6
+}: QuestionnaireResponseProps) {
   return (
     <Textarea
-      placeholder="Digite sua resposta aqui..."
+      placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      rows={6}
+      rows={rows}
       className="resize-none mt-4"
       disabled={disabled}
     />

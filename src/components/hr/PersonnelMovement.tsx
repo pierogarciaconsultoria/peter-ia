@@ -20,15 +20,6 @@ import { RequestStatusCards } from "./personnel/RequestStatusCards";
 import { RequestTable } from "./personnel/RequestTable";
 import { mockRequests } from "./personnel/mock-data";
 
-interface JobPositionData {
-  id: string;
-  title: string;
-  description: string;
-  department: string;
-  code?: string;
-  revision?: string;
-}
-
 export function PersonnelMovement() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -95,19 +86,48 @@ export function PersonnelMovement() {
   }, [toast]);
   
   const handleSubmit = (data: RequestFormValues) => {
+    // Map form movement type to a readable label
+    const getTypeLabel = (type: string) => {
+      const typeMap: { [key: string]: string } = {
+        "hiring": "Admissão",
+        "termination": "Demissão",
+        "salaryChange": "Aumento salarial",
+        "positionChange": "Mudança de cargo",
+        "vacation": "Férias",
+        "scheduleChange": "Mudança de horário",
+        "absence": "Falta ao trabalho",
+        "late": "Chegou atrasado",
+        "medicalCertificate": "Atestado",
+        "cardPunchForgot": "Esqueceu de bater cartão",
+        "departmentChange": "Mudança de setor",
+        "shiftChange": "Troca de turno",
+        "factoryLeave": "Autorização saída da fábrica",
+        "writtenWarning": "Advertência por escrito",
+        "verbalWarning": "Advertência verbal",
+        "overtimeAuth": "Autorizado a fazer hora extra",
+        "dayExchange": "Troca de dia",
+        "hourCredit": "Abono de hora"
+      };
+      return typeMap[type] || type;
+    };
+    
     // Find the selected job position to get its details
-    const selectedPosition = jobPositions.find(job => job.id === data.position);
+    const selectedPosition = jobPositions.find(job => job.id === data.position_id);
     
     // In a real implementation, this would send the data to an API
     const newRequest: PersonnelRequest = {
       id: (requests.length + 1).toString(),
-      type: data.type,
+      type: getTypeLabel(data.type),
       department: data.department,
-      position: selectedPosition ? selectedPosition.title : data.position,
-      position_id: data.position, // Store the position ID
+      position: data.currentPosition || (selectedPosition ? selectedPosition.title : ""),
+      position_id: data.position_id,
       requestDate: new Date().toISOString().split('T')[0],
       status: "pending",
-      requester: "Usuário Atual" // In a real app, this would be the logged-in user
+      requester: "Usuário Atual", // In a real app, this would be the logged-in user
+      employeeName: data.employeeName,
+      currentSalary: data.currentSalary,
+      proposedSalary: data.proposedSalary,
+      justification: data.justification
     };
     
     setRequests([newRequest, ...requests]);
