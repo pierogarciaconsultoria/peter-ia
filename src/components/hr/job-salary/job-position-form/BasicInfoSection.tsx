@@ -3,14 +3,21 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { JobPosition } from "../../types";
+import { SuperiorPositionSelector } from "./SuperiorPositionSelector";
 
 interface BasicInfoSectionProps {
   formData: JobPosition;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onCheckboxChange: (checked: boolean) => void;
+  onCheckboxChange: (field: string, checked: boolean) => void;
+  onSuperiorPositionChange: (value: string) => void;
 }
 
-export function BasicInfoSection({ formData, onChange, onCheckboxChange }: BasicInfoSectionProps) {
+export function BasicInfoSection({ 
+  formData, 
+  onChange, 
+  onCheckboxChange, 
+  onSuperiorPositionChange 
+}: BasicInfoSectionProps) {
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
@@ -84,22 +91,32 @@ export function BasicInfoSection({ formData, onChange, onCheckboxChange }: Basic
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="immediate_supervisor_position">Cargo do superior imediato</Label>
-          <Input 
-            id="immediate_supervisor_position" 
-            name="immediate_supervisor_position" 
-            value={formData.immediate_supervisor_position} 
-            onChange={onChange} 
+          <Label htmlFor="superior_position">Cargo do superior imediato</Label>
+          <SuperiorPositionSelector
+            value={formData.superior_position_id}
+            departmentFilter={formData.department}
+            onChange={onSuperiorPositionChange}
           />
         </div>
         
-        <div className="space-y-2 flex items-center pt-6">
-          <Checkbox 
-            id="is_supervisor" 
-            checked={formData.is_supervisor} 
-            onCheckedChange={onCheckboxChange}
-          />
-          <Label htmlFor="is_supervisor" className="ml-2">É superior imediato</Label>
+        <div className="space-y-2 grid grid-cols-2 items-start pt-6">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is_supervisor" 
+              checked={formData.is_supervisor} 
+              onCheckedChange={(checked) => onCheckboxChange("is_supervisor", checked as boolean)}
+            />
+            <Label htmlFor="is_supervisor" className="ml-2">É superior imediato</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is_department_head" 
+              checked={formData.is_department_head} 
+              onCheckedChange={(checked) => onCheckboxChange("is_department_head", checked as boolean)}
+            />
+            <Label htmlFor="is_department_head" className="ml-2">É responsável pelo departamento</Label>
+          </div>
         </div>
       </div>
       

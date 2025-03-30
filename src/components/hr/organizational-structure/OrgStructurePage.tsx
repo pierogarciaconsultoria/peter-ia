@@ -22,6 +22,7 @@ interface JobPosition {
   department: string;
   level: string;
   parentPosition?: string | null;
+  isDepartmentHead?: boolean;
 }
 
 export function OrgStructurePage() {
@@ -46,12 +47,12 @@ export function OrgStructurePage() {
           title: pos.title,
           department: pos.department,
           level: getPositionLevel(pos.title),
-          parentPosition: null
+          parentPosition: pos.superior_position_id || null,
+          isDepartmentHead: pos.is_department_head || false
         }));
 
-        // Create hierarchy based on job titles
-        const hierarchicalPositions = createHierarchy(formattedPositions);
-        setPositions(hierarchicalPositions);
+        // Create hierarchy based on job titles and superior positions
+        setPositions(formattedPositions);
       } catch (error) {
         console.error("Error fetching job positions:", error);
         toast({
@@ -81,13 +82,6 @@ export function OrgStructurePage() {
     }
   };
 
-  // Create position hierarchy
-  const createHierarchy = (positions: JobPosition[]): JobPosition[] => {
-    // Implementation for creating hierarchy would go here
-    // This is a simplification for the example
-    return positions;
-  };
-
   const generatePositionsFromDepartments = (departments: any[]): JobPosition[] => {
     const positions: JobPosition[] = [];
     
@@ -96,7 +90,8 @@ export function OrgStructurePage() {
         id: `head-${dept.id}`,
         title: `Gerente de ${dept.name}`,
         department: dept.name,
-        level: "Senior"
+        level: "Senior",
+        isDepartmentHead: true
       });
       
       if (dept.name === "Produção" || dept.name === "Manutenção" || dept.name === "Logística") {
@@ -104,28 +99,32 @@ export function OrgStructurePage() {
           id: `supervisor-${dept.id}`,
           title: `Supervisor de ${dept.name}`,
           department: dept.name,
-          level: "Pleno"
+          level: "Pleno",
+          parentPosition: `head-${dept.id}`
         });
         
         positions.push({
           id: `analyst-${dept.id}`,
           title: `Analista de ${dept.name}`,
           department: dept.name,
-          level: "Junior"
+          level: "Junior",
+          parentPosition: `supervisor-${dept.id}`
         });
       } else {
         positions.push({
           id: `coordinator-${dept.id}`,
           title: `Coordenador de ${dept.name}`,
           department: dept.name,
-          level: "Pleno"
+          level: "Pleno",
+          parentPosition: `head-${dept.id}`
         });
         
         positions.push({
           id: `analyst-${dept.id}`,
           title: `Analista de ${dept.name}`,
           department: dept.name,
-          level: "Junior"
+          level: "Junior",
+          parentPosition: `coordinator-${dept.id}`
         });
       }
     });
@@ -137,13 +136,13 @@ export function OrgStructurePage() {
   const displayPositions = positions.length > 0 
     ? positions 
     : [
-        { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior" },
-        { id: "2", title: "Supervisor de Produção", department: "Produção", level: "Pleno" },
-        { id: "3", title: "Analista de Produção", department: "Produção", level: "Junior" },
-        { id: "4", title: "Gerente de Qualidade", department: "Qualidade", level: "Senior" },
-        { id: "5", title: "Analista de Qualidade", department: "Qualidade", level: "Junior" },
-        { id: "6", title: "Gerente de RH", department: "Recursos Humanos", level: "Senior" },
-        { id: "7", title: "Analista de RH", department: "Recursos Humanos", level: "Junior" }
+        { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior", isDepartmentHead: true },
+        { id: "2", title: "Supervisor de Produção", department: "Produção", level: "Pleno", parentPosition: "1" },
+        { id: "3", title: "Analista de Produção", department: "Produção", level: "Junior", parentPosition: "2" },
+        { id: "4", title: "Gerente de Qualidade", department: "Qualidade", level: "Senior", isDepartmentHead: true },
+        { id: "5", title: "Analista de Qualidade", department: "Qualidade", level: "Junior", parentPosition: "4" },
+        { id: "6", title: "Gerente de RH", department: "Recursos Humanos", level: "Senior", isDepartmentHead: true },
+        { id: "7", title: "Analista de RH", department: "Recursos Humanos", level: "Junior", parentPosition: "6" }
       ];
 
   return (
@@ -183,6 +182,7 @@ export function OrgStructurePage() {
                       <TableHead>Cargo</TableHead>
                       <TableHead>Departamento</TableHead>
                       <TableHead>Nível</TableHead>
+                      <TableHead>Responsável pelo Departamento</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -192,6 +192,13 @@ export function OrgStructurePage() {
                         <TableCell>{position.department}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{position.level}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {position.isDepartmentHead ? (
+                            <Badge className="bg-green-100 text-green-800 border border-green-300">Sim</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">Não</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

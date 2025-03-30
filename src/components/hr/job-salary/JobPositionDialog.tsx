@@ -43,6 +43,7 @@ export function JobPositionDialog({
       department: "",
       revision: "1.0",
       is_supervisor: false,
+      is_department_head: false,
       status: "draft",
     }
   );
@@ -52,8 +53,12 @@ export function JobPositionDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, is_supervisor: checked }));
+  const handleCheckboxChange = (field: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: checked }));
+  };
+
+  const handleSuperiorPositionChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, superior_position_id: value }));
   };
 
   const handleDocumentSelection = (documentId: string, documentTitle: string) => {
@@ -119,6 +124,7 @@ export function JobPositionDialog({
             formData={formData} 
             onChange={handleChange}
             onCheckboxChange={handleCheckboxChange}
+            onSuperiorPositionChange={handleSuperiorPositionChange}
           />
           
           <ResponsibilitiesSection 

@@ -1,79 +1,16 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserRound, ChevronDown, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-
-interface OrgChartNodeProps {
-  title: string;
-  department: string;
-  level: string;
-  children?: React.ReactNode;
-  isRoot?: boolean;
-}
-
-const OrgChartNode: React.FC<OrgChartNodeProps> = ({ 
-  title, 
-  department, 
-  level, 
-  children, 
-  isRoot = false 
-}) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  return (
-    <div className={cn(
-      "flex flex-col items-center",
-      isRoot ? "w-full" : "min-w-[200px]"
-    )}>
-      <div className="relative">
-        <div className={cn(
-          "flex flex-col items-center p-3 rounded-lg border bg-card shadow-sm",
-          isRoot ? "bg-primary/5 border-primary/20" : ""
-        )}>
-          <div className="flex items-center justify-center mb-1">
-            {isRoot ? (
-              <Users className="h-6 w-6 text-primary mr-2" />
-            ) : (
-              <UserRound className="h-5 w-5 text-muted-foreground mr-2" />
-            )}
-            <h4 className={cn(
-              "font-medium",
-              isRoot ? "text-lg" : "text-base"
-            )}>
-              {title}
-            </h4>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {department} • {level}
-          </div>
-        </div>
-        
-        {children && (
-          <button 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-6 w-6 rounded-full bg-background border shadow-sm flex items-center justify-center hover:bg-muted transition-colors"
-          >
-            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
-        )}
-      </div>
-      
-      {children && isExpanded && (
-        <>
-          <div className="w-px h-6 bg-border"></div>
-          <div className="flex flex-col gap-6">
-            <div className="w-full h-px bg-border"></div>
-            <div className="flex flex-wrap justify-center gap-6">
-              {children}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
+import React from "react";
+import { Card } from "@/components/ui/card";
+import ReactFlow, { 
+  Node, 
+  Edge, 
+  ReactFlowProvider, 
+  useNodesState, 
+  useEdgesState,
+  Position
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { useDepartments } from "@/hooks/useDepartments";
 
 interface Position {
   id: string;
@@ -81,78 +18,129 @@ interface Position {
   department: string;
   level: string;
   parentPosition?: string | null;
+  isDepartmentHead?: boolean;
 }
 
 interface DepartmentOrgChartProps {
   positions: Position[];
 }
 
-export function DepartmentOrgChart({ positions }: DepartmentOrgChartProps) {
-  // Find all unique departments
-  const departments = Array.from(new Set(positions.map(p => p.department)));
+interface OrgChartNode extends Node {
+  data: {
+    label: string;
+    department?: string;
+    isDepartmentHead?: boolean;
+  };
+}
+
+const nodeTypes = {
+  department: ({ data }: { data: { label: string, department?: string, isDepartmentHead?: boolean } }) => (
+    <div className={`px-4 py-2 shadow-md rounded-md border ${data.isDepartmentHead ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+      <div className="font-bold">{data.label}</div>
+      {data.department && <div className="text-xs text-gray-500">{data.department}</div>}
+    </div>
+  ),
+};
+
+function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
+  const { departments } = useDepartments();
   
-  // Group positions by department and organize by levels
-  const departmentHierarchy = departments.map(department => {
-    const departmentPositions = positions.filter(p => p.department === department);
+  // Group positions by department for more organized layout
+  const departments = React.useMemo(() => {
+    const deptMap = new Map<string, Position[]>();
     
-    // Sort by level - assuming levels are Junior, Pleno, Senior
-    const levelOrder = { "Junior": 1, "Pleno": 2, "Senior": 3 };
-    const sortedPositions = departmentPositions.sort((a, b) => {
-      return (levelOrder[b.level as keyof typeof levelOrder] || 0) - 
-             (levelOrder[a.level as keyof typeof levelOrder] || 0);
+    positions.forEach(pos => {
+      if (!deptMap.has(pos.department)) {
+        deptMap.set(pos.department, []);
+      }
+      deptMap.get(pos.department)?.push(pos);
     });
     
-    // Find the highest level position for the department (department head)
-    const departmentHead = sortedPositions[0];
+    return Array.from(deptMap.entries());
+  }, [positions]);
+  
+  // Create nodes and edges for the org chart
+  const { nodes: initialNodes, edges: initialEdges } = React.useMemo(() => {
+    const nodes: OrgChartNode[] = [];
+    const edges: Edge[] = [];
+    let xOffset = 0;
     
-    // Filter out the head for regular positions
-    const regularPositions = sortedPositions.slice(1);
+    departments.forEach(([deptName, deptPositions], deptIndex) => {
+      // Sort positions by level (Senior -> Pleno -> Junior)
+      const sortedPositions = [...deptPositions].sort((a, b) => {
+        const levelOrder = { "Senior": 0, "Pleno": 1, "Junior": 2 };
+        return levelOrder[a.level as keyof typeof levelOrder] - levelOrder[b.level as keyof typeof levelOrder];
+      });
+      
+      // Calculate vertical positioning based on hierarchy
+      const yGap = 100;
+      
+      // Add nodes for each position in the department
+      sortedPositions.forEach((position, index) => {
+        nodes.push({
+          id: position.id,
+          type: 'department',
+          position: { 
+            x: xOffset + (deptIndex * 300), 
+            y: index * yGap 
+          },
+          data: { 
+            label: position.title, 
+            department: position.department,
+            isDepartmentHead: position.isDepartmentHead
+          },
+          sourcePosition: Position.Bottom,
+          targetPosition: Position.Top,
+        });
+        
+        // Add edge from parent to this position
+        if (position.parentPosition) {
+          edges.push({
+            id: `e${position.parentPosition}-${position.id}`,
+            source: position.parentPosition,
+            target: position.id,
+            type: 'smoothstep',
+          });
+        }
+      });
+      
+      // Increment x offset for next department
+      xOffset += 300;
+    });
     
-    return {
-      department,
-      head: departmentHead,
-      positions: regularPositions
-    };
-  });
+    return { nodes, edges };
+  }, [departments]);
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  
+  // Update nodes and edges when positions change
+  React.useEffect(() => {
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Users className="mr-2 h-5 w-5" />
-          Organograma da Empresa
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-auto p-4">
-          <div className="min-w-[800px] flex flex-col items-center">
-            <OrgChartNode
-              title="Direção"
-              department="Empresa"
-              level="Executivo"
-              isRoot={true}
-            >
-              {departmentHierarchy.map(dept => (
-                <OrgChartNode
-                  key={dept.department}
-                  title={dept.head?.title || dept.department}
-                  department={dept.department}
-                  level={dept.head?.level || "Gerência"}
-                >
-                  {dept.positions.map(position => (
-                    <OrgChartNode
-                      key={position.id}
-                      title={position.title}
-                      department={position.department}
-                      level={position.level}
-                    />
-                  ))}
-                </OrgChartNode>
-              ))}
-            </OrgChartNode>
-          </div>
-        </div>
-      </CardContent>
+    <div style={{ height: 500 }}>
+      <ReactFlow 
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView
+        attributionPosition="bottom-right"
+      />
+    </div>
+  );
+}
+
+export function DepartmentOrgChart(props: DepartmentOrgChartProps) {
+  return (
+    <Card className="p-0">
+      <ReactFlowProvider>
+        <DepartmentOrgChartContent {...props} />
+      </ReactFlowProvider>
     </Card>
   );
 }

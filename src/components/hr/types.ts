@@ -1,22 +1,16 @@
-
-// JobPosition type
 export interface JobPosition {
   id: string;
-  title: string;
-  description?: string;
   code?: string;
+  title: string;
   department?: string;
+  description?: string;
   revision?: string;
-  is_supervisor?: boolean;
-  status?: string;
-  requirements?: string;
-  responsibilities?: string;
-  required_procedures?: string[];
-  
-  // New fields that are being used in the components
   approval_date?: string;
   approver?: string;
   immediate_supervisor_position?: string;
+  is_supervisor?: boolean;
+  is_department_head?: boolean; // New field for department head
+  superior_position_id?: string; // New field for superior position ID reference
   cbo_code?: string;
   norm?: string;
   main_responsibilities?: string;
@@ -24,6 +18,8 @@ export interface JobPosition {
   skill_requirements?: string;
   training_requirements?: string;
   experience_requirements?: string;
+  required_procedures?: string[];
   required_resources?: string[];
   required_ppe?: string[];
+  status?: "draft" | "in_review" | "approved" | "distributed";
 }
