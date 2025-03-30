@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
 import NonConformingProducts from "./pages/NonConformingProducts";
+import NotFound from "./pages/NotFound";
 
 // Importando as novas páginas que serão criadas
 import PerformanceIndicators from "./pages/PerformanceIndicators";
