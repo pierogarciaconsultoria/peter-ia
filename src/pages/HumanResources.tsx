@@ -44,9 +44,65 @@ import { ExitInterviews } from "@/components/hr/ExitInterviews";
 import { DevelopmentPlans } from "@/components/hr/DevelopmentPlans";
 import { VacationManagement } from "@/components/hr/VacationManagement";
 import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  // Tab groups for better organization
+  const tabGroups = [
+    {
+      label: "Principais",
+      tabs: [
+        { value: "dashboard", label: "Dashboard" },
+        { value: "personnel-movement", label: "Movimentação de Pessoal" },
+        { value: "employees", label: "Funcionários" },
+        { value: "recruitment", label: "Recrutamento" },
+        { value: "positions", label: "Quadro Aprovado" },
+        { value: "admission", label: "Admissão Online" },
+        { value: "onboarding", label: "Onboarding" }
+      ]
+    },
+    {
+      label: "Avaliações",
+      tabs: [
+        { value: "trial", label: "Avaliação de Experiência" },
+        { value: "performance", label: "Avaliação de Desempenho" },
+        { value: "exit-interviews", label: "Entrevista de Desligamento" }
+      ]
+    },
+    {
+      label: "Desenvolvimento",
+      tabs: [
+        { value: "development-plans", label: "Plano de Desenvolvimento" },
+        { value: "vacation", label: "Gestão de Férias" },
+        { value: "job-plan", label: "Cargos e Salários" }
+      ]
+    },
+    {
+      label: "Comunicação",
+      tabs: [
+        { value: "feedback", label: "Feedbacks" },
+        { value: "climate", label: "Clima Organizacional" },
+        { value: "board", label: "Mural do Colaborador" }
+      ]
+    },
+    {
+      label: "Outros",
+      tabs: [
+        { value: "occurrence", label: "Ocorrências" },
+        { value: "certificates", label: "Atestados" },
+        { value: "departments", label: "Departamentos" }
+      ]
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -83,30 +139,50 @@ const HumanResources = () => {
           </div>
           
           <HRFilters />
+
+          <div className="mb-4">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full md:w-[300px]">
+                <SelectValue placeholder="Selecione uma seção" />
+              </SelectTrigger>
+              <SelectContent>
+                {tabGroups.map((group) => (
+                  <div key={group.label}>
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                      {group.label}
+                    </div>
+                    {group.tabs.map((tab) => (
+                      <SelectItem key={tab.value} value={tab.value}>
+                        {tab.label}
+                      </SelectItem>
+                    ))}
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
-          <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6 flex flex-wrap">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="personnel-movement">Movimentação de Pessoal</TabsTrigger>
-              <TabsTrigger value="employees">Funcionários</TabsTrigger>
-              <TabsTrigger value="recruitment">Recrutamento</TabsTrigger>
-              <TabsTrigger value="positions">Quadro Aprovado</TabsTrigger>
-              <TabsTrigger value="admission">Admissão Online</TabsTrigger>
-              <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-              <TabsTrigger value="trial">Avaliação de Experiência</TabsTrigger>
-              <TabsTrigger value="performance">Avaliação de Desempenho</TabsTrigger>
-              <TabsTrigger value="exit-interviews">Entrevista de Desligamento</TabsTrigger>
-              <TabsTrigger value="development-plans">Plano de Desenvolvimento</TabsTrigger>
-              <TabsTrigger value="vacation">Gestão de Férias</TabsTrigger>
-              <TabsTrigger value="job-plan">Cargos e Salários</TabsTrigger>
-              <TabsTrigger value="feedback">Feedbacks</TabsTrigger>
-              <TabsTrigger value="climate">Clima Organizacional</TabsTrigger>
-              <TabsTrigger value="board">Mural do Colaborador</TabsTrigger>
-              <TabsTrigger value="occurrence">Ocorrências</TabsTrigger>
-              <TabsTrigger value="certificates">Atestados</TabsTrigger>
-              <TabsTrigger value="departments">Departamentos</TabsTrigger>
-            </TabsList>
-            
+          <div className="border rounded-md">
+            <ScrollArea className="w-full" orientation="horizontal">
+              <div className="flex p-1 min-w-max">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="flex w-full h-auto flex-wrap bg-transparent p-0 gap-1">
+                    {tabGroups.flatMap(group => group.tabs).map(tab => (
+                      <TabsTrigger 
+                        key={tab.value} 
+                        value={tab.value}
+                        className="h-9 rounded-md px-3 py-1.5 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        {tab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
+            </ScrollArea>
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
             <TabsContent value="dashboard">
               <HRDashboard />
             </TabsContent>
