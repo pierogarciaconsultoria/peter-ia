@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { EmployeeSelector } from "./EmployeeSelector";
-import { Department } from "../DepartmentManagement";
+import { Department } from "@/hooks/useDepartments";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -31,6 +31,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   sector: z.string().optional(),
   responsible_employee_id: z.string().nullable().optional(),
+  approved_headcount: z.coerce.number().int().min(0, "Não pode ser negativo").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -55,6 +56,7 @@ export function DepartmentFormDialog({
       description: "",
       sector: "",
       responsible_employee_id: null,
+      approved_headcount: 0,
     },
   });
 
@@ -66,6 +68,7 @@ export function DepartmentFormDialog({
         description: department.description || "",
         sector: department.sector || "",
         responsible_employee_id: department.responsible_employee_id,
+        approved_headcount: department.approved_headcount || 0,
       });
     } else {
       form.reset({
@@ -73,6 +76,7 @@ export function DepartmentFormDialog({
         description: "",
         sector: "",
         responsible_employee_id: null,
+        approved_headcount: 0,
       });
     }
   }, [department, form]);
@@ -136,6 +140,25 @@ export function DepartmentFormDialog({
                       placeholder="Descreva a função ou objetivo do departamento"
                       className="min-h-[100px]"
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="approved_headcount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quadro Aprovado</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      placeholder="Quantidade de posições aprovadas" 
+                      {...field} 
                     />
                   </FormControl>
                   <FormMessage />

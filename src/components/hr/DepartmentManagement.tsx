@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, Building } from "lucide-react";
+import { Plus, Pencil, Trash2, Building, Users } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,60 +22,15 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DepartmentFormDialog } from "./departments/DepartmentFormDialog";
 import { DeleteConfirmDialog } from "./departments/DeleteConfirmDialog";
-
-export interface Department {
-  id: string;
-  name: string;
-  description: string | null;
-  sector: string | null;
-  responsible_employee_id: string | null;
-  responsible_name?: string;
-  employee_count?: number;
-}
+import { Department, useDepartments } from "@/hooks/useDepartments";
+import { Progress } from "@/components/ui/progress";
 
 export function DepartmentManagement() {
   const { toast } = useToast();
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { departments, isLoading, refetch } = useDepartments();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
-
-  const fetchDepartments = async () => {
-    setIsLoading(true);
-    try {
-      // In a real implementation, this would fetch from the database
-      const { data: departmentsData, error } = await supabase
-        .from("departments")
-        .select("*");
-
-      if (error) {
-        throw error;
-      }
-
-      // For demonstration, we'll add some mock data for responsible name and employee count
-      const enrichedDepartments = departmentsData.map((dept: any) => ({
-        ...dept,
-        responsible_name: dept.responsible_employee_id ? "Carlos Silva" : undefined,
-        employee_count: Math.floor(Math.random() * 20) + 1 // Mock employee count
-      }));
-
-      setDepartments(enrichedDepartments);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-      toast({
-        title: "Erro ao carregar departamentos",
-        description: "Não foi possível carregar os departamentos.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
 
   const handleOpenForm = (department?: Department) => {
     setSelectedDepartment(department || null);
@@ -85,6 +40,11 @@ export function DepartmentManagement() {
   const handleOpenDeleteDialog = (department: Department) => {
     setSelectedDepartment(department);
     setIsDeleteDialogOpen(true);
+  };
+
+  const calculateHeadcountProgress = (current: number, approved: number) => {
+    if (approved === 0) return 0;
+    return Math.min(Math.round((current / approved) * 100), 100);
   };
 
   const handleSaveDepartment = async (departmentData: Partial<Department>) => {
@@ -100,6 +60,7 @@ export function DepartmentManagement() {
             description: departmentData.description,
             sector: departmentData.sector,
             responsible_employee_id: departmentData.responsible_employee_id,
+            approved_headcount: departmentData.approved_headcount,
             updated_at: new Date().toISOString(),
           })
           .eq("id", selectedDepartment.id)
@@ -110,7 +71,7 @@ export function DepartmentManagement() {
         newDepartment = {
           ...data,
           responsible_name: data.responsible_employee_id ? "Carlos Silva" : undefined,
-          employee_count: selectedDepartment.employee_count
+          current_headcount: selectedDepartment.current_headcount
         };
 
         toast({
@@ -126,6 +87,7 @@ export function DepartmentManagement() {
             description: departmentData.description,
             sector: departmentData.sector,
             responsible_employee_id: departmentData.responsible_employee_id,
+            approved_headcount: departmentData.approved_headcount,
           })
           .select("*")
           .single();
@@ -134,7 +96,7 @@ export function DepartmentManagement() {
         newDepartment = {
           ...data,
           responsible_name: data.responsible_employee_id ? "Carlos Silva" : undefined,
-          employee_count: 0
+          current_headcount: 0
         };
 
         toast({
@@ -143,14 +105,8 @@ export function DepartmentManagement() {
         });
       }
 
-      // Update the departments list
-      if (selectedDepartment) {
-        setDepartments(departments.map(dept =>
-          dept.id === selectedDepartment.id ? newDepartment : dept
-        ));
-      } else {
-        setDepartments([...departments, newDepartment]);
-      }
+      // Refresh the department list
+      refetch();
     } catch (error) {
       console.error("Error saving department:", error);
       toast({
@@ -175,8 +131,8 @@ export function DepartmentManagement() {
 
       if (error) throw error;
 
-      // Update the departments list
-      setDepartments(departments.filter(dept => dept.id !== selectedDepartment.id));
+      // Refresh departments list
+      refetch();
 
       toast({
         title: "Departamento excluído",
@@ -245,7 +201,7 @@ export function DepartmentManagement() {
                     <TableHead>Nome</TableHead>
                     <TableHead>Setor</TableHead>
                     <TableHead>Responsável</TableHead>
-                    <TableHead>Qtd. Funcionários</TableHead>
+                    <TableHead>Quadro Aprovado</TableHead>
                     <TableHead className="w-[100px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -272,7 +228,31 @@ export function DepartmentManagement() {
                           <span className="text-muted-foreground text-sm">Não definido</span>
                         )}
                       </TableCell>
-                      <TableCell>{department.employee_count}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span>
+                                {department.current_headcount} / {department.approved_headcount || 0}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {calculateHeadcountProgress(
+                                department.current_headcount || 0, 
+                                department.approved_headcount || 0
+                              )}%
+                            </span>
+                          </div>
+                          <Progress 
+                            value={calculateHeadcountProgress(
+                              department.current_headcount || 0, 
+                              department.approved_headcount || 0
+                            )} 
+                            className="h-1.5"
+                          />
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button
