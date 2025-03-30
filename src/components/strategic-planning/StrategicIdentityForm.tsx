@@ -1,17 +1,15 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus, Save, PenLine, RotateCcw, Sparkles } from "lucide-react";
+import { PenLine, Sparkles } from "lucide-react";
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { updateStrategicIdentity } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityQuestionnaireForm, IdentityResponses } from "./IdentityQuestionnaireForm";
 import { supabase } from "@/integrations/supabase/client";
+import { ManualIdentityForm } from "./ManualIdentityForm";
+import { IdentityFormActions } from "./IdentityFormActions";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -25,21 +23,9 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
   const [mission, setMission] = useState(identity?.mission || "");
   const [vision, setVision] = useState(identity?.vision || "");
   const [values, setValues] = useState<string[]>(identity?.values || []);
-  const [newValue, setNewValue] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [generatingIdentity, setGeneratingIdentity] = useState(false);
-
-  const addValue = () => {
-    if (newValue.trim() && !values.includes(newValue.trim())) {
-      setValues([...values, newValue.trim()]);
-      setNewValue("");
-    }
-  };
-
-  const removeValue = (index: number) => {
-    setValues(values.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,85 +126,20 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
       <CardContent>
         <TabsContent value="manual">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="mission">Missão</Label>
-              <Textarea
-                id="mission"
-                placeholder="Qual é a missão da sua organização?"
-                rows={3}
-                value={mission}
-                onChange={(e) => setMission(e.target.value)}
-                required
-              />
-            </div>
+            <ManualIdentityForm
+              mission={mission}
+              setMission={setMission}
+              vision={vision}
+              setVision={setVision}
+              values={values}
+              setValues={setValues}
+              isLoading={loading}
+            />
             
-            <div className="space-y-2">
-              <Label htmlFor="vision">Visão</Label>
-              <Textarea
-                id="vision"
-                placeholder="Qual é a visão da sua organização?"
-                rows={3}
-                value={vision}
-                onChange={(e) => setVision(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Valores</Label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {values.map((value, index) => (
-                  <Badge key={index} variant="secondary" className="px-3 py-1">
-                    {value}
-                    <button
-                      type="button"
-                      onClick={() => removeValue(index)}
-                      className="ml-2 text-muted-foreground hover:text-foreground"
-                    >
-                      <X size={14} />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Adicione um valor..."
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={addValue}
-                  disabled={!newValue.trim()}
-                >
-                  <Plus size={16} />
-                </Button>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={resetForm}
-                disabled={loading}
-                className="flex-1"
-              >
-                <RotateCcw size={16} className="mr-2" />
-                Restaurar
-              </Button>
-              
-              <Button 
-                type="submit" 
-                disabled={loading} 
-                className="flex-1"
-              >
-                {loading ? "Salvando..." : "Salvar Identidade"}
-                {!loading && <Save size={16} className="ml-2" />}
-              </Button>
-            </div>
+            <IdentityFormActions 
+              onReset={resetForm}
+              isLoading={loading}
+            />
           </form>
         </TabsContent>
         
