@@ -26,42 +26,46 @@ import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
 import StrategicPlanning from "./pages/StrategicPlanning";
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance within the component to ensure it's created properly
+const App = () => {
+  // Create a client
+  const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/non-compliance" element={<NonCompliance />} />
-          <Route path="/non-conforming-products" element={<NonConformingProducts />} />
-          
-          {/* Novas rotas */}
-          <Route path="/performance-indicators" element={<PerformanceIndicators />} />
-          <Route path="/customer-complaints" element={<CustomerComplaints />} />
-          <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
-          <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
-          <Route path="/training-control" element={<TrainingControl />} />
-          <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
-          <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
-          <Route path="/action-schedule" element={<ActionSchedule />} />
-          <Route path="/audit-schedule" element={<AuditSchedule />} />
-          <Route path="/risk-management" element={<RiskManagement />} />
-          <Route path="/organization-context" element={<OrganizationContext />} />
-          <Route path="/critical-analysis" element={<CriticalAnalysis />} />
-          <Route path="/human-resources" element={<HumanResources />} />
-          <Route path="/strategic-planning" element={<StrategicPlanning />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/non-compliance" element={<NonCompliance />} />
+            <Route path="/non-conforming-products" element={<NonConformingProducts />} />
+            
+            {/* Novas rotas */}
+            <Route path="/performance-indicators" element={<PerformanceIndicators />} />
+            <Route path="/customer-complaints" element={<CustomerComplaints />} />
+            <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
+            <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
+            <Route path="/training-control" element={<TrainingControl />} />
+            <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
+            <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
+            <Route path="/action-schedule" element={<ActionSchedule />} />
+            <Route path="/audit-schedule" element={<AuditSchedule />} />
+            <Route path="/risk-management" element={<RiskManagement />} />
+            <Route path="/organization-context" element={<OrganizationContext />} />
+            <Route path="/critical-analysis" element={<CriticalAnalysis />} />
+            <Route path="/human-resources" element={<HumanResources />} />
+            <Route path="/strategic-planning" element={<StrategicPlanning />} />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
