@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -618,7 +617,9 @@ export function NewEmployeeForm() {
         <Button type="button" variant="outline">
           Cancelar
         </Button>
-        <Button type="submit">Salvar Funcionário</Button>
+        <Button type="submit">
+          Salvar Funcionário
+        </Button>
       </div>
     </form>
   );
