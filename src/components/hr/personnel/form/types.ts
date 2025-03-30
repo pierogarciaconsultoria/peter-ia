@@ -1,9 +1,10 @@
 
+import { UseFormReturn } from "react-hook-form";
 import { RequestFormValues } from "../types";
 import { JobPosition } from "../../types";
 
 export interface FormSectionProps {
-  form: any; // React Hook Form methods
+  form: UseFormReturn<RequestFormValues>;
 }
 
 export interface RequestFormDialogProps {

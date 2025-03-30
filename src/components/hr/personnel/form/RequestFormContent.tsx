@@ -17,9 +17,15 @@ interface RequestFormContentProps {
   form: UseFormReturn<RequestFormValues>;
   jobPositions: JobPosition[];
   onSubmit: () => void;
+  selectedPosition?: JobPosition | null;
 }
 
-export function RequestFormContent({ form, jobPositions, onSubmit }: RequestFormContentProps) {
+export function RequestFormContent({ 
+  form, 
+  jobPositions, 
+  onSubmit,
+  selectedPosition 
+}: RequestFormContentProps) {
   // Selected type category
   const selectedType = movementTypes.find(type => type.id === form.watch("type"))?.label || "";
   const isAdmission = selectedType === "Admissão";
@@ -44,7 +50,11 @@ export function RequestFormContent({ form, jobPositions, onSubmit }: RequestForm
 
       {/* Position Section - conditionally shown */}
       {showPositionSection && (
-        <PositionSection form={form} jobPositions={jobPositions} />
+        <PositionSection 
+          form={form} 
+          jobPositions={jobPositions} 
+          selectedPosition={selectedPosition}
+        />
       )}
 
       {/* Schedule Section - conditionally shown */}

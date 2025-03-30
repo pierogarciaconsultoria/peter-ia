@@ -14,7 +14,7 @@ import { RequestFormContent } from "./form/RequestFormContent";
 import { useRequestForm } from "./hooks/useRequestForm";
 
 export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions }: RequestFormDialogProps) {
-  const { form, handleSubmit } = useRequestForm(jobPositions, onSubmit);
+  const { form, handleSubmit, selectedPosition } = useRequestForm(jobPositions, onSubmit);
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -31,6 +31,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
             form={form} 
             jobPositions={jobPositions}
             onSubmit={handleSubmit}
+            selectedPosition={selectedPosition}
           />
           
           <DialogFooter className="mt-6">
