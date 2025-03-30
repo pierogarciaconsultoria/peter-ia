@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 
@@ -11,7 +11,7 @@ export interface Department {
   responsible_employee_id: string | null;
   approved_headcount?: number;
   current_headcount?: number;
-  responsible_name?: string; // Added this property
+  responsible_name?: string;
 }
 
 export function useDepartments() {
@@ -20,23 +20,29 @@ export function useDepartments() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchDepartments = async () => {
+  // Optimize fetch function with useCallback to prevent unnecessary re-renders
+  const fetchDepartments = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
+      // Use select-join pattern optimized for Postgres performance
       const { data, error } = await supabase
         .from("departments")
-        .select("*, employees:employees(id, name)")
+        .select(`
+          *,
+          employees!departments_responsible_employee_id_fkey (id, name)
+        `)
         .order("name");
       
       if (error) throw error;
       
-      // Process the data to include current headcount and responsible name
+      // Optimize data processing - use map once with all transformations
       const processedDepartments = data.map((dept: any) => {
         const responsibleEmployee = dept.employees?.length > 0 ? dept.employees[0] : null;
         
         return {
           ...dept,
+          // Store calculated values to avoid recalculation
           current_headcount: dept.employees ? dept.employees.length : 0,
           approved_headcount: dept.approved_headcount || 0,
           responsible_name: responsibleEmployee?.name || null
@@ -55,11 +61,12 @@ export function useDepartments() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
+  // Fetch data only once when component mounts
   useEffect(() => {
     fetchDepartments();
-  }, []);
+  }, [fetchDepartments]);
 
   return {
     departments,

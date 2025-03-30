@@ -12,9 +12,18 @@ import { Form } from "@/components/ui/form";
 import { RequestFormDialogProps } from "./form/types";
 import { RequestFormContent } from "./form/RequestFormContent";
 import { useRequestForm } from "./hooks/useRequestForm";
+import { useCallback, memo } from "react";
+
+// Use memo to prevent unnecessary re-renders
+const MemoizedRequestFormContent = memo(RequestFormContent);
 
 export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions }: RequestFormDialogProps) {
   const { form, handleSubmit, selectedPosition } = useRequestForm(jobPositions, onSubmit);
+  
+  // Memoize handler to prevent unnecessary re-renders
+  const handleDialogSubmit = useCallback(() => {
+    handleSubmit();
+  }, [handleSubmit]);
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -27,7 +36,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
         </DialogHeader>
         
         <Form {...form}>
-          <RequestFormContent 
+          <MemoizedRequestFormContent 
             form={form} 
             jobPositions={jobPositions}
             onSubmit={handleSubmit}
@@ -38,7 +47,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" onClick={() => handleSubmit()}>Enviar Solicitação</Button>
+            <Button type="submit" onClick={handleDialogSubmit}>Enviar Solicitação</Button>
           </DialogFooter>
         </Form>
       </DialogContent>

@@ -13,3 +13,10 @@ export interface RequestFormDialogProps {
   onSubmit: (data: RequestFormValues) => void;
   jobPositions: JobPosition[];
 }
+
+export interface RequestFormContentProps {
+  form: UseFormReturn<RequestFormValues>;
+  jobPositions: JobPosition[];
+  onSubmit: () => void;
+  selectedPosition: JobPosition | null;
+}

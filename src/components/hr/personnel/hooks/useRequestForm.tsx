@@ -3,14 +3,14 @@ import { useForm } from "react-hook-form";
 import { RequestFormValues } from "../types";
 import { useEmployeeData } from "./useEmployeeData";
 import { JobPosition } from "../../types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDepartments } from "@/hooks/useDepartments";
 
 export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: RequestFormValues) => void) {
   const [selectedPosition, setSelectedPosition] = useState<JobPosition | null>(null);
   const { departments } = useDepartments();
 
-  // Initialize form with default values
+  // Initialize form with default values - memoized to prevent unnecessary re-creation
   const form = useForm<RequestFormValues>({
     defaultValues: {
       type: "",
@@ -49,33 +49,57 @@ export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: Req
   // Use the employee data hook
   const { selectedEmployeeData } = useEmployeeData(form, jobPositions);
   
-  // Watch for position_id changes to update department and responsible
-  useEffect(() => {
-    const positionId = form.watch("position_id");
-    if (positionId) {
-      const foundPosition = jobPositions.find(pos => pos.id === positionId);
-      setSelectedPosition(foundPosition || null);
+  // Memoize department head lookup for better performance
+  const departmentHeads = useMemo(() => {
+    return departments.reduce((acc, dept) => {
+      if (dept.responsible_name) {
+        acc[dept.name.toLowerCase()] = dept.responsible_name;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+  }, [departments]);
+  
+  // Watch for position_id changes to update department and responsible - optimized with useCallback
+  const updateDepartmentInfo = useCallback((positionId: string) => {
+    if (!positionId) return;
+    
+    const foundPosition = jobPositions.find(pos => pos.id === positionId);
+    setSelectedPosition(foundPosition || null);
+    
+    if (foundPosition?.department) {
+      // Update department field
+      form.setValue("department", foundPosition.department);
       
-      if (foundPosition?.department) {
-        // Update department field
-        form.setValue("department", foundPosition.department);
-        
-        // Find department head info if available
-        const departmentInfo = departments.find(dept => 
-          dept.name.toLowerCase() === foundPosition.department?.toLowerCase()
-        );
-        
-        if (departmentInfo?.responsible_name) {
-          console.log("Found department head:", departmentInfo.responsible_name);
-        }
+      // Find department head info if available
+      const departmentKey = foundPosition.department.toLowerCase();
+      const departmentHead = departmentHeads[departmentKey];
+      
+      if (departmentHead) {
+        console.log("Found department head:", departmentHead);
       }
     }
-  }, [form.watch("position_id"), jobPositions, departments]);
+  }, [form, jobPositions, departmentHeads]);
+  
+  // Only re-run effect when necessary dependencies change
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "position_id") {
+        updateDepartmentInfo(value.position_id as string);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form.watch, updateDepartmentInfo]);
+  
+  // Handle submit wrapped with useCallback to prevent unnecessary re-renders
+  const handleSubmit = useCallback(() => {
+    return form.handleSubmit(onSubmit)();
+  }, [form, onSubmit]);
   
   return {
     form,
     selectedEmployeeData,
     selectedPosition,
-    handleSubmit: form.handleSubmit(onSubmit)
+    handleSubmit
   };
 }
