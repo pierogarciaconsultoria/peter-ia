@@ -20,6 +20,15 @@ import { RequestStatusCards } from "./personnel/RequestStatusCards";
 import { RequestTable } from "./personnel/RequestTable";
 import { mockRequests } from "./personnel/mock-data";
 
+interface JobPositionData {
+  id: string;
+  title: string;
+  description: string;
+  department: string;
+  code?: string;
+  revision?: string;
+}
+
 export function PersonnelMovement() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -33,7 +42,7 @@ export function PersonnelMovement() {
       try {
         const { data, error } = await supabase
           .from('job_positions')
-          .select('id, title, description, department');
+          .select('id, title, description, department, code, revision');
         
         if (error) {
           console.error('Error fetching job positions:', error);
@@ -47,10 +56,15 @@ export function PersonnelMovement() {
         
         if (data) {
           // Add required fields to match JobPosition type
-          const formattedPositions: JobPosition[] = data.map(pos => ({
-            ...pos,
+          const formattedPositions: JobPosition[] = data.map((pos: JobPositionData) => ({
+            id: pos.id,
+            title: pos.title,
+            department: pos.department,
+            description: pos.description,
             code: pos.code || '',
-            revision: pos.revision || '1.0'
+            revision: pos.revision || '1.0',
+            is_supervisor: false,
+            status: "approved" as const
           }));
           setJobPositions(formattedPositions);
         }
