@@ -1,151 +1,87 @@
 
 import { useState, useEffect } from "react";
+import { PlusCircle, RefreshCcw, FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Plus, FileText, BarChart2 } from "lucide-react";
-import { useDiscAssessments } from "@/hooks/useDiscAssessments";
-import { DiscAssessmentTable } from "./DiscAssessmentTable";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewAssessmentDialog } from "./NewAssessmentDialog";
+import { DiscAssessmentTable } from "./DiscAssessmentTable";
+import { DiscAssessmentStats } from "./DiscAssessmentStats";
+import { useDiscAssessments } from "@/hooks/useDiscAssessments";
 
 export function DiscAssessment() {
-  const { assessments, isLoading, error, fetchAssessments } = useDiscAssessments();
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
+  const { assessments, isLoading, fetchAssessments } = useDiscAssessments();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
   useEffect(() => {
     fetchAssessments();
-  }, []);
+  }, [fetchAssessments]);
+  
+  const handleRefresh = () => {
+    fetchAssessments();
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Avaliação DISC</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Avaliação DISC</h2>
           <p className="text-muted-foreground">
-            Gerenciamento de avaliações DISC para identificar estilos comportamentais
+            Gerencie avaliações DISC de colaboradores e candidatos
           </p>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Avaliação DISC
-        </Button>
+        
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            <RefreshCcw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Nova Avaliação
+          </Button>
+        </div>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      
+      {assessments.length === 0 && !isLoading ? (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total de Avaliações
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Nenhuma avaliação DISC encontrada</CardTitle>
+            <CardDescription>
+              Realize sua primeira avaliação DISC para começar a análise de perfis comportamentais.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{assessments.length}</div>
+          <CardContent className="flex flex-col items-center pt-6 pb-8">
+            <FileQuestion className="h-16 w-16 text-muted-foreground mb-6" />
+            <p className="text-center text-muted-foreground max-w-md mb-6">
+              A metodologia DISC é um poderoso instrumento de avaliação comportamental
+              que ajuda a identificar os diferentes estilos de comportamento e comunicação das pessoas.
+            </p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              Realizar Primeira Avaliação
+            </Button>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Dominante (D)
-            </CardTitle>
-            <BarChart2 className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {assessments.filter(a => a.primary_type === 'D').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Influente (I)
-            </CardTitle>
-            <BarChart2 className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {assessments.filter(a => a.primary_type === 'I').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Estável (S)
-            </CardTitle>
-            <BarChart2 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {assessments.filter(a => a.primary_type === 'S').length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Conformista (C)
-            </CardTitle>
-            <BarChart2 className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {assessments.filter(a => a.primary_type === 'C').length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="mr-2 h-5 w-5" />
-            Avaliações DISC
-          </CardTitle>
-          <CardDescription>
-            Lista de todas as avaliações DISC realizadas
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      ) : (
+        <>
+          <DiscAssessmentStats assessments={assessments} />
+          
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <p className="text-muted-foreground">Carregando avaliações DISC...</p>
-            </div>
-          ) : error ? (
-            <div className="flex justify-center py-8 text-destructive">
-              <p>{error}</p>
-            </div>
-          ) : assessments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium">Nenhuma avaliação DISC encontrada</h3>
-              <p className="text-sm text-muted-foreground mt-1 mb-4">
-                Comece criando uma nova avaliação DISC
-              </p>
-              <Button onClick={() => setIsFormOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nova Avaliação DISC
-              </Button>
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <DiscAssessmentTable assessments={assessments} />
           )}
-        </CardContent>
-      </Card>
-
-      <NewAssessmentDialog 
-        isOpen={isFormOpen} 
-        onOpenChange={setIsFormOpen}
+        </>
+      )}
+      
+      <NewAssessmentDialog
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         onSuccess={fetchAssessments}
       />
     </div>
