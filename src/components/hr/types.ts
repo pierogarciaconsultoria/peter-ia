@@ -1,3 +1,4 @@
+
 export interface JobPosition {
   id: string;
   code?: string;

@@ -9,5 +9,15 @@ export function OrgStructureChart() {
     return <div className="h-96 flex items-center justify-center">Carregando organograma...</div>;
   }
   
-  return <DepartmentOrgChart positions={positions} />;
+  // Convert JobPositionWithHierarchy[] to match the format expected by DepartmentOrgChart
+  const formattedPositions = positions.map(pos => ({
+    id: pos.id,
+    title: pos.title,
+    department: pos.department || '',
+    level: pos.level,
+    parentPosition: pos.parentPosition,
+    isDepartmentHead: pos.isDepartmentHead
+  }));
+  
+  return <DepartmentOrgChart positions={formattedPositions} />;
 }
