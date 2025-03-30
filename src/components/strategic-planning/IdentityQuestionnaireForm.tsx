@@ -1,126 +1,113 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { QuestionDisplay } from "./questionnaire/QuestionDisplay";
 import { QuestionnaireProgress } from "./questionnaire/QuestionnaireProgress";
-import { QuestionnaireResponse } from "./questionnaire/QuestionnaireResponse";
 import { QuestionnaireNavigation } from "./questionnaire/QuestionnaireNavigation";
-import { IdentityResponses, questionnaireData } from "./questionnaire/QuestionnaireTypes";
+import { QuestionnaireResponse } from "./questionnaire/QuestionnaireResponse";
+
+export interface IdentityResponses {
+  purpose?: string;
+  uniqueness?: string;
+  values?: string;
+  ambition?: string;
+  impact?: string;
+}
 
 interface IdentityQuestionnaireFormProps {
   onSubmitResponses: (responses: IdentityResponses) => void;
   isGenerating: boolean;
 }
 
-export function IdentityQuestionnaireForm({ onSubmitResponses, isGenerating }: IdentityQuestionnaireFormProps) {
-  const { toast } = useToast();
-  const [activeSection, setActiveSection] = useState<"mission" | "vision" | "values">("mission");
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [responses, setResponses] = useState<IdentityResponses>({
-    mission: ["", "", "", "", ""],
-    vision: ["", "", "", "", ""],
-    values: ["", "", "", "", ""]
-  });
+// Questionnaire questions
+const questions = [
+  "Qual é o propósito fundamental da sua organização? Por que ela existe?",
+  "O que torna sua organização única? Quais são suas principais competências e diferenciais?",
+  "Quais são os valores fundamentais que guiam as decisões e comportamentos na sua organização?",
+  "Onde sua organização quer estar em 5 a 10 anos? Qual é a sua ambição de longo prazo?",
+  "Qual impacto positivo sua organização deseja ter no mundo, para seus clientes, colaboradores e comunidade?",
+];
 
-  const handleResponseChange = (response: string) => {
-    setResponses(prev => ({
-      ...prev,
-      [activeSection]: prev[activeSection].map((r, i) => 
-        i === currentQuestion ? response : r
-      )
-    }));
-  };
+export function IdentityQuestionnaireForm({ onSubmitResponses, isGenerating }: IdentityQuestionnaireFormProps) {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [responses, setResponses] = useState<IdentityResponses>({});
+
+  // Calculate progress percentage
+  const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   const handleNext = () => {
-    if (responses[activeSection][currentQuestion].trim() === "") {
-      toast({
-        title: "Campo vazio",
-        description: "Por favor, responda à pergunta antes de continuar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentQuestion < questionnaireData[activeSection].length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else if (activeSection === "mission") {
-      setActiveSection("vision");
-      setCurrentQuestion(0);
-    } else if (activeSection === "vision") {
-      setActiveSection("values");
-      setCurrentQuestion(0);
-    } else {
-      // All questions answered, submit responses
-      onSubmitResponses(responses);
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    } else if (activeSection === "vision") {
-      setActiveSection("mission");
-      setCurrentQuestion(questionnaireData.mission.length - 1);
-    } else if (activeSection === "values") {
-      setActiveSection("vision");
-      setCurrentQuestion(questionnaireData.vision.length - 1);
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 
-  const calculateProgress = () => {
-    const totalQuestions = 
-      questionnaireData.mission.length + 
-      questionnaireData.vision.length + 
-      questionnaireData.values.length;
-    
-    const questionsAnswered = 
-      (activeSection === "mission" ? currentQuestion : questionnaireData.mission.length) +
-      (activeSection === "vision" ? currentQuestion : (activeSection === "values" ? questionnaireData.vision.length : 0));
-    
-    return ((questionsAnswered + 1) / totalQuestions) * 100;
+  const handleResponseChange = (response: string) => {
+    setResponses({
+      ...responses,
+      [getResponseKey(currentQuestionIndex)]: response,
+    });
   };
 
-  // Is first or last question check
-  const isFirstQuestion = activeSection === "mission" && currentQuestion === 0;
-  const isLastQuestion = activeSection === "values" && currentQuestion === questionnaireData.values.length - 1;
+  const handleSubmit = () => {
+    onSubmitResponses(responses);
+  };
+
+  // Helper to map question index to response key
+  const getResponseKey = (index: number): keyof IdentityResponses => {
+    switch (index) {
+      case 0: return "purpose";
+      case 1: return "uniqueness";
+      case 2: return "values";
+      case 3: return "ambition";
+      case 4: return "impact";
+      default: return "purpose";
+    }
+  };
+
+  // Current response for this question
+  const currentResponse = responses[getResponseKey(currentQuestionIndex)] || "";
+
+  // Check if form is complete
+  const isFormComplete = [
+    responses.purpose,
+    responses.uniqueness,
+    responses.values,
+    responses.ambition,
+    responses.impact
+  ].every(response => !!response?.trim());
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-bold">
-          Questionário de Identidade Estratégica - {activeSection === "mission" ? "Missão" : activeSection === "vision" ? "Visão" : "Valores"}
-        </CardTitle>
-        
-        <QuestionnaireProgress
-          currentQuestion={currentQuestion}
-          totalQuestions={questionnaireData[activeSection].length}
-          progressPercentage={calculateProgress()}
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <QuestionnaireProgress 
+          currentQuestion={currentQuestionIndex}
+          totalQuestions={questions.length}
+          progressPercentage={progressPercentage}
         />
-      </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-4">
-          <QuestionDisplay question={questionnaireData[activeSection][currentQuestion]} />
-          
-          <QuestionnaireResponse
-            value={responses[activeSection][currentQuestion]}
-            onChange={(e) => handleResponseChange(e.target.value)}
-            isDisabled={isGenerating}
-          />
-          
-          <QuestionnaireNavigation
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            isFirstQuestion={isFirstQuestion}
-            isLastQuestion={isLastQuestion}
-            isGenerating={isGenerating}
-          />
-        </div>
-      </CardContent>
-    </Card>
+        
+        <QuestionDisplay question={questions[currentQuestionIndex]} />
+        
+        <QuestionnaireResponse 
+          value={currentResponse}
+          onChange={handleResponseChange}
+          disabled={isGenerating}
+        />
+      </div>
+
+      <QuestionnaireNavigation 
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onSubmit={handleSubmit}
+        isFirstQuestion={currentQuestionIndex === 0}
+        isLastQuestion={currentQuestionIndex === questions.length - 1}
+        isFormComplete={isFormComplete}
+        isLoading={isGenerating}
+      />
+    </div>
   );
 }
-
-// Re-export the IdentityResponses type so that it can still be imported from this file
-export { type IdentityResponses } from "./questionnaire/QuestionnaireTypes";

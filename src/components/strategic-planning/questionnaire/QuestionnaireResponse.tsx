@@ -1,27 +1,22 @@
 
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 interface QuestionnaireResponseProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  isDisabled: boolean;
+  onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export function QuestionnaireResponse({ value, onChange, isDisabled }: QuestionnaireResponseProps) {
+export function QuestionnaireResponse({ value, onChange, disabled }: QuestionnaireResponseProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="response">Sua resposta</Label>
-      <Textarea
-        id="response"
-        rows={4}
-        value={value}
-        onChange={onChange}
-        placeholder="Digite sua resposta aqui..."
-        className="resize-none"
-        disabled={isDisabled}
-      />
-    </div>
+    <Textarea
+      placeholder="Digite sua resposta aqui..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={6}
+      className="resize-none mt-4"
+      disabled={disabled}
+    />
   );
 }
