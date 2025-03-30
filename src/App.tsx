@@ -23,6 +23,7 @@ import RiskManagement from "./pages/RiskManagement";
 import OrganizationContext from "./pages/OrganizationContext";
 import CriticalAnalysis from "./pages/CriticalAnalysis";
 import SatisfactionSurvey from "./pages/SatisfactionSurvey";
+import HumanResources from "./pages/HumanResources";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/risk-management" element={<RiskManagement />} />
           <Route path="/organization-context" element={<OrganizationContext />} />
           <Route path="/critical-analysis" element={<CriticalAnalysis />} />
+          <Route path="/human-resources" element={<HumanResources />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
