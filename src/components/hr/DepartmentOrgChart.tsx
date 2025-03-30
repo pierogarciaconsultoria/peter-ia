@@ -2,7 +2,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import ReactFlow, { 
-  Node, 
+  Node as FlowNode, 
   Edge, 
   ReactFlowProvider, 
   useNodesState, 
@@ -25,7 +25,7 @@ interface DepartmentOrgChartProps {
   positions: Position[];
 }
 
-interface OrgChartNode extends Node {
+interface OrgChartNode extends FlowNode {
   data: {
     label: string;
     department?: string;
@@ -43,10 +43,10 @@ const nodeTypes = {
 };
 
 function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
-  const { departments } = useDepartments();
+  const { departments: orgDepartments } = useDepartments();
   
   // Group positions by department for more organized layout
-  const departments = React.useMemo(() => {
+  const departmentGroups = React.useMemo(() => {
     const deptMap = new Map<string, Position[]>();
     
     positions.forEach(pos => {
@@ -65,11 +65,13 @@ function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
     const edges: Edge[] = [];
     let xOffset = 0;
     
-    departments.forEach(([deptName, deptPositions], deptIndex) => {
+    departmentGroups.forEach(([deptName, deptPositions], deptIndex) => {
       // Sort positions by level (Senior -> Pleno -> Junior)
       const sortedPositions = [...deptPositions].sort((a, b) => {
         const levelOrder = { "Senior": 0, "Pleno": 1, "Junior": 2 };
-        return levelOrder[a.level as keyof typeof levelOrder] - levelOrder[b.level as keyof typeof levelOrder];
+        const aLevel = a.level as keyof typeof levelOrder;
+        const bLevel = b.level as keyof typeof levelOrder;
+        return (levelOrder[aLevel] || 3) - (levelOrder[bLevel] || 3);
       });
       
       // Calculate vertical positioning based on hierarchy
@@ -109,7 +111,7 @@ function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
     });
     
     return { nodes, edges };
-  }, [departments]);
+  }, [departmentGroups]);
   
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
