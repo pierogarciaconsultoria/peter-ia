@@ -45,7 +45,15 @@ export function PersonnelMovement() {
           return;
         }
         
-        setJobPositions(data || []);
+        if (data) {
+          // Add required fields to match JobPosition type
+          const formattedPositions: JobPosition[] = data.map(pos => ({
+            ...pos,
+            code: pos.code || '',
+            revision: pos.revision || '1.0'
+          }));
+          setJobPositions(formattedPositions);
+        }
       } catch (error) {
         console.error('Error in job positions fetch:', error);
       } finally {

@@ -114,7 +114,7 @@ export function JobSalaryPlan() {
       pos.id === jobPosition.id
         ? {
             ...pos,
-            status: "approved",
+            status: "approved" as const,
             approval_date: new Date().toISOString().split('T')[0],
             approver: "Usuário Atual" // Should be replaced with current user's name
           }
@@ -133,7 +133,7 @@ export function JobSalaryPlan() {
       pos.id === jobPosition.id
         ? {
             ...pos,
-            status: "in_review",
+            status: "in_review" as const,
             revision: (parseFloat(pos.revision) + 0.1).toFixed(1)
           }
         : pos
@@ -151,7 +151,7 @@ export function JobSalaryPlan() {
       pos.id === jobPosition.id
         ? {
             ...pos,
-            status: "distributed"
+            status: "distributed" as const
           }
         : pos
     );
