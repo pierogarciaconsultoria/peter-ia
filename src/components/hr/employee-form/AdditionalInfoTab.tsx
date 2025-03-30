@@ -1,16 +1,17 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { EmployeeFormData } from "./types";
 
 interface AdditionalInfoTabProps {
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: EmployeeFormData;
+  setFormData: (data: EmployeeFormData) => void;
 }
 
 export function AdditionalInfoTab({ formData, setFormData }: AdditionalInfoTabProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
   return (
