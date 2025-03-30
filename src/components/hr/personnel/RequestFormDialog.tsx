@@ -26,6 +26,9 @@ import { JobPosition } from "../types";
 import { RequestFormValues } from "./types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { EmployeeSelector } from "../departments/EmployeeSelector";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RequestFormDialogProps {
   isOpen: boolean;
@@ -35,14 +38,17 @@ interface RequestFormDialogProps {
 }
 
 export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions }: RequestFormDialogProps) {
+  const [selectedEmployeeData, setSelectedEmployeeData] = useState<any>(null);
+  
   const form = useForm<RequestFormValues>({
     defaultValues: {
       type: "",
       department: "",
-      position: "",
+      position_id: "",
       justification: "",
       targetDate: "",
       employeeName: "",
+      employeeId: "",
       hireDate: "",
       currentPosition: "",
       proposedPosition: "",
@@ -69,6 +75,51 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
     }
   });
   
+  // Fetch employee data when the employeeId changes
+  useEffect(() => {
+    const employeeId = form.watch("employeeId");
+    if (employeeId) {
+      fetchEmployeeData(employeeId);
+    } else {
+      setSelectedEmployeeData(null);
+      form.setValue("currentPosition", "");
+      form.setValue("department", "");
+    }
+  }, [form.watch("employeeId")]);
+  
+  // Function to fetch employee data
+  const fetchEmployeeData = async (employeeId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching employee data:", error);
+        return;
+      }
+      
+      if (data) {
+        setSelectedEmployeeData(data);
+        form.setValue("employeeName", data.name);
+        form.setValue("currentPosition", data.position);
+        form.setValue("department", data.department);
+        
+        // Find the corresponding job position ID
+        const positionMatch = jobPositions.find(
+          pos => pos.title.toLowerCase() === data.position.toLowerCase()
+        );
+        if (positionMatch) {
+          form.setValue("position_id", positionMatch.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error in employee data fetch:", error);
+    }
+  };
+  
   // Get unique departments from job positions
   const departments = Array.from(new Set(jobPositions.map(job => job.department)));
   
@@ -80,7 +131,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
   // Handle department selection to filter job positions
   const handleDepartmentChange = (value: string) => {
     form.setValue("department", value);
-    form.setValue("position", ""); // Reset position when department changes
+    form.setValue("position_id", ""); // Reset position when department changes
   };
 
   // Form movement types
@@ -163,6 +214,24 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Employee Selection */}
+              <FormField
+                control={form.control}
+                name="employeeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Colaborador</FormLabel>
+                    <FormControl>
+                      <EmployeeSelector 
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               {/* Department */}
               <FormField
                 control={form.control}
@@ -170,35 +239,8 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Setor</FormLabel>
-                    <Select 
-                      onValueChange={(value) => handleDepartmentChange(value)} 
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um setor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {/* Employee Name */}
-              <FormField
-                control={form.control}
-                name="employeeName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Colaborador</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome do colaborador" {...field} />
+                      <Input value={field.value} readOnly className="bg-gray-50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -271,7 +313,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
                     <FormItem>
                       <FormLabel>Cargo atual</FormLabel>
                       <FormControl>
-                        <Input placeholder="Cargo atual" {...field} />
+                        <Input value={field.value} readOnly className="bg-gray-50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -308,109 +350,107 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
 
             {/* Schedule Section */}
             {showScheduleSection && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <FormLabel>Horário atual</FormLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      <FormField
-                        control={form.control}
-                        name="currentSchedule.start1"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="currentSchedule.end1"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="currentSchedule.start2"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="currentSchedule.end2"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <FormLabel>Horário proposto</FormLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      <FormField
-                        control={form.control}
-                        name="proposedSchedule.start1"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="proposedSchedule.end1"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="proposedSchedule.start2"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="proposedSchedule.end2"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <FormLabel>Horário atual</FormLabel>
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="currentSchedule.start1"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currentSchedule.end1"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currentSchedule.start2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currentSchedule.end2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
-              </>
+                
+                <div>
+                  <FormLabel>Horário proposto</FormLabel>
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="proposedSchedule.start1"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="proposedSchedule.end1"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="proposedSchedule.start2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="proposedSchedule.end2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Admission Type Section */}
@@ -592,9 +632,10 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
               </div>
             </div>
             
+            {/* Signature Sections - Styled according to the image */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
               <div>
-                <FormLabel>Requisitante</FormLabel>
+                <h3 className="font-medium text-lg mb-2">Requisitante</h3>
                 <div className="text-sm text-gray-500 mt-2">
                   Data: ___/___/_____
                 </div>
@@ -603,7 +644,7 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
                 </div>
               </div>
               <div>
-                <FormLabel>Gerência / Direção</FormLabel>
+                <h3 className="font-medium text-lg mb-2">Gerência / Direção</h3>
                 <div className="text-sm text-gray-500 mt-2">
                   Data: ___/___/_____
                 </div>
@@ -613,8 +654,9 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
               </div>
             </div>
             
+            {/* Encerramento Section - Styled according to the image */}
             <div className="bg-gray-100 p-4 rounded-md text-center">
-              <h3 className="font-semibold">ENCERRAMENTO</h3>
+              <h3 className="font-semibold text-xl mb-2">ENCERRAMENTO</h3>
               <div className="text-sm text-gray-500 mt-2">
                 Data: ___/___/_____
               </div>

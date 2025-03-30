@@ -10,8 +10,8 @@ export interface JobPosition {
   approver?: string;
   immediate_supervisor_position?: string;
   is_supervisor?: boolean;
-  is_department_head?: boolean; // New field for department head
-  superior_position_id?: string; // New field for superior position ID reference
+  is_department_head?: boolean;
+  superior_position_id?: string;
   cbo_code?: string;
   norm?: string;
   main_responsibilities?: string;

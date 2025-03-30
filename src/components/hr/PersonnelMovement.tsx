@@ -55,6 +55,8 @@ export function PersonnelMovement() {
             code: pos.code || '',
             revision: pos.revision || '1.0',
             is_supervisor: pos.is_supervisor || false,
+            is_department_head: pos.is_department_head || false,
+            superior_position_id: pos.superior_position_id,
             status: (pos.status as "draft" | "approved" | "in_review" | "distributed") || "approved",
             approval_date: pos.approval_date,
             approver: pos.approver,
