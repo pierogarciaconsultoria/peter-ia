@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
@@ -11,22 +10,12 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { JobPositionSelector } from "../job-position/JobPositionSelector";
 import { JobPosition } from "../types";
-
-// Mock departments for the dropdown
-const departments = [
-  "Recursos Humanos",
-  "Tecnologia da Informação",
-  "Financeiro",
-  "Operações",
-  "Logística",
-  "Marketing",
-  "Comercial",
-  "Administrativo",
-];
+import { DepartmentSelector } from "../departments/DepartmentSelector";
+import { EmployeeFormData } from "./types";
 
 interface JobInfoTabProps {
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: EmployeeFormData;
+  setFormData: (data: EmployeeFormData) => void;
   selectedJobPosition: JobPosition | null;
   setSelectedJobPosition: (position: JobPosition | null) => void;
 }
@@ -39,22 +28,23 @@ export function JobInfoTab({
 }: JobInfoTabProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleDepartmentChange = (value: string) => {
-    setFormData((prev: any) => ({ ...prev, department: value }));
+    setFormData({ ...formData, department: value });
   };
 
   // Function to handle job position selection
   const handleJobPositionSelect = (position: JobPosition | null) => {
     setSelectedJobPosition(position);
     if (position) {
-      // Update job title based on selected position
-      setFormData((prev: any) => ({
-        ...prev,
+      // Update job title and department based on selected position
+      setFormData({
+        ...formData,
         jobTitle: position.title,
-      }));
+        department: position.department || formData.department,
+      });
     }
   };
 
@@ -86,7 +76,7 @@ export function JobInfoTab({
                   mode="single"
                   selected={formData.hireDate || undefined}
                   onSelect={(date) =>
-                    setFormData((prev: any) => ({ ...prev, hireDate: date }))
+                    setFormData({ ...formData, hireDate: date })
                   }
                   initialFocus
                 />
@@ -96,21 +86,11 @@ export function JobInfoTab({
 
           <div className="space-y-2">
             <Label htmlFor="department">Departamento</Label>
-            <Select
+            <DepartmentSelector
               value={formData.department}
               onValueChange={handleDepartmentChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o departamento" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Selecione o departamento"
+            />
           </div>
 
           <div className="space-y-2">

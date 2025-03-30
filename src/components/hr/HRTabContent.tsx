@@ -18,6 +18,7 @@ import { ExitInterviews } from "@/components/hr/ExitInterviews";
 import { DevelopmentPlans } from "@/components/hr/DevelopmentPlans";
 import { VacationManagement } from "@/components/hr/VacationManagement";
 import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
+import { DepartmentManagement } from "@/components/hr/DepartmentManagement";
 
 type HRTabContentProps = {
   activeTab: string;
@@ -100,9 +101,7 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
       </TabsContent>
       
       <TabsContent value="departments">
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Módulo de Departamentos será implementado em breve.</p>
-        </div>
+        <DepartmentManagement />
       </TabsContent>
     </Tabs>
   );
