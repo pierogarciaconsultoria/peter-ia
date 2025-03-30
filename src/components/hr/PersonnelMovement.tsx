@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
@@ -40,58 +40,43 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarDays, FileText, Plus, RefreshCw } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for personnel movement requests
-const mockRequests = [
-  {
-    id: "1",
-    type: "hiring",
-    department: "Engenharia",
-    position: "Engenheiro de Produção",
-    requestDate: "2023-07-15",
-    status: "pending",
-    requester: "João Silva"
-  },
-  {
-    id: "2",
-    type: "transfer",
-    department: "Financeiro",
-    position: "Analista Financeiro",
-    requestDate: "2023-07-10",
-    status: "approved",
-    requester: "Maria Oliveira"
-  },
-  {
-    id: "3",
-    type: "termination",
-    department: "TI",
-    position: "Desenvolvedor Frontend",
-    requestDate: "2023-07-05",
-    status: "rejected",
-    requester: "Pedro Santos"
-  },
-  {
-    id: "4",
-    type: "salary_change",
-    department: "Marketing",
-    position: "Coordenador de Marketing",
-    requestDate: "2023-07-01",
-    status: "pending",
-    requester: "Ana Costa"
-  }
-];
+// Types for job positions and requests
+interface JobPosition {
+  id: string;
+  title: string;
+  department: string;
+  description: string;
+}
+
+interface PersonnelRequest {
+  id: string;
+  type: string;
+  department: string;
+  position: string;
+  position_id?: string;
+  requestDate: string;
+  status: string;
+  requester: string;
+}
 
 interface RequestFormValues {
   type: string;
   department: string;
   position: string;
+  position_id?: string;
   justification: string;
   targetDate: string;
 }
 
 export function PersonnelMovement() {
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [requests, setRequests] = useState(mockRequests);
+  const [requests, setRequests] = useState<PersonnelRequest[]>([]);
+  const [jobPositions, setJobPositions] = useState<JobPosition[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const form = useForm<RequestFormValues>({
     defaultValues: {
@@ -103,13 +88,49 @@ export function PersonnelMovement() {
     }
   });
   
+  // Fetch job positions from Supabase
+  useEffect(() => {
+    const fetchJobPositions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('job_positions')
+          .select('id, title, description, department');
+        
+        if (error) {
+          console.error('Error fetching job positions:', error);
+          toast({
+            title: "Erro ao carregar cargos",
+            description: "Não foi possível carregar a lista de cargos.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        setJobPositions(data || []);
+      } catch (error) {
+        console.error('Error in job positions fetch:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchJobPositions();
+    
+    // For demo purposes, we'll continue using the mock requests
+    setRequests(mockRequests);
+  }, [toast]);
+  
   const handleSubmit = (data: RequestFormValues) => {
+    // Find the selected job position to get its details
+    const selectedPosition = jobPositions.find(job => job.id === data.position);
+    
     // In a real implementation, this would send the data to an API
-    const newRequest = {
+    const newRequest: PersonnelRequest = {
       id: (requests.length + 1).toString(),
       type: data.type,
       department: data.department,
-      position: data.position,
+      position: selectedPosition ? selectedPosition.title : data.position,
+      position_id: data.position, // Store the position ID
       requestDate: new Date().toISOString().split('T')[0],
       status: "pending",
       requester: "Usuário Atual" // In a real app, this would be the logged-in user
@@ -118,6 +139,17 @@ export function PersonnelMovement() {
     setRequests([newRequest, ...requests]);
     setIsDialogOpen(false);
     form.reset();
+    
+    toast({
+      title: "Solicitação enviada",
+      description: "Sua solicitação de movimentação foi registrada com sucesso.",
+    });
+  };
+  
+  // Handle department selection to filter job positions
+  const handleDepartmentChange = (value: string) => {
+    form.setValue("department", value);
+    form.setValue("position", ""); // Reset position when department changes
   };
   
   const getStatusBadge = (status: string) => {
@@ -146,6 +178,58 @@ export function PersonnelMovement() {
     }
   };
   
+  // Mock data for personnel movement requests
+  const mockRequests = [
+    {
+      id: "1",
+      type: "hiring",
+      department: "Engenharia",
+      position: "Engenheiro de Produção",
+      position_id: "pos-001",
+      requestDate: "2023-07-15",
+      status: "pending",
+      requester: "João Silva"
+    },
+    {
+      id: "2",
+      type: "transfer",
+      department: "Financeiro",
+      position: "Analista Financeiro",
+      position_id: "pos-002",
+      requestDate: "2023-07-10",
+      status: "approved",
+      requester: "Maria Oliveira"
+    },
+    {
+      id: "3",
+      type: "termination",
+      department: "TI",
+      position: "Desenvolvedor Frontend",
+      position_id: "pos-003",
+      requestDate: "2023-07-05",
+      status: "rejected",
+      requester: "Pedro Santos"
+    },
+    {
+      id: "4",
+      type: "salary_change",
+      department: "Marketing",
+      position: "Coordenador de Marketing",
+      position_id: "pos-004",
+      requestDate: "2023-07-01",
+      status: "pending",
+      requester: "Ana Costa"
+    }
+  ];
+  
+  // Get unique departments from job positions
+  const departments = Array.from(new Set(jobPositions.map(job => job.department)));
+  
+  // Filter job positions by selected department
+  const filteredPositions = jobPositions.filter(
+    job => !form.watch("department") || job.department === form.watch("department")
+  );
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -157,8 +241,8 @@ export function PersonnelMovement() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => setIsLoading(true)}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
           <Button size="sm" onClick={() => setIsDialogOpen(true)}>
@@ -248,7 +332,16 @@ export function PersonnelMovement() {
                 <TableRow key={request.id}>
                   <TableCell>{getTypeLabel(request.type)}</TableCell>
                   <TableCell>{request.department}</TableCell>
-                  <TableCell>{request.position}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{request.position}</span>
+                      {request.position_id && (
+                        <span className="text-xs text-muted-foreground">
+                          Cód: {request.position_id}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{request.requester}</TableCell>
                   <TableCell>{request.requestDate}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
@@ -307,9 +400,21 @@ export function PersonnelMovement() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Departamento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Departamento" {...field} />
-                    </FormControl>
+                    <Select 
+                      onValueChange={(value) => handleDepartmentChange(value)} 
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um departamento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -321,9 +426,23 @@ export function PersonnelMovement() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cargo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Cargo" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um cargo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredPositions.map((position) => (
+                          <SelectItem key={position.id} value={position.id}>
+                            {position.title} - {position.department}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      {field.value && jobPositions.find(p => p.id === field.value)?.description}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

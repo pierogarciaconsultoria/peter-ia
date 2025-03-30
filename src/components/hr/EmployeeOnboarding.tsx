@@ -20,40 +20,106 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+
+// Types for job positions
+interface JobPosition {
+  id: string;
+  title: string;
+  department: string;
+  description: string;
+}
+
+// Types for onboarding process
+interface OnboardingProcess {
+  id: string;
+  employeeName: string;
+  position: string;
+  position_id?: string;
+  position_details?: JobPosition;
+  startDate: string;
+  progress: number;
+  status: string;
+  department: string;
+}
 
 export function EmployeeOnboarding() {
-  // Mock data for onboarding processes
-  const [onboardingProcesses] = useState([
-    {
-      id: "onb1",
-      employeeName: "Pedro Costa",
-      position: "Desenvolvedor Full Stack",
-      startDate: "2023-10-15",
-      progress: 75,
-      status: "em_andamento",
-      department: "Tecnologia"
-    },
-    {
-      id: "onb2",
-      employeeName: "Mariana Silva",
-      position: "Analista de Marketing",
-      startDate: "2023-11-05",
-      progress: 30,
-      status: "em_andamento",
-      department: "Marketing"
-    },
-    {
-      id: "onb3",
-      employeeName: "Roberto Alves",
-      position: "Gerente de Projetos",
-      startDate: "2023-09-22",
-      progress: 100,
-      status: "concluido",
-      department: "Operações"
-    }
-  ]);
+  const [onboardingProcesses, setOnboardingProcesses] = useState<OnboardingProcess[]>([]);
+  const [jobPositions, setJobPositions] = useState<JobPosition[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch job positions and onboarding processes
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch job positions
+        const { data: positionsData, error: positionsError } = await supabase
+          .from('job_positions')
+          .select('id, title, department, description');
+        
+        if (positionsError) {
+          console.error('Error fetching job positions:', positionsError);
+          return;
+        }
+        
+        setJobPositions(positionsData || []);
+        
+        // For demo, we'll use mock data for onboarding processes
+        // but in a real app we'd fetch from the database
+        const mockOnboardingData = [
+          {
+            id: "onb1",
+            employeeName: "Pedro Costa",
+            position: "Desenvolvedor Full Stack",
+            position_id: "pos1",
+            startDate: "2023-10-15",
+            progress: 75,
+            status: "em_andamento",
+            department: "Tecnologia"
+          },
+          {
+            id: "onb2",
+            employeeName: "Mariana Silva",
+            position: "Analista de Marketing",
+            position_id: "pos2",
+            startDate: "2023-11-05",
+            progress: 30,
+            status: "em_andamento",
+            department: "Marketing"
+          },
+          {
+            id: "onb3",
+            employeeName: "Roberto Alves",
+            position: "Gerente de Projetos",
+            position_id: "pos3",
+            startDate: "2023-09-22",
+            progress: 100,
+            status: "concluido",
+            department: "Operações"
+          }
+        ];
+        
+        // Merge onboarding data with job position details
+        const enrichedOnboarding = mockOnboardingData.map(process => {
+          const positionDetails = positionsData?.find(p => p.id === process.position_id);
+          return {
+            ...process,
+            position_details: positionDetails
+          };
+        });
+        
+        setOnboardingProcesses(enrichedOnboarding);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -67,6 +133,14 @@ export function EmployeeOnboarding() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <p className="text-muted-foreground">Carregando processos de onboarding...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -147,7 +221,23 @@ export function EmployeeOnboarding() {
                 {onboardingProcesses.map((process) => (
                   <TableRow key={process.id}>
                     <TableCell className="font-medium">{process.employeeName}</TableCell>
-                    <TableCell>{process.position}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{process.position}</span>
+                        {process.position_id && (
+                          <div className="flex flex-col">
+                            <span className="text-xs text-muted-foreground">
+                              Cód: {process.position_id}
+                            </span>
+                            {process.position_details && (
+                              <span className="text-xs text-muted-foreground line-clamp-1">
+                                {process.position_details.description}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{process.department}</TableCell>
                     <TableCell>{new Date(process.startDate).toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell>{getStatusBadge(process.status)}</TableCell>
@@ -183,6 +273,7 @@ export function EmployeeOnboarding() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Funcionário</TableHead>
+                  <TableHead>Cargo</TableHead>
                   <TableHead>Data de Início</TableHead>
                   <TableHead>Progresso</TableHead>
                   <TableHead>Ações</TableHead>
@@ -194,6 +285,16 @@ export function EmployeeOnboarding() {
                   .map((process) => (
                   <TableRow key={process.id}>
                     <TableCell className="font-medium">{process.employeeName}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{process.position}</span>
+                        {process.position_id && (
+                          <span className="text-xs text-muted-foreground">
+                            Cód: {process.position_id}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{new Date(process.startDate).toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -231,7 +332,16 @@ export function EmployeeOnboarding() {
                   .map((process) => (
                   <TableRow key={process.id}>
                     <TableCell className="font-medium">{process.employeeName}</TableCell>
-                    <TableCell>{process.position}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{process.position}</span>
+                        {process.position_id && (
+                          <span className="text-xs text-muted-foreground">
+                            Cód: {process.position_id}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{new Date().toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell>
                       <Button variant="outline" size="sm">
