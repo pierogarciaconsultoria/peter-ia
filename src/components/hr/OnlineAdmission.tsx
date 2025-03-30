@@ -11,7 +11,9 @@ import {
   Loader2, 
   SquareCheck, 
   UserCheck, 
-  UserPlus
+  UserPlus,
+  Send,
+  ExternalLink
 } from "lucide-react";
 
 import {
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { NewEmployeeDialog } from "./NewEmployeeDialog";
+import { DocumentRequestDialog } from "./DocumentRequestDialog";
 
 export function OnlineAdmission() {
   // Mock data for admission processes
@@ -36,6 +39,8 @@ export function OnlineAdmission() {
       startDate: "2023-10-25",
       status: "documentos_pendentes",
       completion: 65,
+      email: "joao.silva@example.com",
+      phone: "11987654321"
     },
     {
       id: "adm2",
@@ -45,6 +50,7 @@ export function OnlineAdmission() {
       startDate: "2023-11-01",
       status: "exame_medico",
       completion: 40,
+      email: "maria.souza@example.com"
     },
     {
       id: "adm3",
@@ -54,6 +60,7 @@ export function OnlineAdmission() {
       startDate: "2023-10-15",
       status: "contrato_assinado",
       completion: 85,
+      phone: "11998765432"
     },
     {
       id: "adm4",
@@ -63,8 +70,22 @@ export function OnlineAdmission() {
       startDate: "2023-11-05",
       status: "documentos_enviados",
       completion: 25,
+      email: "ana.oliveira@example.com",
+      phone: "11912345678"
     }
   ]);
+
+  const [activeDocumentRequestDialog, setActiveDocumentRequestDialog] = useState<{
+    isOpen: boolean;
+    employeeId: string;
+    employeeName: string;
+    employeeEmail?: string;
+    employeePhone?: string;
+  }>({
+    isOpen: false,
+    employeeId: "",
+    employeeName: "",
+  });
 
   const pendingCount = admissionProcesses.filter(p => p.status !== "contrato_assinado").length;
 
@@ -157,7 +178,7 @@ export function OnlineAdmission() {
                   <TableHead>Data de Início</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Progresso</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
+                  <TableHead className="w-[150px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -179,10 +200,24 @@ export function OnlineAdmission() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="icon">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          title="Solicitar documentos por link externo"
+                          onClick={() => setActiveDocumentRequestDialog({
+                            isOpen: true,
+                            employeeId: process.id,
+                            employeeName: process.name,
+                            employeeEmail: process.email,
+                            employeePhone: process.phone
+                          })}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" title="Ver checklist">
                           <ListChecks className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" title="Ver documentos">
                           <FileText className="h-4 w-4" />
                         </Button>
                       </div>
@@ -290,6 +325,15 @@ export function OnlineAdmission() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <DocumentRequestDialog
+        isOpen={activeDocumentRequestDialog.isOpen}
+        onOpenChange={(isOpen) => setActiveDocumentRequestDialog(prev => ({ ...prev, isOpen }))}
+        employeeId={activeDocumentRequestDialog.employeeId}
+        employeeName={activeDocumentRequestDialog.employeeName}
+        employeeEmail={activeDocumentRequestDialog.employeeEmail}
+        employeePhone={activeDocumentRequestDialog.employeePhone}
+      />
     </div>
   );
 }

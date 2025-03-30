@@ -26,6 +26,7 @@ import CriticalAnalysis from "./pages/CriticalAnalysis";
 import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
 import StrategicPlanning from "./pages/StrategicPlanning";
+import DocumentUpload from "./pages/DocumentUpload";
 
 // Create a new QueryClient instance for React Query
 const queryClient = new QueryClient();
@@ -59,6 +60,9 @@ const App = () => {
               <Route path="/critical-analysis" element={<CriticalAnalysis />} />
               <Route path="/human-resources" element={<HumanResources />} />
               <Route path="/strategic-planning" element={<StrategicPlanning />} />
+              
+              {/* Nova rota para o formulário externo de upload de documentos */}
+              <Route path="/document-upload/:token" element={<DocumentUpload />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
