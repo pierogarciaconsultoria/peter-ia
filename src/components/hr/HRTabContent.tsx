@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { HRDashboard } from "@/components/hr/HRDashboard";
 import { EmployeeDirectory } from "@/components/hr/EmployeeDirectory";
@@ -27,7 +26,21 @@ type HRTabContentProps = {
   onTabChange: (value: string) => void;
 };
 
-export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
+export function HRTabContent({ 
+  activeTab, 
+  onTabChange 
+}: { 
+  activeTab: string, 
+  onTabChange: (tabId: string) => void 
+}) {
+  useEffect(() => {
+    const location = window.location;
+    if (location.state && location.state.activeTab && activeTab !== location.state.activeTab) {
+      onTabChange(location.state.activeTab);
+      window.history.replaceState({}, document.title);
+    }
+  }, [activeTab, onTabChange]);
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="mt-6">
       <TabsContent value="dashboard">
