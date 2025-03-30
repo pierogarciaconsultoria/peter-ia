@@ -1,4 +1,3 @@
-
 export const hrTabGroups = [
   {
     label: "Principais",
@@ -17,7 +16,8 @@ export const hrTabGroups = [
     tabs: [
       { value: "trial", label: "Avaliação de Experiência" },
       { value: "performance", label: "Avaliação de Desempenho" },
-      { value: "exit-interviews", label: "Entrevista de Desligamento" }
+      { value: "exit-interviews", label: "Entrevista de Desligamento" },
+      { value: "disc-assessment", label: "Avaliação DISC" }
     ]
   },
   {
