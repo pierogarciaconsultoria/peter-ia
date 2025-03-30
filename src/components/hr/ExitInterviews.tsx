@@ -1,7 +1,9 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
   Calendar,
@@ -20,28 +22,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ExitInterviewFormDialog, ExitInterviewData } from "./exit-interviews/ExitInterviewFormDialog";
+import { ExitInterviewReports } from "./exit-interviews/ExitInterviewReports";
 
 export function ExitInterviews() {
-  // Mock data for exit interviews
-  const [exitInterviews] = useState([
+  // State for exit interviews data
+  const [exitInterviews, setExitInterviews] = useState([
     {
       id: "exit1",
       employeeName: "Ana Beatriz Torres",
       position: "Designer UX Senior",
-      exitDate: "2023-09-30",
-      reason: "Proposta melhor",
+      exitDate: new Date("2023-09-30"),
+      reason: "proposta_melhor",
       status: "realizada",
       feedback: "Gostou da cultura da empresa, mas recebeu proposta com melhor remuneração e benefícios.",
-      department: "Design"
+      department: "Design",
+      overallExperience: "boa",
+      wouldRecommend: "sim"
     },
     {
       id: "exit2",
       employeeName: "Carlos Mendes",
       position: "Desenvolvedor Front-end",
-      exitDate: "2023-10-15",
-      reason: "Mudança de carreira",
+      exitDate: new Date("2023-10-15"),
+      reason: "mudanca_carreira",
       status: "agendada",
       department: "Tecnologia"
     },
@@ -49,20 +54,39 @@ export function ExitInterviews() {
       id: "exit3",
       employeeName: "Patrícia Lima",
       position: "Analista de Marketing",
-      exitDate: "2023-08-25",
-      reason: "Realocação",
+      exitDate: new Date("2023-08-25"),
+      reason: "realocacao",
       status: "realizada",
       feedback: "Mudança para outra cidade. Satisfeita com a experiência na empresa.",
-      department: "Marketing"
+      department: "Marketing",
+      overallExperience: "excelente",
+      wouldRecommend: "sim"
     }
   ]);
   
+  // State for dialogs
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("interviews");
 
   const openInterviewDetails = (interview: any) => {
     setSelectedInterview(interview);
     setIsDialogOpen(true);
+  };
+  
+  const handleNewInterview = () => {
+    setIsFormDialogOpen(true);
+  };
+  
+  const handleInterviewSubmit = (data: ExitInterviewData) => {
+    const newInterview = {
+      id: `exit${exitInterviews.length + 1}`,
+      ...data,
+      status: "realizada"
+    };
+    
+    setExitInterviews([newInterview, ...exitInterviews]);
   };
 
   const getStatusBadge = (status: string) => {
@@ -82,7 +106,7 @@ export function ExitInterviews() {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Entrevistas de Desligamento</h2>
-        <Button>
+        <Button onClick={handleNewInterview}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Entrevista
         </Button>
@@ -131,51 +155,74 @@ export function ExitInterviews() {
           </CardContent>
         </Card>
       </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="interviews">Lista de Entrevistas</TabsTrigger>
+          <TabsTrigger value="reports">Relatórios e Análises</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="interviews">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Funcionário</TableHead>
+                  <TableHead>Cargo</TableHead>
+                  <TableHead>Departamento</TableHead>
+                  <TableHead>Data de Saída</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[100px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {exitInterviews.map((interview) => (
+                  <TableRow key={interview.id}>
+                    <TableCell className="font-medium">{interview.employeeName}</TableCell>
+                    <TableCell>{interview.position}</TableCell>
+                    <TableCell>{interview.department}</TableCell>
+                    <TableCell>{interview.exitDate.toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>
+                      {interview.reason === "proposta_melhor" && "Proposta melhor"}
+                      {interview.reason === "mudanca_carreira" && "Mudança de carreira"}
+                      {interview.reason === "realocacao" && "Realocação"}
+                      {interview.reason === "motivos_pessoais" && "Motivos pessoais"}
+                      {interview.reason === "ambiente_trabalho" && "Ambiente de trabalho"}
+                      {interview.reason === "lideranca" && "Problemas com liderança"}
+                      {interview.reason === "salario_beneficios" && "Salário/benefícios"}
+                      {interview.reason === "outro" && "Outro"}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(interview.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => openInterviewDetails(interview)}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                        {interview.status === "realizada" && (
+                          <Button variant="outline" size="icon">
+                            <FileDown className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="reports">
+          <ExitInterviewReports interviews={exitInterviews} />
+        </TabsContent>
+      </Tabs>
 
-      <div className="rounded-md border mt-6">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Funcionário</TableHead>
-              <TableHead>Cargo</TableHead>
-              <TableHead>Departamento</TableHead>
-              <TableHead>Data de Saída</TableHead>
-              <TableHead>Motivo</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {exitInterviews.map((interview) => (
-              <TableRow key={interview.id}>
-                <TableCell className="font-medium">{interview.employeeName}</TableCell>
-                <TableCell>{interview.position}</TableCell>
-                <TableCell>{interview.department}</TableCell>
-                <TableCell>{new Date(interview.exitDate).toLocaleDateString('pt-BR')}</TableCell>
-                <TableCell>{interview.reason}</TableCell>
-                <TableCell>{getStatusBadge(interview.status)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => openInterviewDetails(interview)}
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                    {interview.status === "realizada" && (
-                      <Button variant="outline" size="icon">
-                        <FileDown className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
+      {/* Interview Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -202,13 +249,22 @@ export function ExitInterviews() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Data de Saída</p>
-                  <p className="font-medium">{new Date(selectedInterview.exitDate).toLocaleDateString('pt-BR')}</p>
+                  <p className="font-medium">{selectedInterview.exitDate.toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
               
               <div>
                 <p className="text-sm text-muted-foreground">Motivo do Desligamento</p>
-                <p className="font-medium">{selectedInterview.reason}</p>
+                <p className="font-medium">
+                  {selectedInterview.reason === "proposta_melhor" && "Proposta melhor"}
+                  {selectedInterview.reason === "mudanca_carreira" && "Mudança de carreira"}
+                  {selectedInterview.reason === "realocacao" && "Realocação"}
+                  {selectedInterview.reason === "motivos_pessoais" && "Motivos pessoais"}
+                  {selectedInterview.reason === "ambiente_trabalho" && "Ambiente de trabalho"}
+                  {selectedInterview.reason === "lideranca" && "Problemas com liderança"}
+                  {selectedInterview.reason === "salario_beneficios" && "Salário/benefícios"}
+                  {selectedInterview.reason === "outro" && "Outro"}
+                </p>
               </div>
               
               {selectedInterview.feedback && (
@@ -241,6 +297,13 @@ export function ExitInterviews() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* New Exit Interview Form */}
+      <ExitInterviewFormDialog 
+        open={isFormDialogOpen}
+        onOpenChange={setIsFormDialogOpen}
+        onSubmit={handleInterviewSubmit}
+      />
     </div>
   );
 }
