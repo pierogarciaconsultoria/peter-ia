@@ -11,7 +11,8 @@ import {
   Loader2, 
   SquareCheck, 
   UserCheck, 
-  UserPlus
+  UserPlus,
+  Link
 } from "lucide-react";
 
 import {
@@ -24,10 +25,24 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { NewEmployeeDialog } from "./NewEmployeeDialog";
+import { DocumentLinkGenerator } from "./admission/DocumentLinkGenerator";
+
+// Expandir o tipo do processo de admissão para incluir informações de contato
+interface AdmissionProcess {
+  id: string;
+  name: string;
+  position: string;
+  department: string;
+  startDate: string;
+  status: string;
+  completion: number;
+  email?: string;
+  phone?: string;
+}
 
 export function OnlineAdmission() {
   // Mock data for admission processes
-  const [admissionProcesses] = useState([
+  const [admissionProcesses] = useState<AdmissionProcess[]>([
     {
       id: "adm1",
       name: "João Silva",
@@ -36,6 +51,8 @@ export function OnlineAdmission() {
       startDate: "2023-10-25",
       status: "documentos_pendentes",
       completion: 65,
+      email: "joao.silva@example.com",
+      phone: "5511987654321"
     },
     {
       id: "adm2",
@@ -45,6 +62,7 @@ export function OnlineAdmission() {
       startDate: "2023-11-01",
       status: "exame_medico",
       completion: 40,
+      email: "maria.souza@example.com"
     },
     {
       id: "adm3",
@@ -54,6 +72,7 @@ export function OnlineAdmission() {
       startDate: "2023-10-15",
       status: "contrato_assinado",
       completion: 85,
+      phone: "5511998765432"
     },
     {
       id: "adm4",
@@ -63,9 +82,12 @@ export function OnlineAdmission() {
       startDate: "2023-11-05",
       status: "documentos_enviados",
       completion: 25,
+      email: "ana.oliveira@example.com",
+      phone: "5511987651234"
     }
   ]);
 
+  const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const pendingCount = admissionProcesses.filter(p => p.status !== "contrato_assinado").length;
 
   const getStatusBadge = (status: string) => {
@@ -157,7 +179,7 @@ export function OnlineAdmission() {
                   <TableHead>Data de Início</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Progresso</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
+                  <TableHead className="w-[150px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -179,6 +201,13 @@ export function OnlineAdmission() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => setSelectedProcess(selectedProcess === process.id ? null : process.id)}
+                        >
+                          <Link className="h-4 w-4" />
+                        </Button>
                         <Button variant="outline" size="icon">
                           <ListChecks className="h-4 w-4" />
                         </Button>
@@ -192,6 +221,24 @@ export function OnlineAdmission() {
               </TableBody>
             </Table>
           </div>
+          
+          {/* Link Generator para o processo selecionado */}
+          {selectedProcess && (
+            <div className="mt-4">
+              {(() => {
+                const process = admissionProcesses.find(p => p.id === selectedProcess);
+                if (!process) return null;
+                return (
+                  <DocumentLinkGenerator 
+                    employeeId={process.id} 
+                    employeeName={process.name}
+                    email={process.email}
+                    phone={process.phone}
+                  />
+                );
+              })()}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="pending" className="pt-4">
@@ -232,9 +279,18 @@ export function OnlineAdmission() {
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter>
-                          <Button variant="outline" size="sm" className="w-full">
+                        <CardFooter className="flex gap-2">
+                          <Button variant="outline" size="sm" className="flex-1">
                             Ver Detalhes
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex items-center" 
+                            onClick={() => setSelectedProcess(process.id)}
+                          >
+                            <Link className="h-3 w-3 mr-1" />
+                            Enviar Link
                           </Button>
                         </CardFooter>
                       </Card>
@@ -243,6 +299,24 @@ export function OnlineAdmission() {
               )}
             </CardContent>
           </Card>
+          
+          {/* Link Generator para o processo selecionado na aba Pendentes */}
+          {selectedProcess && (
+            <div className="mt-4">
+              {(() => {
+                const process = admissionProcesses.find(p => p.id === selectedProcess);
+                if (!process) return null;
+                return (
+                  <DocumentLinkGenerator 
+                    employeeId={process.id} 
+                    employeeName={process.name}
+                    email={process.email}
+                    phone={process.phone}
+                  />
+                );
+              })()}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="completed" className="pt-4">

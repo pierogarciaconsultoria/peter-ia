@@ -1,71 +1,63 @@
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Documents from "./pages/Documents";
-import NonCompliance from "./pages/NonCompliance";
-import NonConformingProducts from "./pages/NonConformingProducts";
-import NotFound from "./pages/NotFound";
-
-// Importando as novas páginas que serão criadas
-import PerformanceIndicators from "./pages/PerformanceIndicators";
-import CustomerComplaints from "./pages/CustomerComplaints";
-import SupplierEvaluation from "./pages/SupplierEvaluation";
-import EquipmentCalibration from "./pages/EquipmentCalibration";
-import TrainingControl from "./pages/TrainingControl";
-import RawMaterialInspection from "./pages/RawMaterialInspection";
-import ActionSchedule from "./pages/ActionSchedule";
-import AuditSchedule from "./pages/AuditSchedule";
-import RiskManagement from "./pages/RiskManagement";
-import OrganizationContext from "./pages/OrganizationContext";
-import CriticalAnalysis from "./pages/CriticalAnalysis";
-import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
-import StrategicPlanning from "./pages/StrategicPlanning";
+import ISOCertifications from "./pages/ISOCertifications";
+import DashBoard from "./pages/DashBoard";
+import TrainingPage from "./pages/TrainingPage";
+import Settings from "./pages/Settings";
+import Reports from "./pages/Reports";
+import QualityManagement from "./pages/QualityManagement";
+import Login from "./pages/Login";
+import DocumentUpload from "./pages/DocumentUpload";
 
-// Create a new QueryClient instance within the component to ensure it's created properly
-const App = () => {
-  // Create a client
-  const queryClient = new QueryClient();
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Login />,
+  },
+  {
+    path: "/dashboard",
+    element: <DashBoard />,
+  },
+  {
+    path: "/human-resources",
+    element: <HumanResources />,
+  },
+  {
+    path: "/iso-certifications",
+    element: <ISOCertifications />,
+  },
+  {
+    path: "/training",
+    element: <TrainingPage />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/reports",
+    element: <Reports />,
+  },
+  {
+    path: "/quality-management",
+    element: <QualityManagement />,
+  },
+  
+  // Adicionar a nova rota para upload de documentos
+  {
+    path: "/document-upload/:token",
+    element: <DocumentUpload />,
+  },
+]);
 
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/non-compliance" element={<NonCompliance />} />
-            <Route path="/non-conforming-products" element={<NonConformingProducts />} />
-            
-            {/* Novas rotas */}
-            <Route path="/performance-indicators" element={<PerformanceIndicators />} />
-            <Route path="/customer-complaints" element={<CustomerComplaints />} />
-            <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
-            <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
-            <Route path="/training-control" element={<TrainingControl />} />
-            <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
-            <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
-            <Route path="/action-schedule" element={<ActionSchedule />} />
-            <Route path="/audit-schedule" element={<AuditSchedule />} />
-            <Route path="/risk-management" element={<RiskManagement />} />
-            <Route path="/organization-context" element={<OrganizationContext />} />
-            <Route path="/critical-analysis" element={<CriticalAnalysis />} />
-            <Route path="/human-resources" element={<HumanResources />} />
-            <Route path="/strategic-planning" element={<StrategicPlanning />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <RouterProvider router={router} />
   );
-};
+}
 
 export default App;
