@@ -9,6 +9,7 @@ import DocumentUpload from "./pages/DocumentUpload";
 import StrategicPlanning from "./pages/StrategicPlanning"; 
 import NotFound from "./pages/NotFound";
 import Documents from "./pages/Documents";
+import NonCompliance from "./pages/NonCompliance";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: "/documents",
     element: <Documents />,
+  },
+  {
+    path: "/non-compliance",
+    element: <NonCompliance />,
   },
   {
     path: "*",
