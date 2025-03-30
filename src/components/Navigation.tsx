@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, Building, Search, ThumbsUp, Users, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, LineChart } from "lucide-react";
+
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -11,6 +13,7 @@ export function Navigation() {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
   const menuItems = [{
     name: "Dashboard",
     icon: <Home size={18} />,
@@ -84,6 +87,7 @@ export function Navigation() {
     icon: <LineChart size={18} />,
     path: "/strategic-planning"
   }];
+
   return <>
       {/* Mobile menu button */}
       <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-50 md:hidden" onClick={() => setIsOpen(!isOpen)}>
@@ -94,7 +98,7 @@ export function Navigation() {
       <div className={cn("fixed inset-y-0 left-0 z-40 w-64 bg-card/80 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0", isOpen ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex flex-col h-full">
           <div className="p-6">
-            <h1 className="text-xl font-bold">Peter.IA</h1>
+            <h1 className="text-xl font-bold">Gestão</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Simplificando a conformidade
             </p>
