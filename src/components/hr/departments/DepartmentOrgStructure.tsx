@@ -1,9 +1,17 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useDepartments } from "@/hooks/useDepartments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DepartmentOrgChart } from "../DepartmentOrgChart";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface JobPosition {
   id: string;
@@ -17,12 +25,10 @@ export function DepartmentOrgStructure() {
   const [activeView, setActiveView] = useState<"chart" | "list">("chart");
   const { departments } = useDepartments();
 
-  // Sample positions based on departments (in a real app, these would come from an API)
   const generatePositionsFromDepartments = (): JobPosition[] => {
     const positions: JobPosition[] = [];
     
     departments.forEach((dept) => {
-      // Add department head
       positions.push({
         id: `head-${dept.id}`,
         title: `Gerente de ${dept.name}`,
@@ -30,7 +36,6 @@ export function DepartmentOrgStructure() {
         level: "Senior"
       });
       
-      // Add other positions
       if (dept.name === "Produção" || dept.name === "Manutenção" || dept.name === "Logística") {
         positions.push({
           id: `supervisor-${dept.id}`,
@@ -65,7 +70,6 @@ export function DepartmentOrgStructure() {
     return positions;
   };
 
-  // If there are no departments, we'll show default positions for demonstration
   const getDemoPositions = (): JobPosition[] => {
     return [
       { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior" },
