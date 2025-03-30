@@ -23,6 +23,8 @@ import { DepartmentFormDialog } from "./departments/DepartmentFormDialog";
 import { DeleteConfirmDialog } from "./departments/DeleteConfirmDialog";
 import { Department, useDepartments } from "@/hooks/useDepartments";
 import { Progress } from "@/components/ui/progress";
+import { TraditionalDepartments } from "./departments/TraditionalDepartments";
+import { DepartmentOrgStructure } from "./departments/DepartmentOrgStructure";
 
 export function DepartmentManagement() {
   const { toast } = useToast();
@@ -161,6 +163,8 @@ export function DepartmentManagement() {
         </Button>
       </div>
 
+      <TraditionalDepartments />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -277,6 +281,8 @@ export function DepartmentManagement() {
           )}
         </CardContent>
       </Card>
+
+      <DepartmentOrgStructure />
 
       <DepartmentFormDialog
         isOpen={isFormOpen}
