@@ -43,6 +43,7 @@ import { MedicalCertificateManagement } from "@/components/hr/MedicalCertificate
 import { ExitInterviews } from "@/components/hr/ExitInterviews";
 import { DevelopmentPlans } from "@/components/hr/DevelopmentPlans";
 import { VacationManagement } from "@/components/hr/VacationManagement";
+import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -86,6 +87,7 @@ const HumanResources = () => {
           <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6 flex flex-wrap">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="personnel-movement">Movimentação de Pessoal</TabsTrigger>
               <TabsTrigger value="employees">Funcionários</TabsTrigger>
               <TabsTrigger value="recruitment">Recrutamento</TabsTrigger>
               <TabsTrigger value="positions">Quadro Aprovado</TabsTrigger>
@@ -107,6 +109,10 @@ const HumanResources = () => {
             
             <TabsContent value="dashboard">
               <HRDashboard />
+            </TabsContent>
+            
+            <TabsContent value="personnel-movement">
+              <PersonnelMovement />
             </TabsContent>
             
             <TabsContent value="employees">
