@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,7 @@ import { updateStrategicIdentity } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityQuestionnaireForm, IdentityResponses } from "./IdentityQuestionnaireForm";
-import { createClientComponentClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -21,7 +20,6 @@ interface StrategicIdentityFormProps {
 
 export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityFormProps) {
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
   const [activeTab, setActiveTab] = useState<string>("manual");
   
   const [mission, setMission] = useState(identity?.mission || "");
@@ -87,7 +85,6 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
         setVision(data.vision || "");
         setValues(data.values || []);
         
-        // Switch to the manual tab to show results
         setActiveTab("manual");
         
         toast({
