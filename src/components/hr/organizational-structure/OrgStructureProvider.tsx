@@ -107,7 +107,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
         if (error) throw error;
 
         // Map database positions to our format
-        const formattedPositions: JobPositionWithHierarchy[] = data.map(pos => ({
+        const formattedPositions: JobPositionWithHierarchy[] = data.map((pos: any) => ({
           ...pos,
           level: getPositionLevel(pos.title),
           parentPosition: pos.superior_position_id || null,

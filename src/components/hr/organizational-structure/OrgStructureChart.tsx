@@ -1,6 +1,7 @@
 
 import { DepartmentOrgChart } from "@/components/hr/DepartmentOrgChart";
 import { useOrgStructure } from "./OrgStructureProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function OrgStructureChart() {
   const { positions, loading } = useOrgStructure();
@@ -19,5 +20,9 @@ export function OrgStructureChart() {
     isDepartmentHead: pos.isDepartmentHead
   }));
   
-  return <DepartmentOrgChart positions={formattedPositions} />;
+  return (
+    <TooltipProvider>
+      <DepartmentOrgChart positions={formattedPositions} />
+    </TooltipProvider>
+  );
 }
