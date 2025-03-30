@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
 import NonConformingProducts from "./pages/NonConformingProducts";
-import NotFound from "./pages/NotFound";
 
 // Importando as novas páginas que serão criadas
 import PerformanceIndicators from "./pages/PerformanceIndicators";
@@ -24,6 +23,7 @@ import OrganizationContext from "./pages/OrganizationContext";
 import CriticalAnalysis from "./pages/CriticalAnalysis";
 import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
+import StrategicPlanning from "./pages/StrategicPlanning";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +53,7 @@ const App = () => (
           <Route path="/organization-context" element={<OrganizationContext />} />
           <Route path="/critical-analysis" element={<CriticalAnalysis />} />
           <Route path="/human-resources" element={<HumanResources />} />
+          <Route path="/strategic-planning" element={<StrategicPlanning />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Building, Search, ThumbsUp, Users } from "lucide-react";
+import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, Building, Search, ThumbsUp, Users, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, Strategy } from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,6 +82,10 @@ export function Navigation() {
     name: "Gestão de Pessoas",
     icon: <Users size={18} />,
     path: "/human-resources"
+  }, {
+    name: "Planejamento Estratégico",
+    icon: <Strategy size={18} />,
+    path: "/strategic-planning"
   }];
 
   return <>
