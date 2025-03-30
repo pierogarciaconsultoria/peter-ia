@@ -17,6 +17,7 @@ interface ManualIdentityFormProps {
   values: string[];
   setValues: (values: string[]) => void;
   isLoading: boolean;
+  isEditable: boolean;
 }
 
 export function ManualIdentityForm({
@@ -26,7 +27,8 @@ export function ManualIdentityForm({
   setVision,
   values,
   setValues,
-  isLoading
+  isLoading,
+  isEditable = true
 }: ManualIdentityFormProps) {
   const [newValue, setNewValue] = useState("");
 
@@ -45,28 +47,40 @@ export function ManualIdentityForm({
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="mission">Missão</Label>
-        <Textarea
-          id="mission"
-          placeholder="Qual é a missão da sua organização?"
-          rows={3}
-          value={mission}
-          onChange={(e) => setMission(e.target.value)}
-          required
-          disabled={isLoading}
-        />
+        {isEditable ? (
+          <Textarea
+            id="mission"
+            placeholder="Qual é a missão da sua organização?"
+            rows={3}
+            value={mission}
+            onChange={(e) => setMission(e.target.value)}
+            required
+            disabled={isLoading}
+          />
+        ) : (
+          <div className="p-3 bg-muted/50 rounded-md border">
+            {mission || "Nenhuma missão definida."}
+          </div>
+        )}
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="vision">Visão</Label>
-        <Textarea
-          id="vision"
-          placeholder="Qual é a visão da sua organização?"
-          rows={3}
-          value={vision}
-          onChange={(e) => setVision(e.target.value)}
-          required
-          disabled={isLoading}
-        />
+        {isEditable ? (
+          <Textarea
+            id="vision"
+            placeholder="Qual é a visão da sua organização?"
+            rows={3}
+            value={vision}
+            onChange={(e) => setVision(e.target.value)}
+            required
+            disabled={isLoading}
+          />
+        ) : (
+          <div className="p-3 bg-muted/50 rounded-md border">
+            {vision || "Nenhuma visão definida."}
+          </div>
+        )}
       </div>
       
       <div className="space-y-2">
@@ -76,28 +90,33 @@ export function ManualIdentityForm({
             <IdentityValueBadge 
               key={index}
               value={value}
-              onRemove={() => removeValue(index)}
+              onRemove={isEditable ? () => removeValue(index) : undefined}
               disabled={isLoading}
             />
           ))}
+          {values.length === 0 && !isEditable && (
+            <p className="text-sm text-muted-foreground">Nenhum valor definido.</p>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Adicione um valor..."
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            disabled={isLoading}
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm"
-            onClick={addValue}
-            disabled={!newValue.trim() || isLoading}
-          >
-            <Plus size={16} />
-          </Button>
-        </div>
+        {isEditable && (
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Adicione um valor..."
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+              disabled={isLoading}
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm"
+              onClick={addValue}
+              disabled={!newValue.trim() || isLoading}
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

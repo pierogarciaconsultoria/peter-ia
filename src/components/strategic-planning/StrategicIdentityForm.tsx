@@ -26,6 +26,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
   
   const [loading, setLoading] = useState(false);
   const [generatingIdentity, setGeneratingIdentity] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +45,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
       });
       
       onUpdate();
+      setIsEditing(false);
     } catch (error) {
       console.error("Error saving strategic identity:", error);
       toast({
@@ -72,6 +74,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
         setValues(data.values || []);
         
         setActiveTab("manual");
+        setIsEditing(true);
         
         toast({
           title: "Sugestões Geradas",
@@ -99,6 +102,10 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
       title: "Formulário Redefinido",
       description: "Os campos foram restaurados para os valores salvos anteriormente",
     });
+  };
+
+  const enableEditing = () => {
+    setIsEditing(true);
   };
 
   return (
@@ -129,17 +136,31 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             <ManualIdentityForm
               mission={mission}
               setMission={setMission}
+              vision={setVision}
               vision={vision}
-              setVision={setVision}
               values={values}
               setValues={setValues}
               isLoading={loading}
+              isEditable={isEditing}
             />
             
-            <IdentityFormActions 
-              onReset={resetForm}
-              isLoading={loading}
-            />
+            {isEditing ? (
+              <IdentityFormActions 
+                onReset={resetForm}
+                isLoading={loading}
+              />
+            ) : (
+              <div className="flex justify-end mt-4">
+                <button 
+                  type="button" 
+                  onClick={enableEditing}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                >
+                  <PenLine className="h-4 w-4 mr-2 inline" />
+                  Editar
+                </button>
+              </div>
+            )}
           </form>
         </TabsContent>
         
