@@ -21,12 +21,17 @@ import {
   Newspaper,
   AlertTriangle,
   Stethoscope,
-  Users
+  Users,
+  UserCheck,
+  GraduationCap,
+  CalendarDays,
+  UserMinus
 } from "lucide-react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { RecruitmentSelection } from "@/components/hr/RecruitmentSelection";
 import { ApprovedPositions } from "@/components/hr/ApprovedPositions";
 import { OnlineAdmission } from "@/components/hr/OnlineAdmission";
+import { EmployeeOnboarding } from "@/components/hr/EmployeeOnboarding";
 import { TrialEvaluation } from "@/components/hr/TrialEvaluation";
 import { PerformanceEvaluation } from "@/components/hr/PerformanceEvaluation";
 import { JobSalaryPlan } from "@/components/hr/JobSalaryPlan";
@@ -35,6 +40,9 @@ import { ClimateResearch } from "@/components/hr/ClimateResearch";
 import { EmployeeBoard } from "@/components/hr/EmployeeBoard";
 import { OccurrenceManagement } from "@/components/hr/OccurrenceManagement";
 import { MedicalCertificateManagement } from "@/components/hr/MedicalCertificateManagement";
+import { ExitInterviews } from "@/components/hr/ExitInterviews";
+import { DevelopmentPlans } from "@/components/hr/DevelopmentPlans";
+import { VacationManagement } from "@/components/hr/VacationManagement";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -82,8 +90,12 @@ const HumanResources = () => {
               <TabsTrigger value="recruitment">Recrutamento</TabsTrigger>
               <TabsTrigger value="positions">Quadro Aprovado</TabsTrigger>
               <TabsTrigger value="admission">Admissão Online</TabsTrigger>
+              <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
               <TabsTrigger value="trial">Avaliação de Experiência</TabsTrigger>
               <TabsTrigger value="performance">Avaliação de Desempenho</TabsTrigger>
+              <TabsTrigger value="exit-interviews">Entrevista de Desligamento</TabsTrigger>
+              <TabsTrigger value="development-plans">Plano de Desenvolvimento</TabsTrigger>
+              <TabsTrigger value="vacation">Gestão de Férias</TabsTrigger>
               <TabsTrigger value="job-plan">Cargos e Salários</TabsTrigger>
               <TabsTrigger value="feedback">Feedbacks</TabsTrigger>
               <TabsTrigger value="climate">Clima Organizacional</TabsTrigger>
@@ -113,12 +125,28 @@ const HumanResources = () => {
               <OnlineAdmission />
             </TabsContent>
 
+            <TabsContent value="onboarding">
+              <EmployeeOnboarding />
+            </TabsContent>
+
             <TabsContent value="trial">
               <TrialEvaluation />
             </TabsContent>
 
             <TabsContent value="performance">
               <PerformanceEvaluation />
+            </TabsContent>
+
+            <TabsContent value="exit-interviews">
+              <ExitInterviews />
+            </TabsContent>
+
+            <TabsContent value="development-plans">
+              <DevelopmentPlans />
+            </TabsContent>
+
+            <TabsContent value="vacation">
+              <VacationManagement />
             </TabsContent>
 
             <TabsContent value="job-plan">
