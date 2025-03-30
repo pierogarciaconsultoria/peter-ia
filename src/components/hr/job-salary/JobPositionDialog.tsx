@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,8 +12,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { JobPosition } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import { fetchDocumentsForSelection } from "@/services/jobPositionService";
+import { ISODocument } from "@/utils/isoTypes";
 
 interface JobPositionDialogProps {
   isOpen: boolean;
@@ -30,6 +57,8 @@ export function JobPositionDialog({
 }: JobPositionDialogProps) {
   const { toast } = useToast();
   const isEditing = !!jobPosition;
+  const [documents, setDocuments] = useState<ISODocument[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState<JobPosition>(
     jobPosition || {
@@ -44,6 +73,30 @@ export function JobPositionDialog({
     }
   );
 
+  // Fetch documents from the database
+  useEffect(() => {
+    const loadDocuments = async () => {
+      if (isOpen) {
+        setIsLoading(true);
+        try {
+          const docsData = await fetchDocumentsForSelection();
+          setDocuments(docsData);
+        } catch (error) {
+          console.error("Error loading documents:", error);
+          toast({
+            title: "Erro ao carregar documentos",
+            description: "Não foi possível carregar a lista de documentos para seleção.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadDocuments();
+  }, [isOpen, toast]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -51,6 +104,39 @@ export function JobPositionDialog({
 
   const handleCheckboxChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, is_supervisor: checked }));
+  };
+
+  const handleDocumentSelection = (documentId: string, documentTitle: string) => {
+    setFormData((prev) => {
+      const currentProcedures = prev.required_procedures || [];
+      
+      // Check if document is already selected
+      if (currentProcedures.includes(documentId)) {
+        // Remove document from selection
+        return {
+          ...prev,
+          required_procedures: currentProcedures.filter(id => id !== documentId)
+        };
+      } else {
+        // Add document to selection
+        return {
+          ...prev,
+          required_procedures: [...currentProcedures, documentId]
+        };
+      }
+    });
+  };
+
+  const getDocumentTitleById = (id: string) => {
+    const document = documents.find(doc => doc.id === id);
+    return document ? document.title : id;
+  };
+
+  const removeSelectedDocument = (docId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      required_procedures: (prev.required_procedures || []).filter(id => id !== docId)
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -247,17 +333,66 @@ export function JobPositionDialog({
           
           <div className="space-y-2">
             <Label htmlFor="required_procedures">Treinamentos necessários (procedimentos)</Label>
-            <Textarea 
-              id="required_procedures" 
-              name="required_procedures" 
-              value={formData.required_procedures?.join('\n')} 
-              onChange={(e) => setFormData(prev => ({
-                ...prev, 
-                required_procedures: e.target.value.split('\n').filter(item => item.trim() !== '')
-              }))} 
-              placeholder="Digite um procedimento por linha"
-              rows={3}
-            />
+            
+            <div className="space-y-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Carregando documentos..." : "Selecionar documentos"}
+                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Buscar documento..." />
+                    <CommandEmpty>Nenhum documento encontrado.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup>
+                        <ScrollArea className="h-72">
+                          {documents.map((document) => (
+                            <CommandItem
+                              key={document.id}
+                              value={document.id}
+                              onSelect={() => handleDocumentSelection(document.id, document.title)}
+                            >
+                              <div className="flex items-center">
+                                <span>{document.title}</span>
+                                <CheckIcon
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
+                                    (formData.required_procedures || []).includes(document.id)
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </ScrollArea>
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              {/* Display selected documents as badges */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(formData.required_procedures || []).map((docId) => (
+                  <Badge key={docId} variant="secondary" className="flex items-center gap-1 px-3 py-1">
+                    {getDocumentTitleById(docId)}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => removeSelectedDocument(docId)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
           
           <div className="space-y-2">

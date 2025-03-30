@@ -1,17 +1,26 @@
 
-import React from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { JobPosition } from "../types";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Check, RefreshCw, Share2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { 
+  FileCheck, 
+  Edit, 
+  Check, 
+  RefreshCw, 
+  Share2, 
+  ArrowRight 
+} from "lucide-react";
+import { ISODocument } from "@/utils/isoTypes";
+import { fetchDocumentsForSelection } from "@/services/jobPositionService";
 
 interface JobPositionDetailsDialogProps {
   isOpen: boolean;
@@ -32,6 +41,30 @@ export function JobPositionDetailsDialog({
   onRevise,
   onDistribute,
 }: JobPositionDetailsDialogProps) {
+  const [documents, setDocuments] = useState<ISODocument[]>([]);
+
+  // Fetch documents to show proper names
+  useEffect(() => {
+    const loadDocuments = async () => {
+      if (isOpen && jobPosition.required_procedures?.length) {
+        try {
+          const docsData = await fetchDocumentsForSelection();
+          setDocuments(docsData);
+        } catch (error) {
+          console.error("Error loading documents:", error);
+        }
+      }
+    };
+
+    loadDocuments();
+  }, [isOpen, jobPosition.required_procedures]);
+
+  // Helper function to get document title by ID
+  const getDocumentTitleById = (id: string) => {
+    const document = documents.find(doc => doc.id === id);
+    return document ? document.title : id;
+  };
+
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "draft":
@@ -47,159 +80,222 @@ export function JobPositionDetailsDialog({
     }
   };
 
+  if (!jobPosition) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl">
-              {jobPosition.title}
-            </DialogTitle>
+          <DialogTitle className="text-xl">
+            {jobPosition.code} - {jobPosition.title}
+          </DialogTitle>
+          <div className="flex items-center gap-2 mt-2">
             {getStatusBadge(jobPosition.status)}
+            <span className="text-sm text-muted-foreground">
+              Revisão {jobPosition.revision}
+            </span>
           </div>
-          <p className="text-muted-foreground">
-            Código: {jobPosition.code} | Revisão: {jobPosition.revision}
-          </p>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          <div className="grid grid-cols-2 gap-6">
+          {/* Description and Department */}
+          <div>
+            <h3 className="font-medium">Departamento</h3>
+            <p className="text-sm text-muted-foreground mt-1">{jobPosition.department}</p>
+          </div>
+          
+          <Separator />
+          
+          {/* Description Section */}
+          <div>
+            <h3 className="font-medium">Descrição</h3>
+            <p className="text-sm text-muted-foreground mt-1">{jobPosition.description}</p>
+          </div>
+          
+          <Separator />
+          
+          {/* Approval Information */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-2">Informações Gerais</h3>
-              <dl className="space-y-2">
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Departamento:</dt>
-                  <dd>{jobPosition.department}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Data de Aprovação:</dt>
-                  <dd>{jobPosition.approval_date || "Não aprovado"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Aprovador:</dt>
-                  <dd>{jobPosition.approver || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Superior Imediato:</dt>
-                  <dd>{jobPosition.immediate_supervisor_position || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">É superior:</dt>
-                  <dd>{jobPosition.is_supervisor ? "Sim" : "Não"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Código CBO:</dt>
-                  <dd>{jobPosition.cbo_code || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Norma:</dt>
-                  <dd>{jobPosition.norm || "Não definido"}</dd>
-                </div>
-              </dl>
+              <h3 className="font-medium">Data de Aprovação</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.approval_date || "Não aprovado"}
+              </p>
             </div>
-            
             <div>
-              <h3 className="font-semibold mb-2">Requisitos</h3>
-              <dl className="space-y-2">
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Educação:</dt>
-                  <dd>{jobPosition.education_requirements || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Habilidades:</dt>
-                  <dd>{jobPosition.skill_requirements || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Treinamento:</dt>
-                  <dd>{jobPosition.training_requirements || "Não definido"}</dd>
-                </div>
-                <div className="grid grid-cols-2">
-                  <dt className="text-muted-foreground">Experiência:</dt>
-                  <dd>{jobPosition.experience_requirements || "Não definido"}</dd>
-                </div>
-              </dl>
+              <h3 className="font-medium">Aprovado por</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.approver || "Não aprovado"}
+              </p>
             </div>
           </div>
           
           <Separator />
           
-          <div>
-            <h3 className="font-semibold mb-2">Principais Responsabilidades</h3>
-            <p className="whitespace-pre-wrap">{jobPosition.main_responsibilities || "Não definido"}</p>
+          {/* Supervisor Information */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-medium">Superior Imediato</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.immediate_supervisor_position || "Não especificado"}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium">É Supervisor</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.is_supervisor ? "Sim" : "Não"}
+              </p>
+            </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <Separator />
+          
+          {/* CBO and Norm */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-2">Treinamentos Necessários</h3>
-              {jobPosition.required_procedures && jobPosition.required_procedures.length > 0 ? (
-                <ul className="list-disc pl-5">
-                  {jobPosition.required_procedures.map((procedure, index) => (
-                    <li key={index}>{procedure}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">Nenhum treinamento definido</p>
-              )}
+              <h3 className="font-medium">Código CBO</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.cbo_code || "Não especificado"}
+              </p>
             </div>
-            
             <div>
-              <h3 className="font-semibold mb-2">Recursos Necessários</h3>
-              {jobPosition.required_resources && jobPosition.required_resources.length > 0 ? (
-                <ul className="list-disc pl-5">
-                  {jobPosition.required_resources.map((resource, index) => (
-                    <li key={index}>{resource}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">Nenhum recurso definido</p>
-              )}
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-2">EPIs</h3>
-              {jobPosition.required_ppe && jobPosition.required_ppe.length > 0 ? (
-                <ul className="list-disc pl-5">
-                  {jobPosition.required_ppe.map((ppe, index) => (
-                    <li key={index}>{ppe}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">Nenhum EPI definido</p>
-              )}
+              <h3 className="font-medium">Norma</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {jobPosition.norm || "Não especificado"}
+              </p>
             </div>
           </div>
+          
+          <Separator />
+          
+          {/* Main Responsibilities */}
+          {jobPosition.main_responsibilities && (
+            <>
+              <div>
+                <h3 className="font-medium">Principais Responsabilidades</h3>
+                <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                  {jobPosition.main_responsibilities}
+                </p>
+              </div>
+              <Separator />
+            </>
+          )}
+          
+          {/* Competencies */}
+          <div>
+            <h3 className="font-medium">Competências</h3>
+            <div className="mt-3 space-y-3">
+              <div>
+                <h4 className="text-sm font-medium">Educação</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {jobPosition.education_requirements || "Não especificado"}
+                </p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium">Habilidades</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {jobPosition.skill_requirements || "Não especificado"}
+                </p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium">Treinamento</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {jobPosition.training_requirements || "Não especificado"}
+                </p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium">Experiência</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {jobPosition.experience_requirements || "Não especificado"}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* Required Procedures */}
+          <div>
+            <h3 className="font-medium">Treinamentos necessários (procedimentos)</h3>
+            {jobPosition.required_procedures && jobPosition.required_procedures.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {jobPosition.required_procedures.map((procedureId) => (
+                  <Badge key={procedureId} className="bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200">
+                    <FileCheck className="w-3 h-3 mr-1" />
+                    {getDocumentTitleById(procedureId)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-1">Nenhum procedimento especificado</p>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Required Resources */}
+          <div>
+            <h3 className="font-medium">Recursos necessários</h3>
+            {jobPosition.required_resources && jobPosition.required_resources.length > 0 ? (
+              <ul className="text-sm text-muted-foreground mt-1 list-disc pl-5 space-y-1">
+                {jobPosition.required_resources.map((resource, index) => (
+                  <li key={index}>{resource}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-1">Nenhum recurso especificado</p>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Required PPE */}
+          <div>
+            <h3 className="font-medium">EPI (Equipamentos de Proteção Individual)</h3>
+            {jobPosition.required_ppe && jobPosition.required_ppe.length > 0 ? (
+              <ul className="text-sm text-muted-foreground mt-1 list-disc pl-5 space-y-1">
+                {jobPosition.required_ppe.map((ppe, index) => (
+                  <li key={index}>{ppe}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-1">Nenhum EPI especificado</p>
+            )}
+          </div>
         </div>
-        
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onEdit} className="gap-1">
-            <Pencil size={16} />
+
+        <DialogFooter className="gap-2 flex-wrap">
+          <Button variant="outline" onClick={onEdit} className="flex items-center">
+            <Edit className="mr-2 h-4 w-4" />
             Editar
           </Button>
+          
           <Button 
-            variant="default" 
             onClick={onApprove} 
-            className="gap-1 bg-green-600 hover:bg-green-700"
-            disabled={jobPosition.status === "approved"}
+            disabled={jobPosition.status === "approved"} 
+            className="bg-green-600 hover:bg-green-700"
           >
-            <Check size={16} />
+            <Check className="mr-2 h-4 w-4" />
             Aprovar
           </Button>
+          
           <Button 
-            variant="default" 
             onClick={onRevise} 
-            className="gap-1 bg-amber-600 hover:bg-amber-700"
-            disabled={jobPosition.status === "in_review"}
+            disabled={jobPosition.status === "in_review"} 
+            variant="outline"
+            className="text-amber-600 border-amber-600 hover:bg-amber-50"
           >
-            <RefreshCw size={16} />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Revisão
           </Button>
+          
           <Button 
-            variant="default" 
             onClick={onDistribute} 
-            className="gap-1 bg-blue-600 hover:bg-blue-700"
-            disabled={jobPosition.status === "distributed" || jobPosition.status !== "approved"}
+            disabled={jobPosition.status === "distributed" || jobPosition.status !== "approved"} 
+            variant="outline"
+            className="text-blue-600 border-blue-600 hover:bg-blue-50"
           >
-            <Share2 size={16} />
+            <Share2 className="mr-2 h-4 w-4" />
             Distribuir
           </Button>
         </DialogFooter>

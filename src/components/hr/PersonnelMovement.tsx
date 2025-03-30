@@ -42,7 +42,7 @@ export function PersonnelMovement() {
       try {
         const { data, error } = await supabase
           .from('job_positions')
-          .select('id, title, description, department, code, revision');
+          .select('*');
         
         if (error) {
           console.error('Error fetching job positions:', error);
@@ -56,15 +56,28 @@ export function PersonnelMovement() {
         
         if (data) {
           // Add required fields to match JobPosition type
-          const formattedPositions: JobPosition[] = data.map((pos: JobPositionData) => ({
+          const formattedPositions: JobPosition[] = data.map((pos: any) => ({
             id: pos.id,
             title: pos.title,
             department: pos.department,
             description: pos.description,
             code: pos.code || '',
             revision: pos.revision || '1.0',
-            is_supervisor: false,
-            status: "approved" as const
+            is_supervisor: pos.is_supervisor || false,
+            status: (pos.status as "draft" | "approved" | "in_review" | "distributed") || "approved",
+            approval_date: pos.approval_date,
+            approver: pos.approver,
+            immediate_supervisor_position: pos.immediate_supervisor_position,
+            cbo_code: pos.cbo_code,
+            norm: pos.norm,
+            main_responsibilities: pos.main_responsibilities,
+            education_requirements: pos.education_requirements,
+            skill_requirements: pos.skill_requirements,
+            training_requirements: pos.training_requirements,
+            experience_requirements: pos.experience_requirements,
+            required_procedures: pos.required_procedures,
+            required_resources: pos.required_resources,
+            required_ppe: pos.required_ppe,
           }));
           setJobPositions(formattedPositions);
         }
