@@ -11,6 +11,7 @@ export interface Department {
   responsible_employee_id: string | null;
   approved_headcount?: number;
   current_headcount?: number;
+  responsible_name?: string; // Added this property
 }
 
 export function useDepartments() {
@@ -25,17 +26,22 @@ export function useDepartments() {
     try {
       const { data, error } = await supabase
         .from("departments")
-        .select("*, employees:employees(id)")
+        .select("*, employees:employees(id, name)")
         .order("name");
       
       if (error) throw error;
       
-      // Process the data to include current headcount
-      const processedDepartments = data.map((dept: any) => ({
-        ...dept,
-        current_headcount: dept.employees ? dept.employees.length : 0,
-        approved_headcount: dept.approved_headcount || 0
-      }));
+      // Process the data to include current headcount and responsible name
+      const processedDepartments = data.map((dept: any) => {
+        const responsibleEmployee = dept.employees?.length > 0 ? dept.employees[0] : null;
+        
+        return {
+          ...dept,
+          current_headcount: dept.employees ? dept.employees.length : 0,
+          approved_headcount: dept.approved_headcount || 0,
+          responsible_name: responsibleEmployee?.name || null
+        };
+      });
       
       setDepartments(processedDepartments);
     } catch (err: any) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +51,6 @@ export function DepartmentManagement() {
       let newDepartment: Department;
 
       if (selectedDepartment) {
-        // Update existing department
         const { data, error } = await supabase
           .from("departments")
           .update({
@@ -68,9 +66,9 @@ export function DepartmentManagement() {
           .single();
 
         if (error) throw error;
+        
         newDepartment = {
           ...data,
-          responsible_name: data.responsible_employee_id ? "Carlos Silva" : undefined,
           current_headcount: selectedDepartment.current_headcount
         };
 
@@ -79,7 +77,6 @@ export function DepartmentManagement() {
           description: "O departamento foi atualizado com sucesso.",
         });
       } else {
-        // Create new department
         const { data, error } = await supabase
           .from("departments")
           .insert({
@@ -93,9 +90,9 @@ export function DepartmentManagement() {
           .single();
 
         if (error) throw error;
+        
         newDepartment = {
           ...data,
-          responsible_name: data.responsible_employee_id ? "Carlos Silva" : undefined,
           current_headcount: 0
         };
 
@@ -105,7 +102,6 @@ export function DepartmentManagement() {
         });
       }
 
-      // Refresh the department list
       refetch();
     } catch (error) {
       console.error("Error saving department:", error);
@@ -131,7 +127,6 @@ export function DepartmentManagement() {
 
       if (error) throw error;
 
-      // Refresh departments list
       refetch();
 
       toast({
