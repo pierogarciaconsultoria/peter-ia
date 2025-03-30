@@ -11,6 +11,7 @@ interface DepartmentListCardProps {
   onEditDepartment: (department: Department) => void;
   onDeleteDepartment: (department: Department) => void;
   onAddDepartment: () => void;
+  onShowTemplates: () => void;
 }
 
 export function DepartmentListCard({
@@ -19,6 +20,7 @@ export function DepartmentListCard({
   onEditDepartment,
   onDeleteDepartment,
   onAddDepartment,
+  onShowTemplates,
 }: DepartmentListCardProps) {
   return (
     <Card>
@@ -37,7 +39,10 @@ export function DepartmentListCard({
             <p className="text-muted-foreground">Carregando departamentos...</p>
           </div>
         ) : departments.length === 0 ? (
-          <EmptyDepartmentState onAddDepartment={onAddDepartment} />
+          <EmptyDepartmentState 
+            onAddDepartment={onAddDepartment} 
+            onShowTemplates={onShowTemplates}
+          />
         ) : (
           <DepartmentTable
             departments={departments}

@@ -7,14 +7,15 @@ import { DepartmentFormDialog } from "./departments/DepartmentFormDialog";
 import { DeleteConfirmDialog } from "./departments/DeleteConfirmDialog";
 import { DepartmentHeader } from "./departments/DepartmentHeader";
 import { DepartmentListCard } from "./departments/DepartmentListCard";
-import { TraditionalDepartments } from "./departments/TraditionalDepartments";
 import { DepartmentOrgStructure } from "./departments/DepartmentOrgStructure";
+import { TemplateDepartmentsDialog } from "./departments/TemplateDepartmentsDialog";
 
 export function DepartmentManagement() {
   const { toast } = useToast();
   const { departments, isLoading, refetch } = useDepartments();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
 
   const handleOpenForm = (department?: Department) => {
@@ -25,6 +26,10 @@ export function DepartmentManagement() {
   const handleOpenDeleteDialog = (department: Department) => {
     setSelectedDepartment(department);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleOpenTemplatesDialog = () => {
+    setIsTemplatesDialogOpen(true);
   };
 
   const handleSaveDepartment = async (departmentData: Partial<Department>) => {
@@ -127,11 +132,34 @@ export function DepartmentManagement() {
     setSelectedDepartment(null);
   };
 
+  const handleAddTemplateDepartment = async (department: { name: string; description: string; sector: string }) => {
+    try {
+      const { error } = await supabase
+        .from("departments")
+        .insert({
+          name: department.name,
+          description: department.description,
+          sector: department.sector,
+        });
+
+      if (error) throw error;
+      refetch();
+    } catch (error) {
+      console.error("Error adding department:", error);
+      toast({
+        title: "Erro ao adicionar",
+        description: "Ocorreu um erro ao adicionar o departamento.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <DepartmentHeader onAddDepartment={() => handleOpenForm()} />
-
-      <TraditionalDepartments />
+      <DepartmentHeader 
+        onAddDepartment={() => handleOpenForm()} 
+        onShowTemplates={handleOpenTemplatesDialog}
+      />
 
       <DepartmentListCard
         departments={departments}
@@ -139,6 +167,7 @@ export function DepartmentManagement() {
         onEditDepartment={handleOpenForm}
         onDeleteDepartment={handleOpenDeleteDialog}
         onAddDepartment={() => handleOpenForm()}
+        onShowTemplates={handleOpenTemplatesDialog}
       />
 
       <DepartmentOrgStructure />
@@ -156,6 +185,12 @@ export function DepartmentManagement() {
         onDelete={handleDeleteDepartment}
         title="Excluir departamento"
         description={`Tem certeza que deseja excluir o departamento "${selectedDepartment?.name}"? Esta ação não pode ser desfeita.`}
+      />
+
+      <TemplateDepartmentsDialog
+        isOpen={isTemplatesDialogOpen}
+        onOpenChange={setIsTemplatesDialogOpen}
+        onAddDepartment={handleAddTemplateDepartment}
       />
     </div>
   );
