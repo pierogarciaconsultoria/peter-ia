@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,8 @@ import {
   Users,
   FileText,
   CalendarClock,
-  Tag
+  Tag,
+  KanbanSquare
 } from "lucide-react";
 import { getCustomerComplaints, CustomerComplaint } from "@/services/customerComplaintService";
 import { format } from "date-fns";
@@ -19,11 +19,13 @@ import { toast } from "sonner";
 import { CustomerComplaintFormDialog } from "@/components/customer-complaints/CustomerComplaintFormDialog";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { ComplaintKanban } from "@/components/customer-complaints/ComplaintKanban";
 
 const CustomerComplaints = () => {
   const [complaints, setComplaints] = useState<CustomerComplaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("open");
+  const [viewFormat, setViewFormat] = useState<"list" | "kanban">("list");
 
   useEffect(() => {
     fetchComplaints();
@@ -40,6 +42,12 @@ const CustomerComplaints = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStatusUpdate = (updatedComplaint: CustomerComplaint) => {
+    setComplaints(prevComplaints => 
+      prevComplaints.map(c => c.id === updatedComplaint.id ? updatedComplaint : c)
+    );
   };
 
   // Filter complaints by status
@@ -126,6 +134,10 @@ const CustomerComplaints = () => {
                   <Users className="mr-2 h-4 w-4" />
                   Todas
                 </TabsTrigger>
+                <TabsTrigger value="kanban" className="flex items-center">
+                  <KanbanSquare className="mr-2 h-4 w-4" />
+                  Kanban
+                </TabsTrigger>
               </TabsList>
             </div>
             
@@ -199,6 +211,13 @@ const CustomerComplaints = () => {
                       </CardContent>
                     </Card>
                   )}
+                </TabsContent>
+                
+                <TabsContent value="kanban">
+                  <ComplaintKanban 
+                    complaints={complaints} 
+                    onStatusChange={handleStatusUpdate} 
+                  />
                 </TabsContent>
               </>
             )}
@@ -288,6 +307,18 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
         return option;
     }
   };
+  
+  const getDetailedStatusText = (status?: string) => {
+    switch (status) {
+      case 'nova_reclamacao': return 'Nova Reclamação';
+      case 'analise_reclamacao': return 'Análise da Reclamação';
+      case 'identificacao_causa': return 'Identificação da Causa';
+      case 'acao': return 'Ação';
+      case 'acompanhamento': return 'Acompanhamento';
+      case 'conclusao': return 'Conclusão';
+      default: return 'Nova Reclamação';
+    }
+  };
 
   return (
     <Card>
@@ -313,6 +344,11 @@ const ComplaintCard = ({ complaint }: { complaint: CustomerComplaint }) => {
             <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(complaint.priority)}`}>
               {getPriorityText(complaint.priority)}
             </span>
+            {complaint.detailed_status && (
+              <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                {getDetailedStatusText(complaint.detailed_status)}
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>

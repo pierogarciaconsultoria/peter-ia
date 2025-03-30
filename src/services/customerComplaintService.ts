@@ -21,6 +21,7 @@ export interface CustomerComplaint {
   identification_code?: string;
   treatment_option?: 'return' | 'credit' | 'warranty' | 'other';
   action_schedule_id?: string;
+  detailed_status?: 'nova_reclamacao' | 'analise_reclamacao' | 'identificacao_causa' | 'acao' | 'acompanhamento' | 'conclusao';
 }
 
 export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
@@ -39,6 +40,7 @@ export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
     status: item.status as CustomerComplaint['status'],
     priority: item.priority as CustomerComplaint['priority'],
     treatment_option: item.treatment_option as CustomerComplaint['treatment_option'],
+    detailed_status: item.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   }));
 }
 
@@ -59,6 +61,7 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
     treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
+    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 
@@ -79,6 +82,7 @@ export async function createCustomerComplaint(complaint: Omit<CustomerComplaint,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
     treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
+    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 
@@ -109,6 +113,7 @@ export async function updateCustomerComplaint(id: string, complaint: Partial<Omi
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
     treatment_option: data.treatment_option as CustomerComplaint['treatment_option'],
+    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 
@@ -122,4 +127,12 @@ export async function deleteCustomerComplaint(id: string): Promise<void> {
     console.error("Error deleting customer complaint:", error);
     throw new Error(error.message);
   }
+}
+
+// Update complaint detailed status (specific function for kanban)
+export async function updateComplaintDetailedStatus(
+  id: string, 
+  detailed_status: CustomerComplaint['detailed_status']
+): Promise<CustomerComplaint> {
+  return updateCustomerComplaint(id, { detailed_status });
 }
