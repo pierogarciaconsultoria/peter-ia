@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PenLine, Sparkles } from "lucide-react";
 import { StrategicIdentity } from "@/types/strategic-planning";
-import { updateStrategicIdentity } from "@/services/strategicPlanningService";
+import { updateStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdentityQuestionnaireForm, IdentityResponses } from "./IdentityQuestionnaireForm";
