@@ -1,145 +1,98 @@
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Briefcase, Edit, LineChart, Plus, TrendingUp, Users } from "lucide-react";
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Briefcase, LineChart, Plus, TrendingUp } from "lucide-react";
+import { JobPosition } from "./types";
+import { JobPositionTable } from "./job-salary/JobPositionTable";
+import { JobPositionDialog } from "./job-salary/JobPositionDialog";
+import { JobPositionDetailsDialog } from "./job-salary/JobPositionDetailsDialog";
+import { useToast } from "@/hooks/use-toast";
+import { SalaryComparisonChart } from "./job-salary/SalaryComparisonChart";
+import { CareerPathView } from "./job-salary/CareerPathView";
 import { DepartmentOrgChart } from "./DepartmentOrgChart";
 
 export function JobSalaryPlan() {
-  // Mock data for job positions
-  const [jobPositions] = useState([
+  // Mock data for job positions with the new fields
+  const [jobPositions, setJobPositions] = useState<JobPosition[]>([
     {
       id: "job1",
+      code: "DC-001",
       title: "Desenvolvedor Junior",
       department: "Tecnologia",
-      level: "Junior",
-      minSalary: 3500,
-      maxSalary: 5000,
-      requirements: "Formação em TI, 1+ anos de experiência",
-      responsibilities: "Desenvolvimento de aplicações web, manutenção de código"
+      description: "Desenvolvedor de software em início de carreira",
+      revision: "1.0",
+      approval_date: "2023-05-10",
+      approver: "João Silva",
+      immediate_supervisor_position: "Desenvolvedor Pleno",
+      is_supervisor: false,
+      cbo_code: "2124-05",
+      norm: "NBR ISO 9001",
+      main_responsibilities: "Desenvolvimento de aplicações web, manutenção de código, correção de bugs",
+      education_requirements: "Formação em TI",
+      skill_requirements: "JavaScript, HTML, CSS",
+      training_requirements: "Git, Metodologias Ágeis",
+      experience_requirements: "1+ anos de experiência",
+      required_procedures: ["POP-DEV-001", "POP-DEV-002"],
+      required_resources: ["Computador", "Monitor"],
+      required_ppe: ["Não aplicável"],
+      status: "approved"
     },
     {
       id: "job2",
+      code: "DC-002",
       title: "Desenvolvedor Pleno",
       department: "Tecnologia",
-      level: "Pleno",
-      minSalary: 5000,
-      maxSalary: 8000,
-      requirements: "Formação em TI, 3+ anos de experiência",
-      responsibilities: "Desenvolvimento de funcionalidades complexas, revisão de código"
+      description: "Desenvolvedor de software com experiência intermediária",
+      revision: "1.1",
+      approval_date: "2023-05-15",
+      approver: "Maria Oliveira",
+      immediate_supervisor_position: "Desenvolvedor Senior",
+      is_supervisor: true,
+      cbo_code: "2124-05",
+      norm: "NBR ISO 9001",
+      main_responsibilities: "Desenvolvimento de funcionalidades complexas, revisão de código, mentoria de juniores",
+      education_requirements: "Formação em TI",
+      skill_requirements: "JavaScript, TypeScript, React, Node.js",
+      training_requirements: "CI/CD, AWS",
+      experience_requirements: "3+ anos de experiência",
+      required_procedures: ["POP-DEV-001", "POP-DEV-002", "POP-DEV-003"],
+      required_resources: ["Computador", "Monitor duplo"],
+      required_ppe: ["Não aplicável"],
+      status: "in_review"
     },
     {
       id: "job3",
+      code: "DC-003",
       title: "Desenvolvedor Senior",
       department: "Tecnologia",
-      level: "Senior",
-      minSalary: 8000,
-      maxSalary: 12000,
-      requirements: "Formação em TI, 5+ anos de experiência",
-      responsibilities: "Arquitetura de soluções, liderança técnica"
-    },
-    {
-      id: "job4",
-      title: "Analista de RH Junior",
-      department: "Recursos Humanos",
-      level: "Junior",
-      minSalary: 3000,
-      maxSalary: 4500,
-      requirements: "Formação em RH ou áreas relacionadas",
-      responsibilities: "Processos de admissão, folha de ponto"
-    },
-    {
-      id: "job5",
-      title: "Analista de RH Pleno",
-      department: "Recursos Humanos",
-      level: "Pleno",
-      minSalary: 4500,
-      maxSalary: 6500,
-      requirements: "Formação em RH, 3+ anos de experiência",
-      responsibilities: "Recrutamento e seleção, treinamentos"
-    },
-    {
-      id: "job6",
-      title: "Coordenador de RH",
-      department: "Recursos Humanos",
-      level: "Senior",
-      minSalary: 7000,
-      maxSalary: 10000,
-      requirements: "Formação em RH, 5+ anos de experiência",
-      responsibilities: "Gestão da equipe de RH, estratégias de pessoas"
+      description: "Desenvolvedor de software experiente",
+      revision: "1.0",
+      approval_date: "",
+      approver: "",
+      immediate_supervisor_position: "Tech Lead",
+      is_supervisor: true,
+      cbo_code: "2124-05",
+      norm: "NBR ISO 9001",
+      main_responsibilities: "Arquitetura de soluções, liderança técnica, decisões estratégicas",
+      education_requirements: "Formação em TI",
+      skill_requirements: "JavaScript, TypeScript, React, Node.js, Arquitetura de Software",
+      training_requirements: "Liderança Técnica, DevOps",
+      experience_requirements: "5+ anos de experiência",
+      required_procedures: ["POP-DEV-001", "POP-DEV-002", "POP-DEV-003", "POP-DEV-004"],
+      required_resources: ["Computador de alto desempenho", "Monitor duplo"],
+      required_ppe: ["Não aplicável"],
+      status: "draft"
     }
   ]);
 
-  // Data for salary comparison chart
-  const salaryComparisonData = [
-    { 
-      name: 'Desenvolvedor Junior', 
-      'Empresa Atual': 4200, 
-      'Mercado': 4500 
-    },
-    { 
-      name: 'Desenvolvedor Pleno', 
-      'Empresa Atual': 6500, 
-      'Mercado': 7000 
-    },
-    { 
-      name: 'Desenvolvedor Senior', 
-      'Empresa Atual': 10000, 
-      'Mercado': 11000 
-    },
-    { 
-      name: 'Analista RH Junior', 
-      'Empresa Atual': 3800, 
-      'Mercado': 3500 
-    },
-    { 
-      name: 'Analista RH Pleno', 
-      'Empresa Atual': 5500, 
-      'Mercado': 5800 
-    }
-  ];
-
-  // Career paths data
-  const careerPaths = [
-    {
-      department: "Tecnologia",
-      paths: [
-        { level: 1, title: "Desenvolvedor Junior", nextLevel: "Desenvolvedor Pleno" },
-        { level: 2, title: "Desenvolvedor Pleno", nextLevel: "Desenvolvedor Senior" },
-        { level: 3, title: "Desenvolvedor Senior", nextLevel: "Tech Lead" },
-        { level: 4, title: "Tech Lead", nextLevel: "Gerente de Tecnologia" },
-        { level: 5, title: "Gerente de Tecnologia", nextLevel: "CTO" }
-      ]
-    },
-    {
-      department: "Recursos Humanos",
-      paths: [
-        { level: 1, title: "Analista de RH Junior", nextLevel: "Analista de RH Pleno" },
-        { level: 2, title: "Analista de RH Pleno", nextLevel: "Analista de RH Senior" },
-        { level: 3, title: "Analista de RH Senior", nextLevel: "Coordenador de RH" },
-        { level: 4, title: "Coordenador de RH", nextLevel: "Gerente de RH" },
-        { level: 5, title: "Gerente de RH", nextLevel: "Diretor de RH" }
-      ]
-    }
-  ];
+  // State for dialogs
+  const [isNewJobDialogOpen, setIsNewJobDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedJobPosition, setSelectedJobPosition] = useState<JobPosition | undefined>();
+  const { toast } = useToast();
 
   // Format currency
   const formatCurrency = (value: number) => {
@@ -149,13 +102,103 @@ export function JobSalaryPlan() {
     });
   };
 
+  // Handle view details
+  const handleViewDetails = (jobPosition: JobPosition) => {
+    setSelectedJobPosition(jobPosition);
+    setIsDetailsDialogOpen(true);
+  };
+
+  // Handle approve
+  const handleApprove = (jobPosition: JobPosition) => {
+    const updatedPositions = jobPositions.map(pos =>
+      pos.id === jobPosition.id
+        ? {
+            ...pos,
+            status: "approved",
+            approval_date: new Date().toISOString().split('T')[0],
+            approver: "Usuário Atual" // Should be replaced with current user's name
+          }
+        : pos
+    );
+    setJobPositions(updatedPositions);
+    toast({
+      title: "Cargo aprovado",
+      description: `O cargo ${jobPosition.title} foi aprovado com sucesso.`
+    });
+  };
+
+  // Handle revise
+  const handleRevise = (jobPosition: JobPosition) => {
+    const updatedPositions = jobPositions.map(pos =>
+      pos.id === jobPosition.id
+        ? {
+            ...pos,
+            status: "in_review",
+            revision: (parseFloat(pos.revision) + 0.1).toFixed(1)
+          }
+        : pos
+    );
+    setJobPositions(updatedPositions);
+    toast({
+      title: "Cargo em revisão",
+      description: `O cargo ${jobPosition.title} foi marcado para revisão.`
+    });
+  };
+
+  // Handle distribute
+  const handleDistribute = (jobPosition: JobPosition) => {
+    const updatedPositions = jobPositions.map(pos =>
+      pos.id === jobPosition.id
+        ? {
+            ...pos,
+            status: "distributed"
+          }
+        : pos
+    );
+    setJobPositions(updatedPositions);
+    toast({
+      title: "Cargo distribuído",
+      description: `O cargo ${jobPosition.title} foi distribuído com sucesso.`
+    });
+  };
+
+  // Handle edit from details dialog
+  const handleEditFromDetails = () => {
+    setIsDetailsDialogOpen(false);
+    setIsEditDialogOpen(true);
+  };
+
+  // Handle save from edit dialog
+  const handleSaveJobPosition = (updatedJobPosition: JobPosition) => {
+    if (selectedJobPosition) {
+      // Updating existing job position
+      setJobPositions(jobPositions.map(pos =>
+        pos.id === updatedJobPosition.id ? updatedJobPosition : pos
+      ));
+      toast({
+        title: "Cargo atualizado",
+        description: `O cargo ${updatedJobPosition.title} foi atualizado com sucesso.`
+      });
+    } else {
+      // Creating new job position
+      setJobPositions([...jobPositions, updatedJobPosition]);
+      toast({
+        title: "Cargo criado",
+        description: `O cargo ${updatedJobPosition.title} foi criado com sucesso.`
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Plano de Cargos e Salários</h2>
-        <Button>
+        <Button onClick={() => {
+          setSelectedJobPosition(undefined);
+          setIsNewJobDialogOpen(true);
+        }}>
           <Plus className="h-4 w-4 mr-2" />
-          Novo Cargo
+          Nova Descrição de Cargo
         </Button>
       </div>
       
@@ -195,15 +238,13 @@ export function JobSalaryPlan() {
             <CardTitle className="text-sm font-medium">
               <div className="flex items-center">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                Média Salarial
+                Cargos Aprovados
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(
-                jobPositions.reduce((acc, job) => acc + ((job.minSalary + job.maxSalary) / 2), 0) / jobPositions.length
-              )}
+              {jobPositions.filter(job => job.status === "approved").length}
             </div>
           </CardContent>
         </Card>
@@ -218,98 +259,21 @@ export function JobSalaryPlan() {
         </TabsList>
         
         <TabsContent value="positions">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>Nível</TableHead>
-                  <TableHead>Faixa Salarial</TableHead>
-                  <TableHead>Requisitos</TableHead>
-                  <TableHead className="w-[80px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {jobPositions.map((job) => (
-                  <TableRow key={job.id}>
-                    <TableCell className="font-medium">{job.title}</TableCell>
-                    <TableCell>{job.department}</TableCell>
-                    <TableCell>{job.level}</TableCell>
-                    <TableCell>
-                      {formatCurrency(job.minSalary)} - {formatCurrency(job.maxSalary)}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">{job.requirements}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <JobPositionTable 
+            jobPositions={jobPositions}
+            onViewDetails={handleViewDetails}
+            onApprove={handleApprove}
+            onRevise={handleRevise}
+            onDistribute={handleDistribute}
+          />
         </TabsContent>
         
         <TabsContent value="market">
-          <Card>
-            <CardHeader>
-              <CardTitle>Comparativo Salarial com o Mercado</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={salaryComparisonData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                    <Legend />
-                    <Bar dataKey="Empresa Atual" fill="#6366f1" />
-                    <Bar dataKey="Mercado" fill="#a78bfa" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <SalaryComparisonChart formatCurrency={formatCurrency} />
         </TabsContent>
         
         <TabsContent value="career">
-          <div className="space-y-6">
-            {careerPaths.map((path) => (
-              <Card key={path.department}>
-                <CardHeader>
-                  <CardTitle>{path.department}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {path.paths.map((position) => (
-                      <div key={position.level} className="flex items-center">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                          {position.level}
-                        </div>
-                        <div className="ml-4 flex-grow">
-                          <div className="h-1 bg-primary"></div>
-                        </div>
-                        <div className="ml-4 p-3 border rounded-md min-w-[200px]">
-                          <p className="font-medium">{position.title}</p>
-                          {position.nextLevel && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Próximo nível: {position.nextLevel}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <CareerPathView />
         </TabsContent>
         
         <TabsContent value="orgchart">
@@ -318,12 +282,51 @@ export function JobSalaryPlan() {
               id: job.id,
               title: job.title,
               department: job.department,
-              level: job.level,
-              parentPosition: null
+              level: job.status,
+              parentPosition: job.immediate_supervisor_position
             }))}
           />
         </TabsContent>
       </Tabs>
+      
+      {/* Dialog for creating new job positions */}
+      <JobPositionDialog 
+        isOpen={isNewJobDialogOpen} 
+        onClose={() => setIsNewJobDialogOpen(false)}
+        onSave={handleSaveJobPosition}
+      />
+      
+      {/* Dialog for editing existing job positions */}
+      {selectedJobPosition && (
+        <JobPositionDialog 
+          isOpen={isEditDialogOpen} 
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSaveJobPosition}
+          jobPosition={selectedJobPosition}
+        />
+      )}
+      
+      {/* Dialog for viewing job position details */}
+      {selectedJobPosition && (
+        <JobPositionDetailsDialog
+          isOpen={isDetailsDialogOpen}
+          onClose={() => setIsDetailsDialogOpen(false)}
+          jobPosition={selectedJobPosition}
+          onEdit={handleEditFromDetails}
+          onApprove={() => {
+            handleApprove(selectedJobPosition);
+            setIsDetailsDialogOpen(false);
+          }}
+          onRevise={() => {
+            handleRevise(selectedJobPosition);
+            setIsDetailsDialogOpen(false);
+          }}
+          onDistribute={() => {
+            handleDistribute(selectedJobPosition);
+            setIsDetailsDialogOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

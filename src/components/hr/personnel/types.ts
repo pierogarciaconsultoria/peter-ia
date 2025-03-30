@@ -7,6 +7,7 @@ export interface PersonnelRequest {
   department: string;
   position: string;
   position_id?: string;
+  position_details?: JobPosition;
   requestDate: string;
   status: string;
   requester: string;
