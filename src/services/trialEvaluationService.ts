@@ -55,11 +55,11 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
   // Add missing properties if they don't exist in the returned data
   const enhancedData = (data || []).map(item => ({
     ...item,
-    hr_approved: item.hr_approved || null,
-    hr_approved_at: item.hr_approved_at || null,
-    hr_approver_id: item.hr_approver_id || null,
-    notification_sent: item.notification_sent || false,
-  })) as unknown as TrialEvaluationWithEmployee[];
+    hr_approved: item.hr_approved ?? null,
+    hr_approved_at: item.hr_approved_at ?? null,
+    hr_approver_id: item.hr_approver_id ?? null,
+    notification_sent: item.notification_sent ?? false,
+  })) as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }
@@ -84,11 +84,11 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved || null,
-    hr_approved_at: data.hr_approved_at || null,
-    hr_approver_id: data.hr_approver_id || null,
-    notification_sent: data.notification_sent || false,
-  } as unknown as TrialEvaluationWithEmployee;
+    hr_approved: data.hr_approved ?? null,
+    hr_approved_at: data.hr_approved_at ?? null,
+    hr_approver_id: data.hr_approver_id ?? null,
+    notification_sent: data.notification_sent ?? false,
+  } as TrialEvaluationWithEmployee;
 
   return enhancedData;
 }
@@ -109,11 +109,11 @@ export async function createTrialEvaluation(evaluation: Omit<TrialEvaluation, 'i
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved || null,
-    hr_approved_at: data.hr_approved_at || null,
-    hr_approver_id: data.hr_approver_id || null,
-    notification_sent: data.notification_sent || false,
-  } as unknown as TrialEvaluation;
+    hr_approved: data.hr_approved ?? null,
+    hr_approved_at: data.hr_approved_at ?? null,
+    hr_approver_id: data.hr_approver_id ?? null,
+    notification_sent: data.notification_sent ?? false,
+  } as TrialEvaluation;
 
   return enhancedData;
 }
@@ -143,11 +143,11 @@ export async function updateTrialEvaluation(
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved || null,
-    hr_approved_at: data.hr_approved_at || null,
-    hr_approver_id: data.hr_approver_id || null,
-    notification_sent: data.notification_sent || false,
-  } as unknown as TrialEvaluation;
+    hr_approved: data.hr_approved ?? null,
+    hr_approved_at: data.hr_approved_at ?? null,
+    hr_approver_id: data.hr_approver_id ?? null,
+    notification_sent: data.notification_sent ?? false,
+  } as TrialEvaluation;
 
   return enhancedData;
 }
@@ -181,9 +181,11 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
     }
 
     // Handle potential errors with employee data
-    // Use type checking to safely access properties
-    const company_id = employee && 'company_id' in employee ? employee.company_id : 'default-company-id';
-    const evaluator_id = employee && 'immediate_superior' in employee ? employee.immediate_superior : null;
+    const company_id = typeof employee === 'object' && employee && 'company_id' in employee ? 
+      String(employee.company_id) : 'default-company-id';
+    
+    const evaluator_id = typeof employee === 'object' && employee && 'immediate_superior' in employee ? 
+      String(employee.immediate_superior) : null;
     
     // Calculate evaluation dates
     const hireDate = new Date(hire_date);
@@ -256,11 +258,11 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
   // Add missing properties if they don't exist in the returned data
   const enhancedData = (data || []).map(item => ({
     ...item,
-    hr_approved: item.hr_approved || null,
-    hr_approved_at: item.hr_approved_at || null,
-    hr_approver_id: item.hr_approver_id || null,
-    notification_sent: item.notification_sent || false,
-  })) as unknown as TrialEvaluationWithEmployee[];
+    hr_approved: item.hr_approved ?? null,
+    hr_approved_at: item.hr_approved_at ?? null,
+    hr_approver_id: item.hr_approver_id ?? null,
+    notification_sent: item.notification_sent ?? false,
+  })) as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }
@@ -286,11 +288,11 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
   // Add missing properties if they don't exist in the returned data
   const enhancedData = (data || []).map(item => ({
     ...item,
-    hr_approved: item.hr_approved || null,
-    hr_approved_at: item.hr_approved_at || null,
-    hr_approver_id: item.hr_approver_id || null,
-    notification_sent: item.notification_sent || false,
-  })) as unknown as TrialEvaluationWithEmployee[];
+    hr_approved: item.hr_approved ?? null,
+    hr_approved_at: item.hr_approved_at ?? null,
+    hr_approver_id: item.hr_approver_id ?? null,
+    notification_sent: item.notification_sent ?? false,
+  })) as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }

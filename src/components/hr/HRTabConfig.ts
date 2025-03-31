@@ -16,8 +16,8 @@ export type TabGroup = {
 };
 
 // Create icon components without using JSX
-const createIcon = (Icon: typeof icons.Icon) => {
-  // Use direct React.createElement instead of passing invalid props
+const createIcon = (Icon: any) => {
+  // Use direct React.createElement with the Icon as a standard React component
   return React.createElement(Icon, { size: 20 });
 };
 
