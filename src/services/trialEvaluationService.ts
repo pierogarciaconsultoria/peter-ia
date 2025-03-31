@@ -210,11 +210,13 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
     const employee = employeeData as { immediate_superior?: string | null; company_id?: string | null } | null;
     
     // Handle potential errors with employee data
-    const company_id = employee && employee.company_id ? 
-      String(employee.company_id) : 'default-company-id';
+    const company_id = (employee && 'company_id' in employee && employee.company_id) 
+      ? String(employee.company_id) 
+      : 'default-company-id';
     
-    const evaluator_id = employee && employee.immediate_superior ? 
-      String(employee.immediate_superior) : null;
+    const evaluator_id = (employee && 'immediate_superior' in employee && employee.immediate_superior) 
+      ? String(employee.immediate_superior) 
+      : null;
     
     // Calculate evaluation dates
     const hireDate = new Date(hire_date);
