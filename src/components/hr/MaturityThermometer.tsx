@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export interface MaturityThermometerProps {
-  score: number;
-  modulesCompletion: number;
-  goalsAchievement: number;
+  score?: number;
+  modulesCompletion?: number;
+  goalsAchievement?: number;
 }
 
 export function MaturityThermometer({ 
