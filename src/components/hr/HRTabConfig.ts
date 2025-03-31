@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from "react";
 import * as icons from "lucide-react";
 
@@ -17,9 +16,8 @@ export type TabGroup = {
 
 // Create icon components without using JSX
 const createIcon = (Icon: typeof icons.Icon) => {
-  // Use a different approach that doesn't require React.createElement
-  // Directly return the Icon component with the className that will be applied when rendered
-  return <Icon size={20} />;
+  // Use React.createElement instead of JSX since this is a .ts file, not .tsx
+  return React.createElement(Icon, { size: 20 });
 };
 
 export const hrTabGroups: TabGroup[] = [
