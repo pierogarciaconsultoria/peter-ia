@@ -15,9 +15,10 @@ export type TabGroup = {
   }[];
 };
 
-// Create icon components
+// Create icon components without using JSX
 const createIcon = (Icon: typeof icons.Icon) => {
-  return <Icon className="h-5 w-5" />;
+  // Return the icon component with props that will be applied when rendered
+  return React.createElement(Icon, { className: "h-5 w-5" });
 };
 
 export const hrTabGroups: TabGroup[] = [
