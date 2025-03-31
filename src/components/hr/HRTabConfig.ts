@@ -17,7 +17,7 @@ export type TabGroup = {
 
 // Create icon components
 const createIcon = (Icon: typeof icons.Icon) => {
-  return Icon({className: "h-5 w-5"});
+  return <Icon className="h-5 w-5" />;
 };
 
 export const hrTabGroups: TabGroup[] = [

@@ -59,7 +59,7 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
     hr_approved_at: item.hr_approved_at || null,
     hr_approver_id: item.hr_approver_id || null,
     notification_sent: item.notification_sent || false,
-  })) as TrialEvaluationWithEmployee[];
+  })) as unknown as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }
@@ -88,7 +88,7 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
     hr_approved_at: data.hr_approved_at || null,
     hr_approver_id: data.hr_approver_id || null,
     notification_sent: data.notification_sent || false,
-  } as TrialEvaluationWithEmployee;
+  } as unknown as TrialEvaluationWithEmployee;
 
   return enhancedData;
 }
@@ -113,7 +113,7 @@ export async function createTrialEvaluation(evaluation: Omit<TrialEvaluation, 'i
     hr_approved_at: data.hr_approved_at || null,
     hr_approver_id: data.hr_approver_id || null,
     notification_sent: data.notification_sent || false,
-  } as TrialEvaluation;
+  } as unknown as TrialEvaluation;
 
   return enhancedData;
 }
@@ -147,7 +147,7 @@ export async function updateTrialEvaluation(
     hr_approved_at: data.hr_approved_at || null,
     hr_approver_id: data.hr_approver_id || null,
     notification_sent: data.notification_sent || false,
-  } as TrialEvaluation;
+  } as unknown as TrialEvaluation;
 
   return enhancedData;
 }
@@ -259,7 +259,7 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
     hr_approved_at: item.hr_approved_at || null,
     hr_approver_id: item.hr_approver_id || null,
     notification_sent: item.notification_sent || false,
-  })) as TrialEvaluationWithEmployee[];
+  })) as unknown as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }
@@ -289,7 +289,7 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
     hr_approved_at: item.hr_approved_at || null,
     hr_approver_id: item.hr_approver_id || null,
     notification_sent: item.notification_sent || false,
-  })) as TrialEvaluationWithEmployee[];
+  })) as unknown as TrialEvaluationWithEmployee[];
 
   return enhancedData;
 }

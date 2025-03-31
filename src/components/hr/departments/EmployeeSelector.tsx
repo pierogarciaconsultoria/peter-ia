@@ -17,9 +17,10 @@ interface Employee {
 interface EmployeeSelectorProps {
   value: string | null;
   onChange: (value: string | null) => void;
+  placeholder?: string;
 }
 
-export function EmployeeSelector({ value, onChange }: EmployeeSelectorProps) {
+export function EmployeeSelector({ value, onChange, placeholder = "Selecionar funcionário..." }: EmployeeSelectorProps) {
   const [open, setOpen] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +63,7 @@ export function EmployeeSelector({ value, onChange }: EmployeeSelectorProps) {
         >
           {value && selectedEmployee
             ? selectedEmployee.name
-            : "Selecionar responsável..."}
+            : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
