@@ -1,29 +1,29 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-type TabGroup = {
-  label: string;
-  tabs: {
-    value: string;
-    label: string;
-  }[];
-};
+import { hrTabGroups } from "./HRTabConfig";
 
 type HRTabGroupProps = {
-  tabGroups: TabGroup[];
+  tabGroups: typeof hrTabGroups;
   activeTab: string;
   setActiveTab: (value: string) => void;
 };
 
 export function HRTabGroup({ tabGroups, activeTab, setActiveTab }: HRTabGroupProps) {
+  // Convert the tab configuration into a flat list of tabs for display
+  const allTabs = tabGroups.flatMap(group => 
+    group.subTabs 
+      ? group.subTabs.map(tab => ({ value: tab.id, label: tab.name }))
+      : []
+  );
+
   return (
     <div className="border rounded-md">
       <ScrollArea className="w-full">
         <div className="flex p-1 min-w-max">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="flex w-full h-auto flex-wrap bg-transparent p-0 gap-1">
-              {tabGroups.flatMap(group => group.tabs).map(tab => (
+              {allTabs.map(tab => (
                 <TabsTrigger 
                   key={tab.value} 
                   value={tab.value}

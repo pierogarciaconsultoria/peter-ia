@@ -1,17 +1,35 @@
 
-import { DashboardIcon, FileText, Users, CalendarDays, Award, ClipboardList, ChartBarIcon, UserPlusIcon } from "lucide-react";
+import { 
+  DashboardIcon, 
+  FileText, 
+  Users, 
+  CalendarDays, 
+  Award, 
+  ClipboardList 
+} from "lucide-react";
+import { ChartBarIcon, UserPlusIcon } from "lucide-react";
+import React from "react";
+
+// Define the type for the tab groups
+type IconProps = { className: string };
+type IconComponent = React.FC<IconProps>;
+
+// Helper function to create icon elements
+const createIcon = (Icon: IconComponent, className: string = "h-5 w-5") => {
+  return React.createElement(Icon, { className });
+};
 
 export const hrTabGroups = [
   {
     id: "dashboard",
     name: "Dashboard",
-    icon: <DashboardIcon className="h-5 w-5" />,
+    icon: createIcon(DashboardIcon),
     href: "/human-resources"
   },
   {
     id: "employees",
     name: "Colaboradores",
-    icon: <Users className="h-5 w-5" />,
+    icon: createIcon(Users),
     subTabs: [
       { id: "directory", name: "Diretório", component: "EmployeeDirectory" },
       { id: "onboarding", name: "Integração", component: "EmployeeOnboarding" },
@@ -25,7 +43,7 @@ export const hrTabGroups = [
   {
     id: "development",
     name: "Desenvolvimento",
-    icon: <Award className="h-5 w-5" />,
+    icon: createIcon(Award),
     subTabs: [
       { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans" },
       { id: "training", name: "Treinamentos", component: "TrainingControl" },
@@ -37,7 +55,7 @@ export const hrTabGroups = [
   {
     id: "recruitment",
     name: "Recrutamento",
-    icon: <UserPlusIcon className="h-5 w-5" />,
+    icon: createIcon(UserPlusIcon),
     subTabs: [
       { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection" },
       { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission" }
@@ -46,7 +64,7 @@ export const hrTabGroups = [
   {
     id: "structure",
     name: "Estrutura",
-    icon: <ChartBarIcon className="h-5 w-5" />,
+    icon: createIcon(ChartBarIcon),
     subTabs: [
       { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
       { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
@@ -57,7 +75,7 @@ export const hrTabGroups = [
   {
     id: "management",
     name: "Gestão",
-    icon: <ClipboardList className="h-5 w-5" />,
+    icon: createIcon(ClipboardList),
     subTabs: [
       { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement" },
       { id: "vacation", name: "Férias", component: "VacationManagement" },
@@ -68,13 +86,13 @@ export const hrTabGroups = [
   {
     id: "documents",
     name: "Documentos",
-    icon: <FileText className="h-5 w-5" />,
+    icon: createIcon(FileText),
     href: "/documents"
   },
   {
     id: "calendar",
     name: "Agenda",
-    icon: <CalendarDays className="h-5 w-5" />,
+    icon: createIcon(CalendarDays),
     href: "/calendar"
   }
 ];
