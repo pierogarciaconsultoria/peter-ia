@@ -17,8 +17,8 @@ export type TabGroup = {
 
 // Create icon components without using JSX
 const createIcon = (Icon: typeof icons.Icon) => {
-  // Use React.createElement instead of JSX since this is a .ts file, not .tsx
-  return React.createElement(Icon, { size: 20, stroke: "currentColor" });
+  // Use direct React.createElement instead of passing invalid props
+  return React.createElement(Icon, { size: 20 });
 };
 
 export const hrTabGroups: TabGroup[] = [

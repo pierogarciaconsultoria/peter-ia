@@ -181,9 +181,9 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
     }
 
     // Handle potential errors with employee data
-    // Use optional chaining to safely access properties
-    const company_id = employee?.company_id || 'default-company-id';
-    const evaluator_id = employee?.immediate_superior || null;
+    // Use type checking to safely access properties
+    const company_id = employee && 'company_id' in employee ? employee.company_id : 'default-company-id';
+    const evaluator_id = employee && 'immediate_superior' in employee ? employee.immediate_superior : null;
     
     // Calculate evaluation dates
     const hireDate = new Date(hire_date);
