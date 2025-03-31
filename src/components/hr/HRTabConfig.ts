@@ -17,8 +17,8 @@ export type TabGroup = {
 
 // Create icon components without using JSX
 const createIcon = (Icon: any) => {
-  // Use direct React.createElement with the Icon as a standard React component
-  return React.createElement(Icon, { size: 20 });
+  // Create the icon element directly
+  return <Icon size={20} />;
 };
 
 export const hrTabGroups: TabGroup[] = [

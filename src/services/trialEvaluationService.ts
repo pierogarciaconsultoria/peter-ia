@@ -21,19 +21,23 @@ export interface TrialEvaluation {
   notification_sent: boolean;
 }
 
+export interface EmployeeDetails {
+  name: string;
+  position: string;
+  department: string;
+  avatar_url: string | null;
+  hire_date: string;
+  immediate_superior: string | null;
+  job_position_id: string | null;
+}
+
+export interface EvaluatorDetails {
+  name: string | null;
+}
+
 export interface TrialEvaluationWithEmployee extends TrialEvaluation {
-  employee: {
-    name: string;
-    position: string;
-    department: string;
-    avatar_url: string | null;
-    hire_date: string;
-    immediate_superior: string | null;
-    job_position_id: string | null;
-  };
-  evaluator?: {
-    name: string | null;
-  };
+  employee: EmployeeDetails;
+  evaluator?: EvaluatorDetails;
 }
 
 // Get all trial evaluations with employee details
@@ -53,13 +57,25 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
   }
 
   // Add missing properties if they don't exist in the returned data
-  const enhancedData = (data || []).map(item => ({
-    ...item,
-    hr_approved: item.hr_approved ?? null,
-    hr_approved_at: item.hr_approved_at ?? null,
-    hr_approver_id: item.hr_approver_id ?? null,
-    notification_sent: item.notification_sent ?? false,
-  })) as TrialEvaluationWithEmployee[];
+  const enhancedData = (data || []).map(item => {
+    return {
+      ...item,
+      hr_approved: item.hr_approved ?? null,
+      hr_approved_at: item.hr_approved_at ?? null,
+      hr_approver_id: item.hr_approver_id ?? null,
+      notification_sent: item.notification_sent ?? false,
+      employee: item.employee || {
+        name: 'Unknown',
+        position: 'Unknown',
+        department: 'Unknown',
+        avatar_url: null,
+        hire_date: 'Unknown',
+        immediate_superior: null,
+        job_position_id: null
+      },
+      evaluator: item.evaluator || { name: null }
+    } as TrialEvaluationWithEmployee;
+  });
 
   return enhancedData;
 }
@@ -88,6 +104,16 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
     hr_approved_at: data.hr_approved_at ?? null,
     hr_approver_id: data.hr_approver_id ?? null,
     notification_sent: data.notification_sent ?? false,
+    employee: data.employee || {
+      name: 'Unknown',
+      position: 'Unknown',
+      department: 'Unknown',
+      avatar_url: null,
+      hire_date: 'Unknown',
+      immediate_superior: null,
+      job_position_id: null
+    },
+    evaluator: data.evaluator || { name: null }
   } as TrialEvaluationWithEmployee;
 
   return enhancedData;
@@ -169,7 +195,7 @@ export async function deleteTrialEvaluation(id: string): Promise<void> {
 export async function generateTrialEvaluations(employee_id: string, hire_date: string): Promise<void> {
   try {
     // Get the employee's immediate superior to set as evaluator
-    const { data: employee, error: employeeError } = await supabase
+    const { data: employeeData, error: employeeError } = await supabase
       .from('employees')
       .select('immediate_superior, company_id')
       .eq('id', employee_id)
@@ -180,11 +206,14 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
       throw new Error(employeeError.message);
     }
 
+    // Safely extract data from employee data with proper type checking
+    const employee = employeeData as { immediate_superior?: string | null; company_id?: string | null } | null;
+    
     // Handle potential errors with employee data
-    const company_id = typeof employee === 'object' && employee && 'company_id' in employee ? 
+    const company_id = employee && employee.company_id ? 
       String(employee.company_id) : 'default-company-id';
     
-    const evaluator_id = typeof employee === 'object' && employee && 'immediate_superior' in employee ? 
+    const evaluator_id = employee && employee.immediate_superior ? 
       String(employee.immediate_superior) : null;
     
     // Calculate evaluation dates
@@ -256,13 +285,25 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
   }
 
   // Add missing properties if they don't exist in the returned data
-  const enhancedData = (data || []).map(item => ({
-    ...item,
-    hr_approved: item.hr_approved ?? null,
-    hr_approved_at: item.hr_approved_at ?? null,
-    hr_approver_id: item.hr_approver_id ?? null,
-    notification_sent: item.notification_sent ?? false,
-  })) as TrialEvaluationWithEmployee[];
+  const enhancedData = (data || []).map(item => {
+    return {
+      ...item,
+      hr_approved: item.hr_approved ?? null,
+      hr_approved_at: item.hr_approved_at ?? null,
+      hr_approver_id: item.hr_approver_id ?? null,
+      notification_sent: item.notification_sent ?? false,
+      employee: item.employee || {
+        name: 'Unknown',
+        position: 'Unknown',
+        department: 'Unknown',
+        avatar_url: null,
+        hire_date: 'Unknown',
+        immediate_superior: null,
+        job_position_id: null
+      },
+      evaluator: item.evaluator || { name: null }
+    } as TrialEvaluationWithEmployee;
+  });
 
   return enhancedData;
 }
@@ -286,13 +327,25 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
   }
 
   // Add missing properties if they don't exist in the returned data
-  const enhancedData = (data || []).map(item => ({
-    ...item,
-    hr_approved: item.hr_approved ?? null,
-    hr_approved_at: item.hr_approved_at ?? null,
-    hr_approver_id: item.hr_approver_id ?? null,
-    notification_sent: item.notification_sent ?? false,
-  })) as TrialEvaluationWithEmployee[];
+  const enhancedData = (data || []).map(item => {
+    return {
+      ...item,
+      hr_approved: item.hr_approved ?? null,
+      hr_approved_at: item.hr_approved_at ?? null,
+      hr_approver_id: item.hr_approver_id ?? null,
+      notification_sent: item.notification_sent ?? false,
+      employee: item.employee || {
+        name: 'Unknown',
+        position: 'Unknown',
+        department: 'Unknown',
+        avatar_url: null,
+        hire_date: 'Unknown',
+        immediate_superior: null,
+        job_position_id: null
+      },
+      evaluator: item.evaluator || { name: null }
+    } as TrialEvaluationWithEmployee;
+  });
 
   return enhancedData;
 }
