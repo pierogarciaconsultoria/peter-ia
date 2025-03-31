@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import * as icons from "lucide-react";
 
 // Define the type for tab groups
@@ -17,8 +17,9 @@ export type TabGroup = {
 
 // Create icon components without using JSX
 const createIcon = (Icon: typeof icons.Icon) => {
-  // Return the icon component with props that will be applied when rendered
-  return React.createElement(Icon, { className: "h-5 w-5" });
+  // Use a different approach that doesn't require React.createElement
+  // Directly return the Icon component with the className that will be applied when rendered
+  return <Icon size={20} />;
 };
 
 export const hrTabGroups: TabGroup[] = [

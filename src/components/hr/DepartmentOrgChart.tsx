@@ -22,7 +22,7 @@ interface JobPosition {
 }
 
 interface DepartmentOrgChartProps {
-  positions: JobPosition[];
+  positions?: JobPosition[];
 }
 
 interface OrgChartNode extends FlowNode {
@@ -42,7 +42,7 @@ const nodeTypes = {
   ),
 };
 
-function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
+function DepartmentOrgChartContent({ positions = [] }: DepartmentOrgChartProps) {
   const { departments: orgDepartments } = useDepartments();
   
   // Group positions by department for more organized layout

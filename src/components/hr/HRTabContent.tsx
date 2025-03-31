@@ -29,6 +29,40 @@ interface HRTabContentProps {
   onTabChange: (tabId: string) => void;
 }
 
+// Sample positions data for DepartmentOrgChart
+const samplePositions = [
+  {
+    id: "ceo",
+    title: "CEO",
+    department: "Executive",
+    level: "Senior",
+    isDepartmentHead: true
+  },
+  {
+    id: "cto",
+    title: "CTO",
+    department: "Technology",
+    level: "Senior",
+    parentPosition: "ceo",
+    isDepartmentHead: true
+  },
+  {
+    id: "cfo",
+    title: "CFO",
+    department: "Finance",
+    level: "Senior",
+    parentPosition: "ceo",
+    isDepartmentHead: true
+  },
+  {
+    id: "dev-lead",
+    title: "Development Lead",
+    department: "Technology",
+    level: "Senior",
+    parentPosition: "cto"
+  }
+];
+
 export function HRTabContent({ activeTab }: HRTabContentProps) {
   const getTabContent = () => {
     switch (activeTab) {
@@ -63,7 +97,7 @@ export function HRTabContent({ activeTab }: HRTabContentProps) {
       case "online-admission":
         return <OnlineAdmission />;
       case "organizational-structure":
-        return <DepartmentOrgChart />;
+        return <DepartmentOrgChart positions={samplePositions} />;
       case "departments":
         return <DepartmentManagement />;
       case "positions":
