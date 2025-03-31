@@ -40,9 +40,9 @@ export async function getCustomerComplaints(): Promise<CustomerComplaint[]> {
     ...item,
     status: item.status as CustomerComplaint['status'],
     priority: item.priority as CustomerComplaint['priority'],
-    // Use optional chaining to safely access potentially undefined properties
-    treatment_option: item.treatment_option as CustomerComplaint['treatment_option'] || undefined,
-    detailed_status: item.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
+    // Add missing properties with type assertions
+    treatment_option: (item as any).treatment_option as CustomerComplaint['treatment_option'] || undefined,
+    detailed_status: (item as any).detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   }));
 }
 
@@ -62,9 +62,9 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
-    // Use optional chaining to safely access potentially undefined properties
-    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'] || undefined,
-    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
+    // Add missing properties with type assertions
+    treatment_option: (data as any).treatment_option as CustomerComplaint['treatment_option'] || undefined,
+    detailed_status: (data as any).detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 
@@ -90,9 +90,9 @@ export async function createCustomerComplaint(complaint: Omit<CustomerComplaint,
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
-    // Use optional chaining to safely access potentially undefined properties
-    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'] || undefined,
-    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
+    // Add missing properties with type assertions
+    treatment_option: (data as any).treatment_option as CustomerComplaint['treatment_option'] || undefined,
+    detailed_status: (data as any).detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 
@@ -122,9 +122,9 @@ export async function updateCustomerComplaint(id: string, complaint: Partial<Omi
     ...data,
     status: data.status as CustomerComplaint['status'],
     priority: data.priority as CustomerComplaint['priority'],
-    // Use optional chaining to safely access potentially undefined properties
-    treatment_option: data.treatment_option as CustomerComplaint['treatment_option'] || undefined,
-    detailed_status: data.detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
+    // Add missing properties with type assertions
+    treatment_option: (data as any).treatment_option as CustomerComplaint['treatment_option'] || undefined,
+    detailed_status: (data as any).detailed_status as CustomerComplaint['detailed_status'] || 'nova_reclamacao',
   };
 }
 

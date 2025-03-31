@@ -23,12 +23,57 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Trial evaluation type definition
+type EvaluationType = '30_dias' | '45_dias' | '90_dias';
+
+interface TrialEvaluation {
+  id: string;
+  employee: {
+    name: string;
+    position: string;
+    department: string;
+    avatar: string;
+  };
+  hireDate: string;
+  evaluationDate: string | null;
+  evaluationType: EvaluationType;
+  scores: {
+    performance: number;
+    adaptation: number;
+    behavior: number;
+  } | null;
+  approved: boolean | null;
+  evaluator: string | null;
+  status: "pending" | "completed";
+}
 
 export function TrialEvaluation() {
   // Mock data for trial period evaluations
-  const [trialEvaluations] = useState([
+  const [trialEvaluations] = useState<TrialEvaluation[]>([
     {
       id: "te1",
+      employee: {
+        name: "João Silva",
+        position: "Desenvolvedor React",
+        department: "Tecnologia",
+        avatar: ""
+      },
+      hireDate: "2023-08-15",
+      evaluationDate: "2023-09-14",
+      evaluationType: "30_dias",
+      scores: {
+        performance: 80,
+        adaptation: 85,
+        behavior: 90
+      },
+      approved: true,
+      evaluator: "Maria Santos",
+      status: "completed"
+    },
+    {
+      id: "te2",
       employee: {
         name: "João Silva",
         position: "Desenvolvedor React",
@@ -48,7 +93,7 @@ export function TrialEvaluation() {
       status: "completed"
     },
     {
-      id: "te2",
+      id: "te3",
       employee: {
         name: "Ana Oliveira",
         position: "Analista de RH",
@@ -68,7 +113,7 @@ export function TrialEvaluation() {
       status: "completed"
     },
     {
-      id: "te3",
+      id: "te4",
       employee: {
         name: "Pedro Souza",
         position: "Analista de Marketing",
@@ -77,14 +122,30 @@ export function TrialEvaluation() {
       },
       hireDate: "2023-09-20",
       evaluationDate: null,
-      evaluationType: "45_dias",
+      evaluationType: "30_dias",
       scores: null,
       approved: null,
       evaluator: null,
       status: "pending"
     },
     {
-      id: "te4",
+      id: "te5",
+      employee: {
+        name: "Pedro Souza",
+        position: "Analista de Marketing",
+        department: "Marketing",
+        avatar: ""
+      },
+      hireDate: "2023-09-20",
+      evaluationDate: null,
+      evaluationType: "90_dias",
+      scores: null,
+      approved: null,
+      evaluator: null,
+      status: "pending"
+    },
+    {
+      id: "te6",
       employee: {
         name: "Carla Ferreira",
         position: "Assistente Administrativo",
@@ -105,10 +166,37 @@ export function TrialEvaluation() {
     }
   ]);
 
-  const pendingEvaluations = trialEvaluations.filter(e => e.status === "pending");
-  const completedEvaluations = trialEvaluations.filter(e => e.status === "completed");
+  const [activeTab, setActiveTab] = useState<string>("all");
+
+  // Filter evaluations based on active tab
+  const filteredEvaluations = activeTab === "all" 
+    ? trialEvaluations 
+    : trialEvaluations.filter(e => e.evaluationType === activeTab);
+  
+  const pendingEvaluations = filteredEvaluations.filter(e => e.status === "pending");
+  const completedEvaluations = filteredEvaluations.filter(e => e.status === "completed");
   const approvedCount = completedEvaluations.filter(e => e.approved).length;
   const disapprovedCount = completedEvaluations.filter(e => e.approved === false).length;
+
+  // Group employees by name to track multiple evaluations
+  const employeeEvaluationsMap = trialEvaluations.reduce((acc, evaluation) => {
+    const name = evaluation.employee.name;
+    if (!acc[name]) {
+      acc[name] = [];
+    }
+    acc[name].push(evaluation);
+    return acc;
+  }, {} as Record<string, TrialEvaluation[]>);
+
+  // Calculate employees with all evaluations completed
+  const employeesWithCompleteEvaluations = Object.values(employeeEvaluationsMap).filter(
+    evaluations => {
+      // Check if employee has at least one 30-day and one 90-day evaluation both completed
+      const has30DayCompleted = evaluations.some(e => e.evaluationType === '30_dias' && e.status === 'completed');
+      const has90DayCompleted = evaluations.some(e => e.evaluationType === '90_dias' && e.status === 'completed');
+      return has30DayCompleted && has90DayCompleted;
+    }
+  ).length;
 
   const getStatusBadge = (status: string, approved: boolean | null) => {
     if (status === "pending") {
@@ -121,8 +209,9 @@ export function TrialEvaluation() {
     return <Badge variant="outline">{status}</Badge>;
   };
 
-  const getEvaluationTypeName = (type: string) => {
+  const getEvaluationTypeName = (type: EvaluationType) => {
     switch(type) {
+      case "30_dias": return "30 Dias";
       case "45_dias": return "45 Dias";
       case "90_dias": return "90 Dias";
       default: return type;
@@ -139,7 +228,16 @@ export function TrialEvaluation() {
         </Button>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-4">
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="all">Todas</TabsTrigger>
+          <TabsTrigger value="30_dias">30 Dias</TabsTrigger>
+          <TabsTrigger value="45_dias">45 Dias</TabsTrigger>
+          <TabsTrigger value="90_dias">90 Dias</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      
+      <div className="grid gap-6 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
@@ -195,6 +293,21 @@ export function TrialEvaluation() {
             <div className="text-2xl font-bold">{disapprovedCount}</div>
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                Ciclo Completo
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{employeesWithCompleteEvaluations}</div>
+            <p className="text-xs text-muted-foreground mt-1">30 e 90 dias concluídos</p>
+          </CardContent>
+        </Card>
       </div>
 
       {pendingEvaluations.length > 0 && (
@@ -208,7 +321,7 @@ export function TrialEvaluation() {
       )}
       
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Avaliações Recentes</h3>
+        <h3 className="text-lg font-semibold">Avaliações {activeTab === "all" ? "Recentes" : getEvaluationTypeName(activeTab as EvaluationType)}</h3>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -223,7 +336,7 @@ export function TrialEvaluation() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {trialEvaluations.map((evaluation) => (
+              {filteredEvaluations.map((evaluation) => (
                 <TableRow key={evaluation.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
