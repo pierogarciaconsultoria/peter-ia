@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import ReactFlow, { 
@@ -137,7 +136,7 @@ function DepartmentOrgChartContent({ positions }: DepartmentOrgChartProps) {
   );
 }
 
-export function DepartmentOrgChart(props: DepartmentOrgChartProps) {
+export function DepartmentOrgChart({ positions = [] }: { positions?: JobPosition[] }) {
   return (
     <Card className="p-0">
       <ReactFlowProvider>

@@ -9,7 +9,7 @@ import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";
 import { ExitInterviews } from "./ExitInterviews";
 import { DevelopmentPlans } from "./DevelopmentPlans";
-import { TrainingControl } from "../TrainingControl";
+import { TrainingControl } from "./TrainingControl"; // Fixed import path
 import { ClimateResearch } from "./ClimateResearch";
 import { FeedbackManagement } from "./FeedbackManagement";
 import { DiscAssessment } from "./disc-assessment/DiscAssessment";
