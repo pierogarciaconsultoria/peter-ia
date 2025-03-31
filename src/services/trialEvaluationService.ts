@@ -60,10 +60,12 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
   const enhancedData = (data || []).map(item => {
     return {
       ...item,
-      hr_approved: item.hr_approved ?? null,
-      hr_approved_at: item.hr_approved_at ?? null,
-      hr_approver_id: item.hr_approver_id ?? null,
-      notification_sent: item.notification_sent ?? false,
+      // Ensure HR approval fields exist
+      hr_approved: item.hr_approved === undefined ? null : item.hr_approved,
+      hr_approved_at: item.hr_approved_at === undefined ? null : item.hr_approved_at,
+      hr_approver_id: item.hr_approver_id === undefined ? null : item.hr_approver_id,
+      notification_sent: item.notification_sent === undefined ? false : item.notification_sent,
+      // Ensure employee object exists with required fields
       employee: item.employee || {
         name: 'Unknown',
         position: 'Unknown',
@@ -73,6 +75,7 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
         immediate_superior: null,
         job_position_id: null
       },
+      // Ensure evaluator object exists
       evaluator: item.evaluator || { name: null }
     } as TrialEvaluationWithEmployee;
   });
@@ -100,10 +103,12 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved ?? null,
-    hr_approved_at: data.hr_approved_at ?? null,
-    hr_approver_id: data.hr_approver_id ?? null,
-    notification_sent: data.notification_sent ?? false,
+    // Ensure HR approval fields exist
+    hr_approved: data.hr_approved === undefined ? null : data.hr_approved,
+    hr_approved_at: data.hr_approved_at === undefined ? null : data.hr_approved_at,
+    hr_approver_id: data.hr_approver_id === undefined ? null : data.hr_approver_id,
+    notification_sent: data.notification_sent === undefined ? false : data.notification_sent,
+    // Ensure employee object exists with required fields
     employee: data.employee || {
       name: 'Unknown',
       position: 'Unknown',
@@ -113,6 +118,7 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
       immediate_superior: null,
       job_position_id: null
     },
+    // Ensure evaluator object exists
     evaluator: data.evaluator || { name: null }
   } as TrialEvaluationWithEmployee;
 
@@ -135,10 +141,11 @@ export async function createTrialEvaluation(evaluation: Omit<TrialEvaluation, 'i
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved ?? null,
-    hr_approved_at: data.hr_approved_at ?? null,
-    hr_approver_id: data.hr_approver_id ?? null,
-    notification_sent: data.notification_sent ?? false,
+    // Ensure HR approval fields exist
+    hr_approved: data.hr_approved === undefined ? null : data.hr_approved,
+    hr_approved_at: data.hr_approved_at === undefined ? null : data.hr_approved_at,
+    hr_approver_id: data.hr_approver_id === undefined ? null : data.hr_approver_id,
+    notification_sent: data.notification_sent === undefined ? false : data.notification_sent,
   } as TrialEvaluation;
 
   return enhancedData;
@@ -169,10 +176,11 @@ export async function updateTrialEvaluation(
   // Add missing properties if they don't exist in the returned data
   const enhancedData = {
     ...data,
-    hr_approved: data.hr_approved ?? null,
-    hr_approved_at: data.hr_approved_at ?? null,
-    hr_approver_id: data.hr_approver_id ?? null,
-    notification_sent: data.notification_sent ?? false,
+    // Ensure HR approval fields exist
+    hr_approved: data.hr_approved === undefined ? null : data.hr_approved,
+    hr_approved_at: data.hr_approved_at === undefined ? null : data.hr_approved_at,
+    hr_approver_id: data.hr_approver_id === undefined ? null : data.hr_approver_id,
+    notification_sent: data.notification_sent === undefined ? false : data.notification_sent,
   } as TrialEvaluation;
 
   return enhancedData;
@@ -290,10 +298,12 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
   const enhancedData = (data || []).map(item => {
     return {
       ...item,
-      hr_approved: item.hr_approved ?? null,
-      hr_approved_at: item.hr_approved_at ?? null,
-      hr_approver_id: item.hr_approver_id ?? null,
-      notification_sent: item.notification_sent ?? false,
+      // Ensure HR approval fields exist
+      hr_approved: item.hr_approved === undefined ? null : item.hr_approved,
+      hr_approved_at: item.hr_approved_at === undefined ? null : item.hr_approved_at,
+      hr_approver_id: item.hr_approver_id === undefined ? null : item.hr_approver_id,
+      notification_sent: item.notification_sent === undefined ? false : item.notification_sent,
+      // Ensure employee object exists with required fields
       employee: item.employee || {
         name: 'Unknown',
         position: 'Unknown',
@@ -303,6 +313,7 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
         immediate_superior: null,
         job_position_id: null
       },
+      // Ensure evaluator object exists
       evaluator: item.evaluator || { name: null }
     } as TrialEvaluationWithEmployee;
   });
@@ -332,10 +343,12 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
   const enhancedData = (data || []).map(item => {
     return {
       ...item,
-      hr_approved: item.hr_approved ?? null,
-      hr_approved_at: item.hr_approved_at ?? null,
-      hr_approver_id: item.hr_approver_id ?? null,
-      notification_sent: item.notification_sent ?? false,
+      // Ensure HR approval fields exist
+      hr_approved: item.hr_approved === undefined ? null : item.hr_approved,
+      hr_approved_at: item.hr_approved_at === undefined ? null : item.hr_approved_at,
+      hr_approver_id: item.hr_approver_id === undefined ? null : item.hr_approver_id,
+      notification_sent: item.notification_sent === undefined ? false : item.notification_sent,
+      // Ensure employee object exists with required fields  
       employee: item.employee || {
         name: 'Unknown',
         position: 'Unknown',
@@ -345,6 +358,7 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
         immediate_superior: null,
         job_position_id: null
       },
+      // Ensure evaluator object exists
       evaluator: item.evaluator || { name: null }
     } as TrialEvaluationWithEmployee;
   });
