@@ -1,49 +1,80 @@
 
+import { DashboardIcon, FileText, Users, CalendarDays, Award, ClipboardList, ChartBarIcon, UserPlusIcon } from "lucide-react";
+
 export const hrTabGroups = [
   {
-    label: "Principais",
-    tabs: [
-      { value: "dashboard", label: "Dashboard" },
-      { value: "personnel-movement", label: "Movimentação de Pessoal" },
-      { value: "employees", label: "Funcionários" },
-      { value: "recruitment", label: "Recrutamento" },
-      { value: "positions", label: "Quadro Aprovado" },
-      { value: "org-structure", label: "Organograma" },
-      { value: "admission", label: "Admissão Online" },
-      { value: "onboarding", label: "Onboarding" }
+    id: "dashboard",
+    name: "Dashboard",
+    icon: <DashboardIcon className="h-5 w-5" />,
+    href: "/human-resources"
+  },
+  {
+    id: "employees",
+    name: "Colaboradores",
+    icon: <Users className="h-5 w-5" />,
+    subTabs: [
+      { id: "directory", name: "Diretório", component: "EmployeeDirectory" },
+      { id: "onboarding", name: "Integração", component: "EmployeeOnboarding" },
+      { id: "trial-evaluation", name: "Avaliação de Experiência", component: "NewTrialEvaluation" },
+      { id: "performance", name: "Avaliação de Desempenho", component: "PerformanceEvaluation" },
+      { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement" },
+      { id: "medical", name: "Atestados", component: "MedicalCertificateManagement" },
+      { id: "exit", name: "Entrevistas de Desligamento", component: "ExitInterviews" }
     ]
   },
   {
-    label: "Avaliações",
-    tabs: [
-      { value: "trial", label: "Avaliação de Experiência" },
-      { value: "performance", label: "Avaliação de Desempenho" },
-      { value: "exit-interviews", label: "Entrevista de Desligamento" },
-      { value: "disc-assessment", label: "Avaliação DISC" }
+    id: "development",
+    name: "Desenvolvimento",
+    icon: <Award className="h-5 w-5" />,
+    subTabs: [
+      { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans" },
+      { id: "training", name: "Treinamentos", component: "TrainingControl" },
+      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" },
+      { id: "feedback", name: "Feedback", component: "FeedbackManagement" },
+      { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment" }
     ]
   },
   {
-    label: "Desenvolvimento",
-    tabs: [
-      { value: "development-plans", label: "Plano de Desenvolvimento" },
-      { value: "vacation", label: "Gestão de Férias" },
-      { value: "job-plan", label: "Cargos e Salários" }
+    id: "recruitment",
+    name: "Recrutamento",
+    icon: <UserPlusIcon className="h-5 w-5" />,
+    subTabs: [
+      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection" },
+      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission" }
     ]
   },
   {
-    label: "Comunicação",
-    tabs: [
-      { value: "feedback", label: "Feedbacks" },
-      { value: "climate", label: "Clima Organizacional" },
-      { value: "board", label: "Mural do Colaborador" }
+    id: "structure",
+    name: "Estrutura",
+    icon: <ChartBarIcon className="h-5 w-5" />,
+    subTabs: [
+      { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
+      { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
+      { id: "positions", name: "Cargos", component: "ApprovedPositions" },
+      { id: "salary", name: "Plano Salarial", component: "JobSalaryPlan" }
     ]
   },
   {
-    label: "Outros",
-    tabs: [
-      { value: "occurrence", label: "Ocorrências" },
-      { value: "certificates", label: "Atestados" },
-      { value: "departments", label: "Departamentos" }
+    id: "management",
+    name: "Gestão",
+    icon: <ClipboardList className="h-5 w-5" />,
+    subTabs: [
+      { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement" },
+      { id: "vacation", name: "Férias", component: "VacationManagement" },
+      { id: "thermometer", name: "Termômetro de Maturidade", component: "MaturityThermometer" },
+      { id: "board", name: "Quadro de Colaboradores", component: "EmployeeBoard" }
     ]
+  },
+  {
+    id: "documents",
+    name: "Documentos",
+    icon: <FileText className="h-5 w-5" />,
+    href: "/documents"
+  },
+  {
+    id: "calendar",
+    name: "Agenda",
+    icon: <CalendarDays className="h-5 w-5" />,
+    href: "/calendar"
   }
 ];

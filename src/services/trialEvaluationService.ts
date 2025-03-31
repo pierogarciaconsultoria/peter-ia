@@ -1,0 +1,240 @@
+
+import { supabase } from "@/integrations/supabase/client";
+
+export interface TrialEvaluation {
+  id: string;
+  employee_id: string;
+  evaluation_date: string;
+  evaluator_id: string | null;
+  performance_score: number | null;
+  adaptation_score: number | null;
+  behavior_score: number | null;
+  approved: boolean | null;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+  evaluation_type: '30_dias' | '45_dias' | '90_dias';
+  comments: string | null;
+  hr_approved: boolean | null;
+  hr_approved_at: string | null;
+  hr_approver_id: string | null;
+  notification_sent: boolean;
+}
+
+export interface TrialEvaluationWithEmployee extends TrialEvaluation {
+  employee: {
+    name: string;
+    position: string;
+    department: string;
+    avatar_url: string | null;
+    hire_date: string;
+    immediate_superior: string | null;
+    job_position_id: string | null;
+  };
+  evaluator?: {
+    name: string | null;
+  };
+}
+
+// Get all trial evaluations with employee details
+export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee[]> {
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .select(`
+      *,
+      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      evaluator:evaluator_id(name)
+    `)
+    .order('evaluation_date', { ascending: false });
+
+  if (error) {
+    console.error("Error fetching trial evaluations:", error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+// Get a specific trial evaluation
+export async function getTrialEvaluationById(id: string): Promise<TrialEvaluationWithEmployee> {
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .select(`
+      *,
+      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      evaluator:evaluator_id(name)
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching trial evaluation:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Create a new trial evaluation
+export async function createTrialEvaluation(evaluation: Omit<TrialEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<TrialEvaluation> {
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .insert([evaluation])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating trial evaluation:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Update an existing trial evaluation
+export async function updateTrialEvaluation(
+  id: string, 
+  evaluation: Partial<Omit<TrialEvaluation, 'id' | 'created_at' | 'updated_at'>>
+): Promise<TrialEvaluation> {
+  const updates = {
+    ...evaluation,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating trial evaluation:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Delete a trial evaluation
+export async function deleteTrialEvaluation(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('trial_period_evaluations')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error("Error deleting trial evaluation:", error);
+    throw new Error(error.message);
+  }
+}
+
+// Generate evaluations for newly hired employees
+export async function generateTrialEvaluations(employee_id: string, hire_date: string): Promise<void> {
+  try {
+    // Get the employee's immediate superior to set as evaluator
+    const { data: employee, error: employeeError } = await supabase
+      .from('employees')
+      .select('immediate_superior, company_id')
+      .eq('id', employee_id)
+      .single();
+
+    if (employeeError) {
+      console.error("Error fetching employee details:", employeeError);
+      throw new Error(employeeError.message);
+    }
+
+    const company_id = employee.company_id;
+    const evaluator_id = employee.immediate_superior || null;
+
+    // Calculate evaluation dates
+    const hireDate = new Date(hire_date);
+    
+    const thirtyDayEval = new Date(hireDate);
+    thirtyDayEval.setDate(hireDate.getDate() + 30);
+    
+    const ninetyDayEval = new Date(hireDate);
+    ninetyDayEval.setDate(hireDate.getDate() + 90);
+    
+    // Create 30-day evaluation
+    await createTrialEvaluation({
+      employee_id,
+      evaluator_id,
+      evaluation_date: thirtyDayEval.toISOString().split('T')[0],
+      evaluation_type: '30_dias',
+      company_id,
+      performance_score: null,
+      adaptation_score: null,
+      behavior_score: null,
+      approved: null,
+      comments: null,
+      hr_approved: null,
+      hr_approved_at: null,
+      hr_approver_id: null,
+      notification_sent: false
+    });
+    
+    // Create 90-day evaluation
+    await createTrialEvaluation({
+      employee_id,
+      evaluator_id,
+      evaluation_date: ninetyDayEval.toISOString().split('T')[0],
+      evaluation_type: '90_dias',
+      company_id,
+      performance_score: null,
+      adaptation_score: null,
+      behavior_score: null,
+      approved: null,
+      comments: null,
+      hr_approved: null,
+      hr_approved_at: null,
+      hr_approver_id: null,
+      notification_sent: false
+    });
+  } catch (error) {
+    console.error("Error generating trial evaluations:", error);
+    throw error;
+  }
+}
+
+// Get pending evaluations for a specific evaluator
+export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Promise<TrialEvaluationWithEmployee[]> {
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .select(`
+      *,
+      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      evaluator:evaluator_id(name)
+    `)
+    .eq('evaluator_id', evaluator_id)
+    .is('approved', null)
+    .order('evaluation_date', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching pending evaluations:", error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+// Get evaluations pending HR approval
+export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluationWithEmployee[]> {
+  const { data, error } = await supabase
+    .from('trial_period_evaluations')
+    .select(`
+      *,
+      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      evaluator:evaluator_id(name)
+    `)
+    .not('approved', 'is', null)
+    .is('hr_approved', null)
+    .order('evaluation_date', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching evaluations pending HR approval:", error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
