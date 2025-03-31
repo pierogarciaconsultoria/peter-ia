@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { generateRandomCode } from "@/utils/codeGenerator";
 
 export interface CustomerComplaint {
   id: string;
@@ -66,9 +67,15 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
 }
 
 export async function createCustomerComplaint(complaint: Omit<CustomerComplaint, 'id' | 'created_at' | 'updated_at' | 'closed_at'>): Promise<CustomerComplaint> {
+  // Gerar um código de identificação automático se não foi informado
+  const complaintWithCode = {
+    ...complaint,
+    identification_code: complaint.identification_code || generateRandomCode('RC')
+  };
+
   const { data, error } = await supabase
     .from('customer_complaints')
-    .insert([complaint])
+    .insert([complaintWithCode])
     .select()
     .single();
   
