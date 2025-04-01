@@ -32,7 +32,7 @@ export const hrTabGroups: TabGroup[] = [
     name: "Colaboradores",
     icon: createIcon(icons.Users),
     subTabs: [
-      { id: "directory", name: "Diretório", component: "EmployeeDirectory" },
+      { id: "directory", name: "Colaborador", component: "EmployeeDirectory" },
       { id: "onboarding", name: "Integração", component: "EmployeeOnboarding" },
       { id: "trial-evaluation", name: "Avaliação de Experiência", component: "NewTrialEvaluation" },
       { id: "performance", name: "Avaliação de Desempenho", component: "PerformanceEvaluation" },
