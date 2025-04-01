@@ -1,19 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
-export interface Occurrence {
-  id: string;
-  employee_id: string;
-  type: 'warning' | 'disciplinary' | 'observation';
-  title: string;
-  description: string;
-  date: string;
-  reported_by: string;
-  status: 'pending' | 'in_progress' | 'resolved';
-  created_at?: string;
-  updated_at?: string;
-}
+// Type representing a row from the occurrences table
+export type Occurrence = Database['public']['Tables']['occurrences']['Row'];
 
+// Type with employee data joined
 export interface OccurrenceWithEmployee extends Occurrence {
   employee: {
     id: string;
@@ -45,7 +37,7 @@ export async function getOccurrences(): Promise<OccurrenceWithEmployee[]> {
   }
 }
 
-export async function createOccurrence(occurrence: Omit<Occurrence, 'id' | 'created_at' | 'updated_at'>): Promise<Occurrence> {
+export async function createOccurrence(occurrence: Omit<Database['public']['Tables']['occurrences']['Insert'], 'id' | 'created_at' | 'updated_at'>): Promise<Occurrence> {
   try {
     const { data, error } = await supabase
       .from('occurrences')
@@ -64,7 +56,7 @@ export async function createOccurrence(occurrence: Omit<Occurrence, 'id' | 'crea
   }
 }
 
-export async function updateOccurrence(id: string, occurrence: Partial<Omit<Occurrence, 'id' | 'created_at' | 'updated_at'>>): Promise<Occurrence> {
+export async function updateOccurrence(id: string, occurrence: Partial<Omit<Database['public']['Tables']['occurrences']['Update'], 'id' | 'created_at' | 'updated_at'>>): Promise<Occurrence> {
   try {
     const { data, error } = await supabase
       .from('occurrences')

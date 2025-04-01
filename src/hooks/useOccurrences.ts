@@ -9,6 +9,10 @@ import {
   Occurrence,
   OccurrenceWithEmployee
 } from '@/services/occurrenceService';
+import { Database } from "@/integrations/supabase/types";
+
+type OccurrenceInsert = Omit<Database['public']['Tables']['occurrences']['Insert'], 'id' | 'created_at' | 'updated_at'>;
+type OccurrenceUpdate = Partial<Omit<Database['public']['Tables']['occurrences']['Update'], 'id' | 'created_at' | 'updated_at'>>;
 
 export function useOccurrences() {
   const [occurrences, setOccurrences] = useState<OccurrenceWithEmployee[]>([]);
@@ -31,7 +35,7 @@ export function useOccurrences() {
     }
   };
 
-  const addOccurrence = async (occurrence: Omit<Occurrence, 'id' | 'created_at' | 'updated_at'>) => {
+  const addOccurrence = async (occurrence: OccurrenceInsert) => {
     try {
       await createOccurrence(occurrence);
       toast.success("Ocorrência registrada com sucesso");
