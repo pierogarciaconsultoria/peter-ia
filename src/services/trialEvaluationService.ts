@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface TrialEvaluation {
@@ -45,7 +46,7 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
     .from('trial_period_evaluations')
     .select(`
       *,
-      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      employee:employee_id(name, position, department, avatar_url, hire_date, job_position_id),
       evaluator:evaluator_id(name)
     `)
     .order('evaluation_date', { ascending: false });
@@ -89,7 +90,7 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
     .from('trial_period_evaluations')
     .select(`
       *,
-      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      employee:employee_id(name, position, department, avatar_url, hire_date, job_position_id),
       evaluator:evaluator_id(name)
     `)
     .eq('id', id)
@@ -205,10 +206,10 @@ export async function deleteTrialEvaluation(id: string): Promise<void> {
 // Generate evaluations for newly hired employees
 export async function generateTrialEvaluations(employee_id: string, hire_date: string): Promise<void> {
   try {
-    // Get the employee's immediate superior to set as evaluator
+    // Get the company_id for this employee
     const { data: employeeData, error: employeeError } = await supabase
       .from('employees')
-      .select('immediate_superior, company_id')
+      .select('company_id')
       .eq('id', employee_id)
       .single();
 
@@ -217,17 +218,13 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
       throw new Error(employeeError.message);
     }
 
-    // Safely extract data from employee data with proper type checking
-    const employee = employeeData as { immediate_superior?: string | null; company_id?: string | null } | null;
+    // Safely extract company_id from employee data with proper type checking
+    const employee = employeeData as { company_id?: string | null } | null;
     
-    // Handle potential errors with employee data
+    // Default company_id if not found
     const company_id = (employee && 'company_id' in employee && employee.company_id) 
       ? String(employee.company_id) 
       : 'default-company-id';
-    
-    const evaluator_id = (employee && 'immediate_superior' in employee && employee.immediate_superior) 
-      ? String(employee.immediate_superior) 
-      : null;
     
     // Calculate evaluation dates
     const hireDate = new Date(hire_date);
@@ -238,10 +235,10 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
     const ninetyDayEval = new Date(hireDate);
     ninetyDayEval.setDate(hireDate.getDate() + 90);
     
-    // Create 30-day evaluation
+    // Create 30-day evaluation without evaluator_id (will be assigned later)
     await createTrialEvaluation({
       employee_id,
-      evaluator_id,
+      evaluator_id: null,
       evaluation_date: thirtyDayEval.toISOString().split('T')[0],
       evaluation_type: '30_dias',
       company_id,
@@ -256,10 +253,10 @@ export async function generateTrialEvaluations(employee_id: string, hire_date: s
       notification_sent: false
     });
     
-    // Create 90-day evaluation
+    // Create 90-day evaluation without evaluator_id (will be assigned later)
     await createTrialEvaluation({
       employee_id,
-      evaluator_id,
+      evaluator_id: null,
       evaluation_date: ninetyDayEval.toISOString().split('T')[0],
       evaluation_type: '90_dias',
       company_id,
@@ -285,7 +282,7 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
     .from('trial_period_evaluations')
     .select(`
       *,
-      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      employee:employee_id(name, position, department, avatar_url, hire_date, job_position_id),
       evaluator:evaluator_id(name)
     `)
     .eq('evaluator_id', evaluator_id)
@@ -331,7 +328,7 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
     .from('trial_period_evaluations')
     .select(`
       *,
-      employee:employee_id(name, position, department, avatar_url, hire_date, immediate_superior, job_position_id),
+      employee:employee_id(name, position, department, avatar_url, hire_date, job_position_id),
       evaluator:evaluator_id(name)
     `)
     .not('approved', 'is', null)
