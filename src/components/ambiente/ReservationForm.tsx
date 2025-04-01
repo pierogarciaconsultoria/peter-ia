@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -77,8 +76,8 @@ export function ReservationForm({
         roomId: reservation.roomId,
         title: reservation.title,
         description: reservation.description,
-        startTime: reservation.startTime,
-        endTime: reservation.endTime,
+        startTime: new Date(reservation.startTime),
+        endTime: new Date(reservation.endTime),
         organizer: reservation.organizer,
         attendees: reservation.attendees,
         status: reservation.status
@@ -150,6 +149,7 @@ export function ReservationForm({
         
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            
             <FormField
               control={form.control}
               name="roomId"

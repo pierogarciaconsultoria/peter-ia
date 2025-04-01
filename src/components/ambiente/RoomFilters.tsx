@@ -19,8 +19,9 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
   };
 
   const handleTypeFilter = (newType: string | null) => {
-    setType(prevType => prevType === newType ? null : newType);
-    onFilter(search, type === newType ? null : newType);
+    const updatedType = type === newType ? null : newType;
+    setType(updatedType);
+    onFilter(search, updatedType);
   };
 
   return (
