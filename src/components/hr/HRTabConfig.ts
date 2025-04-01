@@ -8,6 +8,7 @@ export type TabGroup = {
   name: string;
   icon: ReactNode;
   href?: string;
+  component?: string;
   subTabs?: {
     id: string;
     name: string;
