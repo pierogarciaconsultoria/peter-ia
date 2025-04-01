@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from "react";
 import * as icons from "lucide-react";
 
@@ -126,9 +127,9 @@ export const hrTabGroups: TabGroup[] = [
     href: "/documents"
   },
   {
-    id: "calendar",
-    name: "Agenda",
-    icon: createIcon(icons.CalendarDays),
-    href: "/calendar"
+    id: "ambiente",
+    name: "Ambiente",
+    icon: createIcon(icons.Building2),
+    href: "/ambiente"
   }
 ];
