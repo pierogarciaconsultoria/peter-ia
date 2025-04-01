@@ -1,10 +1,10 @@
 
-import React from "react"; // Add explicit React import
+import React from "react"; 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
@@ -27,7 +27,6 @@ import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
 import StrategicPlanning from "./pages/StrategicPlanning";
 import DocumentUpload from "./pages/DocumentUpload";
-import Ambiente from "./pages/Ambiente";
 
 // Create a new QueryClient instance for React Query
 const queryClient = new QueryClient();
@@ -61,7 +60,9 @@ const App = () => {
               <Route path="/critical-analysis" element={<CriticalAnalysis />} />
               <Route path="/human-resources" element={<HumanResources />} />
               <Route path="/strategic-planning" element={<StrategicPlanning />} />
-              <Route path="/ambiente" element={<Ambiente />} />
+              
+              {/* Redirect old ambiente path to human resources */}
+              <Route path="/ambiente" element={<Navigate to="/human-resources" state={{activeTab: "ambiente"}} />} />
               
               {/* Nova rota para o formulário externo de upload de documentos */}
               <Route path="/document-upload/:token" element={<DocumentUpload />} />

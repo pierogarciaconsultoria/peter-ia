@@ -9,7 +9,7 @@ import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";
 import { ExitInterviews } from "./ExitInterviews";
 import { DevelopmentPlans } from "./DevelopmentPlans";
-import { TrainingControl } from "./TrainingControl"; // Fixed import path
+import { TrainingControl } from "./TrainingControl"; 
 import { ClimateResearch } from "./ClimateResearch";
 import { FeedbackManagement } from "./FeedbackManagement";
 import { DiscAssessment } from "./disc-assessment/DiscAssessment";
@@ -23,6 +23,7 @@ import { PersonnelMovement } from "./PersonnelMovement";
 import { VacationManagement } from "./VacationManagement";
 import { MaturityThermometer } from "./MaturityThermometer";
 import { EmployeeBoard } from "./EmployeeBoard";
+import { AmbienteContent } from "./AmbienteContent";
 
 interface HRTabContentProps {
   activeTab: string;
@@ -112,6 +113,8 @@ export function HRTabContent({ activeTab }: HRTabContentProps) {
         return <MaturityThermometer />;
       case "board":
         return <EmployeeBoard />;
+      case "ambiente":
+        return <AmbienteContent />;
       default:
         return <div>Select a tab to view content</div>;
     }

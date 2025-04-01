@@ -29,7 +29,7 @@ const HumanResources = () => {
         <div className="max-w-6xl mx-auto space-y-6">
           <HRHeader />
           
-          <HRFilters />
+          {activeTab !== "ambiente" && <HRFilters />}
 
           {/* New simplified navigation system */}
           <HRTabSelect 
@@ -39,7 +39,7 @@ const HumanResources = () => {
           />
           
           {/* Show tab group navigation only when a group is selected */}
-          {activeTab !== "dashboard" && (
+          {activeTab !== "dashboard" && activeTab !== "ambiente" && (
             <HRTabGroup 
               tabGroups={hrTabGroups} 
               activeTab={activeTab} 

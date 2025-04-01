@@ -121,15 +121,15 @@ export const hrTabGroups: TabGroup[] = [
     ]
   },
   {
+    id: "ambiente",
+    name: "Ambiente",
+    icon: createIcon(icons.Building2),
+    component: "AmbienteContent"
+  },
+  {
     id: "documents",
     name: "Documentos",
     icon: createIcon(icons.FileText),
     href: "/documents"
-  },
-  {
-    id: "ambiente",
-    name: "Ambiente",
-    icon: createIcon(icons.Building2),
-    href: "/ambiente"
   }
 ];
