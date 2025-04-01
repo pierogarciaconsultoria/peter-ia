@@ -11,6 +11,7 @@ import {
 } from '@/services/occurrenceService';
 import { Database } from "@/integrations/supabase/types";
 
+// Tipos derivados da definição do Supabase
 type OccurrenceInsert = Omit<Database['public']['Tables']['occurrences']['Insert'], 'id' | 'created_at' | 'updated_at'>;
 type OccurrenceUpdate = Partial<Omit<Database['public']['Tables']['occurrences']['Update'], 'id' | 'created_at' | 'updated_at'>>;
 
