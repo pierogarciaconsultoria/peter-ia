@@ -1,0 +1,658 @@
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { AuthGuard } from "@/components/AuthGuard";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2, Plus, Trash2, User } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+  active_modules: string[];
+  active: boolean;
+}
+
+interface UserProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  company_id: string;
+  company_name?: string;
+  is_super_admin: boolean;
+  is_company_admin: boolean;
+  created_at: string;
+  last_login: string;
+  is_active: boolean;
+}
+
+interface Role {
+  id: string;
+  name: string;
+  company_id: string;
+  company_name?: string;
+  is_admin: boolean;
+}
+
+const Admin = () => {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company'} | null>(null);
+  
+  // Form states
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserFirstName, setNewUserFirstName] = useState("");
+  const [newUserLastName, setNewUserLastName] = useState("");
+  const [newUserCompany, setNewUserCompany] = useState("");
+  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
+  
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanySlug, setNewCompanySlug] = useState("");
+
+  useEffect(() => {
+    fetchCompanies();
+    fetchUsers();
+    fetchRoles();
+  }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .order('name');
+        
+      if (error) throw error;
+      setCompanies(data || []);
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+      toast.error("Erro ao carregar empresas");
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select(`
+          *,
+          companies:company_id (name)
+        `)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      // Format the data to include company_name
+      const formattedUsers = data?.map(user => ({
+        ...user,
+        company_name: user.companies?.name
+      }));
+      
+      setUsers(formattedUsers || []);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Erro ao carregar usuários");
+      setLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('roles')
+        .select(`
+          *,
+          companies:company_id (name)
+        `)
+        .order('name');
+        
+      if (error) throw error;
+      
+      // Format the data to include company_name
+      const formattedRoles = data?.map(role => ({
+        ...role,
+        company_name: role.companies?.name
+      }));
+      
+      setRoles(formattedRoles || []);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      toast.error("Erro ao carregar papéis");
+    }
+  };
+
+  const handleCreateUser = async () => {
+    setLoading(true);
+    try {
+      // Step 1: Create the user in auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newUserEmail,
+        password: newUserPassword,
+        email_confirm: true,
+        user_metadata: {
+          first_name: newUserFirstName,
+          last_name: newUserLastName
+        }
+      });
+      
+      if (authError) throw authError;
+      
+      // Step 2: Update the user profile with company and admin status
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          company_id: newUserCompany || null,
+          is_company_admin: newUserIsAdmin,
+          first_name: newUserFirstName,
+          last_name: newUserLastName
+        })
+        .eq('id', authData.user.id);
+        
+      if (profileError) throw profileError;
+      
+      toast.success("Usuário criado com sucesso");
+      setUserDialogOpen(false);
+      fetchUsers();
+      
+      // Reset form
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserFirstName("");
+      setNewUserLastName("");
+      setNewUserCompany("");
+      setNewUserIsAdmin(false);
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast.error(error.message || "Erro ao criar usuário");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateCompany = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .insert({
+          name: newCompanyName,
+          slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-'),
+          active: true
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      toast.success("Empresa criada com sucesso");
+      setCompanyDialogOpen(false);
+      fetchCompanies();
+      
+      // Reset form
+      setNewCompanyName("");
+      setNewCompanySlug("");
+    } catch (error: any) {
+      console.error("Error creating company:", error);
+      toast.error(error.message || "Erro ao criar empresa");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+    
+    setLoading(true);
+    try {
+      if (itemToDelete.type === 'user') {
+        const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
+        if (error) throw error;
+        fetchUsers();
+      } else if (itemToDelete.type === 'company') {
+        const { error } = await supabase
+          .from('companies')
+          .delete()
+          .eq('id', itemToDelete.id);
+          
+        if (error) throw error;
+        fetchCompanies();
+      }
+      
+      toast.success(`${itemToDelete.type === 'user' ? 'Usuário' : 'Empresa'} excluído(a) com sucesso`);
+    } catch (error: any) {
+      console.error(`Error deleting ${itemToDelete.type}:`, error);
+      toast.error(error.message || `Erro ao excluir ${itemToDelete.type === 'user' ? 'usuário' : 'empresa'}`);
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
+  return (
+    <AuthGuard requireAdmin={true}>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navigation />
+        
+        <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Administração</h1>
+              <p className="text-muted-foreground">
+                Gerencie usuários, empresas e permissões do sistema
+              </p>
+            </div>
+            
+            <Tabs defaultValue="users">
+              <TabsList className="mb-4">
+                <TabsTrigger value="users">Usuários</TabsTrigger>
+                <TabsTrigger value="companies">Empresas</TabsTrigger>
+                <TabsTrigger value="roles">Papéis</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="users" className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Usuários</CardTitle>
+                      <CardDescription>Gerenciar usuários do sistema</CardDescription>
+                    </div>
+                    <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Novo Usuário
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Criar Novo Usuário</DialogTitle>
+                          <DialogDescription>
+                            Preencha os dados para criar um novo usuário no sistema
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="firstName">Nome</Label>
+                              <Input
+                                id="firstName"
+                                placeholder="Nome"
+                                value={newUserFirstName}
+                                onChange={(e) => setNewUserFirstName(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="lastName">Sobrenome</Label>
+                              <Input
+                                id="lastName"
+                                placeholder="Sobrenome"
+                                value={newUserLastName}
+                                onChange={(e) => setNewUserLastName(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                              id="email"
+                              placeholder="usuario@empresa.com"
+                              type="email"
+                              value={newUserEmail}
+                              onChange={(e) => setNewUserEmail(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="password">Senha</Label>
+                            <Input
+                              id="password"
+                              placeholder="Senha"
+                              type="password"
+                              value={newUserPassword}
+                              onChange={(e) => setNewUserPassword(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="company">Empresa</Label>
+                            <Select value={newUserCompany} onValueChange={setNewUserCompany}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione uma empresa" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {companies.map((company) => (
+                                  <SelectItem key={company.id} value={company.id}>
+                                    {company.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="isAdmin">
+                              <input
+                                id="isAdmin"
+                                type="checkbox"
+                                checked={newUserIsAdmin}
+                                onChange={(e) => setNewUserIsAdmin(e.target.checked)}
+                                className="mr-2"
+                              />
+                              Administrador da Empresa
+                            </Label>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancelar</Button>
+                          <Button onClick={handleCreateUser} disabled={loading}>
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processando...
+                              </>
+                            ) : 'Criar Usuário'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nome</TableHead>
+                              <TableHead>Email</TableHead>
+                              <TableHead>Empresa</TableHead>
+                              <TableHead>Função</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="w-[100px]">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {users.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                  Nenhum usuário encontrado.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              users.map((user) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4 text-muted-foreground" />
+                                      {user.first_name} {user.last_name}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{user.company_name || '-'}</TableCell>
+                                  <TableCell>
+                                    {user.is_super_admin 
+                                      ? 'Super Admin' 
+                                      : user.is_company_admin 
+                                        ? 'Admin da Empresa' 
+                                        : 'Usuário'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                      user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {user.is_active ? 'Ativo' : 'Inativo'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        setItemToDelete({ id: user.id, type: 'user' });
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="companies" className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Empresas</CardTitle>
+                      <CardDescription>Gerenciar empresas do sistema</CardDescription>
+                    </div>
+                    <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Nova Empresa
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Criar Nova Empresa</DialogTitle>
+                          <DialogDescription>
+                            Preencha os dados para criar uma nova empresa no sistema
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="companyName">Nome da Empresa</Label>
+                            <Input
+                              id="companyName"
+                              placeholder="Nome da Empresa"
+                              value={newCompanyName}
+                              onChange={(e) => {
+                                setNewCompanyName(e.target.value);
+                                setNewCompanySlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="companySlug">Identificador Único (Slug)</Label>
+                            <Input
+                              id="companySlug"
+                              placeholder="identificador-unico"
+                              value={newCompanySlug}
+                              onChange={(e) => setNewCompanySlug(e.target.value)}
+                            />
+                            <p className="text-sm text-muted-foreground">
+                              O identificador único será usado para URLs e identificação da empresa.
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>Cancelar</Button>
+                          <Button onClick={handleCreateCompany} disabled={loading}>
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processando...
+                              </>
+                            ) : 'Criar Empresa'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nome</TableHead>
+                              <TableHead>Identificador</TableHead>
+                              <TableHead>Módulos Ativos</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="w-[100px]">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {companies.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center">
+                                  Nenhuma empresa encontrada.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              companies.map((company) => (
+                                <TableRow key={company.id}>
+                                  <TableCell>{company.name}</TableCell>
+                                  <TableCell>{company.slug}</TableCell>
+                                  <TableCell>
+                                    {(company.active_modules || []).length > 0 
+                                      ? company.active_modules.join(', ') 
+                                      : 'Todos'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                      company.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {company.active ? 'Ativa' : 'Inativa'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        setItemToDelete({ id: company.id, type: 'company' });
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="roles" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Papéis e Permissões</CardTitle>
+                    <CardDescription>Gerenciar papéis e permissões de usuários</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p>
+                      Esta área está em desenvolvimento. Em breve você poderá gerenciar papéis e permissões detalhadas.
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+        
+        <Footer />
+        
+        {/* Confirmação de exclusão */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir este {itemToDelete?.type === 'user' ? 'usuário' : 'empresa'}?
+                {itemToDelete?.type === 'company' && (
+                  <span className="block mt-2 font-bold text-destructive">
+                    Atenção: Esta ação também excluirá todos os usuários e dados associados à empresa.
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive text-destructive-foreground">
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </AuthGuard>
+  );
+};
+
+export default Admin;

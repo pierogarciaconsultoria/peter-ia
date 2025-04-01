@@ -1,18 +1,74 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, AlertOctagon, Package, Activity, MessageSquareWarning, UserCheck, Ruler, GraduationCap, Search, ThumbsUp, Users, PackageCheck, CalendarCheck, CalendarCheck2, TriangleAlert, LineChart } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  Home, 
+  FileText, 
+  AlertOctagon, 
+  Package, 
+  Activity, 
+  MessageSquareWarning, 
+  UserCheck, 
+  Ruler, 
+  GraduationCap, 
+  Search, 
+  ThumbsUp, 
+  Users, 
+  PackageCheck, 
+  CalendarCheck, 
+  CalendarCheck2, 
+  TriangleAlert, 
+  LineChart,
+  LogOut,
+  User
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut, isAdmin } = useAuth();
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Logout realizado com sucesso");
+      navigate("/auth");
+    } catch (error) {
+      toast.error("Erro ao fazer logout");
+    }
+  };
+
+  // Extract user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.user_metadata) return "U";
+    
+    const firstName = user.user_metadata.first_name || "";
+    const lastName = user.user_metadata.last_name || "";
+    
+    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "U";
+  };
 
   const menuItems = [{
     name: "Dashboard",
@@ -93,6 +149,53 @@ export function Navigation() {
       <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-50 md:hidden" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </Button>
+      
+      {/* User menu (top right) */}
+      <div className="fixed top-4 right-4 z-50">
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar>
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">
+                    {user.user_metadata?.first_name} {user.user_metadata?.last_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Perfil</span>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Administração</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+            Login
+          </Button>
+        )}
+      </div>
       
       {/* Sidebar navigation */}
       <div className={cn("fixed inset-y-0 left-0 z-40 w-64 bg-card/80 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0", isOpen ? "translate-x-0" : "-translate-x-full")}>
