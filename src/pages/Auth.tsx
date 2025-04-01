@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,58 @@ const Auth = () => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
+
+  // Create the default admin user on component mount
+  useEffect(() => {
+    const createDefaultAdmin = async () => {
+      try {
+        // Check if admin exists first by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: "contato@pierogarcia.com.br",
+          password: "pi391500B@",
+        });
+
+        // If admin doesn't exist, create one
+        if (signInError && signInError.message.includes("Invalid login credentials")) {
+          console.log("Admin user doesn't exist, creating...");
+          
+          const { data, error } = await supabase.auth.signUp({
+            email: "contato@pierogarcia.com.br",
+            password: "pi391500B@",
+            options: {
+              data: {
+                first_name: "Admin",
+                last_name: "User",
+                is_super_admin: true,
+                is_company_admin: true
+              }
+            }
+          });
+
+          if (error) {
+            console.error("Error creating admin:", error);
+          } else {
+            console.log("Admin user created successfully:", data);
+            
+            // If admin was created successfully, try to auto-login
+            // This is often blocked by email confirmation requirements
+            if (data.user) {
+              toast.info("Conta de administrador criada. Confirme seu email se necessário.");
+            }
+          }
+        } else if (!signInError) {
+          // If we successfully logged in, log out again (we just wanted to check if the user exists)
+          await supabase.auth.signOut();
+          console.log("Admin user already exists");
+        }
+
+      } catch (error: any) {
+        console.error("Error in admin user creation:", error);
+      }
+    };
+
+    createDefaultAdmin();
+  }, []);
   
   // Handle login
   const handleLogin = async (e: React.FormEvent) => {
@@ -122,6 +174,34 @@ const Auth = () => {
     }
   };
 
+  // Helper function to directly login the admin user
+  const handleDirectAdminLogin = async () => {
+    setLoading(true);
+    setErrorDetails(null);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: "contato@pierogarcia.com.br",
+        password: "pi391500B@",
+      });
+      
+      if (error) {
+        console.error("Admin login error:", error);
+        setErrorDetails(`Erro de login do administrador: ${error.message}`);
+        throw error;
+      }
+      
+      console.log("Admin login successful:", data);
+      toast.success("Login como administrador realizado com sucesso!");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Admin login failed:", error);
+      toast.error(error.message || "Falha ao fazer login como administrador");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
@@ -189,6 +269,15 @@ const Auth = () => {
                     disabled={loading}
                   >
                     {loading ? "Processando..." : "Entrar"}
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    className="w-full mt-2"
+                    onClick={handleDirectAdminLogin}
+                    disabled={loading}
+                  >
+                    Entrar como Administrador
                   </Button>
                   <p className="text-xs text-muted-foreground text-center pt-2">
                     Nota: Confirme se seu email e senha estão corretos. Em caso de dificuldades, tente recarregar a página.
