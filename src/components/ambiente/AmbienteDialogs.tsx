@@ -1,7 +1,7 @@
 
 import { Room, Reservation } from '@/services/roomService';
 import { RoomForm } from './RoomForm';
-import { ReservationForm } from './ReservationForm';
+import { ReservationForm } from './reservation/ReservationForm';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
 interface AmbienteDialogsProps {
