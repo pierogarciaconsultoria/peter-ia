@@ -6,13 +6,13 @@ import { useOccurrences } from "@/hooks/useOccurrences";
 import { OccurrenceFormValues } from "../occurrenceTypes";
 import { Occurrence } from "@/services/occurrenceService";
 
-export function useOccurrenceForm(onClose: () => void) {
+export function useOccurrenceForm(onClose: () => void, employeeId?: string) {
   const { addOccurrence } = useOccurrences();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<OccurrenceFormValues>({
     defaultValues: {
-      employee_id: '',
+      employee_id: employeeId || '',
       type: 'observation',
       title: '',
       description: '',
