@@ -1,206 +1,16 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase, confirmAdminEmail } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Building2, Lock, Mail, User } from "lucide-react";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { useAdminCreation } from "@/hooks/useAdminCreation";
 
 const Auth = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("login");
-  const [loading, setLoading] = useState(false);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  
-  // Register form state
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
-
-  // Create the default admin user on component mount
-  useEffect(() => {
-    const createDefaultAdmin = async () => {
-      try {
-        // First try to verify the admin account
-        const { success, error } = await confirmAdminEmail("contato@pierogarcia.com.br");
-        
-        if (success) {
-          console.log("Admin account exists and is valid");
-          return;
-        }
-        
-        // If verification failed, try to create the admin user
-        console.log("Admin verification failed, trying to create user...");
-        
-        // Try to create the admin user
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: "contato@pierogarcia.com.br",
-          password: "pi391500B@",
-          options: {
-            data: {
-              first_name: "Admin",
-              last_name: "User",
-              is_super_admin: true,
-              is_company_admin: true
-            }
-          }
-        });
-
-        if (signUpError) {
-          console.error("Error creating admin:", signUpError);
-          if (signUpError.message.includes("User already registered")) {
-            console.log("Admin already exists but may need confirmation");
-          }
-        } else {
-          console.log("Admin user creation initiated:", data);
-          toast.info("Conta de administrador criada. Verifique o email para confirmação.");
-        }
-      } catch (error: any) {
-        console.error("Error in admin user creation:", error);
-      }
-    };
-
-    createDefaultAdmin();
-  }, []);
-  
-  // Handle login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorDetails(null);
-    
-    try {
-      console.log("Attempting login with:", { email: loginEmail });
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
-      });
-      
-      if (error) {
-        console.error("Login error:", error);
-        setErrorDetails(`Erro: ${error.message}`);
-        throw error;
-      }
-      
-      console.log("Login successful:", data);
-      
-      // Successful login
-      toast.success("Login realizado com sucesso!");
-      navigate("/");
-    } catch (error: any) {
-      console.error("Full error details:", error);
-      toast.error(error.message || "Falha ao fazer login");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Handle registration
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorDetails(null);
-    
-    try {
-      // Step 1: Register the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: registerEmail,
-        password: registerPassword,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-          },
-        },
-      });
-      
-      if (authError) {
-        console.error("Registration error:", authError);
-        setErrorDetails(`Erro: ${authError.message}`);
-        throw authError;
-      }
-      
-      console.log("Registration successful:", authData);
-      
-      // Step 2: Create a company if provided
-      if (companyName.trim()) {
-        const { data: companyData, error: companyError } = await supabase
-          .from("companies")
-          .insert({
-            name: companyName,
-            slug: companyName.toLowerCase().replace(/\s+/g, '-'),
-          })
-          .select("id")
-          .single();
-          
-        if (companyError) throw companyError;
-        
-        // Step 3: Update the user profile with company and admin role
-        const { error: profileError } = await supabase
-          .from("user_profiles")
-          .update({
-            company_id: companyData.id,
-            is_company_admin: true
-          })
-          .eq("id", authData.user?.id);
-          
-        if (profileError) throw profileError;
-      }
-      
-      toast.success("Cadastro realizado com sucesso! Verifique seu email.");
-      setActiveTab("login");
-    } catch (error: any) {
-      console.error("Full registration error:", error);
-      toast.error(error.message || "Falha ao criar conta");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper function to directly login the admin user
-  const handleDirectAdminLogin = async () => {
-    setLoading(true);
-    setErrorDetails(null);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: "contato@pierogarcia.com.br",
-        password: "pi391500B@",
-      });
-      
-      if (error) {
-        console.error("Admin login error:", error);
-        setErrorDetails(`Erro de login do administrador: ${error.message}`);
-        
-        // If error is about email confirmation, let's inform the user
-        if (error.message.includes("Email not confirmed")) {
-          toast.error("O email do administrador precisa ser confirmado. Por favor, verifique o email contato@pierogarcia.com.br ou desative a confirmação de email no painel do Supabase.");
-        }
-        
-        throw error;
-      }
-      
-      console.log("Admin login successful:", data);
-      toast.success("Login como administrador realizado com sucesso!");
-      navigate("/");
-    } catch (error: any) {
-      console.error("Admin login failed:", error);
-      toast.error(error.message || "Falha ao fazer login como administrador");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Initialize admin account creation
+  useAdminCreation();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -218,172 +28,23 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="login">
-              <form onSubmit={handleLogin}>
-                <CardHeader>
-                  <CardTitle>Faça login na sua conta</CardTitle>
-                  <CardDescription>
-                    Digite suas credenciais para acessar o sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {errorDetails && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-                      {errorDetails}
-                    </div>
-                  )}
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        placeholder="seu@email.com"
-                        type="email"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        required
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        required
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-2">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={loading}
-                  >
-                    {loading ? "Processando..." : "Entrar"}
-                  </Button>
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    className="w-full mt-2"
-                    onClick={handleDirectAdminLogin}
-                    disabled={loading}
-                  >
-                    Entrar como Administrador
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center pt-2">
-                    Nota: Confirme se seu email e senha estão corretos. Em caso de dificuldades, tente recarregar a página.
-                  </p>
-                </CardFooter>
-              </form>
+              <CardHeader>
+                <CardTitle>Faça login na sua conta</CardTitle>
+                <CardDescription>
+                  Digite suas credenciais para acessar o sistema
+                </CardDescription>
+              </CardHeader>
+              <LoginForm />
             </TabsContent>
             
             <TabsContent value="register">
-              <form onSubmit={handleRegister}>
-                <CardHeader>
-                  <CardTitle>Crie sua conta</CardTitle>
-                  <CardDescription>
-                    Complete os dados para iniciar no sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {errorDetails && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-                      {errorDetails}
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">Nome</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="firstName"
-                          placeholder="Nome"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          required
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Sobrenome</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Sobrenome"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="registerEmail">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="registerEmail"
-                        placeholder="seu@email.com"
-                        type="email"
-                        value={registerEmail}
-                        onChange={(e) => setRegisterEmail(e.target.value)}
-                        required
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="registerPassword">Senha</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="registerPassword"
-                        type="password"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                        required
-                        className="pl-10"
-                        minLength={6}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="companyName">Nome da Empresa (opcional)</Label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="companyName"
-                        placeholder="Nome da sua empresa"
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Se você for o administrador de uma empresa, digite o nome aqui.
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={loading}
-                  >
-                    {loading ? "Processando..." : "Cadastrar"}
-                  </Button>
-                </CardFooter>
-              </form>
+              <CardHeader>
+                <CardTitle>Crie sua conta</CardTitle>
+                <CardDescription>
+                  Complete os dados para iniciar no sistema
+                </CardDescription>
+              </CardHeader>
+              <RegisterForm setActiveTab={setActiveTab} />
             </TabsContent>
           </Tabs>
         </Card>
