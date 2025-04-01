@@ -36,6 +36,7 @@ export const confirmAdminEmail = async (email: string) => {
       return { success: false, error };
     }
     
+    // Find the admin user by email in the users array
     const adminUser = data.users?.find(user => user.email === email);
     
     if (!adminUser) {

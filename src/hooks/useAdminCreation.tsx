@@ -16,7 +16,9 @@ export const useAdminCreation = () => {
           return;
         }
         
-        const adminUser = users?.find(user => user.email === "contato@pierogarcia.com.br");
+        // Find the admin user by email
+        const adminEmail = "contato@pierogarcia.com.br";
+        const adminUser = users?.find(user => user.email === adminEmail);
         
         if (adminUser) {
           console.log("Admin account exists");
@@ -25,7 +27,7 @@ export const useAdminCreation = () => {
           if (!adminUser.email_confirmed_at) {
             const { error: confirmError } = await supabase.auth.admin.updateUserById(
               adminUser.id,
-              { email_confirmed: true }
+              { email_confirm: true }
             );
             
             if (confirmError) {
@@ -42,7 +44,7 @@ export const useAdminCreation = () => {
         console.log("Admin account not found, creating...");
         
         const { data, error: signUpError } = await supabase.auth.admin.createUser({
-          email: "contato@pierogarcia.com.br",
+          email: adminEmail,
           email_confirm: true,
           user_metadata: {
             first_name: "Admin",
