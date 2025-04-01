@@ -16,6 +16,11 @@ import { toast } from "sonner";
 import { ISODocument } from "@/utils/isoTypes";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 interface DocumentFormProps {
   document: ISODocument | null;
@@ -34,7 +39,21 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
       associated_requirement: "",
       status: "draft",
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      document_code: "",
+      process: "",
+      standard_item: "",
+      revision: "00",
+      approval_date: undefined,
+      responsible: "",
+      distribution_location: "",
+      storage_location: "",
+      protection: "",
+      recovery_method: "",
+      retention_time: "",
+      archiving_time: "",
+      disposal_method: "",
+      internal_external: "interno"
     }
   );
 
@@ -45,6 +64,15 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (date: Date | undefined, fieldName: string) => {
+    if (date) {
+      setFormData((prev) => ({ 
+        ...prev, 
+        [fieldName]: date.toISOString().split('T')[0] 
+      }));
+    }
   };
 
   const saveDocument = async () => {
@@ -99,7 +127,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
         </DialogTitle>
       </DialogHeader>
 
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="title" className="text-right">
             Título *
@@ -113,10 +141,41 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             required
           />
         </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="document_code" className="text-right">
+            Código
+          </Label>
+          <Input
+            id="document_code"
+            name="document_code"
+            value={formData.document_code || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+        
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="internal_external" className="text-right">
+            Tipo
+          </Label>
+          <Select
+            value={formData.internal_external || "interno"}
+            onValueChange={(value) => handleSelectChange("internal_external", value)}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="interno">Interno</SelectItem>
+              <SelectItem value="externo">Externo</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="document_type" className="text-right">
-            Tipo de Documento *
+            Categoria *
           </Label>
           <Select
             value={formData.document_type}
@@ -134,6 +193,32 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
               <SelectItem value="manual">Manual</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="process" className="text-right">
+            Processo
+          </Label>
+          <Input
+            id="process"
+            name="process"
+            value={formData.process || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="standard_item" className="text-right">
+            Norma / Item
+          </Label>
+          <Input
+            id="standard_item"
+            name="standard_item"
+            value={formData.standard_item || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
         </div>
         
         <div className="grid grid-cols-4 items-center gap-4">
@@ -155,6 +240,153 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="revision" className="text-right">
+            Revisão
+          </Label>
+          <Input
+            id="revision"
+            name="revision"
+            value={formData.revision || "00"}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="approval_date" className="text-right">
+            Data de Aprovação
+          </Label>
+          <div className="col-span-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.approval_date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.approval_date ? format(new Date(formData.approval_date), "dd/MM/yyyy") : "Selecione uma data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.approval_date ? new Date(formData.approval_date) : undefined}
+                  onSelect={(date) => handleDateChange(date, "approval_date")}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="responsible" className="text-right">
+            Responsável
+          </Label>
+          <Input
+            id="responsible"
+            name="responsible"
+            value={formData.responsible || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="distribution_location" className="text-right">
+            Local de Distribuição
+          </Label>
+          <Input
+            id="distribution_location"
+            name="distribution_location"
+            value={formData.distribution_location || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="storage_location" className="text-right">
+            Armazenamento
+          </Label>
+          <Input
+            id="storage_location"
+            name="storage_location"
+            value={formData.storage_location || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="protection" className="text-right">
+            Proteção
+          </Label>
+          <Input
+            id="protection"
+            name="protection"
+            value={formData.protection || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="recovery_method" className="text-right">
+            Método de Recuperação
+          </Label>
+          <Input
+            id="recovery_method"
+            name="recovery_method"
+            value={formData.recovery_method || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="retention_time" className="text-right">
+            Tempo de Retenção
+          </Label>
+          <Input
+            id="retention_time"
+            name="retention_time"
+            value={formData.retention_time || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="archiving_time" className="text-right">
+            Tempo de Arquivo
+          </Label>
+          <Input
+            id="archiving_time"
+            name="archiving_time"
+            value={formData.archiving_time || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="disposal_method" className="text-right">
+            Forma de Descarte
+          </Label>
+          <Input
+            id="disposal_method"
+            name="disposal_method"
+            value={formData.disposal_method || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
         </div>
         
         <div className="grid grid-cols-4 items-center gap-4">

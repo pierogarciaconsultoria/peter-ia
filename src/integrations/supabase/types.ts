@@ -1100,35 +1100,77 @@ export type Database = {
       }
       iso_documents: {
         Row: {
+          approval_date: string | null
+          archiving_time: string | null
           associated_requirement: string
           content: string | null
           created_at: string
           description: string | null
+          disposal_method: string | null
+          distribution_location: string | null
+          document_code: string | null
           document_type: string
           id: string
+          internal_external: string | null
+          process: string | null
+          protection: string | null
+          recovery_method: string | null
+          responsible: string | null
+          retention_time: string | null
+          revision: string | null
+          standard_item: string | null
           status: string | null
+          storage_location: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          approval_date?: string | null
+          archiving_time?: string | null
           associated_requirement: string
           content?: string | null
           created_at?: string
           description?: string | null
+          disposal_method?: string | null
+          distribution_location?: string | null
+          document_code?: string | null
           document_type: string
           id?: string
+          internal_external?: string | null
+          process?: string | null
+          protection?: string | null
+          recovery_method?: string | null
+          responsible?: string | null
+          retention_time?: string | null
+          revision?: string | null
+          standard_item?: string | null
           status?: string | null
+          storage_location?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          approval_date?: string | null
+          archiving_time?: string | null
           associated_requirement?: string
           content?: string | null
           created_at?: string
           description?: string | null
+          disposal_method?: string | null
+          distribution_location?: string | null
+          document_code?: string | null
           document_type?: string
           id?: string
+          internal_external?: string | null
+          process?: string | null
+          protection?: string | null
+          recovery_method?: string | null
+          responsible?: string | null
+          retention_time?: string | null
+          revision?: string | null
+          standard_item?: string | null
           status?: string | null
+          storage_location?: string | null
           title?: string
           updated_at?: string
         }
