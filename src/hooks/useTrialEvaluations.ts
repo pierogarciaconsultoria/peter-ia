@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { 
   getTrialEvaluations,
   createTrialEvaluation,
@@ -14,21 +14,18 @@ export function useTrialEvaluations() {
   const [evaluations, setEvaluations] = useState<TrialEvaluationWithEmployee[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
 
   const fetchEvaluations = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const data = await getTrialEvaluations();
       setEvaluations(data);
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-      toast({
-        title: "Error",
-        description: "Failed to load trial evaluations",
-        variant: "destructive",
-      });
+      console.error("Error fetching trial evaluations:", err);
+      setError(err instanceof Error ? err : new Error('Erro desconhecido ao carregar avaliações'));
+      toast.error("Falha ao carregar avaliações de período de experiência");
     } finally {
       setIsLoading(false);
     }
@@ -37,18 +34,12 @@ export function useTrialEvaluations() {
   const createEvaluation = async (evaluation: any) => {
     try {
       await createTrialEvaluation(evaluation);
-      toast({
-        title: "Success",
-        description: "Trial evaluation created successfully",
-      });
-      fetchEvaluations();
+      toast.success("Avaliação criada com sucesso");
+      await fetchEvaluations();
       return true;
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to create trial evaluation",
-        variant: "destructive",
-      });
+      console.error("Error creating evaluation:", err);
+      toast.error("Falha ao criar avaliação");
       return false;
     }
   };
@@ -56,18 +47,12 @@ export function useTrialEvaluations() {
   const updateEvaluation = async (id: string, evaluation: any) => {
     try {
       await updateTrialEvaluation(id, evaluation);
-      toast({
-        title: "Success",
-        description: "Trial evaluation updated successfully",
-      });
-      fetchEvaluations();
+      toast.success("Avaliação atualizada com sucesso");
+      await fetchEvaluations();
       return true;
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to update trial evaluation",
-        variant: "destructive",
-      });
+      console.error("Error updating evaluation:", err);
+      toast.error("Falha ao atualizar avaliação");
       return false;
     }
   };
@@ -75,18 +60,12 @@ export function useTrialEvaluations() {
   const deleteEvaluation = async (id: string) => {
     try {
       await deleteTrialEvaluation(id);
-      toast({
-        title: "Success",
-        description: "Trial evaluation deleted successfully",
-      });
-      fetchEvaluations();
+      toast.success("Avaliação excluída com sucesso");
+      await fetchEvaluations();
       return true;
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to delete trial evaluation",
-        variant: "destructive",
-      });
+      console.error("Error deleting evaluation:", err);
+      toast.error("Falha ao excluir avaliação");
       return false;
     }
   };
@@ -94,18 +73,12 @@ export function useTrialEvaluations() {
   const generateEvaluations = async (employee_id: string, hire_date: string) => {
     try {
       await generateTrialEvaluations(employee_id, hire_date);
-      toast({
-        title: "Success",
-        description: "Trial evaluations generated successfully",
-      });
-      fetchEvaluations();
+      toast.success("Avaliações geradas com sucesso");
+      await fetchEvaluations();
       return true;
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to generate trial evaluations",
-        variant: "destructive",
-      });
+      console.error("Error generating evaluations:", err);
+      toast.error("Falha ao gerar avaliações");
       return false;
     }
   };

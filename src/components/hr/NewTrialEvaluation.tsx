@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,8 @@ import {
   FileCheck, 
   Plus, 
   Loader2,
-  UserCheck
+  UserCheck,
+  RefreshCcw
 } from "lucide-react";
 import { 
   Table, 
@@ -30,6 +30,7 @@ import { useTrialEvaluations } from "@/hooks/useTrialEvaluations";
 import { EmployeeSelector } from "./departments/EmployeeSelector";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export function NewTrialEvaluation() {
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -47,6 +48,7 @@ export function NewTrialEvaluation() {
     evaluations,
     isLoading,
     error,
+    fetchEvaluations,
     createEvaluation,
     updateEvaluation,
     generateEvaluations
@@ -113,10 +115,21 @@ export function NewTrialEvaluation() {
   const handleManualEmployeeSelect = async (employee_id: string) => {
     if (!employee_id) return;
 
-    // Get employee hire date (in a real app, you would fetch this from API)
-    // For this example, we're using today's date
-    const hireDate = new Date().toISOString().split('T')[0];
-    await generateEvaluations(employee_id, hireDate);
+    try {
+      // Get employee hire date (in a real app, you would fetch this from API)
+      // For this example, we're using today's date
+      const hireDate = new Date().toISOString().split('T')[0];
+      await generateEvaluations(employee_id, hireDate);
+      toast.success("Avaliações geradas com sucesso");
+    } catch (error) {
+      console.error("Error generating evaluations:", error);
+      toast.error("Falha ao gerar avaliações");
+    }
+  };
+
+  const handleRetry = () => {
+    fetchEvaluations();
+    toast.info("Recarregando avaliações...");
   };
 
   // Render status badge based on evaluation status
@@ -184,16 +197,30 @@ export function NewTrialEvaluation() {
     );
   }
 
-  // Show error state
+  // Show error state with retry button
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load trial evaluations. Please try again later.
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Avaliação de Período de Experiência</h2>
+        </div>
+        
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar avaliações</AlertTitle>
+          <AlertDescription>
+            Falha ao carregar avaliações de período de experiência. 
+            Por favor tente novamente mais tarde.
+          </AlertDescription>
+        </Alert>
+
+        <div className="flex justify-center">
+          <Button onClick={handleRetry} className="flex items-center gap-2">
+            <RefreshCcw className="h-4 w-4" />
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -202,6 +229,10 @@ export function NewTrialEvaluation() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Avaliação de Período de Experiência</h2>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRetry} className="flex items-center gap-2">
+            <RefreshCcw className="h-4 w-4" />
+            Atualizar
+          </Button>
           <div className="relative">
             <div className="flex w-full max-w-xs items-center space-x-2">
               <EmployeeSelector 
@@ -338,7 +369,7 @@ export function NewTrialEvaluation() {
               ) : (
                 filteredEvaluations.map((evaluation) => {
                   const averageScore = evaluation.performance_score !== null 
-                    ? ((evaluation.performance_score + evaluation.adaptation_score + evaluation.behavior_score) / 3).toFixed(0) 
+                    ? Math.round((evaluation.performance_score + evaluation.adaptation_score + evaluation.behavior_score) / 3).toFixed(0) 
                     : "-";
                     
                   return (

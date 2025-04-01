@@ -27,7 +27,6 @@ export interface EmployeeDetails {
   department: string;
   avatar_url: string | null;
   hire_date: string;
-  immediate_superior: string | null;
   job_position_id: string | null;
 }
 
@@ -73,7 +72,6 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
         department: 'Unknown',
         avatar_url: null,
         hire_date: 'Unknown',
-        immediate_superior: null,
         job_position_id: null
       },
       // Ensure evaluator object exists
@@ -117,7 +115,6 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
       department: 'Unknown',
       avatar_url: null,
       hire_date: 'Unknown',
-      immediate_superior: null,
       job_position_id: null
     },
     // Ensure evaluator object exists
@@ -129,9 +126,23 @@ export async function getTrialEvaluationById(id: string): Promise<TrialEvaluatio
 
 // Create a new trial evaluation
 export async function createTrialEvaluation(evaluation: Omit<TrialEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<TrialEvaluation> {
+  // Ensure all fields are properly defined before insert
+  const evaluationWithDefaults = {
+    ...evaluation,
+    performance_score: evaluation.performance_score ?? null,
+    adaptation_score: evaluation.adaptation_score ?? null,
+    behavior_score: evaluation.behavior_score ?? null,
+    approved: evaluation.approved ?? null,
+    hr_approved: evaluation.hr_approved ?? null,
+    hr_approved_at: evaluation.hr_approved_at ?? null,
+    hr_approver_id: evaluation.hr_approver_id ?? null,
+    notification_sent: evaluation.notification_sent ?? false,
+    comments: evaluation.comments ?? null
+  };
+
   const { data, error } = await supabase
     .from('trial_period_evaluations')
-    .insert([evaluation])
+    .insert([evaluationWithDefaults])
     .select()
     .single();
 
@@ -311,7 +322,6 @@ export async function getPendingEvaluationsByEvaluator(evaluator_id: string): Pr
         department: 'Unknown',
         avatar_url: null,
         hire_date: 'Unknown',
-        immediate_superior: null,
         job_position_id: null
       },
       // Ensure evaluator object exists
@@ -357,7 +367,6 @@ export async function getEvaluationsPendingHRApproval(): Promise<TrialEvaluation
         department: 'Unknown',
         avatar_url: null,
         hire_date: 'Unknown',
-        immediate_superior: null,
         job_position_id: null
       },
       // Ensure evaluator object exists
