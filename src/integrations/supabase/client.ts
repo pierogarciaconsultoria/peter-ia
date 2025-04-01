@@ -23,24 +23,26 @@ export const supabase = createClient<Database>(
   }
 );
 
-// Helper function to programmatically confirm email
+// Helper function to check if admin account exists
 export const confirmAdminEmail = async (email: string) => {
   try {
-    // This is a client-side helper that doesn't actually confirm the email
-    // It's just to check if the admin account exists
     console.log("Checking admin account:", email);
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: "pi391500B@"
-    });
+    // Try to get user by email
+    const { data, error } = await supabase.auth.admin.listUsers();
     
     if (error) {
       console.error("Error checking admin account:", error);
       return { success: false, error };
     }
     
-    return { success: true, data };
+    const adminUser = data.users?.find(user => user.email === email);
+    
+    if (!adminUser) {
+      return { success: false, error: new Error("Admin account not found") };
+    }
+    
+    return { success: true, data: adminUser };
   } catch (error) {
     console.error("Unexpected error checking admin account:", error);
     return { success: false, error };

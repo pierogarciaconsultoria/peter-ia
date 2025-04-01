@@ -43,35 +43,30 @@ export const useLogin = () => {
     }
   };
 
-  // Helper function to directly login the admin user
+  // Helper function to send password reset for admin user
   const handleDirectAdminLogin = async () => {
     setLoading(true);
     setErrorDetails(null);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: "contato@pierogarcia.com.br",
-        password: "pi391500B@",
+      const adminEmail = "contato@pierogarcia.com.br";
+      
+      // Send password reset email to admin
+      const { error } = await supabase.auth.resetPasswordForEmail(adminEmail, {
+        redirectTo: window.location.origin + "/auth"
       });
       
       if (error) {
         console.error("Admin login error:", error);
-        setErrorDetails(`Erro de login do administrador: ${error.message}`);
-        
-        // If error is about email confirmation, let's inform the user
-        if (error.message.includes("Email not confirmed")) {
-          toast.error("O email do administrador precisa ser confirmado. Por favor, verifique o email contato@pierogarcia.com.br ou desative a confirmação de email no painel do Supabase.");
-        }
+        setErrorDetails(`Erro ao enviar link para o administrador: ${error.message}`);
         
         throw error;
       }
       
-      console.log("Admin login successful:", data);
-      toast.success("Login como administrador realizado com sucesso!");
-      navigate("/");
+      toast.success("Um link de acesso foi enviado para o email do administrador.");
     } catch (error: any) {
       console.error("Admin login failed:", error);
-      toast.error(error.message || "Falha ao fazer login como administrador");
+      toast.error(error.message || "Falha ao enviar link para o administrador");
     } finally {
       setLoading(false);
     }

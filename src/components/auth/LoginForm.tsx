@@ -72,7 +72,7 @@ export const LoginForm = () => {
           onClick={handleDirectAdminLogin}
           disabled={loading}
         >
-          Entrar como Administrador
+          Enviar Link para Administrador
         </Button>
         <p className="text-xs text-muted-foreground text-center pt-2">
           Nota: Confirme se seu email e senha estão corretos. Em caso de dificuldades, tente recarregar a página.
