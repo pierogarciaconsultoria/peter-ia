@@ -36,7 +36,7 @@ import { useForm } from "react-hook-form";
 import { Room, Reservation } from "@/services/roomService";
 import { format, addHours } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Clock, Users } from "lucide-react";
+import { CalendarIcon, Clock, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ReservationFormProps {
