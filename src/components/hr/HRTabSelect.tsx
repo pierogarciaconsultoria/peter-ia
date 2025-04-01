@@ -1,5 +1,6 @@
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 import { hrTabGroups } from "./HRTabConfig";
 
 type HRTabSelectProps = {
@@ -9,37 +10,61 @@ type HRTabSelectProps = {
 };
 
 export function HRTabSelect({ tabGroups, activeTab, setActiveTab }: HRTabSelectProps) {
-  // Group tabs by their parent category
-  const groupedTabs = tabGroups.map(group => ({
-    label: group.name,
-    tabs: group.subTabs 
-      ? group.subTabs.map(tab => ({ value: tab.id, label: tab.name }))
-      : group.href 
-        ? [{ value: group.id, label: group.name }]
-        : []
-  }));
+  // Find current active group
+  const activeGroup = tabGroups.find(group => 
+    group.subTabs?.some(tab => tab.id === activeTab) || group.id === activeTab
+  );
 
   return (
-    <div className="mb-4">
-      <Select value={activeTab} onValueChange={setActiveTab}>
-        <SelectTrigger className="w-full md:w-[300px]">
-          <SelectValue placeholder="Selecione uma seção" />
-        </SelectTrigger>
-        <SelectContent>
-          {groupedTabs.map((group) => (
-            <div key={group.label}>
-              <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                {group.label}
-              </div>
-              {group.tabs.map((tab) => (
-                <SelectItem key={tab.value} value={tab.value}>
-                  {tab.label}
-                </SelectItem>
-              ))}
-            </div>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <NavigationMenu className="mb-6">
+      <NavigationMenuList className="flex space-x-2 border rounded-lg p-1 bg-white">
+        {tabGroups.map((group) => (
+          <NavigationMenuItem key={group.id}>
+            {group.subTabs ? (
+              <>
+                <NavigationMenuTrigger 
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 text-sm font-medium",
+                    activeGroup?.id === group.id && "bg-muted"
+                  )}
+                >
+                  <span className="mr-1">{group.icon}</span>
+                  {group.name}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="grid gap-1 p-2 w-[250px]">
+                    {group.subTabs.map((subTab) => (
+                      <NavigationMenuLink
+                        key={subTab.id}
+                        onClick={() => setActiveTab(subTab.id)}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 text-sm rounded-md cursor-pointer hover:bg-muted",
+                          activeTab === subTab.id && "bg-muted font-medium"
+                        )}
+                      >
+                        <span className="mr-1">{subTab.icon}</span>
+                        {subTab.name}
+                      </NavigationMenuLink>
+                    ))}
+                  </div>
+                </NavigationMenuContent>
+              </>
+            ) : (
+              <NavigationMenuLink
+                onClick={() => setActiveTab(group.id)}
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium",
+                  activeTab === group.id && "bg-muted"
+                )}
+              >
+                <span className="mr-1">{group.icon}</span>
+                {group.name}
+              </NavigationMenuLink>
+            )}
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 }

@@ -13,10 +13,11 @@ import { useOccurrenceForm } from "./hooks/useOccurrenceForm";
 
 interface OccurrenceDialogContentProps {
   onClose: () => void;
+  employeeId?: string;
 }
 
-export function OccurrenceDialogContent({ onClose }: OccurrenceDialogContentProps) {
-  const { form, isSubmitting, handleSubmit } = useOccurrenceForm(onClose);
+export function OccurrenceDialogContent({ onClose, employeeId }: OccurrenceDialogContentProps) {
+  const { form, isSubmitting, handleSubmit } = useOccurrenceForm(onClose, employeeId);
 
   return (
     <DialogContent className="sm:max-w-[600px]">

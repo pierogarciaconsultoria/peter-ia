@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from "react";
 import * as icons from "lucide-react";
 
@@ -12,6 +11,7 @@ export type TabGroup = {
     id: string;
     name: string;
     component: string;
+    icon?: ReactNode;
   }[];
 };
 
@@ -32,13 +32,48 @@ export const hrTabGroups: TabGroup[] = [
     name: "Colaboradores",
     icon: createIcon(icons.Users),
     subTabs: [
-      { id: "directory", name: "Colaborador", component: "EmployeeDirectory" },
-      { id: "onboarding", name: "Integração", component: "EmployeeOnboarding" },
-      { id: "trial-evaluation", name: "Avaliação de Experiência", component: "NewTrialEvaluation" },
-      { id: "performance", name: "Avaliação de Desempenho", component: "PerformanceEvaluation" },
-      { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement" },
-      { id: "medical", name: "Atestados", component: "MedicalCertificateManagement" },
-      { id: "exit", name: "Entrevistas de Desligamento", component: "ExitInterviews" }
+      { 
+        id: "directory", 
+        name: "Colaborador", 
+        component: "EmployeeDirectory",
+        icon: createIcon(icons.UserCircle)
+      },
+      { 
+        id: "onboarding", 
+        name: "Integração", 
+        component: "EmployeeOnboarding",
+        icon: createIcon(icons.UserPlus)
+      },
+      { 
+        id: "trial-evaluation", 
+        name: "Avaliação de Experiência", 
+        component: "NewTrialEvaluation",
+        icon: createIcon(icons.ClipboardCheck)
+      },
+      { 
+        id: "performance", 
+        name: "Avaliação de Desempenho", 
+        component: "PerformanceEvaluation",
+        icon: createIcon(icons.BarChart2)
+      },
+      { 
+        id: "occurrences", 
+        name: "Ocorrências", 
+        component: "OccurrenceManagement",
+        icon: createIcon(icons.AlertCircle)
+      },
+      { 
+        id: "medical", 
+        name: "Atestados", 
+        component: "MedicalCertificateManagement",
+        icon: createIcon(icons.FileHeart)
+      },
+      { 
+        id: "exit", 
+        name: "Entrevistas de Desligamento", 
+        component: "ExitInterviews",
+        icon: createIcon(icons.LogOut)
+      }
     ]
   },
   {
