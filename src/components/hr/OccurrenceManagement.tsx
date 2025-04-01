@@ -19,7 +19,9 @@ import {
   FileText, 
   Plus, 
   Search,
-  UserRound 
+  UserRound,
+  AlertOctagon,
+  Info
 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -30,56 +32,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useOccurrences } from "@/hooks/useOccurrences";
+import { NewOccurrenceDialog } from "./NewOccurrenceDialog";
+import { OccurrenceWithEmployee } from "@/services/occurrenceService";
 
 export function OccurrenceManagement() {
-  // Mock data for occurrences
-  const [occurrences] = useState([
-    {
-      id: "o1",
-      employee: {
-        name: "João Silva",
-        position: "Desenvolvedor React",
-        department: "Tecnologia",
-        avatar: ""
-      },
-      type: "warning",
-      title: "Atraso Recorrente",
-      description: "Funcionário tem apresentado atrasos recorrentes nas últimas duas semanas.",
-      date: "2023-10-15",
-      reportedBy: "Maria Santos",
-      status: "pending"
-    },
-    {
-      id: "o2",
-      employee: {
-        name: "Ana Oliveira",
-        position: "Analista de RH",
-        department: "Recursos Humanos",
-        avatar: ""
-      },
-      type: "disciplinary",
-      title: "Conflito com Colega",
-      description: "Discussão inapropriada com colega de trabalho durante reunião de equipe.",
-      date: "2023-10-10",
-      reportedBy: "Carlos Mendes",
-      status: "in_progress"
-    },
-    {
-      id: "o3",
-      employee: {
-        name: "Pedro Souza",
-        position: "Analista de Marketing",
-        department: "Marketing",
-        avatar: ""
-      },
-      type: "observation",
-      title: "Performance Abaixo do Esperado",
-      description: "Entregas abaixo do esperado no último mês, necessário acompanhamento.",
-      date: "2023-10-05",
-      reportedBy: "Roberto Alves",
-      status: "resolved"
-    }
-  ]);
+  const { occurrences, isLoading } = useOccurrences();
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showNewDialog, setShowNewDialog] = useState<boolean>(false);
+
+  // Filter occurrences based on search query and filters
+  const filteredOccurrences = occurrences.filter((occurrence) => {
+    // Search filter
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch =
+      searchQuery === "" ||
+      occurrence.title.toLowerCase().includes(searchLower) ||
+      occurrence.description.toLowerCase().includes(searchLower) ||
+      occurrence.employee.name.toLowerCase().includes(searchLower) ||
+      occurrence.reported_by.toLowerCase().includes(searchLower);
+
+    // Type filter
+    const matchesType = typeFilter === "all" || occurrence.type === typeFilter;
+
+    // Status filter
+    const matchesStatus = statusFilter === "all" || occurrence.status === statusFilter;
+
+    return matchesSearch && matchesType && matchesStatus;
+  });
 
   const pendingCount = occurrences.filter(o => o.status === "pending").length;
   const resolvedCount = occurrences.filter(o => o.status === "resolved").length;
@@ -115,7 +97,7 @@ export function OccurrenceManagement() {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Gestão de Ocorrências</h2>
-        <Button>
+        <Button onClick={() => setShowNewDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Ocorrência
         </Button>
@@ -184,12 +166,17 @@ export function OccurrenceManagement() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar ocorrências..." 
-            className="pl-8" 
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
         <div className="flex gap-2">
-          <Select>
+          <Select
+            value={typeFilter}
+            onValueChange={setTypeFilter}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
@@ -201,7 +188,10 @@ export function OccurrenceManagement() {
             </SelectContent>
           </Select>
           
-          <Select>
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -229,37 +219,51 @@ export function OccurrenceManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {occurrences.map((occurrence) => (
-              <TableRow key={occurrence.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={occurrence.employee.avatar} />
-                      <AvatarFallback>{occurrence.employee.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{occurrence.employee.name}</span>
-                      <span className="text-xs text-muted-foreground">{occurrence.employee.department}</span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>{getTypeBadge(occurrence.type)}</TableCell>
-                <TableCell className="font-medium">{occurrence.title}</TableCell>
-                <TableCell>{new Date(occurrence.date).toLocaleDateString('pt-BR')}</TableCell>
-                <TableCell>{occurrence.reportedBy}</TableCell>
-                <TableCell>{getStatusBadge(occurrence.status)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6">
+                  Carregando ocorrências...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredOccurrences.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6">
+                  Nenhuma ocorrência encontrada
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredOccurrences.map((occurrence) => (
+                <TableRow key={occurrence.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={occurrence.employee.avatar_url || undefined} />
+                        <AvatarFallback>{occurrence.employee.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{occurrence.employee.name}</span>
+                        <span className="text-xs text-muted-foreground">{occurrence.employee.department}</span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{getTypeBadge(occurrence.type)}</TableCell>
+                  <TableCell className="font-medium">{occurrence.title}</TableCell>
+                  <TableCell>{new Date(occurrence.date).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell>{occurrence.reported_by}</TableCell>
+                  <TableCell>{getStatusBadge(occurrence.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="icon">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon">
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -276,7 +280,7 @@ export function OccurrenceManagement() {
                   <div className="flex justify-between">
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={occurrence.employee.avatar} />
+                        <AvatarImage src={occurrence.employee.avatar_url || undefined} />
                         <AvatarFallback>{occurrence.employee.name.substring(0, 2)}</AvatarFallback>
                       </Avatar>
                       <div>
@@ -305,6 +309,11 @@ export function OccurrenceManagement() {
             ))}
         </div>
       </div>
+
+      <NewOccurrenceDialog 
+        isOpen={showNewDialog}
+        onClose={() => setShowNewDialog(false)}
+      />
     </div>
   );
 }
