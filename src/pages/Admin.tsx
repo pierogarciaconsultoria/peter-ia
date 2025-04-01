@@ -127,11 +127,22 @@ const Admin = () => {
       if (error) throw error;
       
       // Convert database records to Company type
-      const formattedCompanies: Company[] = (data || []).map(company => ({
-        ...company,
-        // Explicitly add the active property with a default value if it's not present
-        active: company.hasOwnProperty('active') ? company.active : true
-      }));
+      const formattedCompanies = (data || []).map(company => {
+        // Create a properly typed company object with all required fields
+        const typedCompany: Company = {
+          ...company as any,
+          active: false // Default value that will be overwritten if exists
+        };
+        
+        // Now safely check if the property exists and assign it
+        if ('active' in company) {
+          typedCompany.active = (company as any).active;
+        } else {
+          typedCompany.active = true; // Default value
+        }
+        
+        return typedCompany;
+      });
       
       setCompanies(formattedCompanies);
     } catch (error) {
@@ -180,12 +191,21 @@ const Admin = () => {
       if (error) throw error;
       
       // Format the data to include company_name and ensure is_admin field exists
-      const formattedRoles: Role[] = (data || []).map(role => ({
-        ...role,
-        company_name: role.companies?.name,
-        // Explicitly add the is_admin property with a default value if it's not present
-        is_admin: role.hasOwnProperty('is_admin') ? role.is_admin : false
-      }));
+      const formattedRoles = (data || []).map(role => {
+        // Create a properly typed role object with all required fields
+        const typedRole: Role = {
+          ...role as any,
+          company_name: role.companies?.name,
+          is_admin: false // Default value that will be overwritten if exists
+        };
+        
+        // Now safely check if the property exists and assign it
+        if ('is_admin' in role) {
+          typedRole.is_admin = (role as any).is_admin;
+        }
+        
+        return typedRole;
+      });
       
       setRoles(formattedRoles);
     } catch (error) {
@@ -679,3 +699,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
