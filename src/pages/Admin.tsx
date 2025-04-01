@@ -126,11 +126,12 @@ const Admin = () => {
         
       if (error) throw error;
       
-      // Convert database records to Company type, ensuring all required fields exist
-      const formattedCompanies: Company[] = data?.map(company => ({
+      // Convert database records to Company type
+      const formattedCompanies: Company[] = (data || []).map(company => ({
         ...company,
-        active: company.active ?? true // Default to true if active is not present
-      })) || [];
+        // Explicitly add the active property with a default value if it's not present
+        active: company.hasOwnProperty('active') ? company.active : true
+      }));
       
       setCompanies(formattedCompanies);
     } catch (error) {
@@ -179,11 +180,12 @@ const Admin = () => {
       if (error) throw error;
       
       // Format the data to include company_name and ensure is_admin field exists
-      const formattedRoles: Role[] = data?.map(role => ({
+      const formattedRoles: Role[] = (data || []).map(role => ({
         ...role,
         company_name: role.companies?.name,
-        is_admin: role.is_admin ?? false // Default to false if is_admin is not present
-      })) || [];
+        // Explicitly add the is_admin property with a default value if it's not present
+        is_admin: role.hasOwnProperty('is_admin') ? role.is_admin : false
+      }));
       
       setRoles(formattedRoles);
     } catch (error) {
