@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Plus } from "lucide-react";
@@ -17,7 +16,6 @@ export function OccurrenceManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showNewDialog, setShowNewDialog] = useState<boolean>(false);
 
-  // Filter occurrences based on search query and filters
   const filteredOccurrences = filterOccurrences(
     occurrences, 
     searchQuery, 
