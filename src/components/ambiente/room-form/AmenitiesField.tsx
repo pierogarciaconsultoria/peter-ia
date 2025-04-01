@@ -32,7 +32,7 @@ export function AmenitiesField({
         <Input
           value={newAmenity}
           onChange={(e) => setNewAmenity(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder="Ex: Projetor, Wi-Fi"
         />
         <Button type="button" onClick={handleAddAmenity}>

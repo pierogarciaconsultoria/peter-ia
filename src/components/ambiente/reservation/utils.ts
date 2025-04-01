@@ -1,27 +1,26 @@
 
-import { format, addHours } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-// Helper function to generate time options
-export const generateTimeOptions = () => {
-  const options = [];
-  for (let hour = 7; hour < 22; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      options.push(time);
-    }
+// Função para gerar opções de horários (a cada 30 minutos)
+export function generateTimeOptions(): string[] {
+  const options: string[] = [];
+  for (let hour = 7; hour <= 22; hour++) {
+    options.push(`${hour.toString().padStart(2, '0')}:00`);
+    options.push(`${hour.toString().padStart(2, '0')}:30`);
   }
   return options;
-};
+}
 
-export const formatDate = (date: Date): string => {
-  return format(date, "PPP", { locale: ptBR });
-};
+// Função para formatar a hora a partir de um objeto Date
+export function formatTime(date: Date): string {
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
 
-export const formatTime = (date: Date): string => {
-  return format(date, "HH:mm");
-};
-
-export const getInitialEndTime = (): Date => {
-  return addHours(new Date(), 1);
-};
+// Função para verificar se uma data está no mesmo dia
+export function isSameDay(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}

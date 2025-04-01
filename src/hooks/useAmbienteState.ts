@@ -1,8 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Room, Reservation } from '@/services/roomService';
 import { useRooms } from '@/hooks/useRooms';
 import { useReservations } from '@/hooks/useReservations';
+import { toast } from 'sonner';
 
 export function useAmbienteState() {
   const [activeTab, setActiveTab] = useState("rooms");
@@ -48,8 +49,8 @@ export function useAmbienteState() {
       const searchTerm = filterSearch.toLowerCase();
       filtered = filtered.filter(room => 
         room.name.toLowerCase().includes(searchTerm) || 
-        room.description?.toLowerCase().includes(searchTerm) ||
-        room.location?.toLowerCase().includes(searchTerm)
+        (room.description && room.description.toLowerCase().includes(searchTerm)) ||
+        (room.location && room.location.toLowerCase().includes(searchTerm))
       );
     }
     
@@ -60,88 +61,106 @@ export function useAmbienteState() {
     setFilteredRooms(filtered);
   }, [rooms, filterSearch, filterType]);
 
-  const handleOpenRoomForm = (room?: Room) => {
+  const handleOpenRoomForm = useCallback((room?: Room) => {
     setSelectedRoom(room);
     setRoomFormOpen(true);
-  };
+  }, []);
 
-  const handleCloseRoomForm = () => {
+  const handleCloseRoomForm = useCallback(() => {
     setSelectedRoom(undefined);
     setRoomFormOpen(false);
-  };
+  }, []);
 
-  const handleOpenReservationForm = (roomId?: string) => {
+  const handleOpenReservationForm = useCallback((roomId?: string) => {
     setSelectedRoomId(roomId);
     setSelectedReservation(undefined);
     setReservationFormOpen(true);
-  };
+  }, []);
 
-  const handleCloseReservationForm = () => {
+  const handleCloseReservationForm = useCallback(() => {
     setSelectedRoomId(undefined);
     setSelectedReservation(undefined);
     setReservationFormOpen(false);
-  };
+  }, []);
 
-  const handleEditReservation = (reservation: Reservation) => {
+  const handleEditReservation = useCallback((reservation: Reservation) => {
     setSelectedReservation(reservation);
     setReservationFormOpen(true);
-  };
+  }, []);
 
-  const handleFilter = (search: string, type: string | null) => {
+  const handleFilter = useCallback((search: string, type: string | null) => {
     setFilterSearch(search);
     setFilterType(type);
-  };
+  }, []);
 
-  const handleSubmitRoom = async (data: Omit<Room, 'id'>) => {
-    let success;
-    
-    if (selectedRoom) {
-      success = await updateRoom(selectedRoom.id, data);
-    } else {
-      success = await addRoom(data);
+  const handleSubmitRoom = useCallback(async (data: Omit<Room, 'id'>) => {
+    try {
+      let success;
+      
+      if (selectedRoom) {
+        success = await updateRoom(selectedRoom.id, data);
+      } else {
+        success = await addRoom(data);
+      }
+      
+      if (success) {
+        handleCloseRoomForm();
+        toast.success(selectedRoom ? 'Ambiente atualizado com sucesso' : 'Ambiente criado com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar ambiente:', error);
+      toast.error('Erro ao salvar ambiente');
     }
-    
-    if (success) {
-      handleCloseRoomForm();
-    }
-  };
+  }, [selectedRoom, updateRoom, addRoom, handleCloseRoomForm]);
 
-  const handleSubmitReservation = async (data: Omit<Reservation, 'id' | 'createdAt'>) => {
-    let success;
-    
-    if (selectedReservation) {
-      success = await updateReservation(selectedReservation.id, data);
-    } else {
-      success = await addReservation(data);
+  const handleSubmitReservation = useCallback(async (data: Omit<Reservation, 'id' | 'createdAt'>) => {
+    try {
+      let success;
+      
+      if (selectedReservation) {
+        success = await updateReservation(selectedReservation.id, data);
+      } else {
+        success = await addReservation(data);
+      }
+      
+      if (success) {
+        handleCloseReservationForm();
+        toast.success(selectedReservation ? 'Reserva atualizada com sucesso' : 'Reserva criada com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar reserva:', error);
+      toast.error('Erro ao salvar reserva');
     }
-    
-    if (success) {
-      handleCloseReservationForm();
-    }
-  };
+  }, [selectedReservation, updateReservation, addReservation, handleCloseReservationForm]);
 
-  const openDeleteDialog = (id: string, type: 'room' | 'reservation') => {
+  const openDeleteDialog = useCallback((id: string, type: 'room' | 'reservation') => {
     setItemToDelete({ id, type });
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!itemToDelete) return;
     
-    let success;
-    if (itemToDelete.type === 'room') {
-      success = await deleteRoom(itemToDelete.id);
-    } else {
-      success = await deleteReservation(itemToDelete.id);
+    try {
+      let success;
+      if (itemToDelete.type === 'room') {
+        success = await deleteRoom(itemToDelete.id);
+      } else {
+        success = await deleteReservation(itemToDelete.id);
+      }
+      
+      if (success) {
+        setDeleteDialogOpen(false);
+        setItemToDelete(null);
+        toast.success(itemToDelete.type === 'room' ? 'Ambiente excluído com sucesso' : 'Reserva cancelada com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir item:', error);
+      toast.error('Erro ao excluir item');
     }
-    
-    if (success) {
-      setDeleteDialogOpen(false);
-      setItemToDelete(null);
-    }
-  };
+  }, [itemToDelete, deleteRoom, deleteReservation]);
 
-  const getDeleteDialogProps = () => {
+  const getDeleteDialogProps = useCallback(() => {
     if (!itemToDelete) return { title: '', description: '' };
     
     if (itemToDelete.type === 'room') {
@@ -155,7 +174,7 @@ export function useAmbienteState() {
         description: 'Tem certeza que deseja cancelar esta reserva? Esta ação não pode ser desfeita.'
       };
     }
-  };
+  }, [itemToDelete]);
 
   const isLoading = roomsLoading || reservationsLoading;
 

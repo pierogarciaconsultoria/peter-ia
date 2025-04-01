@@ -32,7 +32,8 @@ export function RoomCapacityField({ form }: RoomCapacityFieldProps) {
               min={1} 
               placeholder="Capacidade" 
               {...field}
-              onChange={e => field.onChange(parseInt(e.target.value) || 0)}
+              value={field.value || ''}
+              onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
             />
           </FormControl>
           <FormMessage />
