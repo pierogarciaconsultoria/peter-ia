@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useOccurrences } from "@/hooks/useOccurrences";
-import { NewOccurrenceDialog } from "./NewOccurrenceDialog";
+import { NewOccurrenceDialog } from "./occurrences/NewOccurrenceDialog";
 import { OccurrenceStats } from "./occurrences/OccurrenceStats";
 import { OccurrenceFilters } from "./occurrences/OccurrenceFilters";
 import { OccurrenceTable } from "./occurrences/OccurrenceTable";
