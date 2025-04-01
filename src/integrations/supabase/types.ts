@@ -1438,6 +1438,53 @@ export type Database = {
         }
         Relationships: []
       }
+      occurrences: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          employee_id: string
+          id: string
+          reported_by: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description: string
+          employee_id: string
+          id?: string
+          reported_by: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          employee_id?: string
+          id?: string
+          reported_by?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "occurrences_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_processes: {
         Row: {
           checklist: Json
