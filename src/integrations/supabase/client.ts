@@ -16,7 +16,33 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      storage: localStorage
+      detectSessionInUrl: false,
+      storage: localStorage,
+      flowType: 'pkce'
     }
   }
 );
+
+// Helper function to programmatically confirm email
+export const confirmAdminEmail = async (email: string) => {
+  try {
+    // This is a client-side helper that doesn't actually confirm the email
+    // It's just to check if the admin account exists
+    console.log("Checking admin account:", email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: "pi391500B@"
+    });
+    
+    if (error) {
+      console.error("Error checking admin account:", error);
+      return { success: false, error };
+    }
+    
+    return { success: true, data };
+  } catch (error) {
+    console.error("Unexpected error checking admin account:", error);
+    return { success: false, error };
+  }
+};

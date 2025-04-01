@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, confirmAdminEmail } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,46 +31,40 @@ const Auth = () => {
   useEffect(() => {
     const createDefaultAdmin = async () => {
       try {
-        // Check if admin exists first by attempting to sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        // First try to verify the admin account
+        const { success, error } = await confirmAdminEmail("contato@pierogarcia.com.br");
+        
+        if (success) {
+          console.log("Admin account exists and is valid");
+          return;
+        }
+        
+        // If verification failed, try to create the admin user
+        console.log("Admin verification failed, trying to create user...");
+        
+        // Try to create the admin user
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: "contato@pierogarcia.com.br",
           password: "pi391500B@",
-        });
-
-        // If admin doesn't exist, create one
-        if (signInError && signInError.message.includes("Invalid login credentials")) {
-          console.log("Admin user doesn't exist, creating...");
-          
-          const { data, error } = await supabase.auth.signUp({
-            email: "contato@pierogarcia.com.br",
-            password: "pi391500B@",
-            options: {
-              data: {
-                first_name: "Admin",
-                last_name: "User",
-                is_super_admin: true,
-                is_company_admin: true
-              }
-            }
-          });
-
-          if (error) {
-            console.error("Error creating admin:", error);
-          } else {
-            console.log("Admin user created successfully:", data);
-            
-            // If admin was created successfully, try to auto-login
-            // This is often blocked by email confirmation requirements
-            if (data.user) {
-              toast.info("Conta de administrador criada. Confirme seu email se necessário.");
+          options: {
+            data: {
+              first_name: "Admin",
+              last_name: "User",
+              is_super_admin: true,
+              is_company_admin: true
             }
           }
-        } else if (!signInError) {
-          // If we successfully logged in, log out again (we just wanted to check if the user exists)
-          await supabase.auth.signOut();
-          console.log("Admin user already exists");
-        }
+        });
 
+        if (signUpError) {
+          console.error("Error creating admin:", signUpError);
+          if (signUpError.message.includes("User already registered")) {
+            console.log("Admin already exists but may need confirmation");
+          }
+        } else {
+          console.log("Admin user creation initiated:", data);
+          toast.info("Conta de administrador criada. Verifique o email para confirmação.");
+        }
       } catch (error: any) {
         console.error("Error in admin user creation:", error);
       }
@@ -188,6 +182,12 @@ const Auth = () => {
       if (error) {
         console.error("Admin login error:", error);
         setErrorDetails(`Erro de login do administrador: ${error.message}`);
+        
+        // If error is about email confirmation, let's inform the user
+        if (error.message.includes("Email not confirmed")) {
+          toast.error("O email do administrador precisa ser confirmado. Por favor, verifique o email contato@pierogarcia.com.br ou desative a confirmação de email no painel do Supabase.");
+        }
+        
         throw error;
       }
       
