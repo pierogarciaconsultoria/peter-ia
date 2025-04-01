@@ -3,7 +3,7 @@ import { Room, Reservation } from '@/services/roomService';
 import { RoomCard } from './RoomCard';
 import { ReservationList } from './ReservationList';
 import { RoomCalendar } from './RoomCalendar';
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 interface AmbienteTabContentProps {
   activeTab: string;
@@ -31,7 +31,7 @@ export function AmbienteTabContent({
   onDeleteReservation
 }: AmbienteTabContentProps) {
   return (
-    <>
+    <Tabs value={activeTab}>
       <TabsContent value="rooms" className="space-y-4">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,6 +90,6 @@ export function AmbienteTabContent({
           />
         )}
       </TabsContent>
-    </>
+    </Tabs>
   );
 }
