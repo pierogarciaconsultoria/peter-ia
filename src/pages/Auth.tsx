@@ -14,6 +14,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("login");
   const [loading, setLoading] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -30,19 +31,29 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorDetails(null);
     
     try {
+      console.log("Attempting login with:", { email: loginEmail });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Login error:", error);
+        setErrorDetails(`Erro: ${error.message}`);
+        throw error;
+      }
+      
+      console.log("Login successful:", data);
       
       // Successful login
       toast.success("Login realizado com sucesso!");
       navigate("/");
     } catch (error: any) {
+      console.error("Full error details:", error);
       toast.error(error.message || "Falha ao fazer login");
     } finally {
       setLoading(false);
@@ -53,6 +64,7 @@ const Auth = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorDetails(null);
     
     try {
       // Step 1: Register the user
@@ -67,7 +79,13 @@ const Auth = () => {
         },
       });
       
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Registration error:", authError);
+        setErrorDetails(`Erro: ${authError.message}`);
+        throw authError;
+      }
+      
+      console.log("Registration successful:", authData);
       
       // Step 2: Create a company if provided
       if (companyName.trim()) {
@@ -97,6 +115,7 @@ const Auth = () => {
       toast.success("Cadastro realizado com sucesso! Verifique seu email.");
       setActiveTab("login");
     } catch (error: any) {
+      console.error("Full registration error:", error);
       toast.error(error.message || "Falha ao criar conta");
     } finally {
       setLoading(false);
@@ -127,6 +146,12 @@ const Auth = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {errorDetails && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                      {errorDetails}
+                    </div>
+                  )}
+                  
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
@@ -157,7 +182,7 @@ const Auth = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-2">
                   <Button
                     type="submit"
                     className="w-full"
@@ -165,6 +190,9 @@ const Auth = () => {
                   >
                     {loading ? "Processando..." : "Entrar"}
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center pt-2">
+                    Nota: Confirme se seu email e senha estão corretos. Em caso de dificuldades, tente recarregar a página.
+                  </p>
                 </CardFooter>
               </form>
             </TabsContent>
@@ -178,6 +206,12 @@ const Auth = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {errorDetails && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                      {errorDetails}
+                    </div>
+                  )}
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">Nome</Label>
