@@ -52,7 +52,16 @@ interface Company {
   slug: string;
   created_at: string;
   active_modules: string[];
-  active: boolean;
+  active?: boolean; // Make this optional since it might not be in the database yet
+  // Add other fields from the database that we need
+  address?: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  plan?: string;
+  potency?: string;
+  responsible?: string;
+  settings?: any;
 }
 
 interface UserProfile {
@@ -74,7 +83,11 @@ interface Role {
   name: string;
   company_id: string;
   company_name?: string;
-  is_admin: boolean;
+  is_admin?: boolean; // Make this optional since it might not be in the database yet
+  // Add other fields that might come from the database
+  is_default?: boolean;
+  created_at?: string;
+  companies?: { name: string };
 }
 
 const Admin = () => {
@@ -112,7 +125,14 @@ const Admin = () => {
         .order('name');
         
       if (error) throw error;
-      setCompanies(data || []);
+      
+      // Convert database records to Company type, ensuring all required fields exist
+      const formattedCompanies: Company[] = data?.map(company => ({
+        ...company,
+        active: company.active ?? true // Default to true if active is not present
+      })) || [];
+      
+      setCompanies(formattedCompanies);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast.error("Erro ao carregar empresas");
@@ -158,13 +178,14 @@ const Admin = () => {
         
       if (error) throw error;
       
-      // Format the data to include company_name
-      const formattedRoles = data?.map(role => ({
+      // Format the data to include company_name and ensure is_admin field exists
+      const formattedRoles: Role[] = data?.map(role => ({
         ...role,
-        company_name: role.companies?.name
-      }));
+        company_name: role.companies?.name,
+        is_admin: role.is_admin ?? false // Default to false if is_admin is not present
+      })) || [];
       
-      setRoles(formattedRoles || []);
+      setRoles(formattedRoles);
     } catch (error) {
       console.error("Error fetching roles:", error);
       toast.error("Erro ao carregar papéis");
