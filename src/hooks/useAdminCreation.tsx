@@ -18,7 +18,8 @@ export const useAdminCreation = () => {
         
         // Find the admin user by email
         const adminEmail = "contato@pierogarcia.com.br";
-        const adminUser = users?.find(user => user.email === adminEmail);
+        // Explicitly type the user to avoid 'never' type issues
+        const adminUser = users?.find((user: any) => user.email === adminEmail);
         
         if (adminUser) {
           console.log("Admin account exists");
