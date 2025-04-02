@@ -1,4 +1,3 @@
-
 import {
   BarChart3,
   Building2,
@@ -21,7 +20,7 @@ import {
   MessageSquare,
   Settings,
   HelpCircle,
-  GitFlow,
+  GitBranch,
 } from "lucide-react";
 
 interface MenuItem {
@@ -45,7 +44,7 @@ export const menuItems = [
   {
     title: "Processo",
     href: "/processo",
-    icon: GitFlow,
+    icon: GitBranch,
   },
   {
     title: "Planejamento Estratégico",
