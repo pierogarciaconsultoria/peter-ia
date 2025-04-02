@@ -16,11 +16,11 @@ interface ReservationListProps {
 export function ReservationList({ reservations, rooms, onEdit, onDelete }: ReservationListProps) {
   // Ordena as reservas por data (mais recente primeiro)
   const sortedReservations = [...reservations].sort(
-    (a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()
+    (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   );
 
   // Verifica se a data da reserva é hoje
-  const isToday = (date: string): boolean => {
+  const isToday = (date: Date): boolean => {
     const today = new Date();
     const reservationDate = new Date(date);
     return (
@@ -54,13 +54,13 @@ export function ReservationList({ reservations, rooms, onEdit, onDelete }: Reser
       {sortedReservations.map(reservation => (
         <Card 
           key={reservation.id} 
-          className={`overflow-hidden ${isToday(reservation.startDateTime) ? 'border-red-500 border-2' : ''}`}
+          className={`overflow-hidden ${isToday(reservation.startTime) ? 'border-red-500 border-2' : ''}`}
         >
-          <CardHeader className={`p-4 ${isToday(reservation.startDateTime) ? 'bg-red-50' : ''}`}>
+          <CardHeader className={`p-4 ${isToday(reservation.startTime) ? 'bg-red-50' : ''}`}>
             <CardTitle className="text-lg flex items-center justify-between">
               <div className="flex items-center">
                 <span className="font-medium">{reservation.title}</span>
-                {isToday(reservation.startDateTime) && (
+                {isToday(reservation.startTime) && (
                   <span className="ml-3 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
                     Hoje
                   </span>
@@ -93,12 +93,12 @@ export function ReservationList({ reservations, rooms, onEdit, onDelete }: Reser
               </div>
               <div className="flex items-start">
                 <Calendar className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
-                <span>{formatDate(reservation.startDateTime)}</span>
+                <span>{formatDate(reservation.startTime)}</span>
               </div>
               <div className="flex items-start">
                 <Clock className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
                 <span>
-                  {formatTime(reservation.startDateTime)} - {formatTime(reservation.endDateTime)}
+                  {formatTime(reservation.startTime)} - {formatTime(reservation.endTime)}
                 </span>
               </div>
               {reservation.attendees && reservation.attendees.length > 0 && (

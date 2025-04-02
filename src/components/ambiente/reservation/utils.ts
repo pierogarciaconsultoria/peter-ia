@@ -16,6 +16,14 @@ export function formatTime(date: Date): string {
   return `${hours}:${minutes}`;
 }
 
+// Função para formatar a data (DD/MM/YYYY)
+export function formatDate(date: Date): string {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 // Função para verificar se uma data está no mesmo dia
 export function isSameDay(date1: Date, date2: Date): boolean {
   return (

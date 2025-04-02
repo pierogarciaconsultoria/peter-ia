@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { JobPosition } from "./types";
+import { EmployeeFormData } from "./employee-form/types";
 
 // Import the tab components
 import { PersonalInfoTab } from "./employee-form/PersonalInfoTab";
@@ -36,6 +37,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
     documentType: "RG",
     cpf: "",
     carteiraDigitalLink: "",
+    spouse: "",
     dependents: [{ name: "", relationship: "", phone: "", birthDate: null as Date | null }],
     notes: "",
   });
@@ -49,6 +51,11 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
     { name: "Certidão de Nascimento/Casamento", file: null },
   ]);
   const [selectedJobPosition, setSelectedJobPosition] = useState<JobPosition | null>(null);
+
+  // Function to update form data that conforms to EmployeeFormData type
+  const updateFormData = (data: Partial<typeof formData>) => {
+    setFormData(prev => ({ ...prev, ...data }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +92,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
         <TabsContent value="personal">
           <PersonalInfoTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={updateFormData} 
             photoPreview={photoPreview}
             setPhotoPreview={setPhotoPreview}
           />
@@ -94,7 +101,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
         <TabsContent value="job">
           <JobInfoTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={updateFormData} 
             selectedJobPosition={selectedJobPosition}
             setSelectedJobPosition={setSelectedJobPosition}
           />
@@ -103,7 +110,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
         <TabsContent value="documents">
           <DocumentsTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={updateFormData} 
             documents={documents}
             setDocuments={setDocuments}
           />
@@ -112,14 +119,14 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
         <TabsContent value="family">
           <FamilyInfoTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={updateFormData} 
           />
         </TabsContent>
 
         <TabsContent value="additional">
           <AdditionalInfoTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={updateFormData} 
           />
         </TabsContent>
       </Tabs>
