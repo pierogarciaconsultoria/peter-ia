@@ -31,7 +31,7 @@ export function AmbienteTabContent({
   onDeleteReservation
 }: AmbienteTabContentProps) {
   return (
-    <Tabs value={activeTab}>
+    <Tabs value={activeTab} className="w-full">
       <TabsContent value="rooms" className="space-y-4">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

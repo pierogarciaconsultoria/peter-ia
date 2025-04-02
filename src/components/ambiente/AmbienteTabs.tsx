@@ -24,6 +24,7 @@ export function AmbienteTabs({ activeTab, onTabChange }: AmbienteTabsProps) {
           Calendário
         </TabsTrigger>
       </TabsList>
+      {/* TabsContent components should be rendered in AmbienteTabContent.tsx */}
     </Tabs>
   );
 }

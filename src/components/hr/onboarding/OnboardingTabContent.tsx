@@ -28,6 +28,8 @@ export function OnboardingTabContent({
   onboardingProcesses,
   simpleView = false
 }: OnboardingTabContentProps) {
+  // Note: This component is designed to be used within a parent Tabs component
+  // The parent component (OnboardingTabs.tsx) should render the TabsContent components
   return (
     <TabsContent value={tabValue} className={tabValue !== "all" ? "pt-4" : "space-y-4"}>
       <div className={`rounded-md border ${tabValue === "all" ? "mt-6" : "mt-2"}`}>
