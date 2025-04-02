@@ -11,7 +11,6 @@ import {
   MessageSquareWarning, 
   UserCheck, 
   Ruler, 
-  GraduationCap, 
   Search, 
   ThumbsUp, 
   Users, 
@@ -70,11 +69,6 @@ export const menuItems: MenuItem[] = [
     name: "Calibração de Equipamentos",
     icon: <Ruler size={18} />,
     path: "/equipment-calibration"
-  },
-  {
-    name: "Controle de Treinamentos",
-    icon: <GraduationCap size={18} />,
-    path: "/training-control"
   },
   {
     name: "Pesquisa de Satisfação",

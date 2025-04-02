@@ -22,7 +22,6 @@ import PerformanceIndicators from "./pages/PerformanceIndicators";
 import CustomerComplaints from "./pages/CustomerComplaints";
 import SupplierEvaluation from "./pages/SupplierEvaluation";
 import EquipmentCalibration from "./pages/EquipmentCalibration";
-import TrainingControl from "./pages/TrainingControl";
 import RawMaterialInspection from "./pages/RawMaterialInspection";
 import ActionSchedule from "./pages/ActionSchedule";
 import AuditSchedule from "./pages/AuditSchedule";
@@ -67,7 +66,6 @@ const App = () => {
                 <Route path="/customer-complaints" element={<CustomerComplaints />} />
                 <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
                 <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
-                <Route path="/training-control" element={<TrainingControl />} />
                 <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
                 <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
                 <Route path="/action-schedule" element={<ActionSchedule />} />
@@ -80,6 +78,9 @@ const App = () => {
                 
                 {/* Redirect ambiente path */}
                 <Route path="/ambiente" element={<Navigate to="/human-resources" state={{activeTab: "ambiente"}} />} />
+                
+                {/* Redirect training-control path to development tab */}
+                <Route path="/training-control" element={<Navigate to="/human-resources" state={{activeTab: "training"}} />} />
                 
                 {/* Página 404 para rotas não encontradas */}
                 <Route path="*" element={<NotFound />} />
