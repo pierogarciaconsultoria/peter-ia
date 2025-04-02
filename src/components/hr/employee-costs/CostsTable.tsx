@@ -1,20 +1,13 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CostItem } from "./types";
+import { formatCurrency, getMonthName } from "./utils/formatters";
 
 interface CostsTableProps {
   costs: CostItem[];
 }
 
 export function CostsTable({ costs }: CostsTableProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
-  
-  const getMonthName = (month: number) => {
-    return new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date(2023, month - 1, 1));
-  };
-  
   return (
     <Table>
       <TableHeader>

@@ -2,6 +2,7 @@
 import { CostItem } from "./types";
 import { Card } from "@/components/ui/card";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { formatCurrency } from "./utils/formatters";
 
 interface CostChartsProps {
   costs: CostItem[];
@@ -81,10 +82,18 @@ export function CostCharts({ costs }: CostChartsProps) {
     .slice(0, 5);
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+  // Custom tooltip formatter
+  const customTooltipFormatter = (value: number) => [formatCurrency(value), "Valor"];
   
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
+  // Currency formatter for Y axis
+  const yAxisFormatter = (value: number) => 
+    new Intl.NumberFormat('pt-BR', {
+      notation: 'compact',
+      compactDisplay: 'short',
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   
   return (
     <div className="space-y-6">
@@ -102,18 +111,9 @@ export function CostCharts({ costs }: CostChartsProps) {
                   <AreaChart data={monthlyCostData}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis dataKey="month" />
-                    <YAxis 
-                      tickFormatter={(value) => 
-                        new Intl.NumberFormat('pt-BR', {
-                          notation: 'compact',
-                          compactDisplay: 'short',
-                          style: 'currency',
-                          currency: 'BRL'
-                        }).format(value)
-                      } 
-                    />
+                    <YAxis tickFormatter={yAxisFormatter} />
                     <Tooltip 
-                      formatter={(value: number) => [formatCurrency(value), "Valor"]} 
+                      formatter={customTooltipFormatter}
                       labelFormatter={(label) => `Mês: ${label}`}
                     />
                     <Legend />
@@ -172,19 +172,8 @@ export function CostCharts({ costs }: CostChartsProps) {
                 <BarChart data={employeeCostData}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                   <XAxis dataKey="name" />
-                  <YAxis 
-                    tickFormatter={(value) => 
-                      new Intl.NumberFormat('pt-BR', {
-                        notation: 'compact',
-                        compactDisplay: 'short',
-                        style: 'currency',
-                        currency: 'BRL'
-                      }).format(value)
-                    } 
-                  />
-                  <Tooltip 
-                    formatter={(value: number) => [formatCurrency(value), "Valor"]} 
-                  />
+                  <YAxis tickFormatter={yAxisFormatter} />
+                  <Tooltip formatter={customTooltipFormatter} />
                   <Legend />
                   <Bar dataKey="totalCost" name="Custo Total" fill="#8884d8" />
                   <Bar dataKey="avgCost" name="Custo Médio" fill="#82ca9d" />

@@ -1,6 +1,5 @@
 
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SelectGroup } from "./SelectGroup";
 
 interface EmployeeSelectorProps {
   employeeId: string;
@@ -10,22 +9,20 @@ interface EmployeeSelectorProps {
 }
 
 export function EmployeeSelector({ employeeId, setEmployeeId, error, employees }: EmployeeSelectorProps) {
+  const employeeOptions = employees.map(emp => ({
+    value: emp.id,
+    label: `${emp.name} - ${emp.department}`
+  }));
+
   return (
-    <div className="grid gap-2">
-      <Label htmlFor="employee">Colaborador</Label>
-      <Select value={employeeId} onValueChange={setEmployeeId}>
-        <SelectTrigger id="employee" className={error ? "border-red-500" : ""}>
-          <SelectValue placeholder="Selecione um colaborador" />
-        </SelectTrigger>
-        <SelectContent>
-          {employees.map(emp => (
-            <SelectItem key={emp.id} value={emp.id}>
-              {emp.name} - {emp.department}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-    </div>
+    <SelectGroup
+      id="employee"
+      label="Colaborador"
+      value={employeeId}
+      onValueChange={setEmployeeId}
+      placeholder="Selecione um colaborador"
+      options={employeeOptions}
+      error={error}
+    />
   );
 }

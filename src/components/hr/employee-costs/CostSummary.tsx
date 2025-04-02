@@ -1,7 +1,8 @@
 
-import { Card, CardContent } from "@/components/ui/card";
 import { CostItem } from "./types";
+import { StatCard } from "./components/StatCard";
 import { DollarSign, Clock3, TrendingUp, Users } from "lucide-react";
+import { formatCurrency } from "./utils/formatters";
 
 interface CostSummaryProps {
   costsData: CostItem[];
@@ -26,67 +27,33 @@ export function CostSummary({ costsData }: CostSummaryProps) {
   
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-primary/10 rounded-full text-primary">
-              <DollarSign size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Custo Total</p>
-              <h3 className="text-2xl font-bold">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalCost)}
-              </h3>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard 
+        icon={DollarSign}
+        iconColor="primary"
+        label="Custo Total"
+        value={formatCurrency(totalCost)}
+      />
       
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-blue-500/10 rounded-full text-blue-500">
-              <Clock3 size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Média Custo/Hora</p>
-              <h3 className="text-2xl font-bold">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(averageHourlyCost)}/h
-              </h3>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard 
+        icon={Clock3}
+        iconColor="blue"
+        label="Média Custo/Hora"
+        value={`${formatCurrency(averageHourlyCost)}/h`}
+      />
       
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-green-500/10 rounded-full text-green-500">
-              <Users size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Colaboradores</p>
-              <h3 className="text-2xl font-bold">{employeeCount}</h3>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard 
+        icon={Users}
+        iconColor="green"
+        label="Colaboradores"
+        value={employeeCount}
+      />
       
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-amber-500/10 rounded-full text-amber-500">
-              <TrendingUp size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Maior Custo</p>
-              <h3 className="text-lg font-semibold truncate max-w-[200px]">
-                {highestCostEmployee ? highestCostEmployee.employeeName : "N/A"}
-              </h3>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard 
+        icon={TrendingUp}
+        iconColor="amber"
+        label="Maior Custo"
+        value={highestCostEmployee ? highestCostEmployee.employeeName : "N/A"}
+      />
     </div>
   );
 }
