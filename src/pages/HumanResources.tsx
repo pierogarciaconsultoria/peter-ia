@@ -4,7 +4,6 @@ import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { HRHeader } from "@/components/hr/HRHeader";
-import { HRTabGroup } from "@/components/hr/HRTabGroup";
 import { HRTabSelect } from "@/components/hr/HRTabSelect";
 import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
@@ -32,21 +31,12 @@ const HumanResources = () => {
           
           {activeTab !== "ambiente" && <HRFilters />}
 
-          {/* Simplified navigation system with full width */}
+          {/* Simplified navigation system with flattened tabs */}
           <HRTabSelect 
             tabGroups={hrTabGroups} 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
           />
-          
-          {/* Show tab group navigation only when a group is selected */}
-          {activeTab !== "dashboard" && activeTab !== "ambiente" && (
-            <HRTabGroup 
-              tabGroups={hrTabGroups} 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
-            />
-          )}
           
           <HRTabContent 
             activeTab={activeTab} 

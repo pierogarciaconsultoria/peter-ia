@@ -1,7 +1,8 @@
 
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { hrTabGroups } from "./HRTabConfig";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type HRTabSelectProps = {
   tabGroups: typeof hrTabGroups;
@@ -19,61 +20,40 @@ export function HRTabSelect({
     group.subTabs?.some(tab => tab.id === activeTab) || group.id === activeTab
   );
 
+  // Flatten all tabs for direct access
+  const allTabs = tabGroups.flatMap(group => 
+    group.subTabs 
+      ? group.subTabs.map(tab => ({ ...tab, groupId: group.id, groupName: group.name }))
+      : [{ id: group.id, name: group.name, component: group.component, icon: group.icon, groupId: group.id, groupName: group.name }]
+  );
+
   return (
-    <NavigationMenu className="mb-6 w-full max-w-full">
-      <NavigationMenuList className="flex w-full flex-wrap justify-between gap-1 border rounded-lg p-2 bg-card shadow-sm overflow-x-auto py-[10px] mx-0 px-4 md:px-[72px]">
-        {tabGroups.map(group => (
-          <NavigationMenuItem key={group.id} className="flex-1 min-w-[120px] mx-1">
-            {group.subTabs ? (
-              <>
-                <NavigationMenuTrigger 
+    <div className="mb-6 w-full">
+      <ScrollArea className="w-full">
+        <div className="flex flex-wrap gap-2 p-4 border rounded-lg bg-card shadow-sm">
+          {allTabs.map(tab => (
+            <Tooltip key={tab.id}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium w-full whitespace-nowrap transition-colors",
-                    activeGroup?.id === group.id ? "bg-muted text-primary" : "hover:bg-muted/50"
+                    "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors",
+                    activeTab === tab.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50 hover:bg-muted text-foreground"
                   )}
-                  aria-label={`Menu ${group.name}`}
                 >
-                  <span className="mr-1">{group.icon}</span>
-                  <span>{group.name}</span>
-                </NavigationMenuTrigger>
-                <NavigationMenuContent className="absolute top-full left-0 z-[999] w-[280px]">
-                  <div className="grid gap-1 p-3 bg-popover border border-border rounded-md shadow-lg">
-                    {group.subTabs.map(subTab => (
-                      <NavigationMenuLink 
-                        key={subTab.id} 
-                        onClick={() => setActiveTab(subTab.id)} 
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer transition-colors",
-                          activeTab === subTab.id 
-                            ? "bg-primary/10 text-primary font-medium" 
-                            : "hover:bg-muted text-foreground"
-                        )}
-                        role="menuitem"
-                      >
-                        <span className="mr-1">{subTab.icon}</span>
-                        <span>{subTab.name}</span>
-                      </NavigationMenuLink>
-                    ))}
-                  </div>
-                </NavigationMenuContent>
-              </> 
-            ) : (
-              <NavigationMenuLink 
-                onClick={() => setActiveTab(group.id)} 
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium w-full whitespace-nowrap transition-colors",
-                  activeTab === group.id ? "bg-primary/10 text-primary" : "hover:bg-muted/50"
-                )}
-                role="menuitem"
-              >
-                <span className="mr-1">{group.icon}</span>
-                <span>{group.name}</span>
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-        ))}
-      </NavigationMenuList>
-    </NavigationMenu>
+                  {tab.icon && <span className="mr-1">{tab.icon}</span>}
+                  <span>{tab.name}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-card border text-foreground">
+                <p>{tab.groupName} - {tab.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
