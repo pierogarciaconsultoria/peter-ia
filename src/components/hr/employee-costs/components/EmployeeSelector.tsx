@@ -9,6 +9,7 @@ interface EmployeeSelectorProps {
 }
 
 export function EmployeeSelector({ employeeId, setEmployeeId, error, employees }: EmployeeSelectorProps) {
+  // Transformar a lista de colaboradores em opções para o dropdown
   const employeeOptions = employees.map(emp => ({
     value: emp.id,
     label: `${emp.name} - ${emp.department}`
@@ -23,6 +24,7 @@ export function EmployeeSelector({ employeeId, setEmployeeId, error, employees }
       placeholder="Selecione um colaborador"
       options={employeeOptions}
       error={error}
+      className="w-full"
     />
   );
 }

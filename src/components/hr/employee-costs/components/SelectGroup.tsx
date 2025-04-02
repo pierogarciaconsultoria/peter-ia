@@ -25,21 +25,44 @@ export function SelectGroup({
   className
 }: SelectGroupProps) {
   return (
-    <div className={`grid gap-2 ${className}`}>
+    <div className={`grid gap-2 ${className || ''}`}>
       <Label htmlFor={id}>{label}</Label>
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger id={id} className={error ? "border-red-500" : ""}>
+        <SelectTrigger 
+          id={id} 
+          className={cn(
+            "w-full border bg-background h-10 px-3 py-2 text-sm",
+            error ? "border-red-500 focus-visible:ring-red-500" : "border-input"
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
-          {options.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
+        <SelectContent 
+          position="popper"
+          className="w-full min-w-[220px] bg-card border border-border shadow-md"
+          align="start"
+          sideOffset={5}
+        >
+          {options.length === 0 ? (
+            <div className="py-3 px-4 text-sm text-muted-foreground text-center">
+              Nenhuma opção disponível
+            </div>
+          ) : (
+            options.map(option => (
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className="cursor-pointer hover:bg-muted focus:bg-muted"
+              >
+                {option.label}
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }
+
+const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
