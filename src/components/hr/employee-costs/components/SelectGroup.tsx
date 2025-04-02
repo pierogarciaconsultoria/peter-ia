@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface SelectGroupProps {
   id: string;
@@ -43,7 +44,6 @@ export function SelectGroup({
           align="start"
           sideOffset={5}
           avoidCollisions={true}
-          forceMount
         >
           {options.length === 0 ? (
             <div className="py-3 px-4 text-sm text-muted-foreground text-center">
@@ -66,5 +66,3 @@ export function SelectGroup({
     </div>
   );
 }
-
-const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
