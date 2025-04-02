@@ -20,6 +20,13 @@ const HumanResources = () => {
     }
   }, [location.state]);
 
+  // Handle tab change and ensure dropdowns show the correct content
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    
+    // Additional logic could be added here if needed for dropdown state management
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
@@ -31,16 +38,16 @@ const HumanResources = () => {
           
           {activeTab !== "ambiente" && <HRFilters />}
 
-          {/* Simplified navigation system with flattened tabs */}
+          {/* Dropdown navigation system */}
           <HRTabSelect 
             tabGroups={hrTabGroups} 
             activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
+            setActiveTab={handleTabChange} 
           />
           
           <HRTabContent 
             activeTab={activeTab} 
-            onTabChange={setActiveTab} 
+            onTabChange={handleTabChange} 
           />
         </div>
       </main>

@@ -3,6 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { hrTabGroups } from "./HRTabConfig";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 type HRTabGroupProps = {
   tabGroups: typeof hrTabGroups;
@@ -13,7 +20,7 @@ type HRTabGroupProps = {
 export function HRTabGroup({ tabGroups, activeTab, setActiveTab }: HRTabGroupProps) {
   // Find the active tab group
   const activeGroupId = tabGroups.find(group => 
-    group.subTabs?.some(tab => tab.id === activeTab)
+    group.subTabs?.some(tab => tab.id === activeTab) || group.id === activeTab
   )?.id;
 
   // Get subtabs for the active group only
