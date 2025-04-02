@@ -30,6 +30,26 @@ export const hrTabGroups: TabGroup[] = [
     href: "/human-resources"
   },
   {
+    id: "structure",
+    name: "Estrutura",
+    icon: createIcon(icons.BarChartBig),
+    subTabs: [
+      { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
+      { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
+      { id: "positions", name: "Cargos", component: "ApprovedPositions" },
+      { id: "salary", name: "Plano Salarial", component: "JobSalaryPlan" }
+    ]
+  },
+  {
+    id: "recruitment",
+    name: "Recrutamento",
+    icon: createIcon(icons.UserPlus),
+    subTabs: [
+      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection" },
+      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission" }
+    ]
+  },
+  {
     id: "employees",
     name: "Colaboradores",
     icon: createIcon(icons.Users),
@@ -39,12 +59,6 @@ export const hrTabGroups: TabGroup[] = [
         name: "Colaborador", 
         component: "EmployeeDirectory",
         icon: createIcon(icons.UserCircle)
-      },
-      { 
-        id: "employee-costs", 
-        name: "Gestão de Custos", 
-        component: "EmployeeCostManagement",
-        icon: createIcon(icons.DollarSign)
       },
       { 
         id: "onboarding", 
@@ -65,22 +79,10 @@ export const hrTabGroups: TabGroup[] = [
         icon: createIcon(icons.BarChart2)
       },
       { 
-        id: "occurrences", 
-        name: "Ocorrências", 
-        component: "OccurrenceManagement",
-        icon: createIcon(icons.AlertCircle)
-      },
-      { 
-        id: "medical", 
-        name: "Atestados", 
-        component: "MedicalCertificateManagement",
-        icon: createIcon(icons.FileHeart)
-      },
-      { 
-        id: "exit", 
-        name: "Entrevistas de Desligamento", 
-        component: "ExitInterviews",
-        icon: createIcon(icons.LogOut)
+        id: "employee-costs", 
+        name: "Gestão de Custos", 
+        component: "EmployeeCostManagement",
+        icon: createIcon(icons.DollarSign)
       }
     ]
   },
@@ -91,29 +93,9 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans" },
       { id: "training", name: "Treinamentos", component: "TrainingControl" },
-      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" },
       { id: "feedback", name: "Feedback", component: "FeedbackManagement" },
-      { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment" }
-    ]
-  },
-  {
-    id: "recruitment",
-    name: "Recrutamento",
-    icon: createIcon(icons.UserPlus),
-    subTabs: [
-      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection" },
-      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission" }
-    ]
-  },
-  {
-    id: "structure",
-    name: "Estrutura",
-    icon: createIcon(icons.BarChartBig),
-    subTabs: [
-      { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
-      { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
-      { id: "positions", name: "Cargos", component: "ApprovedPositions" },
-      { id: "salary", name: "Plano Salarial", component: "JobSalaryPlan" }
+      { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment" },
+      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" }
     ]
   },
   {
@@ -123,9 +105,17 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement" },
       { id: "vacation", name: "Férias", component: "VacationManagement" },
-      { id: "thermometer", name: "Termômetro de Maturidade", component: "MaturityThermometer" },
-      { id: "board", name: "Quadro de Colaboradores", component: "EmployeeBoard" }
+      { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement", icon: createIcon(icons.AlertCircle) },
+      { id: "medical", name: "Atestados", component: "MedicalCertificateManagement", icon: createIcon(icons.FileHeart) },
+      { id: "board", name: "Quadro de Colaboradores", component: "EmployeeBoard" },
+      { id: "thermometer", name: "Termômetro de Maturidade", component: "MaturityThermometer" }
     ]
+  },
+  {
+    id: "exit",
+    name: "Desligamento",
+    icon: createIcon(icons.LogOut),
+    component: "ExitInterviews"
   },
   {
     id: "ambiente",
@@ -133,5 +123,4 @@ export const hrTabGroups: TabGroup[] = [
     icon: createIcon(icons.Building2),
     component: "AmbienteContent"
   }
-  // Removed the "Documentos" tab as it has no application in the tool
 ];
