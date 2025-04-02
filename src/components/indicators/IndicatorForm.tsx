@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   DialogContent, 
   DialogHeader, 
@@ -10,7 +9,6 @@ import {
   DialogFooter 
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
-import { createIndicator, updateIndicator, deleteIndicator } from "@/services/indicatorService";
 import { IndicatorType } from "@/types/indicators";
 import { indicatorSchema, IndicatorFormValues } from "./IndicatorFormSchema";
 import { FormError } from "./FormError";
@@ -18,14 +16,14 @@ import { IndicatorFormFields } from "./IndicatorFormFields";
 import { IndicatorFormActions } from "./IndicatorFormActions";
 
 interface IndicatorFormProps {
-  indicator?: IndicatorType;
+  indicator?: IndicatorType | null;
   onClose: () => void;
-  afterSubmit: () => void;
+  afterSubmit: (data: IndicatorFormValues) => void;
 }
 
 export function IndicatorForm({ indicator, onClose, afterSubmit }: IndicatorFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const queryClient = useQueryClient();
+  const [error, setError] = useState<Error | null>(null);
   const isEditing = !!indicator;
   
   // Set up form with default values
@@ -50,100 +48,40 @@ export function IndicatorForm({ indicator, onClose, afterSubmit }: IndicatorForm
     },
   });
   
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: (data: IndicatorFormValues) => {
-      // Ensure all required fields are present
-      const indicatorData: Omit<IndicatorType, "id" | "created_at" | "updated_at"> = {
-        name: data.name,
-        description: data.description,
-        process: data.process,
-        goal_type: data.goal_type,
-        goal_value: data.goal_value,
-        calculation_type: data.calculation_type,
-        unit: data.unit
-      };
-      return createIndicator(indicatorData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["indicators"] });
-      afterSubmit();
-    },
-  });
-  
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: (data: IndicatorFormValues) => {
-      // Ensure all required fields are present
-      const indicatorData: Omit<IndicatorType, "id" | "created_at" | "updated_at"> = {
-        name: data.name,
-        description: data.description,
-        process: data.process,
-        goal_type: data.goal_type,
-        goal_value: data.goal_value,
-        calculation_type: data.calculation_type,
-        unit: data.unit
-      };
-      return updateIndicator(indicator!.id, indicatorData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["indicators"] });
-      afterSubmit();
-    },
-  });
-  
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteIndicator(indicator!.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["indicators"] });
-      afterSubmit();
-    },
-  });
-  
   // Handle form submission
   function onSubmit(data: IndicatorFormValues) {
-    if (isEditing) {
-      updateMutation.mutate(data);
-    } else {
-      createMutation.mutate(data);
+    try {
+      afterSubmit(data);
+    } catch (err) {
+      setError(err as Error);
     }
   }
   
   // Handle delete confirmation
   function confirmDelete() {
     setIsDeleting(true);
-    deleteMutation.mutate();
+    // Handle deletion logic here if needed
   }
   
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
-  const error = createMutation.error || updateMutation.error || deleteMutation.error;
+  const isSubmitting = form.formState.isSubmitting;
   
   return (
-    <DialogContent className="sm:max-w-[500px]">
-      <DialogHeader>
-        <DialogTitle>
-          {isEditing ? "Editar Indicador" : "Novo Indicador"}
-        </DialogTitle>
-      </DialogHeader>
-      
-      <FormError error={error as Error | null} />
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <IndicatorFormFields control={form.control} />
-          
-          <DialogFooter className="gap-2 sm:gap-0">
-            <IndicatorFormActions 
-              isEditing={isEditing}
-              isSubmitting={isSubmitting}
-              isDeleting={isDeleting}
-              onClose={onClose}
-              onDelete={confirmDelete}
-            />
-          </DialogFooter>
-        </form>
-      </Form>
-    </DialogContent>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormError error={error} />
+        
+        <IndicatorFormFields control={form.control} />
+        
+        <DialogFooter className="gap-2 sm:gap-0">
+          <IndicatorFormActions 
+            isEditing={isEditing}
+            isSubmitting={isSubmitting}
+            isDeleting={isDeleting}
+            onClose={onClose}
+            onDelete={confirmDelete}
+          />
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }

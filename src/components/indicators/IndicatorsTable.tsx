@@ -10,7 +10,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, PlusCircle, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import { Edit, PlusCircle, ChevronDown, ChevronUp, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +24,15 @@ interface IndicatorsTableProps {
   measurements: MeasurementType[];
   onEdit: (indicator: IndicatorType) => void;
   onAddMeasurement: (indicator: IndicatorType) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function IndicatorsTable({ 
   indicators, 
   measurements, 
   onEdit,
-  onAddMeasurement 
+  onAddMeasurement,
+  onDelete
 }: IndicatorsTableProps) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   
@@ -221,6 +223,12 @@ export function IndicatorsTable({
                       <PlusCircle className="h-4 w-4 mr-2" />
                       Adicionar Medição
                     </DropdownMenuItem>
+                    {onDelete && (
+                      <DropdownMenuItem onClick={() => onDelete(indicator.id)} className="text-destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

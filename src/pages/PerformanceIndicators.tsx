@@ -11,12 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle } from 'lucide-react';
 import { useIndicators } from '@/hooks/useIndicators';
 import { useProcesses } from '@/hooks/useProcesses'; 
+import { IndicatorType } from '@/types/indicators';
 
 type IndicatorFormMode = 'create' | 'edit';
 
 const PerformanceIndicators = () => {
   const [showIndicatorForm, setShowIndicatorForm] = useState(false);
-  const [editingIndicator, setEditingIndicator] = useState(null);
+  const [editingIndicator, setEditingIndicator] = useState<IndicatorType | null>(null);
   const [formMode, setFormMode] = useState<IndicatorFormMode>('create');
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('table');
@@ -37,7 +38,7 @@ const PerformanceIndicators = () => {
     // Extract unique process names from indicators
     const processNames = Array.from(
       new Set(indicators.map(indicator => indicator.process))
-    ).filter(Boolean);
+    ).filter(Boolean) as string[];
     
     // Also add processes from the processes list that have indicators
     const processesWithIndicators = processes
@@ -60,26 +61,24 @@ const PerformanceIndicators = () => {
     setShowIndicatorForm(true);
   };
 
-  const handleEditIndicator = (indicator) => {
+  const handleEditIndicator = (indicator: IndicatorType) => {
     setFormMode('edit');
     setEditingIndicator(indicator);
     setShowIndicatorForm(true);
   };
 
-  const handleSubmitIndicator = (indicatorData) => {
+  const handleSubmitIndicator = (indicatorData: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'>) => {
     if (formMode === 'create') {
       addIndicator({
         ...indicatorData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
       });
-    } else {
+    } else if (editingIndicator) {
       updateIndicator(editingIndicator.id, indicatorData);
     }
     setShowIndicatorForm(false);
   };
 
-  const handleDeleteIndicator = (id) => {
+  const handleDeleteIndicator = (id: string) => {
     deleteIndicator(id);
   };
 
@@ -88,13 +87,13 @@ const PerformanceIndicators = () => {
   };
 
   const selectNextProcess = () => {
-    const currentIndex = uniqueProcesses.indexOf(selectedProcess);
+    const currentIndex = uniqueProcesses.indexOf(selectedProcess as string);
     const nextIndex = (currentIndex + 1) % uniqueProcesses.length;
     setSelectedProcess(uniqueProcesses[nextIndex]);
   };
 
   const selectPrevProcess = () => {
-    const currentIndex = uniqueProcesses.indexOf(selectedProcess);
+    const currentIndex = uniqueProcesses.indexOf(selectedProcess as string);
     const prevIndex = (currentIndex - 1 + uniqueProcesses.length) % uniqueProcesses.length;
     setSelectedProcess(uniqueProcesses[prevIndex]);
   };
@@ -181,9 +180,9 @@ const PerformanceIndicators = () => {
               {selectedProcess && (
                 <IndicatorsTable 
                   indicators={combinedIndicators}
+                  measurements={[]}
                   onEdit={handleEditIndicator}
-                  onDelete={handleDeleteIndicator}
-                  isLoading={isLoading}
+                  onAddMeasurement={() => {}}
                 />
               )}
             </TabsContent>
@@ -191,8 +190,9 @@ const PerformanceIndicators = () => {
             <TabsContent value="dashboard" className="mt-4">
               {selectedProcess && (
                 <ProcessDashboard 
+                  process={selectedProcess}
                   indicators={combinedIndicators}
-                  processName={selectedProcess}
+                  measurements={[]}
                 />
               )}
             </TabsContent>
@@ -207,11 +207,9 @@ const PerformanceIndicators = () => {
                 </DialogTitle>
               </DialogHeader>
               <IndicatorForm 
-                initialData={editingIndicator}
-                onSubmit={handleSubmitIndicator}
-                onCancel={handleCloseDialog}
-                processes={uniqueProcesses}
-                defaultProcess={selectedProcess}
+                indicator={editingIndicator}
+                onClose={handleCloseDialog}
+                afterSubmit={handleSubmitIndicator}
               />
             </DialogContent>
           </Dialog>

@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from "react";
+import { Process, Indicator } from "@/types/processes";
 
 // Mock data for processes
-const processesData = [
+const processesData: Process[] = [
   {
     id: 1,
     name: "Gestão de Vendas",
@@ -65,26 +66,6 @@ const processesData = [
     type: "Comercial"
   },
 ];
-
-interface Indicator {
-  id: number;
-  name: string;
-  goal: string;
-  current: string;
-}
-
-interface Process {
-  id: number;
-  name: string;
-  description: string;
-  owner: string;
-  status: string;
-  lastUpdated: string;
-  indicators: Indicator[];
-  documents: number;
-  risks: number;
-  type?: string;
-}
 
 export function useProcesses() {
   const [processes, setProcesses] = useState<Process[]>([]);

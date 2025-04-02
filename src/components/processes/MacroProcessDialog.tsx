@@ -2,11 +2,12 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MacroProcessDiagram } from "@/components/processes/MacroProcessDiagram";
+import { Process } from "@/types/processes";
 
 interface MacroProcessDialogProps {
   open: boolean;
   onClose: () => void;
-  processes: any[];
+  processes: Process[];
   processType?: string;
 }
 

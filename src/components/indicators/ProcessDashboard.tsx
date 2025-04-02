@@ -11,6 +11,7 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
+import { IndicatorType, MeasurementType } from "@/types/indicators";
 
 interface ProcessDashboardProps {
   process: string;
