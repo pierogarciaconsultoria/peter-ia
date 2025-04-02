@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ProcessoPage from "./pages/ProcessoPage";
+import ProcessFormPage from "./pages/ProcessFormPage";
 
 // Importando as demais páginas
 import PerformanceIndicators from "./pages/PerformanceIndicators";
@@ -64,8 +65,9 @@ const App = () => {
                 {/* Página de administração (não requer mais ser admin) */}
                 <Route path="/admin" element={<Admin />} />
                 
-                {/* Rota de Processo */}
+                {/* Rotas de Processo */}
                 <Route path="/processo" element={<ProcessoPage />} />
+                <Route path="/processo/novo" element={<ProcessFormPage />} />
                 
                 {/* Rotas que não requerem mais autenticação */}
                 <Route path="/documents" element={<Documents />} />

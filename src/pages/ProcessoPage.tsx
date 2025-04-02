@@ -101,10 +101,7 @@ const ProcessoPage = () => {
 
   // Function to handle creating a new process
   const handleNewProcess = () => {
-    // For now, just showing a toast notification since we don't have a form yet
-    toast.info("Funcionalidade em desenvolvimento", {
-      description: "O formulário de criação de processos será implementado em breve.",
-    });
+    navigate("/processo/novo");
   };
 
   // Function to view process details
