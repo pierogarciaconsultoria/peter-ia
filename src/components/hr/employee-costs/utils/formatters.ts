@@ -15,3 +15,11 @@ export const getMonthName = (month: number): string => {
     month: 'long' 
   }).format(new Date(2023, month - 1, 1));
 };
+
+export const formatPercent = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'percent',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value / 100);
+};
