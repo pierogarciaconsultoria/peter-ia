@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ export function NewCostDialog({ open, onOpenChange, onSave }: NewCostDialogProps
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   
-  // Reset form on open change
   useEffect(() => {
     if (open) {
       setEmployeeId("");
@@ -52,12 +50,10 @@ export function NewCostDialog({ open, onOpenChange, onSave }: NewCostDialogProps
     }
   }, [open, currentMonth, currentYear]);
   
-  // Calculate taxes based on base salary (simplistic approach for demo)
   useEffect(() => {
     if (baseSalary) {
       const baseValue = parseFloat(baseSalary);
       if (!isNaN(baseValue)) {
-        // Approximate tax calculation (~28% of base salary)
         setTaxes((baseValue * 0.28).toFixed(2));
       }
     }
