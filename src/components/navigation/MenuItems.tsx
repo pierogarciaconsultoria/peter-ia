@@ -1,147 +1,143 @@
-
-import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { 
-  Home, 
-  FileText, 
-  AlertOctagon, 
-  Package, 
-  Activity, 
-  MessageSquareWarning, 
-  UserCheck, 
-  Ruler, 
-  Search, 
-  ThumbsUp, 
-  Users, 
-  PackageCheck, 
-  CalendarCheck, 
-  CalendarCheck2, 
-  TriangleAlert, 
-  LineChart,
-  Award,
-  UserPlus,
-  BarChartBig,
-  ClipboardList,
-  Building2
+import {
+  BarChart3,
+  Building2,
+  Calendar,
+  CheckSquare,
+  Cog6Tooth,
+  File,
+  Home,
+  ListChecks,
+  LucideIcon,
+  Network,
+  ScrollText,
+  User2,
+  Users,
+  AlertTriangle,
+  PackageCheck,
+  LayoutDashboard,
+  FileText,
+  TrendingUp,
+  MessageSquare,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 
-// Define menu item type
-export interface MenuItem {
-  name: string;
-  icon: ReactNode;
-  path: string;
-  subItems?: MenuItem[];
+interface MenuItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
 }
 
-// Export the menu items for reuse
-export const menuItems: MenuItem[] = [
+// Adicionar um novo item no menu para a home/landing page
+export const menuItems = [
   {
-    name: "Dashboard",
-    icon: <Home size={18} />,
-    path: "/"
+    title: "Home",
+    href: "/",
+    icon: Home,
   },
   {
-    name: "Documentos",
-    icon: <FileText size={18} />,
-    path: "/documents"
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
   },
   {
-    name: "Não Conformidade",
-    icon: <AlertOctagon size={18} />,
-    path: "/non-compliance"
+    title: "Planejamento Estratégico",
+    href: "/strategic-planning",
+    icon: TrendingUp,
   },
   {
-    name: "Produto Não Conforme",
-    icon: <Package size={18} />,
-    path: "/non-conforming-products"
+    title: "Contexto da Organização",
+    href: "/organization-context",
+    icon: Building2,
   },
   {
-    name: "Indicadores de Desempenho",
-    icon: <Activity size={18} />,
-    path: "/performance-indicators"
+    title: "Análise Crítica",
+    href: "/critical-analysis",
+    icon: BarChart3,
   },
   {
-    name: "Reclamação de Cliente",
-    icon: <MessageSquareWarning size={18} />,
-    path: "/customer-complaints"
+    title: "Gestão de Pessoas",
+    href: "/human-resources",
+    icon: Users,
   },
   {
-    name: "Avaliação de Fornecedores",
-    icon: <UserCheck size={18} />,
-    path: "/supplier-evaluation"
+    title: "Não Conformidades",
+    href: "/non-compliance",
+    icon: AlertTriangle,
   },
   {
-    name: "Calibração de Equipamentos",
-    icon: <Ruler size={18} />,
-    path: "/equipment-calibration"
+    title: "Produtos Não Conformes",
+    href: "/non-conforming-products",
+    icon: PackageCheck,
   },
   {
-    name: "Pesquisa de Satisfação",
-    icon: <ThumbsUp size={18} />,
-    path: "/satisfaction-survey"
+    title: "Indicadores de Desempenho",
+    href: "/performance-indicators",
+    icon: BarChart3,
   },
   {
-    name: "Inspeção de Matéria Prima",
-    icon: <PackageCheck size={18} />,
-    path: "/raw-material-inspection"
+    title: "Reclamações de Clientes",
+    href: "/customer-complaints",
+    icon: MessageSquare,
   },
   {
-    name: "Cronograma de Ação",
-    icon: <CalendarCheck size={18} />,
-    path: "/action-schedule"
+    title: "Avaliação de Fornecedores",
+    href: "/supplier-evaluation",
+    icon: Network,
   },
   {
-    name: "Auditoria",
-    icon: <CalendarCheck2 size={18} />,
-    path: "/audit-schedule"
+    title: "Calibração de Equipamentos",
+    href: "/equipment-calibration",
+    icon: Cog6Tooth,
   },
   {
-    name: "Gestão de Riscos",
-    icon: <TriangleAlert size={18} />,
-    path: "/risk-management"
+    title: "Inspeção de Matéria Prima",
+    href: "/raw-material-inspection",
+    icon: CheckSquare,
   },
   {
-    name: "Contexto da Organização",
-    icon: <Search size={18} />,
-    path: "/organization-context"
+    title: "Controle de Treinamento",
+    href: "/training-control",
+    icon: User2,
   },
   {
-    name: "Análise Crítica",
-    icon: <Search size={18} />,
-    path: "/critical-analysis"
+    title: "Agenda de Ações",
+    href: "/action-schedule",
+    icon: Calendar,
   },
   {
-    name: "Gente e Gestão",
-    icon: <Users size={18} />,
-    path: "/human-resources",
+    title: "Agenda de Auditoria",
+    href: "/audit-schedule",
+    icon: ListChecks,
   },
   {
-    name: "Planejamento Estratégico",
-    icon: <LineChart size={18} />,
-    path: "/strategic-planning"
-  }
+    title: "Gestão de Riscos",
+    href: "/risk-management",
+    icon: AlertTriangle,
+  },
+  {
+    title: "Pesquisa de Satisfação",
+    href: "/satisfaction-survey",
+    icon: MessageSquare,
+  },
+  {
+    title: "Documentos",
+    href: "/documents",
+    icon: FileText,
+  },
+  {
+    title: "Upload de Documentos",
+    href: "/document-upload",
+    icon: File,
+  },
+  {
+    title: "Admin",
+    href: "/admin",
+    icon: Settings,
+  },
+  {
+    title: "Ajuda",
+    href: "/help",
+    icon: HelpCircle,
+  },
 ];
-
-export function MenuItems() {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
-  return (
-    <ul className="space-y-1">
-      {menuItems.map(item => (
-        <li key={item.path}>
-          <div>
-            <Link to={item.path} className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors", 
-              currentPath === item.path ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
-            )}>
-              {item.icon}
-              {item.name}
-            </Link>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}

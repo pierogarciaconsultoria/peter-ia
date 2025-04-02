@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/AuthGuard";
 
 // Pages
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
@@ -47,6 +48,12 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
+                {/* Landing page como rota inicial */}
+                <Route path="/" element={<LandingPage />} />
+                
+                {/* Dashboard interno como /dashboard */}
+                <Route path="/dashboard" element={<Index />} />
+                
                 {/* Página de autenticação pública */}
                 <Route path="/auth" element={<Auth />} />
                 
@@ -57,7 +64,6 @@ const App = () => {
                 <Route path="/admin" element={<Admin />} />
                 
                 {/* Rotas que não requerem mais autenticação */}
-                <Route path="/" element={<Index />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/non-compliance" element={<NonCompliance />} />
                 <Route path="/non-conforming-products" element={<NonConformingProducts />} />
