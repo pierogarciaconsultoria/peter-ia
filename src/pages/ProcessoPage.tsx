@@ -80,7 +80,7 @@ const ProcessoPage = () => {
               setShowMacroProcess(false);
               setSelectedProcessType(null);
             }}
-            processes={processes}
+            processes={processes as any[]} // Type cast to avoid type conflicts
             processType={selectedProcessType}
           />
         </div>
