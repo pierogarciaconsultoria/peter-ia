@@ -29,7 +29,8 @@ const PerformanceIndicators = () => {
     updateIndicator, 
     deleteIndicator,
     isLoading,
-    error
+    error,
+    measurements
   } = useIndicators();
 
   const { processes } = useProcesses();
@@ -69,9 +70,7 @@ const PerformanceIndicators = () => {
 
   const handleSubmitIndicator = (indicatorData: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'>) => {
     if (formMode === 'create') {
-      addIndicator({
-        ...indicatorData,
-      });
+      addIndicator(indicatorData);
     } else if (editingIndicator) {
       updateIndicator(editingIndicator.id, indicatorData);
     }
@@ -108,11 +107,6 @@ const PerformanceIndicators = () => {
     ? processes.find(p => p.name === selectedProcess)
     : null;
 
-  // Combine indicators from both sources
-  const combinedIndicators = processData?.indicators 
-    ? [...processIndicators, ...processData.indicators]
-    : processIndicators;
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
@@ -148,7 +142,7 @@ const PerformanceIndicators = () => {
                 <div className="text-center">
                   <h2 className="text-xl font-semibold">{selectedProcess}</h2>
                   <p className="text-sm text-muted-foreground">
-                    {combinedIndicators.length} indicadores
+                    {processIndicators.length} indicadores
                   </p>
                 </div>
                 
@@ -179,10 +173,11 @@ const PerformanceIndicators = () => {
             <TabsContent value="table" className="mt-4">
               {selectedProcess && (
                 <IndicatorsTable 
-                  indicators={combinedIndicators}
-                  measurements={[]}
+                  indicators={processIndicators}
+                  measurements={measurements}
                   onEdit={handleEditIndicator}
                   onAddMeasurement={() => {}}
+                  onDelete={handleDeleteIndicator}
                 />
               )}
             </TabsContent>
@@ -191,8 +186,9 @@ const PerformanceIndicators = () => {
               {selectedProcess && (
                 <ProcessDashboard 
                   process={selectedProcess}
-                  indicators={combinedIndicators}
-                  measurements={[]}
+                  indicators={processIndicators}
+                  measurements={measurements}
+                  processIndicators={processData?.indicators || []}
                 />
               )}
             </TabsContent>

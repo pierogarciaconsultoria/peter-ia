@@ -23,6 +23,7 @@ const ProcessoPage = () => {
   } = useProcesses();
   
   const [showMacroProcess, setShowMacroProcess] = useState(false);
+  const [selectedProcessType, setSelectedProcessType] = useState<string | null>(null);
 
   // Function to handle creating a new process
   const handleNewProcess = () => {
@@ -41,6 +42,12 @@ const ProcessoPage = () => {
     } else {
       setShowMacroProcess(true);
     }
+  };
+  
+  // Function to view macro process by type
+  const handleViewMacroProcessByType = (type: string) => {
+    setSelectedProcessType(type);
+    setShowMacroProcess(true);
   };
 
   return (
@@ -64,12 +71,17 @@ const ProcessoPage = () => {
             isLoading={isLoading}
             handleViewProcess={handleViewProcess}
             clearFilters={clearFilters}
+            onViewMacroProcessByType={handleViewMacroProcessByType}
           />
           
           <MacroProcessDialog
             open={showMacroProcess}
-            onClose={() => setShowMacroProcess(false)}
+            onClose={() => {
+              setShowMacroProcess(false);
+              setSelectedProcessType(null);
+            }}
             processes={processes}
+            processType={selectedProcessType}
           />
         </div>
       </main>

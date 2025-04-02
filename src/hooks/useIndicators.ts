@@ -23,16 +23,12 @@ export function useIndicators() {
       setError(null);
       
       try {
-        // Simulate API call with mock data for now
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
         // In a real implementation, we'd fetch from the API
-        // const indicatorsData = await getAllIndicators();
-        // const measurementsData = await getAllMeasurements();
+        const indicatorsData = await getAllIndicators();
+        const measurementsData = await getAllMeasurements();
         
-        // For now, use empty arrays as we'll implement the actual fetching later
-        setIndicators([]);
-        setMeasurements([]);
+        setIndicators(indicatorsData);
+        setMeasurements(measurementsData);
       } catch (err) {
         console.error("Error fetching indicators:", err);
         setError(err as Error);
@@ -48,16 +44,7 @@ export function useIndicators() {
   // Add a new indicator
   const addIndicator = async (data: Omit<IndicatorType, "id" | "created_at" | "updated_at">) => {
     try {
-      // In a real implementation:
-      // const newIndicator = await createIndicator(data);
-      
-      // Mock implementation
-      const newIndicator: IndicatorType = {
-        id: Date.now().toString(),
-        ...data,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const newIndicator = await createIndicator(data);
       
       setIndicators(prev => [...prev, newIndicator]);
       toast.success("Indicador criado com sucesso");
@@ -72,10 +59,8 @@ export function useIndicators() {
   // Update an existing indicator
   const updateIndicator = async (id: string, data: Partial<IndicatorType>) => {
     try {
-      // In a real implementation:
-      // const updatedIndicator = await updateIndicatorService(id, data);
+      const updatedIndicator = await updateIndicator(id, data);
       
-      // Mock implementation
       setIndicators(prev => 
         prev.map(indicator => 
           indicator.id === id 
@@ -99,10 +84,8 @@ export function useIndicators() {
   // Delete an indicator
   const deleteIndicator = async (id: string) => {
     try {
-      // In a real implementation:
-      // await deleteIndicatorService(id);
+      await deleteIndicatorService(id);
       
-      // Mock implementation
       setIndicators(prev => prev.filter(indicator => indicator.id !== id));
       toast.success("Indicador excluído com sucesso");
     } catch (err) {

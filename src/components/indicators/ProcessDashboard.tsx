@@ -12,12 +12,13 @@ import {
   ResponsiveContainer 
 } from "recharts";
 import { IndicatorType, MeasurementType } from "@/types/indicators";
+import { Indicator } from "@/types/processes";
 
 interface ProcessDashboardProps {
   process: string;
-  indicators: any[];
-  measurements: any[];
-  processIndicators?: any[];  // Indicadores vindos diretamente dos processos
+  indicators: IndicatorType[];
+  measurements: MeasurementType[];
+  processIndicators?: Indicator[];  // Indicadores vindos diretamente dos processos
 }
 
 export function ProcessDashboard({ 
@@ -29,14 +30,6 @@ export function ProcessDashboard({
   // Filtrar indicadores desse processo
   const processSpecificIndicators = indicators.filter(ind => ind.process === process);
   
-  // Criar dados para os indicadores de processo
-  const processIndicatorData = processIndicators.map(ind => ({
-    name: ind.name,
-    meta: ind.goal,
-    valor: ind.current,
-    meses: ["Atual"] // Simplificado para exibição atual
-  }));
-
   return (
     <Card>
       <CardHeader>
