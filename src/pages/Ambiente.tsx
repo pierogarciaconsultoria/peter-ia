@@ -6,8 +6,24 @@ import { RoomFilters } from '@/components/ambiente/RoomFilters';
 import { AmbienteTabs } from '@/components/ambiente/AmbienteTabs';
 import { AmbienteDialogs } from '@/components/ambiente/AmbienteDialogs';
 import { useAmbienteState } from '@/hooks/useAmbienteState';
+import { useState, useEffect } from "react";
 
 export default function Ambiente() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Ouvir um evento personalizado para detectar quando a barra lateral é recolhida
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Verificar periodicamente o estado da barra lateral
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const {
     activeTab,
     setActiveTab,
@@ -39,7 +55,7 @@ export default function Ambiente() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
+      <main className={`transition-all duration-300 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-64'}`}>
         <div className="max-w-6xl mx-auto space-y-6">
           <RoomHeader onAddRoom={() => handleOpenRoomForm()} />
           

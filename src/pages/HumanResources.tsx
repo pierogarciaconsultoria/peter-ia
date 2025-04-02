@@ -11,6 +11,7 @@ import { useLocation } from "react-router-dom";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
 
   // Set active tab from URL state if available
@@ -19,6 +20,19 @@ const HumanResources = () => {
       setActiveTab(location.state.activeTab);
     }
   }, [location.state]);
+
+  // Detect if sidebar is collapsed
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle tab change and ensure dropdowns show the correct content
   const handleTabChange = (tabId: string) => {
@@ -32,7 +46,7 @@ const HumanResources = () => {
       <Navigation />
       
       {/* Adjusted padding to provide more space for content */}
-      <main className="md:pl-72 pt-16 p-6 transition-all duration-300 flex-1">
+      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
         <div className="max-w-7xl mx-auto w-full space-y-6">
           <HRHeader />
           

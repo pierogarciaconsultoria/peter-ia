@@ -7,9 +7,17 @@ interface MenuToggleProps {
   isOpen: boolean;
   toggleMenu: () => void;
   className?: string;
+  toggleCollapsed?: () => void;
+  isCollapsed?: boolean;
 }
 
-export function MenuToggle({ isOpen, toggleMenu, className }: MenuToggleProps) {
+export function MenuToggle({ 
+  isOpen, 
+  toggleMenu, 
+  className,
+  toggleCollapsed,
+  isCollapsed
+}: MenuToggleProps) {
   return (
     <Button
       variant="ghost" 

@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import { RoomHeader } from '@/components/ambiente/RoomHeader';
 import { RoomFilters } from '@/components/ambiente/RoomFilters';
 import { AmbienteTabContent } from '@/components/ambiente/AmbienteTabContent';
@@ -7,6 +8,21 @@ import { AmbienteTabs } from '@/components/ambiente/AmbienteTabs';
 import { useAmbienteState } from '@/hooks/useAmbienteState';
 
 export function AmbienteContent() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Detect if sidebar is collapsed
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
   const {
     activeTab,
     setActiveTab,

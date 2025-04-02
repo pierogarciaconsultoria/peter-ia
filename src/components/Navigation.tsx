@@ -9,8 +9,13 @@ import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
+
+  const toggleCollapsed = () => {
+    setIsCollapsed(prev => !prev);
+  };
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -23,8 +28,10 @@ export function Navigation() {
         isOpen={isOpen} 
         toggleMenu={() => setIsOpen(!isOpen)} 
         className={`transition-opacity duration-300 ${!visible ? 'opacity-0' : 'opacity-100'}`}
+        toggleCollapsed={toggleCollapsed}
+        isCollapsed={isCollapsed}
       />
-      <div className="fixed top-5 right-5 z-50 flex items-center gap-2">
+      <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <NotificationCenter />
         <UserMenu />
       </div>
