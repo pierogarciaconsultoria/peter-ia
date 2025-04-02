@@ -11,7 +11,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen }: SidebarProps) {
   return (
     <div className={cn(
-      "fixed inset-y-0 left-0 z-40 w-64 bg-card/95 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0 shadow-lg", 
+      "fixed inset-y-0 left-0 z-40 w-72 bg-card/95 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0 shadow-lg", 
       isOpen ? "translate-x-0" : "-translate-x-full"
     )}>
       <div className="flex flex-col h-full">

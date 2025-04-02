@@ -25,14 +25,14 @@ const HumanResources = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      {/* Adjusted padding to align with header elements */}
-      <main className="md:pl-64 pt-16 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-6xl mx-auto space-y-6">
+      {/* Adjusted padding to provide more space for content */}
+      <main className="md:pl-72 pt-16 p-6 transition-all duration-300 flex-1">
+        <div className="max-w-7xl mx-auto w-full space-y-6">
           <HRHeader />
           
           {activeTab !== "ambiente" && <HRFilters />}
 
-          {/* New simplified navigation system */}
+          {/* Simplified navigation system with full width */}
           <HRTabSelect 
             tabGroups={hrTabGroups} 
             activeTab={activeTab} 
