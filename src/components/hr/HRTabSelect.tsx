@@ -17,14 +17,14 @@ export function HRTabSelect({ tabGroups, activeTab, setActiveTab }: HRTabSelectP
 
   return (
     <NavigationMenu className="mb-6 w-full">
-      <NavigationMenuList className="flex flex-wrap space-x-1 border rounded-lg p-1 bg-white w-full justify-start overflow-x-auto">
+      <NavigationMenuList className="flex w-full flex-wrap justify-between border rounded-lg p-1 bg-white overflow-x-auto">
         {tabGroups.map((group) => (
-          <NavigationMenuItem key={group.id}>
+          <NavigationMenuItem key={group.id} className="flex-1">
             {group.subTabs ? (
               <>
                 <NavigationMenuTrigger 
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 text-sm font-medium whitespace-nowrap",
+                    "flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium w-full whitespace-nowrap",
                     activeGroup?.id === group.id && "bg-muted"
                   )}
                 >
@@ -54,7 +54,7 @@ export function HRTabSelect({ tabGroups, activeTab, setActiveTab }: HRTabSelectP
                 onClick={() => setActiveTab(group.id)}
                 className={cn(
                   navigationMenuTriggerStyle(),
-                  "flex items-center gap-2 px-3 py-2 text-sm font-medium whitespace-nowrap",
+                  "flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium w-full whitespace-nowrap",
                   activeTab === group.id && "bg-muted"
                 )}
               >
