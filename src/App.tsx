@@ -32,6 +32,7 @@ import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import HumanResources from "./pages/HumanResources";
 import StrategicPlanning from "./pages/StrategicPlanning";
 import DocumentUpload from "./pages/DocumentUpload";
+import TrainingControl from "./pages/TrainingControl";
 
 // Create a new QueryClient instance for React Query
 const queryClient = new QueryClient();
@@ -75,12 +76,10 @@ const App = () => {
                 <Route path="/critical-analysis" element={<CriticalAnalysis />} />
                 <Route path="/human-resources" element={<HumanResources />} />
                 <Route path="/strategic-planning" element={<StrategicPlanning />} />
+                <Route path="/training-control" element={<TrainingControl />} />
                 
                 {/* Redirect ambiente path */}
                 <Route path="/ambiente" element={<Navigate to="/human-resources" state={{activeTab: "ambiente"}} />} />
-                
-                {/* Redirect training-control path to development tab */}
-                <Route path="/training-control" element={<Navigate to="/human-resources" state={{activeTab: "training"}} />} />
                 
                 {/* Página 404 para rotas não encontradas */}
                 <Route path="*" element={<NotFound />} />
