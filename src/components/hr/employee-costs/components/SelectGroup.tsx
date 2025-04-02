@@ -39,10 +39,11 @@ export function SelectGroup({
         </SelectTrigger>
         <SelectContent 
           position="popper"
-          className="w-full min-w-[220px] bg-popover border border-border shadow-lg z-50"
+          className="w-full min-w-[220px] bg-popover border border-border shadow-lg z-[999]"
           align="start"
           sideOffset={5}
           avoidCollisions={true}
+          forceMount
         >
           {options.length === 0 ? (
             <div className="py-3 px-4 text-sm text-muted-foreground text-center">

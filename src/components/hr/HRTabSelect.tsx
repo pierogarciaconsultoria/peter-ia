@@ -36,7 +36,7 @@ export function HRTabSelect({
                   <span className="mr-1">{group.icon}</span>
                   <span>{group.name}</span>
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="absolute top-full left-0 z-[100] w-[280px]">
+                <NavigationMenuContent className="absolute top-full left-0 z-[999] w-[280px]">
                   <div className="grid gap-1 p-3 bg-popover border border-border rounded-md shadow-lg">
                     {group.subTabs.map(subTab => (
                       <NavigationMenuLink 
