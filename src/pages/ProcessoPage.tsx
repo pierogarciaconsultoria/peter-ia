@@ -9,6 +9,7 @@ import { ProcessHeader } from "@/components/processes/ProcessHeader";
 import { ProcessSearchFilter } from "@/components/processes/ProcessSearchFilter";
 import { ProcessList } from "@/components/processes/ProcessList";
 import { MacroProcessDialog } from "@/components/processes/MacroProcessDialog";
+import { Process } from "@/types/processes";
 
 const ProcessoPage = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const ProcessoPage = () => {
               setShowMacroProcess(false);
               setSelectedProcessType(null);
             }}
-            processes={processes as any[]} // Type cast to avoid type conflicts
+            processes={processes as Process[]}
             processType={selectedProcessType}
           />
         </div>

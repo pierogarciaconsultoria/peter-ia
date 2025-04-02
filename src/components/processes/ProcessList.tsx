@@ -3,31 +3,22 @@ import React from "react";
 import { ProcessCard } from "@/components/processes/ProcessCard";
 import { ProcessEmptyState } from "@/components/processes/ProcessEmptyState";
 import { ProcessLoading } from "@/components/processes/ProcessLoading";
-
-interface Process {
-  id: number;
-  name: string;
-  description: string;
-  owner: string;
-  status: string;
-  lastUpdated: string;
-  indicators: number;
-  documents: number;
-  risks: number;
-}
+import { Process } from "@/types/processes";
 
 interface ProcessListProps {
   processes: Process[];
   isLoading: boolean;
   handleViewProcess: (id: number) => void;
   clearFilters: () => void;
+  onViewMacroProcessByType?: (type: string) => void;
 }
 
 export function ProcessList({ 
   processes, 
   isLoading, 
   handleViewProcess,
-  clearFilters
+  clearFilters,
+  onViewMacroProcessByType
 }: ProcessListProps) {
   if (isLoading) {
     return <ProcessLoading />;
@@ -44,6 +35,7 @@ export function ProcessList({
           key={process.id} 
           process={process} 
           handleViewProcess={handleViewProcess} 
+          onViewMacroProcessByType={onViewMacroProcessByType}
         />
       ))}
     </div>

@@ -8,7 +8,7 @@ interface MacroProcessDialogProps {
   open: boolean;
   onClose: () => void;
   processes: Process[];
-  processType?: string;
+  processType?: string | null;
 }
 
 export function MacroProcessDialog({ open, onClose, processes, processType }: MacroProcessDialogProps) {
