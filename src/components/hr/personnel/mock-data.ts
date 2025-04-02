@@ -1,50 +1,61 @@
 
 import { PersonnelRequest } from "./types";
 
-// Mock data for personnel movement requests
 export const mockRequests: PersonnelRequest[] = [
   {
     id: "1",
-    type: "hiring",
-    department: "Engenharia",
-    position: "Engenheiro de Produção",
-    position_id: "pos-001",
-    requestDate: "2023-07-15",
+    type: "Admissão",
+    department: "Produção",
+    position: "Operador de Máquina",
+    position_id: "pos-123",
+    requestDate: "2023-09-15",
     status: "pending",
     requester: "João Silva",
-    requester_id: "emp-001"
+    requester_id: "emp-123",
+    employeeName: "Marcos Oliveira",
+    justification: "Necessidade de reposição devido ao aumento de produção."
   },
   {
     id: "2",
-    type: "transfer",
-    department: "Financeiro",
-    position: "Analista Financeiro",
-    position_id: "pos-002",
-    requestDate: "2023-07-10",
+    type: "Aumento salarial",
+    department: "Administrativo",
+    position: "Auxiliar Administrativo",
+    position_id: "pos-456",
+    requestDate: "2023-09-10",
     status: "approved",
-    requester: "Maria Oliveira",
-    requester_id: "emp-002"
+    requester: "Maria Santos",
+    requester_id: "emp-456",
+    approved_by: "Carlos Mendes",
+    approval_date: "2023-09-12",
+    employeeName: "Ana Paula",
+    currentSalary: "R$ 2.500,00",
+    proposedSalary: "R$ 2.800,00",
+    justification: "Aumento de responsabilidades e bom desempenho."
   },
   {
     id: "3",
-    type: "termination",
-    department: "TI",
-    position: "Desenvolvedor Frontend",
-    position_id: "pos-003",
-    requestDate: "2023-07-05",
+    type: "Demissão",
+    department: "Comercial",
+    position: "Vendedor",
+    position_id: "pos-789",
+    requestDate: "2023-09-08",
     status: "rejected",
-    requester: "Pedro Santos",
-    requester_id: "emp-003"
+    requester: "Paula Ferreira",
+    requester_id: "emp-789",
+    employeeName: "Roberto Almeida",
+    rejection_reason: "Não foi apresentada justificativa suficiente para o desligamento."
   },
   {
     id: "4",
-    type: "salary_change",
-    department: "Marketing",
-    position: "Coordenador de Marketing",
-    position_id: "pos-004",
-    requestDate: "2023-07-01",
+    type: "Mudança de horário",
+    department: "TI",
+    position: "Desenvolvedor",
+    position_id: "pos-101",
+    requestDate: "2023-09-05",
     status: "pending",
-    requester: "Ana Costa",
-    requester_id: "emp-004"
+    requester: "Eduardo Costa",
+    requester_id: "emp-101",
+    employeeName: "Fernanda Lima",
+    justification: "Necessidade de ajuste de horário para cursar especialização."
   }
 ];
