@@ -32,13 +32,13 @@ export function HRTabSelect({ tabGroups, activeTab, setActiveTab }: HRTabSelectP
                   {group.name}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="absolute top-full left-0 z-50">
-                  <div className="grid gap-1 p-2 w-[280px] bg-popover border border-border rounded-md shadow-md">
+                  <div className="grid gap-1 p-2 w-[280px] bg-white border border-border rounded-md shadow-md">
                     {group.subTabs.map((subTab) => (
                       <NavigationMenuLink
                         key={subTab.id}
                         onClick={() => setActiveTab(subTab.id)}
                         className={cn(
-                          "flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-muted text-popover-foreground",
+                          "flex items-center gap-2 px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-muted text-foreground",
                           activeTab === subTab.id && "bg-muted font-medium"
                         )}
                       >
