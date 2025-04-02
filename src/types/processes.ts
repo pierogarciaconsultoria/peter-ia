@@ -16,5 +16,5 @@ export interface Process {
   indicators: Indicator[];
   documents: number;
   risks: number;
-  type?: string;
+  type?: "Gestão" | "Negócio" | "Apoio";
 }

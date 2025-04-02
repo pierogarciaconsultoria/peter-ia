@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -279,37 +278,19 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="processType">Tipo de Processo</Label>
-            <div className="flex gap-2">
-              <Select
-                value={processType}
-                onValueChange={(value) => setProcessType(value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Comercial">Comercial</SelectItem>
-                  <SelectItem value="Produção">Produção</SelectItem>
-                  <SelectItem value="Suporte">Suporte</SelectItem>
-                  <SelectItem value="Gestão">Gestão</SelectItem>
-                  <SelectItem value="Administrativo">Administrativo</SelectItem>
-                  {processTypes.map(type => 
-                    !["Comercial", "Produção", "Suporte", "Gestão", "Administrativo"].includes(type) && (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-              
-              <Input
-                placeholder="Ou digite um novo tipo"
-                value={!processTypes.includes(processType) && !["Comercial", "Produção", "Suporte", "Gestão", "Administrativo"].includes(processType) ? processType : ""}
-                onChange={(e) => setProcessType(e.target.value)}
-                className="w-1/2"
-              />
-            </div>
+            <Select
+              value={processType}
+              onValueChange={(value) => setProcessType(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Gestão">Gestão</SelectItem>
+                <SelectItem value="Negócio">Negócio</SelectItem>
+                <SelectItem value="Apoio">Apoio</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
