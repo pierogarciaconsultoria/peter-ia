@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   Building2,
@@ -56,7 +57,7 @@ export const menuItems = [
     icon: BarChart3,
   },
   {
-    title: "Gestão de Pessoas",
+    title: "Gente e Gestão",
     href: "/human-resources",
     icon: Users,
   },
@@ -94,11 +95,6 @@ export const menuItems = [
     title: "Inspeção de Matéria Prima",
     href: "/raw-material-inspection",
     icon: CheckSquare,
-  },
-  {
-    title: "Controle de Treinamento",
-    href: "/training-control",
-    icon: User2,
   },
   {
     title: "Agenda de Ações",
