@@ -1,21 +1,27 @@
 
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface MenuToggleProps {
   isOpen: boolean;
   toggleMenu: () => void;
+  className?: string;
 }
 
-export function MenuToggle({ isOpen, toggleMenu }: MenuToggleProps) {
+export function MenuToggle({ isOpen, toggleMenu, className }: MenuToggleProps) {
   return (
-    <Button 
+    <Button
       variant="ghost" 
       size="icon" 
-      className="fixed top-5 left-5 z-50 md:hidden" 
+      className={cn(
+        "fixed top-5 left-5 z-50 md:hidden", 
+        className
+      )}
       onClick={toggleMenu}
+      aria-label={isOpen ? "Close menu" : "Open menu"}
     >
-      {isOpen ? <X size={20} /> : <Menu size={20} />}
+      <Menu className={isOpen ? "rotate-90" : ""} />
     </Button>
   );
 }

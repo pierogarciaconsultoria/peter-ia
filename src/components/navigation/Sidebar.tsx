@@ -6,13 +6,15 @@ import { menuItems } from "./MenuItems";
 
 interface SidebarProps {
   isOpen: boolean;
+  className?: string;
 }
 
-export function Sidebar({ isOpen }: SidebarProps) {
+export function Sidebar({ isOpen, className }: SidebarProps) {
   return (
     <div className={cn(
       "fixed inset-y-0 left-0 z-40 w-72 bg-card/95 backdrop-blur-sm border-r border-border/40 transition-transform duration-300 ease-in-out md:translate-x-0 shadow-lg", 
-      isOpen ? "translate-x-0" : "-translate-x-full"
+      isOpen ? "translate-x-0" : "-translate-x-full",
+      className
     )}>
       <div className="flex flex-col h-full">
         <div className="p-6 mt-2">
