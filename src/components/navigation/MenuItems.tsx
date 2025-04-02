@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Settings,
   HelpCircle,
+  GitFlow,
 } from "lucide-react";
 
 interface MenuItem {
@@ -40,6 +41,11 @@ export const menuItems = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Processo",
+    href: "/processo",
+    icon: GitFlow,
   },
   {
     title: "Planejamento Estratégico",
