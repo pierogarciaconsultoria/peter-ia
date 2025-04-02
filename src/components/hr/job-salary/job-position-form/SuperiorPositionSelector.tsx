@@ -70,7 +70,7 @@ export function SuperiorPositionSelector({ value, departmentFilter, onChange }: 
         <SelectValue placeholder="Selecione um cargo superior" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Nenhum</SelectItem>
+        <SelectItem value="none">Nenhum</SelectItem>
         {filteredPositions.map((position) => (
           <SelectItem key={position.id} value={position.id}>
             {position.title} ({position.department})

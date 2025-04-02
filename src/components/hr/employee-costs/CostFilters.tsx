@@ -22,7 +22,7 @@ export function CostFilters({ onFilterChange }: CostFiltersProps) {
   };
 
   const monthOptions = [
-    { value: "", label: "Todos" },
+    { value: "all", label: "Todos" },
     { value: "1", label: "Janeiro" },
     { value: "2", label: "Fevereiro" },
     { value: "3", label: "Março" },
@@ -38,7 +38,7 @@ export function CostFilters({ onFilterChange }: CostFiltersProps) {
   ];
 
   const yearOptions = [
-    { value: "", label: "Todos" },
+    { value: "all", label: "Todos" },
     { value: (currentYear - 1).toString(), label: (currentYear - 1).toString() },
     { value: currentYear.toString(), label: currentYear.toString() },
     { value: (currentYear + 1).toString(), label: (currentYear + 1).toString() }
@@ -49,8 +49,8 @@ export function CostFilters({ onFilterChange }: CostFiltersProps) {
       <SelectGroup
         id="filter-month"
         label=""
-        value={filter.month?.toString() || ""}
-        onValueChange={(value) => setFilter({ ...filter, month: value ? parseInt(value) : undefined })}
+        value={filter.month?.toString() || "all"}
+        onValueChange={(value) => setFilter({ ...filter, month: value === "all" ? undefined : parseInt(value) })}
         placeholder="Mês"
         options={monthOptions}
         className="w-[120px]"
@@ -59,8 +59,8 @@ export function CostFilters({ onFilterChange }: CostFiltersProps) {
       <SelectGroup
         id="filter-year"
         label=""
-        value={filter.year?.toString() || ""}
-        onValueChange={(value) => setFilter({ ...filter, year: value ? parseInt(value) : undefined })}
+        value={filter.year?.toString() || "all"}
+        onValueChange={(value) => setFilter({ ...filter, year: value === "all" ? undefined : parseInt(value) })}
         placeholder="Ano"
         options={yearOptions}
         className="w-[100px]"

@@ -28,7 +28,7 @@ export function HRFilters() {
       </div>
       
       <div className="flex flex-row gap-2">
-        <Select>
+        <Select defaultValue="all">
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Departamento" />
           </SelectTrigger>
@@ -42,7 +42,7 @@ export function HRFilters() {
           </SelectContent>
         </Select>
         
-        <Select>
+        <Select defaultValue="all">
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -87,7 +87,7 @@ export function HRFilters() {
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <Label htmlFor="cargo">Cargo</Label>
-                  <Select>
+                  <Select defaultValue="all">
                     <SelectTrigger className="col-span-2 h-8">
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
