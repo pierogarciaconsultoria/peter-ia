@@ -31,7 +31,7 @@ export function HRTabSelect({ tabGroups, activeTab, setActiveTab }: HRTabSelectP
                   <span className="mr-1">{group.icon}</span>
                   {group.name}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="absolute top-full left-0 z-50">
                   <div className="grid gap-1 p-2 w-[280px] shadow-md">
                     {group.subTabs.map((subTab) => (
                       <NavigationMenuLink

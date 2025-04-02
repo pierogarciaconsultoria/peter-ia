@@ -56,8 +56,10 @@ export function UserMenu() {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-56 mr-1"
-            sideOffset={10}
+            className="w-56"
+            alignOffset={0}
+            side="bottom"
+            sideOffset={5}
           >
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">

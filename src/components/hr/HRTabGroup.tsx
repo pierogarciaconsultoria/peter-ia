@@ -38,7 +38,7 @@ export function HRTabGroup({ tabGroups, activeTab, setActiveTab }: HRTabGroupPro
                       <span>{tab.name}</span>
                     </TabsTrigger>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom">
+                  <TooltipContent side="bottom" align="center" alignOffset={0} sideOffset={5}>
                     <p>{tab.name}</p>
                   </TooltipContent>
                 </Tooltip>
