@@ -32,7 +32,7 @@ export function DepartmentHeader({
             Novo Departamento
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" alignOffset={0} sideOffset={5} className="bg-popover">
+        <DropdownMenuContent align="end" alignOffset={0} sideOffset={5} className="bg-card text-card-foreground border">
           <DropdownMenuItem onClick={onAddDepartment}>
             Criar do zero
           </DropdownMenuItem>

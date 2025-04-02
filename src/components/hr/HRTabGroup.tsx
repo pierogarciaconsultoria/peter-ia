@@ -38,7 +38,7 @@ export function HRTabGroup({ tabGroups, activeTab, setActiveTab }: HRTabGroupPro
                       <span>{tab.name}</span>
                     </TabsTrigger>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" align="center" alignOffset={0} sideOffset={5} className="bg-popover">
+                  <TooltipContent side="bottom" align="center" alignOffset={0} sideOffset={5} className="bg-card text-card-foreground border">
                     <p>{tab.name}</p>
                   </TooltipContent>
                 </Tooltip>
