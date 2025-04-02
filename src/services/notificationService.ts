@@ -14,13 +14,24 @@ export interface Notification {
   created_at: string;
 }
 
+/**
+ * Creates a notification for a specific user
+ * 
+ * @param user_id ID of the user to notify
+ * @param title Title of the notification
+ * @param message Content of the notification
+ * @param type Type of notification (e.g. 'personnel_request', 'task_assigned')
+ * @param reference_id Optional reference ID to link to the original entity
+ * @param link Optional URL to navigate to when clicking the notification
+ * @returns The created notification
+ */
 export async function createNotification(
   user_id: string,
   title: string,
   message: string,
   type: string,
-  link?: string,
-  reference_id?: string
+  reference_id?: string,
+  link?: string
 ): Promise<Notification> {
   console.log('Creating notification:', { user_id, title, message, type, link, reference_id });
   

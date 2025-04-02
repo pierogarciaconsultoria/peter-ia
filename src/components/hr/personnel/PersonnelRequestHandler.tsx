@@ -1,108 +1,99 @@
 
 import { useState } from "react";
-import { RequestFormValues, PersonnelRequest } from "./types";
-import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle } from "lucide-react";
+import { JobPosition } from "../types";
+import { PersonnelRequest, RequestFormValues } from "./types";
+import { v4 as uuidv4 } from "uuid";
+import { createNotification } from "@/services/notificationService";
+import { useToast } from "@/hooks/use-toast";
 
-interface PersonnelRequestHandlerProps {
+interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;
   requests: PersonnelRequest[];
   setRequests: React.Dispatch<React.SetStateAction<PersonnelRequest[]>>;
   employees: any[];
-  jobPositions: any[];
+  jobPositions: JobPosition[];
 }
 
 export function PersonnelRequestHandler({ 
   onAddRequest, 
   requests, 
-  setRequests, 
-  employees, 
-  jobPositions 
-}: PersonnelRequestHandlerProps) {
+  setRequests,
+  employees,
+  jobPositions
+}: PersonnelRequestHandlerParams) {
   const { toast } = useToast();
-  
-  const handleSubmit = (data: RequestFormValues) => {
-    // Map form movement type to a readable label
-    const getTypeLabel = (type: string) => {
-      const typeMap: { [key: string]: string } = {
-        "hiring": "Admissão",
-        "termination": "Demissão",
-        "salaryChange": "Aumento salarial",
-        "positionChange": "Mudança de cargo",
-        "vacation": "Férias",
-        "scheduleChange": "Mudança de horário",
-        "absence": "Falta ao trabalho",
-        "late": "Chegou atrasado",
-        "medicalCertificate": "Atestado",
-        "cardPunchForgot": "Esqueceu de bater cartão",
-        "departmentChange": "Mudança de setor",
-        "shiftChange": "Troca de turno",
-        "factoryLeave": "Autorização saída da fábrica",
-        "writtenWarning": "Advertência por escrito",
-        "verbalWarning": "Advertência verbal",
-        "overtimeAuth": "Autorizado a fazer hora extra",
-        "dayExchange": "Troca de dia",
-        "hourCredit": "Abono de hora"
-      };
-      return typeMap[type] || type;
+
+  const handleSubmit = async (data: RequestFormValues) => {
+    console.log("Form data submitted:", data);
+    
+    // Create a new request object from the form data
+    const newRequest: PersonnelRequest = {
+      id: uuidv4(),
+      type: data.type,
+      department: data.department,
+      position: data.position || "",
+      position_id: data.position_id || "",
+      requestDate: data.requestDate || new Date().toISOString().split('T')[0],
+      status: "pending",
+      requester: data.requester || "Sistema",
+      requester_id: data.requester_id || "",
+      employeeName: data.employeeName || "",
+      employeeId: data.employeeId || "",
+      justification: data.justification || ""
     };
-    
-    // Find the selected job position to get its details
-    const selectedPosition = jobPositions.find(job => job.id === data.position_id);
-    
-    // Find requester info
-    const requester = employees.find(emp => emp.id === data.requester_id);
-    
-    // Find manager (superior) of the requester - in a real app this would be fetched from the database
-    // For now, we'll simulate by assuming each department has a head
-    let managerId = undefined;
-    let managerName = "";
-    
-    if (requester) {
-      // Simulate finding the manager based on department
-      // In a real app, you'd look up the org chart
-      for (const emp of employees) {
-        if (emp.department === requester.department && emp.is_department_head) {
-          managerId = emp.id;
-          managerName = emp.name;
-          break;
-        }
-      }
+
+    // Add specific fields based on request type
+    if (data.type === "Aumento salarial" && data.currentSalary && data.proposedSalary) {
+      newRequest.currentSalary = data.currentSalary;
+      newRequest.proposedSalary = data.proposedSalary;
     }
     
-    // In a real implementation, this would send the data to an API
-    const newRequest: PersonnelRequest = {
-      id: (requests.length + 1).toString(),
-      type: getTypeLabel(data.type),
-      department: data.department,
-      position: data.currentPosition || (selectedPosition ? selectedPosition.title : ""),
-      position_id: data.position_id,
-      requestDate: data.requestDate || new Date().toISOString().split('T')[0],
-      status: "manager_approval", // New status to indicate manager needs to approve
-      requester: requester ? requester.name : "Usuário Atual",
-      requester_id: data.requester_id,
-      manager_id: managerId,
-      employeeName: data.employeeName,
-      currentSalary: data.currentSalary,
-      proposedSalary: data.proposedSalary,
-      justification: data.justification,
-      hr_observation: "",
-      rejection_reason: ""
-    };
+    // Update the requests state with the new request
+    setRequests(prevRequests => [newRequest, ...prevRequests]);
     
-    setRequests([newRequest, ...requests]);
-    
+    // Show a success toast
     toast({
-      title: "Solicitação enviada",
-      description: "Sua solicitação de movimentação foi enviada para aprovação do gestor.",
-      action: (
-        <div className="bg-amber-50 border border-amber-100 px-2 py-1 rounded-md flex items-center gap-2 text-amber-700">
-          <AlertTriangle className="h-4 w-4" />
-          <span className="text-xs">Aguardando aprovação</span>
-        </div>
-      )
+      title: "Solicitação criada",
+      description: `Solicitação de ${data.type} criada com sucesso.`,
     });
+    
+    // Send notification to HR department
+    try {
+      // Find HR manager employees
+      const hrManagers = employees.filter(emp => 
+        emp.department === "Recursos Humanos" && emp.position.includes("Gerente")
+      );
+      
+      // Notify HR managers about the new request
+      if (hrManagers && hrManagers.length > 0) {
+        for (const manager of hrManagers) {
+          await createNotification(
+            manager.id,
+            "Nova Solicitação de Movimentação",
+            `Nova solicitação de ${data.type} para ${data.employeeName || 'um colaborador'} foi recebida.`,
+            "personnel_request",
+            newRequest.id,
+            `/human-resources?activeTab=movimentacao`
+          );
+        }
+      }
+      
+      // If this is for a specific employee, notify them as well
+      if (data.employeeId) {
+        await createNotification(
+          data.employeeId,
+          "Solicitação em Seu Nome",
+          `Uma solicitação de ${data.type} foi aberta em seu nome.`,
+          "personnel_request",
+          newRequest.id
+        );
+      }
+    } catch (error) {
+      console.error("Error sending notifications:", error);
+    }
+    
+    return newRequest;
   };
-  
+
   return { handleSubmit };
 }

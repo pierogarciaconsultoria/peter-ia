@@ -1,13 +1,18 @@
 
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PersonnelRequest } from "../types";
 import { CheckCircle, AlertCircle } from "lucide-react";
+import { createNotification } from "@/services/notificationService";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRequestActions(requests: PersonnelRequest[], setRequests: React.Dispatch<React.SetStateAction<PersonnelRequest[]>>) {
   const { toast } = useToast();
   
   // Handle approval of a request
-  const handleApproval = (id: string) => {
+  const handleApproval = async (id: string) => {
+    // Find the current request to get employee information
+    const request = requests.find(req => req.id === id);
+    
     setRequests(prevRequests => 
       prevRequests.map(req => 
         req.id === id 
@@ -31,10 +36,28 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         </div>
       )
     });
+    
+    // Send notification to the employee about the approved request
+    if (request && request.employeeId) {
+      try {
+        await createNotification(
+          request.employeeId,
+          "Solicitação Aprovada",
+          `Sua solicitação de ${request.type} foi aprovada.`,
+          "personnel_request",
+          id
+        );
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    }
   };
 
   // Handle rejection of a request
-  const handleRejection = (id: string, reason?: string) => {
+  const handleRejection = async (id: string, reason?: string) => {
+    // Find the current request to get employee information
+    const request = requests.find(req => req.id === id);
+    
     setRequests(prevRequests => 
       prevRequests.map(req => 
         req.id === id ? { 
@@ -50,10 +73,28 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       description: "A solicitação foi rejeitada.",
       variant: "destructive"
     });
+    
+    // Send notification to the employee about the rejected request
+    if (request && request.employeeId) {
+      try {
+        await createNotification(
+          request.employeeId,
+          "Solicitação Rejeitada",
+          `Sua solicitação de ${request.type} foi rejeitada. ${reason ? `Motivo: ${reason}` : ''}`,
+          "personnel_request",
+          id
+        );
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    }
   };
 
   // Handle cancellation of a request
-  const handleCancellation = (id: string, reason?: string) => {
+  const handleCancellation = async (id: string, reason?: string) => {
+    // Find the current request to get employee information
+    const request = requests.find(req => req.id === id);
+    
     setRequests(prevRequests => 
       prevRequests.map(req => 
         req.id === id ? { 
@@ -69,6 +110,32 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       description: "A solicitação foi cancelada.",
       variant: "destructive"
     });
+    
+    // Send notification to relevant parties about the cancelled request
+    if (request) {
+      try {
+        // Notify HR manager about the cancellation
+        const { data: hrManagers } = await supabase
+          .from('employees')
+          .select('id')
+          .eq('department', 'Recursos Humanos')
+          .eq('position', 'Gerente');
+        
+        if (hrManagers && hrManagers.length > 0) {
+          for (const manager of hrManagers) {
+            await createNotification(
+              manager.id,
+              "Solicitação Cancelada",
+              `Uma solicitação de ${request.type} para ${request.employeeName} foi cancelada.`,
+              "personnel_request",
+              id
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    }
   };
 
   return {
