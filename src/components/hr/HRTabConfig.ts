@@ -126,11 +126,6 @@ export const hrTabGroups: TabGroup[] = [
     name: "Ambiente",
     icon: createIcon(icons.Building2),
     component: "AmbienteContent"
-  },
-  {
-    id: "documents",
-    name: "Documentos",
-    icon: createIcon(icons.FileText),
-    href: "/documents"
   }
+  // Removed the "Documentos" tab as it has no application in the tool
 ];
