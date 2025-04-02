@@ -3,7 +3,7 @@ import {
   Building2,
   Calendar,
   CheckSquare,
-  Cog6Tooth,
+  Cog,
   File,
   Home,
   ListChecks,
@@ -88,7 +88,7 @@ export const menuItems = [
   {
     title: "Calibração de Equipamentos",
     href: "/equipment-calibration",
-    icon: Cog6Tooth,
+    icon: Cog,
   },
   {
     title: "Inspeção de Matéria Prima",

@@ -2,7 +2,7 @@
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MenuItems } from "./MenuItems";
+import { menuItems } from "./MenuItems";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,7 +23,22 @@ export function Sidebar({ isOpen }: SidebarProps) {
         </div>
         
         <nav className="flex-1 px-4 pb-4 overflow-y-auto">
-          <MenuItems />
+          <ul className="space-y-1">
+            {menuItems.map((item) => (
+              <li key={item.href}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  asChild
+                >
+                  <a href={item.href}>
+                    <item.icon size={16} className="mr-2" />
+                    {item.title}
+                  </a>
+                </Button>
+              </li>
+            ))}
+          </ul>
         </nav>
         
         <div className="p-4 mt-auto border-t border-border/30">
