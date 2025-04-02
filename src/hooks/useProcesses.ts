@@ -17,7 +17,7 @@ const processesData: Process[] = [
     ],
     documents: 5,
     risks: 2,
-    type: "Comercial"
+    type: "Negócio"
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const processesData: Process[] = [
     ],
     documents: 8,
     risks: 4,
-    type: "Produção"
+    type: "Negócio"
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ const processesData: Process[] = [
     ],
     documents: 3,
     risks: 1,
-    type: "Suporte"
+    type: "Apoio"
   },
   {
     id: 4,
@@ -63,7 +63,7 @@ const processesData: Process[] = [
     ],
     documents: 2,
     risks: 3,
-    type: "Comercial"
+    type: "Negócio"
   },
 ];
 
