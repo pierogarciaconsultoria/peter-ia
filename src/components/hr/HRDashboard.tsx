@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,7 +18,6 @@ export function HRDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
   
-  // These would come from the API in a real implementation
   const metrics = {
     totalEmployees: 42,
     newHires: 3,
@@ -35,7 +33,6 @@ export function HRDashboard() {
     medicalLeaves: 1
   };
 
-  // Dummy data for charts
   const departmentDistribution = [
     { name: 'Administrativo', value: 10 },
     { name: 'Comercial', value: 8 },
@@ -110,7 +107,6 @@ export function HRDashboard() {
     { month: 'Jun', salaries: 165000, benefits: 50000, taxes: 66000 }
   ];
   
-  // DISC assessment results across organization
   const discDistribution = [
     { name: 'D (Dominante)', value: 12, color: '#ef4444' },
     { name: 'I (Influente)', value: 15, color: '#eab308' },
@@ -662,7 +658,12 @@ export function HRDashboard() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="position" angle={-45} textAnchor="end" height={80} />
                       <YAxis tickFormatter={(value) => formatCurrency(value).replace('R$', '')} />
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
+                      <Tooltip formatter={(value: any) => {
+                        if (typeof value === 'number') {
+                          return formatCurrency(value);
+                        }
+                        return value.toString();
+                      }} />
                       <Legend />
                       <Bar dataKey="Empresa" fill="#8884d8" />
                       <Bar dataKey="Mercado" fill="#82ca9d" />
@@ -692,7 +693,12 @@ export function HRDashboard() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis tickFormatter={(value) => `${value/1000}k`} />
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
+                      <Tooltip formatter={(value: any) => {
+                        if (typeof value === 'number') {
+                          return formatCurrency(value);
+                        }
+                        return value.toString();
+                      }} />
                       <Legend />
                       <Bar dataKey="salaries" name="Salários" stackId="a" fill="#8884d8" />
                       <Bar dataKey="benefits" name="Benefícios" stackId="a" fill="#82ca9d" />
