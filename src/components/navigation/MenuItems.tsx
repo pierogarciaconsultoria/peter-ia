@@ -97,7 +97,7 @@ export const menuItems = [
     icon: CheckSquare,
   },
   {
-    title: "Agenda de Ações",
+    title: "Plano de Ação",
     href: "/action-schedule",
     icon: Calendar,
   },
