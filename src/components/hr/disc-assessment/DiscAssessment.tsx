@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { PlusCircle, RefreshCcw, FileQuestion } from "lucide-react";
+import { PlusCircle, RefreshCcw, FileQuestion, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewAssessmentDialog } from "./NewAssessmentDialog";
+import { ExternalDiscAssessmentLink } from "./ExternalDiscAssessmentLink";
 import { DiscAssessmentTable } from "./DiscAssessmentTable";
 import { DiscAssessmentStats } from "./DiscAssessmentStats";
 import { useDiscAssessments } from "@/hooks/useDiscAssessments";
@@ -39,6 +40,9 @@ export function DiscAssessment() {
             <RefreshCcw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
+          
+          <ExternalDiscAssessmentLink />
+          
           <Button onClick={() => setIsDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Nova Avaliação

@@ -12,7 +12,11 @@ import { DocumentsTab } from "./employee-form/DocumentsTab";
 import { FamilyInfoTab } from "./employee-form/FamilyInfoTab";
 import { AdditionalInfoTab } from "./employee-form/AdditionalInfoTab";
 
-export function NewEmployeeForm() {
+interface NewEmployeeFormProps {
+  onCancel?: () => void;
+}
+
+export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -32,8 +36,7 @@ export function NewEmployeeForm() {
     documentType: "RG",
     cpf: "",
     carteiraDigitalLink: "",
-    spouse: "",
-    dependents: [{ name: "", birthDate: null as Date | null }],
+    dependents: [{ name: "", relationship: "", phone: "", birthDate: null as Date | null }],
     notes: "",
   });
   
@@ -60,6 +63,12 @@ export function NewEmployeeForm() {
       title: "Funcionário cadastrado",
       description: "As informações foram salvas com sucesso",
     });
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
@@ -116,7 +125,7 @@ export function NewEmployeeForm() {
       </Tabs>
 
       <div className="flex justify-end gap-4 pt-4 border-t">
-        <Button type="button" variant="outline">
+        <Button type="button" variant="outline" onClick={handleCancel}>
           Cancelar
         </Button>
         <Button type="submit">

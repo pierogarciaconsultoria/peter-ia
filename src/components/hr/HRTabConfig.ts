@@ -36,8 +36,8 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
       { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
-      { id: "positions", name: "Cargos", component: "ApprovedPositions" },
-      { id: "salary", name: "Plano Salarial", component: "JobSalaryPlan" }
+      { id: "positions", name: "Quadro Aprovado", component: "ApprovedPositions" },
+      { id: "salary", name: "Plano de Cargos e Salários", component: "JobSalaryPlan" }
     ]
   },
   {
@@ -107,7 +107,7 @@ export const hrTabGroups: TabGroup[] = [
       { id: "vacation", name: "Férias", component: "VacationManagement" },
       { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement", icon: createIcon(icons.AlertCircle) },
       { id: "medical", name: "Atestados", component: "MedicalCertificateManagement", icon: createIcon(icons.FileHeart) },
-      { id: "board", name: "Quadro de Colaboradores", component: "EmployeeBoard" },
+      { id: "board", name: "Mural do Colaborador", component: "EmployeeBoard" },
       { id: "thermometer", name: "Termômetro de Maturidade", component: "MaturityThermometer" }
     ]
   },

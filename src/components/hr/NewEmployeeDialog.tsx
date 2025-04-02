@@ -19,6 +19,10 @@ type NewEmployeeDialogProps = {
 export function NewEmployeeDialog({ triggerButton }: NewEmployeeDialogProps) {
   const [open, setOpen] = useState(false);
   
+  const handleClose = () => {
+    setOpen(false);
+  };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -36,7 +40,7 @@ export function NewEmployeeDialog({ triggerButton }: NewEmployeeDialogProps) {
             Preencha os dados do novo colaborador para cadastro no sistema.
           </DialogDescription>
         </DialogHeader>
-        <NewEmployeeForm />
+        <NewEmployeeForm onCancel={handleClose} />
       </DialogContent>
     </Dialog>
   );

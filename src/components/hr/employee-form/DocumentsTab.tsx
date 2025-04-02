@@ -2,6 +2,8 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
+import { DocumentUploadLink } from "../document-upload/DocumentUploadLink";
+import { Button } from "@/components/ui/button";
 
 interface DocumentsTabProps {
   formData: any;
@@ -35,7 +37,17 @@ export function DocumentsTab({
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="carteiraDigitalLink">Link da Carteira de Trabalho Digital</Label>
+          <div className="flex justify-between items-center">
+            <Label htmlFor="carteiraDigitalLink">Link da Carteira de Trabalho Digital</Label>
+            
+            {/* Link de solicitação de documentação */}
+            <DocumentUploadLink 
+              employeeId={formData.id || "temp-id"} 
+              employeeName={`${formData.firstName} ${formData.lastName}`.trim()} 
+              email={formData.email}
+              whatsapp={formData.whatsapp}
+            />
+          </div>
           <Input
             id="carteiraDigitalLink"
             name="carteiraDigitalLink"
@@ -49,9 +61,15 @@ export function DocumentsTab({
         </div>
 
         <div className="space-y-4 border rounded-md p-4">
-          <h3 className="font-medium">Anexos de Documentos</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="font-medium">Anexos de Documentos</h3>
+            <Button variant="outline" size="sm" type="button">
+              Verificar status
+            </Button>
+          </div>
+          
           <p className="text-sm text-muted-foreground">
-            Faça o upload dos documentos necessários para o cadastro do funcionário
+            Faça o upload dos documentos necessários para o cadastro do funcionário ou envie um link para que o colaborador faça o envio.
           </p>
 
           {documents.map((doc, index) => (
