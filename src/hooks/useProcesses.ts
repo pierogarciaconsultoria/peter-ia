@@ -92,6 +92,11 @@ export function useProcesses() {
       process.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Get a specific process by ID
+  const getProcessById = (id: number) => {
+    return processes.find(process => process.id === id);
+  };
+
   // Clear filters
   const clearFilters = () => {
     setSearchTerm("");
@@ -106,5 +111,6 @@ export function useProcesses() {
     setFilterStatus,
     isLoading,
     clearFilters,
+    getProcessById,
   };
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
 import { PlusCircle, Pencil, Trash2 } from "lucide-react";
@@ -18,6 +18,8 @@ import {
   FormLabel, 
   FormMessage 
 } from "@/components/ui/form";
+import { ProcessActorSelector } from "@/components/processes/ProcessActorSelector";
+import { DocumentSelector } from "@/components/processes/DocumentSelector";
 
 interface ProcessActivity {
   id: string;
@@ -41,11 +43,13 @@ interface ProcessFormValues {
 
 interface ProcessMappingFormProps {
   onSubmit: (data: ProcessFormValues) => void;
+  initialData?: ProcessFormValues | null;
+  isEditing?: boolean;
 }
 
-export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
+export function ProcessMappingForm({ onSubmit, initialData, isEditing = false }: ProcessMappingFormProps) {
   const form = useForm<ProcessFormValues>({
-    defaultValues: {
+    defaultValues: initialData || {
       name: "",
       objective: "",
       painProblems: "",
@@ -66,6 +70,13 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
     }
   });
 
+  useEffect(() => {
+    if (initialData) {
+      // Reset form with initial data when it becomes available
+      form.reset(initialData);
+    }
+  }, [initialData, form]);
+
   const { fields, append, remove } = useFieldArray({
     name: "activities",
     control: form.control
@@ -79,7 +90,7 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
     try {
       // In a real application, you would save this to your database here
       console.log("Process form values:", values);
-      toast.success("Mapeamento de processo salvo com sucesso!");
+      toast.success(isEditing ? "Processo atualizado com sucesso!" : "Mapeamento de processo salvo com sucesso!");
       
       // Pass the data to the parent component
       onSubmit(values);
@@ -104,9 +115,9 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Mapeamento de Processos</h1>
+        <h1 className="text-2xl font-bold">{isEditing ? "Editar Processo" : "Mapeamento de Processos"}</h1>
         <p className="text-muted-foreground mt-2">
-          Preencha o formulário abaixo para mapear um novo processo utilizando a metodologia SIPOC
+          Preencha o formulário abaixo para mapear {isEditing ? "o" : "um novo"} processo utilizando a metodologia SIPOC
         </p>
       </div>
 
@@ -320,10 +331,10 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Input 
-                                placeholder="Responsável pela atividade"
-                                className="text-sm"
-                                {...field}
+                              <ProcessActorSelector
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Selecionar responsável"
                               />
                             </FormControl>
                           </FormItem>
@@ -354,10 +365,10 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Textarea
-                                placeholder="Descreva a documentação relacionada a esta atividade"
-                                className="min-h-[80px] text-sm"
-                                {...field}
+                              <DocumentSelector
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Selecionar documento"
                               />
                             </FormControl>
                           </FormItem>
@@ -400,7 +411,7 @@ export function ProcessMappingForm({ onSubmit }: ProcessMappingFormProps) {
               size="lg"
               className="bg-teal-700 hover:bg-teal-800"
             >
-              {isSubmitting ? "Salvando..." : "Salvar Mapeamento"}
+              {isSubmitting ? "Salvando..." : isEditing ? "Atualizar Processo" : "Salvar Mapeamento"}
             </Button>
           </div>
         </form>
