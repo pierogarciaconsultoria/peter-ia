@@ -1,39 +1,51 @@
 
-export function SignatureSection() {
+import { Textarea } from "@/components/ui/textarea";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { UseFormReturn } from "react-hook-form";
+import { RequestFormValues } from "../types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
+
+interface SignatureSectionProps {
+  form: UseFormReturn<RequestFormValues>;
+}
+
+export function SignatureSection({ form }: SignatureSectionProps) {
   return (
     <>
-      {/* Signature Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
-        <div>
-          <h3 className="font-medium text-lg mb-2">Requisitante</h3>
-          <div className="text-sm text-gray-500 mt-2">
-            Data: ___/___/_____
-          </div>
-          <div className="border-t border-gray-300 mt-6 pt-2 text-center text-sm text-gray-500">
-            Assinatura
-          </div>
-        </div>
-        <div>
-          <h3 className="font-medium text-lg mb-2">Gerência / Direção</h3>
-          <div className="text-sm text-gray-500 mt-2">
-            Data: ___/___/_____
-          </div>
-          <div className="border-t border-gray-300 mt-6 pt-2 text-center text-sm text-gray-500">
-            Assinatura
-          </div>
-        </div>
+      {/* HR Observation Field */}
+      <div className="space-y-2">
+        <FormField
+          control={form.control}
+          name="hr_observation"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parecer do Recursos Humanos</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Este campo será preenchido pelo RH após análise da solicitação"
+                  className="h-24 bg-gray-50"
+                  readOnly
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-      
-      {/* Encerramento Section */}
-      <div className="bg-gray-100 p-4 rounded-md text-center">
-        <h3 className="font-semibold text-xl mb-2">ENCERRAMENTO</h3>
-        <div className="text-sm text-gray-500 mt-2">
-          Data: ___/___/_____
-        </div>
-        <div className="border-t border-gray-300 mt-6 pt-2 text-center text-sm text-gray-500">
-          RH
-        </div>
-      </div>
+
+      {/* Approval Status Indicator */}
+      <Alert variant="outline" className="bg-gray-50 border-muted">
+        <Info className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          Esta solicitação passará pelos seguintes fluxos de aprovação:
+          <ol className="list-decimal ml-5 mt-2 text-xs space-y-1">
+            <li>Aprovação pelo superior imediato do requisitante</li>
+            <li>Aprovação pelo departamento de Recursos Humanos</li>
+          </ol>
+        </AlertDescription>
+      </Alert>
     </>
   );
 }

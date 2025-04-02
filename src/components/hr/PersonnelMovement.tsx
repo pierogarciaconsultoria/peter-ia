@@ -9,7 +9,7 @@ import {
   CardTitle,
   CardDescription 
 } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { JobPosition } from "./types";
@@ -26,17 +26,21 @@ export function PersonnelMovement() {
   const [requests, setRequests] = useState<PersonnelRequest[]>([]);
   const [jobPositions, setJobPositions] = useState<JobPosition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [employees, setEmployees] = useState<any[]>([]);
 
-  // Fetch job positions from Supabase
+  // Fetch job positions and employees from Supabase
   useEffect(() => {
-    const fetchJobPositions = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      
       try {
-        const { data, error } = await supabase
+        // Fetch job positions
+        const { data: positionsData, error: positionsError } = await supabase
           .from('job_positions')
           .select('*');
         
-        if (error) {
-          console.error('Error fetching job positions:', error);
+        if (positionsError) {
+          console.error('Error fetching job positions:', positionsError);
           toast({
             title: "Erro ao carregar cargos",
             description: "Não foi possível carregar a lista de cargos.",
@@ -45,9 +49,9 @@ export function PersonnelMovement() {
           return;
         }
         
-        if (data) {
+        if (positionsData) {
           // Add required fields to match JobPosition type
-          const formattedPositions: JobPosition[] = data.map((pos: any) => ({
+          const formattedPositions: JobPosition[] = positionsData.map((pos: any) => ({
             id: pos.id,
             title: pos.title,
             department: pos.department,
@@ -74,14 +78,29 @@ export function PersonnelMovement() {
           }));
           setJobPositions(formattedPositions);
         }
+        
+        // Fetch employees
+        const { data: employeesData, error: employeesError } = await supabase
+          .from('employees')
+          .select('*')
+          .eq('status', 'active');
+        
+        if (employeesError) {
+          console.error('Error fetching employees:', employeesError);
+          return;
+        }
+        
+        if (employeesData) {
+          setEmployees(employeesData);
+        }
       } catch (error) {
-        console.error('Error in job positions fetch:', error);
+        console.error('Error in data fetch:', error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchJobPositions();
+    fetchData();
     
     // For demo purposes, we'll continue using the mock requests
     setRequests(mockRequests);
@@ -116,6 +135,26 @@ export function PersonnelMovement() {
     // Find the selected job position to get its details
     const selectedPosition = jobPositions.find(job => job.id === data.position_id);
     
+    // Find requester info
+    const requester = employees.find(emp => emp.id === data.requester_id);
+    
+    // Find manager (superior) of the requester - in a real app this would be fetched from the database
+    // For now, we'll simulate by assuming each department has a head
+    let managerId = undefined;
+    let managerName = "";
+    
+    if (requester) {
+      // Simulate finding the manager based on department
+      // In a real app, you'd look up the org chart
+      for (const emp of employees) {
+        if (emp.department === requester.department && emp.is_department_head) {
+          managerId = emp.id;
+          managerName = emp.name;
+          break;
+        }
+      }
+    }
+    
     // In a real implementation, this would send the data to an API
     const newRequest: PersonnelRequest = {
       id: (requests.length + 1).toString(),
@@ -124,12 +163,15 @@ export function PersonnelMovement() {
       position: data.currentPosition || (selectedPosition ? selectedPosition.title : ""),
       position_id: data.position_id,
       requestDate: new Date().toISOString().split('T')[0],
-      status: "pending",
-      requester: "Usuário Atual", // In a real app, this would be the logged-in user
+      status: "manager_approval", // New status to indicate manager needs to approve
+      requester: requester ? requester.name : "Usuário Atual",
+      requester_id: data.requester_id,
+      manager_id: managerId,
       employeeName: data.employeeName,
       currentSalary: data.currentSalary,
       proposedSalary: data.proposedSalary,
-      justification: data.justification
+      justification: data.justification,
+      hr_observation: ""
     };
     
     setRequests([newRequest, ...requests]);
@@ -137,7 +179,55 @@ export function PersonnelMovement() {
     
     toast({
       title: "Solicitação enviada",
-      description: "Sua solicitação de movimentação foi registrada com sucesso.",
+      description: "Sua solicitação de movimentação foi enviada para aprovação do gestor.",
+      action: (
+        <div className="bg-amber-50 border border-amber-100 px-2 py-1 rounded-md flex items-center gap-2 text-amber-700">
+          <AlertTriangle className="h-4 w-4" />
+          <span className="text-xs">Aguardando aprovação</span>
+        </div>
+      )
+    });
+  };
+
+  // Handle approval of a request
+  const handleApproval = (id: string) => {
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === id 
+          ? { 
+              ...req, 
+              status: "approved", 
+              approved_by: "Gestor",
+              approval_date: new Date().toISOString().split('T')[0]
+            } 
+          : req
+      )
+    );
+    
+    toast({
+      title: "Solicitação aprovada",
+      description: "A solicitação foi aprovada com sucesso.",
+      action: (
+        <div className="bg-green-50 border border-green-100 px-2 py-1 rounded-md flex items-center gap-2 text-green-700">
+          <CheckCircle className="h-4 w-4" />
+          <span className="text-xs">Aprovado</span>
+        </div>
+      )
+    });
+  };
+
+  // Handle rejection of a request
+  const handleRejection = (id: string) => {
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === id ? { ...req, status: "rejected" } : req
+      )
+    );
+    
+    toast({
+      title: "Solicitação rejeitada",
+      description: "A solicitação foi rejeitada.",
+      variant: "destructive"
     });
   };
 
@@ -167,7 +257,11 @@ export function PersonnelMovement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <RequestTable requests={requests} />
+          <RequestTable 
+            requests={requests} 
+            onApprove={handleApproval}
+            onReject={handleRejection}
+          />
         </CardContent>
         <CardFooter className="flex justify-center border-t pt-6">
           <Button variant="outline">

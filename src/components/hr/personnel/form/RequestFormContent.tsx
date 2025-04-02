@@ -45,7 +45,7 @@ export function RequestFormContent({
       {/* Movement Type Selection */}
       <MovementTypeSelector form={form} />
 
-      {/* Employee Section */}
+      {/* Employee Section with Requester */}
       <EmployeeSection form={form} />
 
       {/* Position Section - conditionally shown */}
@@ -80,8 +80,8 @@ export function RequestFormContent({
       {/* Justification Section */}
       <JustificationSection form={form} />
 
-      {/* Signature Section */}
-      <SignatureSection />
+      {/* Updated Signature Section with HR observation */}
+      <SignatureSection form={form} />
     </form>
   );
 }

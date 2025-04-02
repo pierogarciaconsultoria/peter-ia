@@ -18,6 +18,7 @@ export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: Req
       position_id: "",
       justification: "",
       targetDate: "",
+      requester_id: "",
       employeeId: "",
       employeeName: "",
       hireDate: "",
@@ -42,7 +43,8 @@ export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: Req
       admissionType: "",
       terminationType: "",
       justCause: false,
-      noticePeriod: false
+      noticePeriod: false,
+      hr_observation: ""
     }
   });
   
@@ -53,10 +55,13 @@ export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: Req
   const departmentHeads = useMemo(() => {
     return departments.reduce((acc, dept) => {
       if (dept.responsible_name) {
-        acc[dept.name.toLowerCase()] = dept.responsible_name;
+        acc[dept.name.toLowerCase()] = {
+          name: dept.responsible_name,
+          id: dept.responsible_employee_id
+        };
       }
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, { name: string, id: string }>);
   }, [departments]);
   
   // Watch for position_id changes to update department and responsible - optimized with useCallback
@@ -75,7 +80,7 @@ export function useRequestForm(jobPositions: JobPosition[], onSubmit: (data: Req
       const departmentHead = departmentHeads[departmentKey];
       
       if (departmentHead) {
-        console.log("Found department head:", departmentHead);
+        console.log("Found department head:", departmentHead.name, departmentHead.id);
       }
     }
   }, [form, jobPositions, departmentHeads]);

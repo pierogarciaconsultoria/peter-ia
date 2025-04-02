@@ -6,8 +6,13 @@ export interface PersonnelRequest {
   position: string;
   position_id?: string;
   requestDate: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "manager_approval";
   requester: string;
+  requester_id: string;
+  manager_id?: string;
+  approved_by?: string;
+  approval_date?: string;
+  hr_observation?: string;
   employeeName?: string;
   currentSalary?: string;
   proposedSalary?: string;
@@ -17,6 +22,7 @@ export interface PersonnelRequest {
 export interface RequestFormValues {
   type: string;
   department: string;
+  requester_id: string;
   employeeId: string;
   employeeName: string;
   position_id: string;
@@ -45,4 +51,5 @@ export interface RequestFormValues {
   terminationType: string;
   justCause: boolean;
   noticePeriod: boolean;
+  hr_observation?: string;
 }

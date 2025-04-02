@@ -1,97 +1,169 @@
 
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { EmployeeSelector } from "../../departments/EmployeeSelector";
-import { CalendarDays } from "lucide-react";
-import { FormSectionProps } from "./types";
+import { UseFormReturn } from "react-hook-form";
+import { RequestFormValues } from "../types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-export function EmployeeSection({ form }: FormSectionProps) {
+interface Employee {
+  id: string;
+  name: string;
+  position: string;
+  department: string;
+}
+
+export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValues> }) {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [requester, setRequester] = useState<Employee | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Fetch employees from Supabase
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .select('*')
+          .eq('status', 'active');
+          
+        if (error) {
+          console.error('Error fetching employees:', error);
+          return;
+        }
+        
+        if (data) {
+          setEmployees(data);
+        }
+      } catch (error) {
+        console.error('Error in employees fetch:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEmployees();
+  }, []);
+
+  // Update employee info when employee is selected
+  const handleEmployeeChange = (employeeId: string) => {
+    const selectedEmployee = employees.find(emp => emp.id === employeeId);
+    
+    if (selectedEmployee) {
+      form.setValue('employeeId', selectedEmployee.id);
+      form.setValue('employeeName', selectedEmployee.name);
+      form.setValue('currentPosition', selectedEmployee.position);
+      form.setValue('department', selectedEmployee.department);
+    }
+  };
+
+  // Update requester info when requester is selected
+  const handleRequesterChange = (requesterId: string) => {
+    const selectedRequester = employees.find(emp => emp.id === requesterId);
+    
+    if (selectedRequester) {
+      setRequester(selectedRequester);
+      form.setValue('requester_id', selectedRequester.id);
+    }
+  };
+  
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="employeeId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Colaborador</FormLabel>
+    <div className="space-y-4">
+      {/* Requester Selection */}
+      <FormField
+        control={form.control}
+        name="requester_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Requisitante</FormLabel>
+            <Select onValueChange={(value) => {
+              field.onChange(value);
+              handleRequesterChange(value);
+            }} value={field.value}>
               <FormControl>
-                <EmployeeSelector 
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o requisitante" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="department"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Setor</FormLabel>
-              <FormControl>
-                <Input value={field.value} readOnly className="bg-gray-50" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+              <SelectContent>
+                {employees.map((employee) => (
+                  <SelectItem key={employee.id} value={employee.id}>
+                    {employee.name} - {employee.position}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="targetDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>A partir de</FormLabel>
-              <FormControl>
-                <div className="flex items-center">
-                  <CalendarDays className="h-4 w-4 mr-2 text-gray-400" />
-                  <Input type="date" {...field} />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="days"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Dias</FormLabel>
-              <FormControl>
-                <Input placeholder="Número de dias" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {/* Requester Department Info */}
+      {requester && (
+        <div className="bg-muted/20 p-2 rounded-md text-sm">
+          <p><span className="font-medium">Departamento:</span> {requester.department}</p>
+          <p><span className="font-medium">Cargo:</span> {requester.position}</p>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="hireDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data da Admissão</FormLabel>
+      {/* Employee Selection */}
+      <FormField
+        control={form.control}
+        name="employeeId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Colaborador envolvido na movimentação</FormLabel>
+            <Select onValueChange={(value) => {
+              field.onChange(value);
+              handleEmployeeChange(value);
+            }} value={field.value}>
               <FormControl>
-                <div className="flex items-center">
-                  <CalendarDays className="h-4 w-4 mr-2 text-gray-400" />
-                  <Input type="date" {...field} />
-                </div>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione um colaborador" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-    </>
+              <SelectContent>
+                {employees.map((employee) => (
+                  <SelectItem key={employee.id} value={employee.id}>
+                    {employee.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="employeeName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome</FormLabel>
+            <FormControl>
+              <Input placeholder="Nome do colaborador" readOnly {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="targetDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Data prevista para movimentação</FormLabel>
+            <FormControl>
+              <Input type="date" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 }
