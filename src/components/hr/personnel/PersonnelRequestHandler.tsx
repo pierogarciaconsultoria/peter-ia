@@ -31,14 +31,14 @@ export function PersonnelRequestHandler({
       id: uuidv4(),
       type: data.type,
       department: data.department,
-      position: data.position || "",
+      position: data.proposedPosition || "",
       position_id: data.position_id || "",
       requestDate: data.requestDate || new Date().toISOString().split('T')[0],
       status: "pending",
-      requester: data.requester || "Sistema",
+      requester: data.requester_id || "Sistema",
       requester_id: data.requester_id || "",
       employeeName: data.employeeName || "",
-      employeeId: data.employeeId || "",
+      employee_id: data.employeeId || "",
       justification: data.justification || ""
     };
 

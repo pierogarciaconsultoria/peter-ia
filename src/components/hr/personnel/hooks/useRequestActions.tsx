@@ -38,10 +38,10 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     });
     
     // Send notification to the employee about the approved request
-    if (request && request.employeeId) {
+    if (request && request.employee_id) {
       try {
         await createNotification(
-          request.employeeId,
+          request.employee_id,
           "Solicitação Aprovada",
           `Sua solicitação de ${request.type} foi aprovada.`,
           "personnel_request",
@@ -75,10 +75,10 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     });
     
     // Send notification to the employee about the rejected request
-    if (request && request.employeeId) {
+    if (request && request.employee_id) {
       try {
         await createNotification(
-          request.employeeId,
+          request.employee_id,
           "Solicitação Rejeitada",
           `Sua solicitação de ${request.type} foi rejeitada. ${reason ? `Motivo: ${reason}` : ''}`,
           "personnel_request",

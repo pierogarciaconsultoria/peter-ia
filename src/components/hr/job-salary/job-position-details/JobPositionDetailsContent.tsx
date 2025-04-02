@@ -1,218 +1,288 @@
-
-import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { FileCheck } from "lucide-react";
 import { JobPosition } from "../../types";
-import { ISODocument } from "@/utils/isoTypes";
-import { fetchDocumentsForSelection } from "@/services/jobPositionService";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 
 interface JobPositionDetailsContentProps {
   jobPosition: JobPosition;
-  isOpen: boolean;
 }
 
-export function JobPositionDetailsContent({ jobPosition, isOpen }: JobPositionDetailsContentProps) {
-  const [documents, setDocuments] = useState<ISODocument[]>([]);
-
-  // Fetch documents to show proper names
-  useEffect(() => {
-    const loadDocuments = async () => {
-      if (isOpen && jobPosition.required_procedures?.length) {
-        try {
-          const docsData = await fetchDocumentsForSelection();
-          setDocuments(docsData);
-        } catch (error) {
-          console.error("Error loading documents:", error);
-        }
-      }
-    };
-
-    loadDocuments();
-  }, [isOpen, jobPosition.required_procedures]);
-
-  // Helper function to get document title by ID
-  const getDocumentTitleById = (id: string) => {
-    const document = documents.find(doc => doc.id === id);
-    return document ? document.title : id;
-  };
+export function JobPositionDetailsContent({ jobPosition }: JobPositionDetailsContentProps) {
+  const [activeTab, setActiveTab] = useState("general");
   
   return (
-    <div className="space-y-6 py-4">
-      {/* Description and Department */}
+    <div className="space-y-6 py-2 text-sm">
       <div>
-        <h3 className="font-medium">Departamento</h3>
-        <p className="text-sm text-muted-foreground mt-1">{jobPosition.department}</p>
-      </div>
-      
-      <Separator />
-      
-      {/* Description Section */}
-      <div>
-        <h3 className="font-medium">Descrição</h3>
-        <p className="text-sm text-muted-foreground mt-1">{jobPosition.description}</p>
-      </div>
-      
-      <Separator />
-      
-      {/* Approval Information */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="font-medium">Data de Aprovação</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.approval_date || "Não aprovado"}
-          </p>
-        </div>
-        <div>
-          <h3 className="font-medium">Aprovado por</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.approver || "Não aprovado"}
-          </p>
-        </div>
-      </div>
-      
-      <Separator />
-      
-      {/* Supervisor Information */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="font-medium">Superior Imediato</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.immediate_supervisor_position || "Não especificado"}
-          </p>
-        </div>
-        <div>
-          <h3 className="font-medium">É Supervisor</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.is_supervisor ? "Sim" : "Não"}
-          </p>
-        </div>
-      </div>
-      
-      <Separator />
-
-      {/* Department Head Information */}
-      <div>
-        <h3 className="font-medium">Responsável pelo Departamento</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          {jobPosition.is_department_head ? "Sim" : "Não"}
-        </p>
-      </div>
-      
-      <Separator />
-      
-      {/* CBO and Norm */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="font-medium">Código CBO</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.cbo_code || "Não especificado"}
-          </p>
-        </div>
-        <div>
-          <h3 className="font-medium">Norma</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {jobPosition.norm || "Não especificado"}
-          </p>
-        </div>
-      </div>
-      
-      <Separator />
-      
-      {/* Main Responsibilities */}
-      {jobPosition.main_responsibilities && (
-        <>
+        <h4 className="font-medium text-base">Informações Básicas</h4>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
           <div>
-            <h3 className="font-medium">Principais Responsabilidades</h3>
-            <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-              {jobPosition.main_responsibilities}
-            </p>
+            <p className="text-muted-foreground">Código:</p>
+            <p>{jobPosition.code || 'Não especificado'}</p>
           </div>
+          <div>
+            <p className="text-muted-foreground">Departamento:</p>
+            <p>{jobPosition.department || 'Não especificado'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Revisão:</p>
+            <p>{jobPosition.revision || '1.0'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Status:</p>
+            <p className="capitalize">{jobPosition.status || 'draft'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">CBO:</p>
+            <p>{jobPosition.cbo_code || 'Não especificado'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Norma:</p>
+            <p>{jobPosition.norm || 'Não especificada'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Cargo Superior:</p>
+            <p>{jobPosition.immediate_supervisor_position || 'Não especificado'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Cargo de Supervisão:</p>
+            <p>{jobPosition.is_supervisor ? 'Sim' : 'Não'}</p>
+          </div>
+        </div>
+      </div>
+      
+      <Separator />
+      
+      <div>
+        <h4 className="font-medium text-base">Descrição do Cargo</h4>
+        <p className="mt-2">{jobPosition.description || 'Descrição não disponível.'}</p>
+      </div>
+      
+      <Separator />
+      
+      {/* Responsabilidades por nível */}
+      <div>
+        <div className="flex justify-between items-center">
+          <h4 className="font-medium text-base">Principais Responsabilidades</h4>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+            <TabsList>
+              <TabsTrigger value="general">Geral</TabsTrigger>
+              <TabsTrigger value="junior">Júnior</TabsTrigger>
+              <TabsTrigger value="mid">Pleno</TabsTrigger>
+              <TabsTrigger value="senior">Sênior</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <TabsContent value="general" className={activeTab === "general" ? "block mt-2" : "hidden"}>
+          <p>{jobPosition.main_responsibilities || 'Não especificadas'}</p>
+        </TabsContent>
+        
+        <TabsContent value="junior" className={activeTab === "junior" ? "block mt-2" : "hidden"}>
+          <p>{jobPosition.responsibilities_junior || 'Não especificadas para nível Júnior'}</p>
+        </TabsContent>
+        
+        <TabsContent value="mid" className={activeTab === "mid" ? "block mt-2" : "hidden"}>
+          <p>{jobPosition.responsibilities_mid || 'Não especificadas para nível Pleno'}</p>
+        </TabsContent>
+        
+        <TabsContent value="senior" className={activeTab === "senior" ? "block mt-2" : "hidden"}>
+          <p>{jobPosition.responsibilities_senior || 'Não especificadas para nível Sênior'}</p>
+        </TabsContent>
+      </div>
+      
+      <Separator />
+      
+      {/* Competências por nível */}
+      <div>
+        <div className="flex justify-between items-center">
+          <h4 className="font-medium text-base">Competências</h4>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+            <TabsList>
+              <TabsTrigger value="general">Geral</TabsTrigger>
+              <TabsTrigger value="junior">Júnior</TabsTrigger>
+              <TabsTrigger value="mid">Pleno</TabsTrigger>
+              <TabsTrigger value="senior">Sênior</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <TabsContent value="general" className={activeTab === "general" ? "block" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <p className="text-muted-foreground">Formação:</p>
+              <p>{jobPosition.education_requirements || 'Não especificado'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Experiência:</p>
+              <p>{jobPosition.experience_requirements || 'Não especificado'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Habilidades:</p>
+              <p>{jobPosition.skill_requirements || 'Não especificado'}</p>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="junior" className={activeTab === "junior" ? "block" : "hidden"}>
+          <div className="mt-2">
+            <p className="text-muted-foreground">Habilidades - Júnior:</p>
+            <p>{jobPosition.skills_junior || 'Não especificado para nível Júnior'}</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="mid" className={activeTab === "mid" ? "block" : "hidden"}>
+          <div className="mt-2">
+            <p className="text-muted-foreground">Habilidades - Pleno:</p>
+            <p>{jobPosition.skills_mid || 'Não especificado para nível Pleno'}</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="senior" className={activeTab === "senior" ? "block" : "hidden"}>
+          <div className="mt-2">
+            <p className="text-muted-foreground">Habilidades - Sênior:</p>
+            <p>{jobPosition.skills_senior || 'Não especificado para nível Sênior'}</p>
+          </div>
+        </TabsContent>
+      </div>
+      
+      <Separator />
+      
+      {/* Treinamentos por nível */}
+      <div>
+        <div className="flex justify-between items-center">
+          <h4 className="font-medium text-base">Treinamentos</h4>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+            <TabsList>
+              <TabsTrigger value="general">Geral</TabsTrigger>
+              <TabsTrigger value="junior">Júnior</TabsTrigger>
+              <TabsTrigger value="mid">Pleno</TabsTrigger>
+              <TabsTrigger value="senior">Sênior</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <TabsContent value="general" className={activeTab === "general" ? "block" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <p className="text-muted-foreground">Treinamentos Internos:</p>
+              <p>{jobPosition.training_requirements || 'Não especificado'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Treinamentos Externos:</p>
+              <p>{jobPosition.external_training || 'Não especificado'}</p>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="junior" className={activeTab === "junior" ? "block" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <p className="text-muted-foreground">Treinamentos Internos - Júnior:</p>
+              <p>{jobPosition.training_junior || 'Não especificado para nível Júnior'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Treinamentos Externos - Júnior:</p>
+              <p>{jobPosition.external_training_junior || 'Não especificado para nível Júnior'}</p>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="mid" className={activeTab === "mid" ? "block" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <p className="text-muted-foreground">Treinamentos Internos - Pleno:</p>
+              <p>{jobPosition.training_mid || 'Não especificado para nível Pleno'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Treinamentos Externos - Pleno:</p>
+              <p>{jobPosition.external_training_mid || 'Não especificado para nível Pleno'}</p>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="senior" className={activeTab === "senior" ? "block" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <p className="text-muted-foreground">Treinamentos Internos - Sênior:</p>
+              <p>{jobPosition.training_senior || 'Não especificado para nível Sênior'}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Treinamentos Externos - Sênior:</p>
+              <p>{jobPosition.external_training_senior || 'Não especificado para nível Sênior'}</p>
+            </div>
+          </div>
+        </TabsContent>
+      </div>
+      
+      <Separator />
+      
+      {/* Faixas Salariais */}
+      <div>
+        <h4 className="font-medium text-base">Faixas Salariais</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+          <div>
+            <p className="text-muted-foreground">Júnior:</p>
+            <p>{jobPosition.salary_junior || 'Não especificado'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Pleno:</p>
+            <p>{jobPosition.salary_mid || 'Não especificado'}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Sênior:</p>
+            <p>{jobPosition.salary_senior || 'Não especificado'}</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Additional sections remain the same */}
+      {jobPosition.required_procedures && jobPosition.required_procedures.length > 0 && (
+        <>
           <Separator />
+          <div>
+            <h4 className="font-medium text-base">Procedimentos Requeridos</h4>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {jobPosition.required_procedures.map((proc, idx) => (
+                <div key={idx} className="bg-secondary p-1 px-2 rounded text-xs">
+                  {proc}
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       )}
       
-      {/* Competencies */}
-      <div>
-        <h3 className="font-medium">Competências</h3>
-        <div className="mt-3 space-y-3">
+      {jobPosition.required_resources && jobPosition.required_resources.length > 0 && (
+        <>
+          <Separator />
           <div>
-            <h4 className="text-sm font-medium">Educação</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              {jobPosition.education_requirements || "Não especificado"}
-            </p>
+            <h4 className="font-medium text-base">Recursos Necessários</h4>
+            <div className="mt-2">
+              <ul className="list-disc pl-5">
+                {jobPosition.required_resources.map((resource, idx) => (
+                  <li key={idx}>{resource}</li>
+                ))}
+              </ul>
+            </div>
           </div>
+        </>
+      )}
+      
+      {jobPosition.required_ppe && jobPosition.required_ppe.length > 0 && (
+        <>
+          <Separator />
           <div>
-            <h4 className="text-sm font-medium">Habilidades</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              {jobPosition.skill_requirements || "Não especificado"}
-            </p>
+            <h4 className="font-medium text-base">EPIs Necessários</h4>
+            <div className="mt-2">
+              <ul className="list-disc pl-5">
+                {jobPosition.required_ppe.map((ppe, idx) => (
+                  <li key={idx}>{ppe}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div>
-            <h4 className="text-sm font-medium">Treinamento</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              {jobPosition.training_requirements || "Não especificado"}
-            </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium">Experiência</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              {jobPosition.experience_requirements || "Não especificado"}
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <Separator />
-      
-      {/* Required Procedures */}
-      <div>
-        <h3 className="font-medium">Treinamentos necessários (procedimentos)</h3>
-        {jobPosition.required_procedures && jobPosition.required_procedures.length > 0 ? (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {jobPosition.required_procedures.map((procedureId) => (
-              <Badge key={procedureId} className="bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200">
-                <FileCheck className="w-3 h-3 mr-1" />
-                {getDocumentTitleById(procedureId)}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">Nenhum procedimento especificado</p>
-        )}
-      </div>
-      
-      <Separator />
-      
-      {/* Required Resources */}
-      <div>
-        <h3 className="font-medium">Recursos necessários</h3>
-        {jobPosition.required_resources && jobPosition.required_resources.length > 0 ? (
-          <ul className="text-sm text-muted-foreground mt-1 list-disc pl-5 space-y-1">
-            {jobPosition.required_resources.map((resource, index) => (
-              <li key={index}>{resource}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">Nenhum recurso especificado</p>
-        )}
-      </div>
-      
-      <Separator />
-      
-      {/* Required PPE */}
-      <div>
-        <h3 className="font-medium">EPI (Equipamentos de Proteção Individual)</h3>
-        {jobPosition.required_ppe && jobPosition.required_ppe.length > 0 ? (
-          <ul className="text-sm text-muted-foreground mt-1 list-disc pl-5 space-y-1">
-            {jobPosition.required_ppe.map((ppe, index) => (
-              <li key={index}>{ppe}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">Nenhum EPI especificado</p>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
