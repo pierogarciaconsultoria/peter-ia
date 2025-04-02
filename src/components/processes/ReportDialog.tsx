@@ -1,10 +1,9 @@
 
 import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Tabs } from "@/components/ui/tabs";
 import { ReportHeader } from "@/components/processes/report/ReportHeader";
 import { ReportFooter } from "@/components/processes/report/ReportFooter";
-import { ReportTabList } from "@/components/processes/report/ReportTabList";
+import { useReportAnalysis } from "@/components/processes/report/useReportAnalysis";
 import { ReportTabs } from "@/components/processes/report/ReportTabs";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
@@ -28,10 +27,7 @@ export function ReportDialog({
   processId = null
 }: ReportDialogProps) {
   const [activeTab, setActiveTab] = useState("bpmn");
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
+  const { isAnalyzing, analysisData } = useReportAnalysis(processData, open);
 
   const handleDownload = async () => {
     toast.info("Preparando download do relatório...");
@@ -102,17 +98,13 @@ export function ReportDialog({
         />
         
         <div className="flex-1 overflow-y-auto py-4" id="report-content">
-          <Tabs value={activeTab} defaultValue="bpmn" className="w-full">
-            <ReportTabList 
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
-            
-            <ReportTabs 
-              activeTab={activeTab}
-              processData={processData}
-            />
-          </Tabs>
+          <ReportTabs 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            processData={processData}
+            isAnalyzing={isAnalyzing}
+            analysisData={analysisData}
+          />
         </div>
         
         <ReportFooter 
@@ -126,3 +118,4 @@ export function ReportDialog({
     </Dialog>
   );
 }
+

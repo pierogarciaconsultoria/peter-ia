@@ -55,3 +55,4 @@ export function ReportTabs({ activeTab, setActiveTab, processData, isAnalyzing, 
     </Tabs>
   );
 }
+

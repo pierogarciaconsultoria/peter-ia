@@ -30,3 +30,4 @@ export function ReportTabList({ activeTab, onTabChange }: ReportTabListProps) {
     </TabsList>
   );
 }
+
