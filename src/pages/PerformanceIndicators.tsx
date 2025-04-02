@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,16 +12,17 @@ import { ProcessDashboard } from "@/components/indicators/ProcessDashboard";
 import { MonthlyMeasurementForm } from "@/components/indicators/MonthlyMeasurementForm";
 import { getAllIndicators, getAllMeasurements } from "@/services/indicatorService";
 import { IndicatorType, MeasurementType } from "@/types/indicators";
+import { Footer } from "@/components/Footer";
+import { useProcesses } from "@/hooks/useProcesses";
 
 const PerformanceIndicators = () => {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isMeasurementDialogOpen, setIsMeasurementDialogOpen] = useState(false);
-  const [selectedIndicator, setSelectedIndicator] = useState<IndicatorType | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [isMeasurementDialogOpen, setIsMeasurementDialogOpen] = React.useState(false);
+  const [selectedIndicator, setSelectedIndicator] = React.useState<IndicatorType | null>(null);
   
   const queryClient = useQueryClient();
   
-  // Fetch all indicators
   const { 
     data: indicators = [], 
     isLoading: isLoadingIndicators,
@@ -32,7 +32,6 @@ const PerformanceIndicators = () => {
     queryFn: getAllIndicators,
   });
   
-  // Fetch all measurements
   const { 
     data: measurements = [], 
     isLoading: isLoadingMeasurements,
@@ -41,27 +40,74 @@ const PerformanceIndicators = () => {
     queryKey: ["measurements"],
     queryFn: getAllMeasurements,
   });
+
+  const { allProcesses = [] } = useProcesses();
   
-  // Calculate statistics
-  const totalIndicators = indicators.length;
+  const processIndicators = React.useMemo(() => {
+    const result: any[] = [];
+    
+    allProcesses.forEach(process => {
+      if (process.indicators && process.indicators.length) {
+        process.indicators.forEach((indicator: any) => {
+          result.push({
+            ...indicator,
+            processId: process.id,
+            processName: process.name,
+            process: process.type || 'Sem categoria'
+          });
+        });
+      }
+    });
+    
+    return result;
+  }, [allProcesses]);
+  
+  const totalIndicators = indicators.length + processIndicators.length;
   const indicatorsAchievingGoals = indicators.length > 0 && measurements.length > 0 
     ? calculateIndicatorsAchievingGoals(indicators, measurements)
     : 0;
   
-  // Handle opening edit dialog
   const handleEditIndicator = (indicator: IndicatorType) => {
     setSelectedIndicator(indicator);
     setIsEditDialogOpen(true);
   };
   
-  // Handle opening add measurement dialog
   const handleAddMeasurement = (indicator: IndicatorType) => {
     setSelectedIndicator(indicator);
     setIsMeasurementDialogOpen(true);
   };
 
-  // Get unique processes for dashboards
-  const uniqueProcesses = getUniqueProcesses(indicators);
+  const uniqueProcesses = React.useMemo(() => {
+    const allProcesses = new Set<string>();
+    
+    indicators.forEach(ind => {
+      if (ind.process) {
+        allProcesses.add(ind.process);
+      }
+    });
+    
+    processIndicators.forEach(ind => {
+      if (ind.process) {
+        allProcesses.add(ind.process);
+      }
+    });
+    
+    return Array.from(allProcesses);
+  }, [indicators, processIndicators]);
+
+  const processIndicatorsByType = React.useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    
+    processIndicators.forEach(indicator => {
+      const process = indicator.process || 'Sem categoria';
+      if (!grouped[process]) {
+        grouped[process] = [];
+      }
+      grouped[process].push(indicator);
+    });
+    
+    return grouped;
+  }, [processIndicators]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,7 +127,6 @@ const PerformanceIndicators = () => {
             Monitore e analise os indicadores de desempenho da sua organização.
           </p>
           
-          {/* Stats summary */}
           <div className="grid gap-4 md:grid-cols-3 mb-8">
             <StatisticCard 
               title="Indicadores Cadastrados" 
@@ -99,7 +144,7 @@ const PerformanceIndicators = () => {
             />
             <StatisticCard 
               title="Processos Monitorados" 
-              value={countUniqueProcesses(indicators)} 
+              value={uniqueProcesses.length} 
               description="Áreas cobertas" 
               color="bg-purple-500"
               total={10}
@@ -131,6 +176,7 @@ const PerformanceIndicators = () => {
                       process={process}
                       indicators={indicators}
                       measurements={measurements}
+                      processIndicators={processIndicatorsByType[process] || []}
                     />
                   ))}
                 </div>
@@ -176,7 +222,8 @@ const PerformanceIndicators = () => {
         </div>
       </main>
       
-      {/* Dialog for creating a new indicator */}
+      <Footer />
+      
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <IndicatorForm 
           onClose={() => setIsAddDialogOpen(false)} 
@@ -187,7 +234,6 @@ const PerformanceIndicators = () => {
         />
       </Dialog>
       
-      {/* Dialog for editing an indicator */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         {selectedIndicator && (
           <IndicatorForm 
@@ -201,7 +247,6 @@ const PerformanceIndicators = () => {
         )}
       </Dialog>
       
-      {/* Dialog for adding monthly measurements */}
       <Dialog open={isMeasurementDialogOpen} onOpenChange={setIsMeasurementDialogOpen}>
         {selectedIndicator && (
           <MonthlyMeasurementForm 
@@ -218,13 +263,8 @@ const PerformanceIndicators = () => {
   );
 };
 
-// Helper functions
 function countUniqueProcesses(indicators: IndicatorType[]): number {
   return new Set(indicators.map(ind => ind.process)).size;
-}
-
-function getUniqueProcesses(indicators: IndicatorType[]): string[] {
-  return Array.from(new Set(indicators.map(ind => ind.process)));
 }
 
 function calculateIndicatorsAchievingGoals(

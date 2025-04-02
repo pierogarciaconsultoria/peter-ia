@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -8,6 +8,7 @@ import { useProcesses } from "@/hooks/useProcesses";
 import { ProcessHeader } from "@/components/processes/ProcessHeader";
 import { ProcessSearchFilter } from "@/components/processes/ProcessSearchFilter";
 import { ProcessList } from "@/components/processes/ProcessList";
+import { MacroProcessDialog } from "@/components/processes/MacroProcessDialog";
 
 const ProcessoPage = () => {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ const ProcessoPage = () => {
     isLoading,
     clearFilters
   } = useProcesses();
+  
+  const [showMacroProcess, setShowMacroProcess] = useState(false);
 
   // Function to handle creating a new process
   const handleNewProcess = () => {
@@ -28,10 +31,16 @@ const ProcessoPage = () => {
 
   // Function to view process details
   const handleViewProcess = (id: number) => {
-    toast.info(`Visualizando processo ${id}`, {
-      description: "Detalhes do processo serão exibidos em breve.",
-    });
-    // Future implementation: navigate(`/processo/${id}`);
+    navigate(`/processo/${id}`);
+  };
+  
+  // Function to open the macro process dialog
+  const handleMacroProcess = () => {
+    if (processes.length === 0) {
+      toast.info("Não há processos para exibir no diagrama de Macro Processo");
+    } else {
+      setShowMacroProcess(true);
+    }
   };
 
   return (
@@ -40,7 +49,10 @@ const ProcessoPage = () => {
 
       <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-7xl mx-auto">
-          <ProcessHeader handleNewProcess={handleNewProcess} />
+          <ProcessHeader 
+            handleNewProcess={handleNewProcess} 
+            handleMacroProcess={handleMacroProcess}
+          />
           <ProcessSearchFilter 
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -52,6 +64,12 @@ const ProcessoPage = () => {
             isLoading={isLoading}
             handleViewProcess={handleViewProcess}
             clearFilters={clearFilters}
+          />
+          
+          <MacroProcessDialog
+            open={showMacroProcess}
+            onClose={() => setShowMacroProcess(false)}
+            processes={processes}
           />
         </div>
       </main>

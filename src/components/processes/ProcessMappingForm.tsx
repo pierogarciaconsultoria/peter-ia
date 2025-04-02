@@ -1,421 +1,750 @@
-
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { toast } from "sonner";
-import { PlusCircle, Pencil, Trash2 } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import { ProcessActorSelector } from "@/components/processes/ProcessActorSelector";
-import { DocumentSelector } from "@/components/processes/DocumentSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { PlusCircle, X } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
-interface ProcessActivity {
-  id: string;
-  activity: string;
-  actor: string;
-  resources: string;
-  documentation: string;
-}
+import { useProcesses } from "@/hooks/useProcesses";
 
-interface ProcessFormValues {
+interface ProcessIndicator {
   name: string;
-  objective: string;
-  painProblems: string;
-  risks: string;
-  inputRequirements: string;
-  expectedOutput: string;
-  performanceIndicators: string;
-  processType: "gestao" | "negocio" | "apoio";
-  activities: ProcessActivity[];
+  goal: string;
+  current: string;
 }
 
-interface ProcessMappingFormProps {
-  onSubmit: (data: ProcessFormValues) => void;
-  initialData?: ProcessFormValues | null;
-  isEditing?: boolean;
-}
-
-export function ProcessMappingForm({ onSubmit, initialData, isEditing = false }: ProcessMappingFormProps) {
-  const form = useForm<ProcessFormValues>({
-    defaultValues: initialData || {
-      name: "",
-      objective: "",
-      painProblems: "",
-      risks: "",
-      inputRequirements: "",
-      expectedOutput: "",
-      performanceIndicators: "",
-      processType: "negocio",
-      activities: [
-        {
-          id: "1",
-          activity: "",
-          actor: "",
-          resources: "",
-          documentation: ""
-        }
-      ]
-    }
+const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [owner, setOwner] = useState(initialData?.owner || "");
+  const [inputs, setInputs] = useState(initialData?.inputs || []);
+  const [outputs, setOutputs] = useState(initialData?.outputs || []);
+  const [activities, setActivities] = useState(initialData?.activities || []);
+  const [documents, setDocuments] = useState(initialData?.documents || []);
+  const [stakeholders, setStakeholders] = useState(initialData?.stakeholders || []);
+  const [requirements, setRequirements] = useState(initialData?.requirements || []);
+  const [risks, setRisks] = useState(initialData?.risks || []);
+  
+  const [newInput, setNewInput] = useState("");
+  const [newOutput, setNewOutput] = useState("");
+  const [newActivity, setNewActivity] = useState("");
+  const [newDocument, setNewDocument] = useState("");
+  const [newStakeholder, setNewStakeholder] = useState("");
+  const [newRequirement, setNewRequirement] = useState("");
+  const [newRisk, setNewRisk] = useState("");
+  
+  const [indicators, setIndicators] = useState<ProcessIndicator[]>(
+    initialData?.indicators || []
+  );
+  const [newIndicator, setNewIndicator] = useState<ProcessIndicator>({
+    name: "",
+    goal: "",
+    current: ""
   });
+  const [processType, setProcessType] = useState(initialData?.type || "");
+  const { processTypes } = useProcesses();
 
   useEffect(() => {
     if (initialData) {
-      // Reset form with initial data when it becomes available
-      form.reset(initialData);
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setOwner(initialData.owner || "");
+      setInputs(initialData.inputs || []);
+      setOutputs(initialData.outputs || []);
+      setActivities(initialData.activities || []);
+      setDocuments(initialData.documents || []);
+      setStakeholders(initialData.stakeholders || []);
+      setRequirements(initialData.requirements || []);
+      setRisks(initialData.risks || []);
+      setIndicators(initialData.indicators || []);
+      setProcessType(initialData.type || "");
     }
-  }, [initialData, form]);
+  }, [initialData]);
 
-  const { fields, append, remove } = useFieldArray({
-    name: "activities",
-    control: form.control
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleFormSubmit = (values: ProcessFormValues) => {
-    setIsSubmitting(true);
-
-    try {
-      // In a real application, you would save this to your database here
-      console.log("Process form values:", values);
-      toast.success(isEditing ? "Processo atualizado com sucesso!" : "Mapeamento de processo salvo com sucesso!");
-      
-      // Pass the data to the parent component
-      onSubmit(values);
-    } catch (error) {
-      console.error("Error submitting process form:", error);
-      toast.error("Erro ao salvar o mapeamento de processo.");
-    } finally {
-      setIsSubmitting(false);
+  const handleAddInput = () => {
+    if (newInput) {
+      setInputs([...inputs, { id: Date.now(), input: newInput }]);
+      setNewInput("");
     }
   };
 
-  const addNewActivity = () => {
-    append({
-      id: `activity-${Date.now()}`,
-      activity: "",
-      actor: "",
-      resources: "",
-      documentation: ""
-    });
+  const handleRemoveInput = (index: number) => {
+    const updatedInputs = [...inputs];
+    updatedInputs.splice(index, 1);
+    setInputs(updatedInputs);
+  };
+
+  const handleAddOutput = () => {
+    if (newOutput) {
+      setOutputs([...outputs, { id: Date.now(), output: newOutput }]);
+      setNewOutput("");
+    }
+  };
+
+  const handleRemoveOutput = (index: number) => {
+    const updatedOutputs = [...outputs];
+    updatedOutputs.splice(index, 1);
+    setOutputs(updatedOutputs);
+  };
+
+  const handleAddActivity = () => {
+    if (newActivity) {
+      setActivities([...activities, { id: Date.now(), activity: newActivity }]);
+      setNewActivity("");
+    }
+  };
+
+  const handleRemoveActivity = (index: number) => {
+    const updatedActivities = [...activities];
+    updatedActivities.splice(index, 1);
+    setActivities(updatedActivities);
+  };
+
+  const handleAddDocument = () => {
+    if (newDocument) {
+      setDocuments([...documents, { id: Date.now(), document: newDocument }]);
+      setNewDocument("");
+    }
+  };
+
+  const handleRemoveDocument = (index: number) => {
+    const updatedDocuments = [...documents];
+    updatedDocuments.splice(index, 1);
+    setDocuments(updatedDocuments);
+  };
+
+  const handleAddStakeholder = () => {
+    if (newStakeholder) {
+      setStakeholders([...stakeholders, { id: Date.now(), stakeholder: newStakeholder }]);
+      setNewStakeholder("");
+    }
+  };
+
+  const handleRemoveStakeholder = (index: number) => {
+    const updatedStakeholders = [...stakeholders];
+    updatedStakeholders.splice(index, 1);
+    setStakeholders(updatedStakeholders);
+  };
+
+  const handleAddRequirement = () => {
+    if (newRequirement) {
+      setRequirements([...requirements, { id: Date.now(), requirement: newRequirement }]);
+      setNewRequirement("");
+    }
+  };
+
+  const handleRemoveRequirement = (index: number) => {
+    const updatedRequirements = [...requirements];
+    updatedRequirements.splice(index, 1);
+    setRequirements(updatedRequirements);
+  };
+
+  const handleAddRisk = () => {
+    if (newRisk) {
+      setRisks([...risks, { id: Date.now(), risk: newRisk }]);
+      setNewRisk("");
+    }
+  };
+
+  const handleRemoveRisk = (index: number) => {
+    const updatedRisks = [...risks];
+    updatedRisks.splice(index, 1);
+    setRisks(updatedRisks);
+  };
+
+  const handleAddIndicator = () => {
+    if (newIndicator.name && newIndicator.goal) {
+      setIndicators([...indicators, { ...newIndicator, id: Date.now() }]);
+      setNewIndicator({ name: "", goal: "", current: "" });
+    }
+  };
+
+  const handleRemoveIndicator = (index: number) => {
+    const updatedIndicators = [...indicators];
+    updatedIndicators.splice(index, 1);
+    setIndicators(updatedIndicators);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!name || !description || !owner) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    // Criar objeto de processo com todos os dados
+    const processData = {
+      name,
+      description,
+      owner,
+      status: "active",
+      lastUpdated: new Date().toISOString().split("T")[0],
+      risks: risks.length,
+      documents: documents.length,
+      inputs,
+      outputs,
+      activities,
+      documents,
+      stakeholders,
+      requirements,
+      risks,
+      indicators,
+      type: processType
+    };
+
+    onSubmit(processData);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{isEditing ? "Editar Processo" : "Mapeamento de Processos"}</h1>
-        <p className="text-muted-foreground mt-2">
-          Preencha o formulário abaixo para mapear {isEditing ? "o" : "um novo"} processo utilizando a metodologia SIPOC
-        </p>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-          <div className="grid md:grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome do Processo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite o nome do processo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="objective"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Objetivo do processo</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva o objetivo principal deste processo" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="painProblems"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dores/Problemas</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva as dores ou problemas relacionados ao processo" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="risks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Riscos</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Identifique os riscos associados ao processo" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="processType"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Tipo de Processo</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="gestao" id="r1" />
-                        <Label htmlFor="r1">Gestão</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="negocio" id="r2" />
-                        <Label htmlFor="r2">Negócio</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="apoio" id="r3" />
-                        <Label htmlFor="r3">Apoio</Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="inputRequirements"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Requisitos de entrada (início do processo)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Liste os requisitos necessários para iniciar o processo" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="expectedOutput"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Resultado esperado do processo</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva qual é o resultado esperado após a conclusão do processo" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="performanceIndicators"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Indicadores de Desempenho (KPIs)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Liste os principais indicadores de desempenho que serão utilizados para medir o sucesso deste processo (ex: tempo médio de ciclo, taxa de erros, satisfação do cliente)" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Atividades do Processo</h3>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Informações Básicas do Processo</CardTitle>
+          <CardDescription>
+            Forneça as informações principais do processo
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome do Processo</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Gestão de Pedidos"
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="owner">Responsável</Label>
+              <Input
+                id="owner"
+                value={owner}
+                onChange={(e) => setOwner(e.target.value)}
+                placeholder="Ex: Departamento Comercial"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descreva o propósito e escopo do processo..."
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="processType">Tipo de Processo</Label>
+            <div className="flex gap-2">
+              <Select
+                value={processType}
+                onValueChange={(value) => setProcessType(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Comercial">Comercial</SelectItem>
+                  <SelectItem value="Produção">Produção</SelectItem>
+                  <SelectItem value="Suporte">Suporte</SelectItem>
+                  <SelectItem value="Gestão">Gestão</SelectItem>
+                  <SelectItem value="Administrativo">Administrativo</SelectItem>
+                  {processTypes.map(type => 
+                    !["Comercial", "Produção", "Suporte", "Gestão", "Administrativo"].includes(type) && (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+              
+              <Input
+                placeholder="Ou digite um novo tipo"
+                value={!processTypes.includes(processType) && !["Comercial", "Produção", "Suporte", "Gestão", "Administrativo"].includes(processType) ? processType : ""}
+                onChange={(e) => setProcessType(e.target.value)}
+                className="w-1/2"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="bg-muted/40 rounded-md p-4">
-              <div className="grid grid-cols-12 gap-2 mb-2 text-sm font-medium text-muted-foreground">
-                <div className="col-span-3">Atividade</div>
-                <div className="col-span-2">Ator do Processo</div>
-                <div className="col-span-3">Recursos</div>
-                <div className="col-span-3">Documentação</div>
-                <div className="col-span-1">Ações</div>
+      <Accordion type="single" collapsible>
+        <AccordionItem value="inputs">
+          <AccordionTrigger>Entradas</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newInput}
+                  onChange={(e) => setNewInput(e.target.value)}
+                  placeholder="Nova entrada"
+                />
+                <Button type="button" onClick={handleAddInput} disabled={!newInput}>
+                  Adicionar
+                </Button>
+              </div>
+              {inputs.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Entrada</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {inputs.map((input, index) => (
+                        <TableRow key={input.id}>
+                          <TableCell className="font-medium">{input.input}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveInput(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhuma entrada adicionada
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="outputs">
+          <AccordionTrigger>Saídas</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newOutput}
+                  onChange={(e) => setNewOutput(e.target.value)}
+                  placeholder="Nova saída"
+                />
+                <Button type="button" onClick={handleAddOutput} disabled={!newOutput}>
+                  Adicionar
+                </Button>
+              </div>
+              {outputs.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Saída</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {outputs.map((output, index) => (
+                        <TableRow key={output.id}>
+                          <TableCell className="font-medium">{output.output}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveOutput(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhuma saída adicionada
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="activities">
+          <AccordionTrigger>Atividades</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newActivity}
+                  onChange={(e) => setNewActivity(e.target.value)}
+                  placeholder="Nova atividade"
+                />
+                <Button type="button" onClick={handleAddActivity} disabled={!newActivity}>
+                  Adicionar
+                </Button>
+              </div>
+              {activities.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Atividade</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activities.map((activity, index) => (
+                        <TableRow key={activity.id}>
+                          <TableCell className="font-medium">{activity.activity}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveActivity(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhuma atividade adicionada
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="documents">
+          <AccordionTrigger>Documentos</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newDocument}
+                  onChange={(e) => setNewDocument(e.target.value)}
+                  placeholder="Novo documento"
+                />
+                <Button type="button" onClick={handleAddDocument} disabled={!newDocument}>
+                  Adicionar
+                </Button>
+              </div>
+              {documents.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Documento</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {documents.map((document, index) => (
+                        <TableRow key={document.id}>
+                          <TableCell className="font-medium">{document.document}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveDocument(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhum documento adicionado
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="stakeholders">
+          <AccordionTrigger>Partes Interessadas</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newStakeholder}
+                  onChange={(e) => setNewStakeholder(e.target.value)}
+                  placeholder="Nova parte interessada"
+                />
+                <Button type="button" onClick={handleAddStakeholder} disabled={!newStakeholder}>
+                  Adicionar
+                </Button>
+              </div>
+              {stakeholders.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Parte Interessada</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stakeholders.map((stakeholder, index) => (
+                        <TableRow key={stakeholder.id}>
+                          <TableCell className="font-medium">{stakeholder.stakeholder}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveStakeholder(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhuma parte interessada adicionada
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="requirements">
+          <AccordionTrigger>Requisitos</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newRequirement}
+                  onChange={(e) => setNewRequirement(e.target.value)}
+                  placeholder="Novo requisito"
+                />
+                <Button type="button" onClick={handleAddRequirement} disabled={!newRequirement}>
+                  Adicionar
+                </Button>
+              </div>
+              {requirements.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Requisito</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {requirements.map((requirement, index) => (
+                        <TableRow key={requirement.id}>
+                          <TableCell className="font-medium">{requirement.requirement}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveRequirement(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhum requisito adicionado
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="risks">
+          <AccordionTrigger>Riscos</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newRisk}
+                  onChange={(e) => setNewRisk(e.target.value)}
+                  placeholder="Novo risco"
+                />
+                <Button type="button" onClick={handleAddRisk} disabled={!newRisk}>
+                  Adicionar
+                </Button>
+              </div>
+              {risks.length > 0 ? (
+                <div className="border rounded-md mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Risco</TableHead>
+                        <TableHead className="w-[100px]">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {risks.map((risk, index) => (
+                        <TableRow key={risk.id}>
+                          <TableCell className="font-medium">{risk.risk}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveRisk(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center p-4 text-muted-foreground">
+                  Nenhum risco adicionado
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicadores de Desempenho</CardTitle>
+          <CardDescription>
+            Defina os indicadores para monitorar o desempenho do processo
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label>Nome do Indicador</Label>
+                <Input
+                  value={newIndicator.name}
+                  onChange={(e) =>
+                    setNewIndicator({ ...newIndicator, name: e.target.value })
+                  }
+                  placeholder="Ex: Taxa de Conversão"
+                />
+              </div>
+              <div>
+                <Label>Meta</Label>
+                <Input
+                  value={newIndicator.goal}
+                  onChange={(e) =>
+                    setNewIndicator({ ...newIndicator, goal: e.target.value })
+                  }
+                  placeholder="Ex: 5%"
+                />
+              </div>
+              <div>
+                <Label>Situação Atual</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newIndicator.current}
+                    onChange={(e) =>
+                      setNewIndicator({ ...newIndicator, current: e.target.value })
+                    }
+                    placeholder="Ex: 4.2%"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddIndicator}
+                    disabled={!newIndicator.name || !newIndicator.goal}
+                  >
+                    Adicionar
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {fields.map((field, index) => (
-              <Card key={field.id} className="border border-muted">
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-3">
-                      <FormField
-                        control={form.control}
-                        name={`activities.${index}.activity`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Descreva a atividade a ser realizada"
-                                className="min-h-[80px] text-sm"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <FormField
-                        control={form.control}
-                        name={`activities.${index}.actor`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <ProcessActorSelector
-                                value={field.value}
-                                onChange={field.onChange}
-                                placeholder="Selecionar responsável"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="col-span-3">
-                      <FormField
-                        control={form.control}
-                        name={`activities.${index}.resources`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Liste os recursos necessários para a execução"
-                                className="min-h-[80px] text-sm"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="col-span-3">
-                      <FormField
-                        control={form.control}
-                        name={`activities.${index}.documentation`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <DocumentSelector
-                                value={field.value}
-                                onChange={field.onChange}
-                                placeholder="Selecionar documento"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="col-span-1 flex items-center justify-center">
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addNewActivity}
-              className="mt-2"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" /> Adicionar Atividade
-            </Button>
+            {indicators.length > 0 ? (
+              <div className="border rounded-md mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome do Indicador</TableHead>
+                      <TableHead>Meta</TableHead>
+                      <TableHead>Situação Atual</TableHead>
+                      <TableHead className="w-[100px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {indicators.map((indicator, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{indicator.name}</TableCell>
+                        <TableCell>{indicator.goal}</TableCell>
+                        <TableCell>{indicator.current}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveIndicator(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center p-4 text-muted-foreground">
+                Nenhum indicador adicionado
+              </div>
+            )}
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              size="lg"
-              className="bg-teal-700 hover:bg-teal-800"
-            >
-              {isSubmitting ? "Salvando..." : isEditing ? "Atualizar Processo" : "Salvar Mapeamento"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+      <div className="flex justify-end gap-2">
+        <Button type="submit">
+          {isEditing ? "Salvar Alterações" : "Criar Processo"}
+        </Button>
+      </div>
+    </form>
   );
-}
+};
+
+export default ProcessMappingForm;
