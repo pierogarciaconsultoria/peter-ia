@@ -44,7 +44,7 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" onClick={handleCTAClick} className="gap-2">
+          <Button size="lg" onClick={handleCTAClick} className="gap-2 bg-red-600 hover:bg-red-700">
             Resolver Meus Problemas de Gestão
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -68,12 +68,12 @@ export default function LandingPage() {
           <FeatureCard 
             icon={<BarChart className="h-10 w-10 text-primary" />}
             title="Planejamento Estratégico"
-            description="Desenvolva estratégias inteligentes com análises preditivas e recomendações baseadas em IA para alcançar resultados superiores."
+            description="Desenvolva estratégias inteligentes com análises preventivas e recomendações baseadas em IA para alcançar resultados superiores."
           />
           <FeatureCard 
             icon={<Briefcase className="h-10 w-10 text-primary" />}
             title="Gestão da Qualidade"
-            description="Automatize processos ISO 9000 e monitore indicadores em tempo real com dashboards e alertas inteligentes."
+            description="Automatize processos ISO 9001 e monitore indicadores em tempo real com dashboards e alertas inteligentes."
           />
           <FeatureCard 
             icon={<Users className="h-10 w-10 text-primary" />}
@@ -101,8 +101,8 @@ export default function LandingPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <BenefitCard 
-              title="Análise Preditiva"
-              description="Antecipe tendências e comportamentos com modelos preditivos que analisam dados históricos e atuais."
+              title="Análise Preventiva"
+              description="Antecipe tendências e comportamentos com modelos preventivos que analisam dados históricos e atuais."
             />
             <BenefitCard 
               title="Automação Inteligente"
@@ -136,7 +136,11 @@ export default function LandingPage() {
             Entre para nossa comunidade de empresas que utilizam inteligência artificial
             para revolucionar seus processos e resultados.
           </p>
-          <Button size="lg" onClick={handleCTAClick} className="gap-2">
+          <Button 
+            size="lg" 
+            onClick={handleCTAClick} 
+            className="gap-2 bg-red-600 hover:bg-red-700"
+          >
             <MessageSquare className="h-4 w-4" />
             Falar com um Especialista
           </Button>
@@ -202,7 +206,7 @@ export default function LandingPage() {
             size="lg" 
             variant="secondary" 
             onClick={handleCTAClick} 
-            className="text-primary font-bold text-lg px-8"
+            className="text-primary font-bold text-lg px-8 bg-red-600 hover:bg-red-700 text-white"
           >
             QUERO TRANSFORMAR MINHA EMPRESA AGORA
           </Button>
