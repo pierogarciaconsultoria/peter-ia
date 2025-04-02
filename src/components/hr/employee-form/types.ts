@@ -22,6 +22,8 @@ export interface EmployeeFormData {
   spouse: string;
   dependents: {
     name: string;
+    relationship: string;
+    phone: string;
     birthDate: Date | null;
   }[];
   notes: string;

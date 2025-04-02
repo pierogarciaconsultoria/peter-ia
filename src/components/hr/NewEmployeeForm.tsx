@@ -19,15 +19,15 @@ interface NewEmployeeFormProps {
 
 export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmployeeFormData>({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     whatsapp: "",
     address: "",
-    birthDate: null as Date | null,
-    hireDate: null as Date | null,
+    birthDate: null,
+    hireDate: null,
     department: "",
     jobTitle: "",
     salary: "",
@@ -38,7 +38,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
     cpf: "",
     carteiraDigitalLink: "",
     spouse: "",
-    dependents: [{ name: "", relationship: "", phone: "", birthDate: null as Date | null }],
+    dependents: [{ name: "", relationship: "", phone: "", birthDate: null }],
     notes: "",
   });
   
@@ -53,7 +53,7 @@ export function NewEmployeeForm({ onCancel }: NewEmployeeFormProps) {
   const [selectedJobPosition, setSelectedJobPosition] = useState<JobPosition | null>(null);
 
   // Function to update form data that conforms to EmployeeFormData type
-  const updateFormData = (data: Partial<typeof formData>) => {
+  const updateFormData = (data: Partial<EmployeeFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
