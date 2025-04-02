@@ -65,7 +65,7 @@ export function SuperiorPositionSelector({ value, departmentFilter, onChange }: 
     : positions;
 
   return (
-    <Select value={value} onValueChange={onChange} disabled={isLoading}>
+    <Select value={value || "none"} onValueChange={onChange} disabled={isLoading}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Selecione um cargo superior" />
       </SelectTrigger>

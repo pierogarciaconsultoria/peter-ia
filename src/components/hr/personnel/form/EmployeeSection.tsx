@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
@@ -80,7 +81,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
             <Select onValueChange={(value) => {
               field.onChange(value);
               handleRequesterChange(value);
-            }} value={field.value}>
+            }} value={field.value || "default"}>
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o requisitante" />
@@ -117,7 +118,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
             <Select onValueChange={(value) => {
               field.onChange(value);
               handleEmployeeChange(value);
-            }} value={field.value}>
+            }} value={field.value || "default"}>
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione um colaborador" />

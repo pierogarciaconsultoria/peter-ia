@@ -162,7 +162,7 @@ export function TrainingFilterBar({
               <SelectValue placeholder="Todos os departamentos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os departamentos</SelectItem>
+              <SelectItem value="all">Todos os departamentos</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept} value={dept}>
                   {dept}
@@ -183,7 +183,7 @@ export function TrainingFilterBar({
               <SelectValue placeholder="Todos os colaboradores" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os colaboradores</SelectItem>
+              <SelectItem value="all">Todos os colaboradores</SelectItem>
               {filteredEmployees.map((emp) => (
                 <SelectItem key={emp.id} value={emp.id}>
                   {emp.name}
@@ -204,7 +204,7 @@ export function TrainingFilterBar({
               <SelectValue placeholder="Todos os procedimentos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os procedimentos</SelectItem>
+              <SelectItem value="all">Todos os procedimentos</SelectItem>
               {procedures.map((proc) => (
                 <SelectItem key={proc} value={proc}>
                   {proc}

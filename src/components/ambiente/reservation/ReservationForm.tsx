@@ -113,7 +113,7 @@ export function ReservationForm({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    value={field.value}
+                    value={field.value || "default-room"}
                   >
                     <FormControl>
                       <SelectTrigger>

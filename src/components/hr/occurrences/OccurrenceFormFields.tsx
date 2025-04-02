@@ -74,7 +74,7 @@ export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
               <FormLabel>Tipo de Ocorrência</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value}
+                defaultValue={field.value || "warning"}
               >
                 <FormControl>
                   <SelectTrigger className="w-full">

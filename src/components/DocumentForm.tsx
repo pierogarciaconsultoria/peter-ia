@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -178,7 +177,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             Categoria *
           </Label>
           <Select
-            value={formData.document_type}
+            value={formData.document_type || "policy"}
             onValueChange={(value) => handleSelectChange("document_type", value)}
           >
             <SelectTrigger className="col-span-3">
@@ -226,7 +225,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             Requisito ISO *
           </Label>
           <Select
-            value={formData.associated_requirement}
+            value={formData.associated_requirement || "4.1"}
             onValueChange={(value) => handleSelectChange("associated_requirement", value)}
           >
             <SelectTrigger className="col-span-3">

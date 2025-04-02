@@ -53,7 +53,7 @@ export function SelectGroup({
             options.map(option => (
               <SelectItem 
                 key={option.value} 
-                value={option.value}
+                value={option.value || "default-value"}
                 className="cursor-pointer hover:bg-muted focus:bg-muted"
               >
                 {option.label}
