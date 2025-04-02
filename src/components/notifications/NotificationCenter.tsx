@@ -1,172 +1,160 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { supabase } from '@/integrations/supabase/client';
-import { Notification, getNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '@/services/notificationService';
-import { useToast } from '@/hooks/use-toast';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead, Notification } from "@/services/notificationService";
+import { useToast } from "@/hooks/use-toast";
 
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
   const { toast } = useToast();
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
-    if (!user) return;
-    
-    const fetchNotifications = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await getNotifications(user.id);
-        
-        if (error) throw error;
-        
-        setNotifications(data || []);
-        setUnreadCount(data?.filter(n => !n.read).length || 0);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchNotifications();
-
-    // Subscribe to notifications channel
-    const channel = supabase
-      .channel('table-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        payload => {
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
-          
-          // Show toast for new notification
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, toast]);
+  }, []);
+  
+  const fetchNotifications = async () => {
+    setIsLoading(true);
+    try {
+      // For demo purposes, using a static user ID
+      // In a real app, this would come from your auth context/session
+      const currentUserId = "current-user-id";
+      const { data, error } = await getNotifications(currentUserId);
+      if (error) throw error;
+      if (data) {
+        setNotifications(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load notifications",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      const { error } = await markNotificationAsRead(notificationId);
-      
+      const { success, error } = await markNotificationAsRead(notificationId);
       if (error) throw error;
       
-      setNotifications(prevNotifications => 
-        prevNotifications.map(n => 
-          n.id === notificationId ? { ...n, read: true } : n
-        )
-      );
-      
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      if (success) {
+        setNotifications(prev => 
+          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        );
+      }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      if (!user) return;
-      
-      const { error } = await markAllNotificationsAsRead(user.id);
-      
+      // For demo purposes, using a static user ID
+      const currentUserId = "current-user-id";
+      const { success, error } = await markAllNotificationsAsRead(currentUserId);
       if (error) throw error;
       
-      setNotifications(prevNotifications => 
-        prevNotifications.map(n => ({ ...n, read: true }))
-      );
-      
-      setUnreadCount(0);
+      if (success) {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        toast({
+          title: "Success",
+          description: "All notifications marked as read",
+        });
+      }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to mark notifications as read",
+      });
     }
   };
-  
-  if (!user) return null;
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-[1.2rem] w-[1.2rem]" />
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative p-2" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </Badge>
           )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h3 className="font-medium">Notificações</h3>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80">
+        <div className="flex items-center justify-between px-4 py-2">
+          <h2 className="font-semibold">Notifications</h2>
           {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleMarkAllAsRead} 
-              className="text-xs h-auto py-1"
-            >
-              Marcar todas como lidas
+            <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
+              Mark all as read
             </Button>
           )}
         </div>
-        <div className="max-h-[300px] overflow-y-auto">
+        <Separator />
+        <ScrollArea className="h-[300px]">
           {isLoading ? (
-            <div className="flex justify-center items-center p-6">
-              <span className="text-sm text-muted-foreground">Carregando...</span>
+            <div className="flex items-center justify-center p-4">
+              <span className="text-sm text-gray-500">Loading...</span>
             </div>
-          ) : notifications.length > 0 ? (
-            <div className="divide-y">
-              {notifications.map(notification => (
-                <div 
-                  key={notification.id}
-                  className={`p-4 cursor-pointer hover:bg-accent transition-colors ${!notification.read ? 'bg-accent/30' : ''}`}
-                  onClick={() => {
-                    if (!notification.read) handleMarkAsRead(notification.id);
-                    if (notification.link) window.location.href = notification.link;
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="text-sm font-medium">{notification.title}</h4>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(notification.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{notification.message}</p>
-                </div>
-              ))}
+          ) : notifications.length === 0 ? (
+            <div className="flex items-center justify-center p-4">
+              <span className="text-sm text-gray-500">No notifications</span>
             </div>
           ) : (
-            <div className="flex justify-center items-center p-6">
-              <span className="text-sm text-muted-foreground">Nenhuma notificação</span>
+            <div>
+              {notifications.map((notification) => (
+                <DropdownMenuItem key={notification.id} className="cursor-pointer">
+                  <div 
+                    className={`w-full p-2 ${!notification.read ? "bg-muted/50" : ""}`}
+                    onClick={() => !notification.read && handleMarkAsRead(notification.id)}
+                  >
+                    <div className="flex justify-between">
+                      <span className="font-medium">{notification.title}</span>
+                      {!notification.read && (
+                        <Badge variant="outline" className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs text-gray-400">
+                        {new Date(notification.created_at).toLocaleString()}
+                      </span>
+                      {notification.link && (
+                        <a 
+                          href={notification.link} 
+                          className="text-xs text-blue-500 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              ))}
             </div>
           )}
-        </div>
-      </PopoverContent>
-    </Popover>
+        </ScrollArea>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -121,8 +120,8 @@ export function TrialEvaluationDialog({
             "Trial Evaluation Needs Approval",
             `A trial evaluation for ${initialData.employee?.name || 'an employee'} has been completed and needs HR approval.`,
             "trial_evaluation",
-            `/human-resources/trial-evaluation/${initialData.id}`,
-            initialData.id
+            initialData.id,
+            `/human-resources/trial-evaluation/${initialData.id}`
           );
         } catch (err) {
           console.error("Failed to send notification:", err);

@@ -13,6 +13,9 @@ export interface Notification {
   reference_id?: string;
 }
 
+/**
+ * Creates a notification for a user
+ */
 export async function createNotification(
   userId: string,
   title: string,
@@ -40,6 +43,9 @@ export async function createNotification(
   }
 }
 
+/**
+ * Marks a notification as read
+ */
 export async function markNotificationAsRead(
   notificationId: string
 ): Promise<{ success: boolean; error?: any }> {
@@ -57,6 +63,9 @@ export async function markNotificationAsRead(
   }
 }
 
+/**
+ * Marks all notifications of a user as read
+ */
 export async function markAllNotificationsAsRead(
   userId: string
 ): Promise<{ success: boolean; error?: any }> {
@@ -75,6 +84,9 @@ export async function markAllNotificationsAsRead(
   }
 }
 
+/**
+ * Gets all notifications for a user
+ */
 export async function getNotifications(
   userId: string
 ): Promise<{ data: Notification[] | null; error?: any }> {
