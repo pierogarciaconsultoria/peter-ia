@@ -1,20 +1,24 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useLogin = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  // Placeholder functions that don't perform authentication
+  // Placeholder function that redirects to the home page
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login functionality disabled");
+    console.log("Login desativado, redirecionando para home");
+    navigate("/");
   };
 
   const handleDirectAdminLogin = () => {
-    console.log("Admin login functionality disabled");
+    console.log("Admin login desativado, redirecionando para home");
+    navigate("/");
   };
 
   return {

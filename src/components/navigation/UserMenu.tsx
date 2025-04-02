@@ -90,10 +90,9 @@ export function UserMenu() {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
-          Login
+        <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+          Início
         </Button>
       )}
     </div>
   );
-}
