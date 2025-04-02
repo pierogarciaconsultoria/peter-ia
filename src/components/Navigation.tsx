@@ -14,10 +14,11 @@ export function Navigation() {
     setIsOpen(false);
   }, [location.pathname]);
 
-  return <>
-    <MenuToggle isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
-    <UserMenu />
-    <Sidebar isOpen={isOpen} />
-  </>;
+  return (
+    <>
+      <MenuToggle isOpen={isOpen} toggleMenu={() => setIsOpen(!isOpen)} />
+      <UserMenu />
+      <Sidebar isOpen={isOpen} />
+    </>
+  );
 }
-

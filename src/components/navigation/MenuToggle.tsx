@@ -12,7 +12,7 @@ export function MenuToggle({ isOpen, toggleMenu }: MenuToggleProps) {
     <Button 
       variant="ghost" 
       size="icon" 
-      className="fixed top-4 left-4 z-50 md:hidden" 
+      className="fixed top-5 left-5 z-50 md:hidden" 
       onClick={toggleMenu}
     >
       {isOpen ? <X size={20} /> : <Menu size={20} />}

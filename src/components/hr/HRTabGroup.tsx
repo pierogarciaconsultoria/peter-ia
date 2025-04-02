@@ -22,23 +22,23 @@ export function HRTabGroup({ tabGroups, activeTab, setActiveTab }: HRTabGroupPro
     ?.subTabs || [];
 
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md shadow-sm">
       <ScrollArea className="w-full">
         <div className="flex p-2 min-w-max">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex w-full h-auto bg-transparent p-1 gap-1">
+            <TabsList className="flex w-full h-auto bg-transparent p-1 gap-2">
               {activeGroupTabs.map(tab => (
                 <Tooltip key={tab.id}>
                   <TooltipTrigger asChild>
                     <TabsTrigger 
                       value={tab.id}
-                      className="flex items-center gap-2 h-10 rounded-md px-4 py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      className="flex items-center gap-2 h-9 rounded-md px-4 py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                     >
                       {tab.icon && <span className="hidden md:inline">{tab.icon}</span>}
                       <span>{tab.name}</span>
                     </TabsTrigger>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="bottom">
                     <p>{tab.name}</p>
                   </TooltipContent>
                 </Tooltip>

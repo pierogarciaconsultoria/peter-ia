@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,7 +40,7 @@ export function UserMenu() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-5 right-5 z-50">
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -57,8 +56,8 @@ export function UserMenu() {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-56"
-            sideOffset={8}
+            className="w-56 mr-1"
+            sideOffset={10}
           >
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
