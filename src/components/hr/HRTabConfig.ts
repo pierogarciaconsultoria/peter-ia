@@ -41,6 +41,12 @@ export const hrTabGroups: TabGroup[] = [
         icon: createIcon(icons.UserCircle)
       },
       { 
+        id: "employee-costs", 
+        name: "Gestão de Custos", 
+        component: "EmployeeCostManagement",
+        icon: createIcon(icons.DollarSign)
+      },
+      { 
         id: "onboarding", 
         name: "Integração", 
         component: "EmployeeOnboarding",

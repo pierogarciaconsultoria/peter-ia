@@ -24,6 +24,7 @@ import { VacationManagement } from "./VacationManagement";
 import { MaturityThermometer } from "./MaturityThermometer";
 import { EmployeeBoard } from "./EmployeeBoard";
 import { AmbienteContent } from "./AmbienteContent";
+import { EmployeeCostManagement } from "./employee-costs/EmployeeCostManagement";
 
 interface HRTabContentProps {
   activeTab: string;
@@ -64,13 +65,15 @@ const samplePositions = [
   }
 ];
 
-export function HRTabContent({ activeTab }: HRTabContentProps) {
+export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
   const getTabContent = () => {
     switch (activeTab) {
       case "dashboard":
         return <HRDashboard />;
       case "directory":
         return <EmployeeDirectory />;
+      case "employee-costs":
+        return <EmployeeCostManagement />;
       case "onboarding":
         return <EmployeeOnboarding />;
       case "trial-evaluation":
