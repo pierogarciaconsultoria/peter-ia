@@ -122,11 +122,6 @@ export const menuItems = [
     icon: FileText,
   },
   {
-    title: "Upload de Documentos",
-    href: "/document-upload",
-    icon: File,
-  },
-  {
     title: "Admin",
     href: "/admin",
     icon: Settings,
