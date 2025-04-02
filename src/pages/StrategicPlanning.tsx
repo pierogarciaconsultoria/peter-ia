@@ -7,13 +7,21 @@ import { StrategicIdentityForm } from "@/components/strategic-planning/Strategic
 import { SwotAnalysis } from "@/components/strategic-planning/SwotAnalysis";
 import { BalancedScorecard } from "@/components/strategic-planning/BalancedScorecard";
 import { BusinessModelCanvas } from "@/components/strategic-planning/BusinessModelCanvas";
+import { StrategicActionPlan } from "@/components/strategic-planning/StrategicActionPlan";
 import { getStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
+import { getSwotItems } from "@/services/strategic-planning/swotService";
+import { getBscPerspectives } from "@/services/strategic-planning/bscService";
+import { getBusinessModelCanvas } from "@/services/strategicPlanningService";
+import { exportStrategicPlanningToPDF } from "@/components/strategic-planning/utils/pdf-export";
 import { StrategicIdentity } from "@/types/strategic-planning";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 const StrategicPlanning = () => {
   const [activeTab, setActiveTab] = useState("identity");
   const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const fetchIdentity = async () => {
@@ -45,17 +53,47 @@ const StrategicPlanning = () => {
     fetchIdentity();
   }, []);
 
+  const handleExportPDF = async () => {
+    setExportLoading(true);
+    try {
+      const [identityData, swotData, bscData, canvasData] = await Promise.all([
+        getStrategicIdentity(),
+        getSwotItems(),
+        getBscPerspectives(),
+        getBusinessModelCanvas()
+      ]);
+      
+      await exportStrategicPlanningToPDF(identityData, swotData, bscData, canvasData);
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
       <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
         <div className="max-w-6xl mx-auto space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>
-            <p className="text-muted-foreground mt-1">
-              Defina e acompanhe a estratégia da sua organização
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>
+              <p className="text-muted-foreground mt-1">
+                Defina e acompanhe a estratégia da sua organização
+              </p>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleExportPDF} 
+              disabled={exportLoading}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              {exportLoading ? "Gerando..." : "Exportar Relatório"}
+            </Button>
           </div>
           
           <Tabs defaultValue="identity" value={activeTab} onValueChange={setActiveTab}>
@@ -64,6 +102,7 @@ const StrategicPlanning = () => {
               <TabsTrigger value="swot">Análise SWOT</TabsTrigger>
               <TabsTrigger value="bsc">Balanced Scorecard</TabsTrigger>
               <TabsTrigger value="canvas">Business Model Canvas</TabsTrigger>
+              <TabsTrigger value="action_plan">Plano de Ação</TabsTrigger>
             </TabsList>
             
             <TabsContent value="identity">
@@ -87,6 +126,10 @@ const StrategicPlanning = () => {
             
             <TabsContent value="canvas">
               <BusinessModelCanvas />
+            </TabsContent>
+            
+            <TabsContent value="action_plan">
+              <StrategicActionPlan />
             </TabsContent>
           </Tabs>
         </div>
