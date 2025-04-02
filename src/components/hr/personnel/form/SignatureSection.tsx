@@ -36,7 +36,7 @@ export function SignatureSection({ form }: SignatureSectionProps) {
       </div>
 
       {/* Approval Status Indicator */}
-      <Alert variant="outline" className="bg-gray-50 border-muted">
+      <Alert variant="default" className="bg-gray-50 border-muted">
         <Info className="h-4 w-4" />
         <AlertDescription className="text-sm">
           Esta solicitação passará pelos seguintes fluxos de aprovação:

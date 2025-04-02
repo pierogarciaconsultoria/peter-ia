@@ -11,7 +11,8 @@ export const mockRequests: PersonnelRequest[] = [
     position_id: "pos-001",
     requestDate: "2023-07-15",
     status: "pending",
-    requester: "João Silva"
+    requester: "João Silva",
+    requester_id: "emp-001"
   },
   {
     id: "2",
@@ -21,7 +22,8 @@ export const mockRequests: PersonnelRequest[] = [
     position_id: "pos-002",
     requestDate: "2023-07-10",
     status: "approved",
-    requester: "Maria Oliveira"
+    requester: "Maria Oliveira",
+    requester_id: "emp-002"
   },
   {
     id: "3",
@@ -31,7 +33,8 @@ export const mockRequests: PersonnelRequest[] = [
     position_id: "pos-003",
     requestDate: "2023-07-05",
     status: "rejected",
-    requester: "Pedro Santos"
+    requester: "Pedro Santos",
+    requester_id: "emp-003"
   },
   {
     id: "4",
@@ -41,6 +44,7 @@ export const mockRequests: PersonnelRequest[] = [
     position_id: "pos-004",
     requestDate: "2023-07-01",
     status: "pending",
-    requester: "Ana Costa"
+    requester: "Ana Costa",
+    requester_id: "emp-004"
   }
 ];
