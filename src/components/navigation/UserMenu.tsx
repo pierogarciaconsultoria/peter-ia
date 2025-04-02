@@ -56,7 +56,7 @@ export function UserMenu() {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-56"
+            className="w-56 bg-popover"
             alignOffset={0}
             side="bottom"
             sideOffset={5}
