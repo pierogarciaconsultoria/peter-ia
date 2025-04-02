@@ -14,6 +14,7 @@ const StrategicPlanning = () => {
   const [activeTab, setActiveTab] = useState("identity");
   const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const fetchIdentity = async () => {
     setLoading(true);
@@ -27,6 +28,19 @@ const StrategicPlanning = () => {
     }
   };
 
+  // Detect if sidebar is collapsed
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     fetchIdentity();
   }, []);
@@ -35,7 +49,7 @@ const StrategicPlanning = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
+      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
         <div className="max-w-6xl mx-auto space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>

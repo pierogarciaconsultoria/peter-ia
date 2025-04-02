@@ -1,13 +1,10 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { PenLine, Sparkles } from "lucide-react";
+import { PenLine, Save, RotateCcw } from "lucide-react";
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { updateStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IdentityQuestionnaireForm, IdentityResponses } from "./IdentityQuestionnaireForm";
-import { supabase } from "@/integrations/supabase/client";
 import { ManualIdentityForm } from "./ManualIdentityForm";
 import { IdentityFormActions } from "./IdentityFormActions";
 
@@ -18,14 +15,12 @@ interface StrategicIdentityFormProps {
 
 export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityFormProps) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<string>("manual");
   
   const [mission, setMission] = useState(identity?.mission || "");
   const [vision, setVision] = useState(identity?.vision || "");
   const [values, setValues] = useState<string[]>(identity?.values || []);
   
   const [loading, setLoading] = useState(false);
-  const [generatingIdentity, setGeneratingIdentity] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,41 +53,6 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
     }
   };
 
-  const handleQuestionnaireSubmit = async (responses: IdentityResponses) => {
-    setGeneratingIdentity(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-strategic-identity', {
-        body: { responses }
-      });
-      
-      if (error) throw error;
-      
-      if (data) {
-        setMission(data.mission || "");
-        setVision(data.vision || "");
-        setValues(data.values || []);
-        
-        setActiveTab("manual");
-        setIsEditing(true);
-        
-        toast({
-          title: "Sugestões Geradas",
-          description: "A identidade estratégica foi gerada com sucesso. Você pode editá-la conforme necessário.",
-        });
-      }
-    } catch (error) {
-      console.error("Error generating strategic identity:", error);
-      toast({
-        title: "Erro ao gerar sugestões",
-        description: "Ocorreu um erro ao gerar a identidade estratégica",
-        variant: "destructive",
-      });
-    } finally {
-      setGeneratingIdentity(false);
-    }
-  };
-
   const resetForm = () => {
     setMission(identity?.mission || "");
     setVision(identity?.vision || "");
@@ -115,61 +75,39 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
         <CardDescription>
           Defina a missão, visão e valores da sua organização
         </CardDescription>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="manual">
-              <PenLine className="mr-2 h-4 w-4" />
-              Edição Manual
-            </TabsTrigger>
-            <TabsTrigger value="guided">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Assistente de Identidade
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </CardHeader>
       
       <CardContent>
-        <TabsContent value="manual">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <ManualIdentityForm
-              mission={mission}
-              setMission={setMission}
-              vision={vision}
-              setVision={setVision}
-              values={values}
-              setValues={setValues}
-              isLoading={loading}
-              isEditable={isEditing}
-            />
-            
-            {isEditing ? (
-              <IdentityFormActions 
-                onReset={resetForm}
-                isLoading={loading}
-              />
-            ) : (
-              <div className="flex justify-end mt-4">
-                <button 
-                  type="button" 
-                  onClick={enableEditing}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                >
-                  <PenLine className="h-4 w-4 mr-2 inline" />
-                  Editar
-                </button>
-              </div>
-            )}
-          </form>
-        </TabsContent>
-        
-        <TabsContent value="guided">
-          <IdentityQuestionnaireForm 
-            onSubmitResponses={handleQuestionnaireSubmit}
-            isGenerating={generatingIdentity}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ManualIdentityForm
+            mission={mission}
+            setMission={setMission}
+            vision={vision}
+            setVision={setVision}
+            values={values}
+            setValues={setValues}
+            isLoading={loading}
+            isEditable={isEditing}
           />
-        </TabsContent>
+          
+          {isEditing ? (
+            <IdentityFormActions 
+              onReset={resetForm}
+              isLoading={loading}
+            />
+          ) : (
+            <div className="flex justify-end mt-4">
+              <button 
+                type="button" 
+                onClick={enableEditing}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                <PenLine className="h-4 w-4 mr-2 inline" />
+                Editar
+              </button>
+            </div>
+          )}
+        </form>
       </CardContent>
     </Card>
   );
