@@ -5,8 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { JobPosition } from "../types";
 
-export interface JobPositionWithHierarchy extends JobPosition {
+export interface JobPositionWithHierarchy extends Partial<JobPosition> {
+  id: string;
+  title: string;
+  department: string;
   level: string;
+  description?: string;
   parentPosition?: string | null;
   isDepartmentHead?: boolean;
 }
@@ -54,6 +58,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
         title: `Gerente de ${dept.name}`,
         department: dept.name,
         level: "Senior",
+        description: `Responsável pelo departamento de ${dept.name}`,
         isDepartmentHead: true
       });
       
@@ -63,6 +68,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
           title: `Supervisor de ${dept.name}`,
           department: dept.name,
           level: "Pleno",
+          description: `Supervisiona operações no departamento de ${dept.name}`,
           parentPosition: `head-${dept.id}`
         });
         
@@ -71,6 +77,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
           title: `Analista de ${dept.name}`,
           department: dept.name,
           level: "Junior",
+          description: `Analisa processos no departamento de ${dept.name}`,
           parentPosition: `supervisor-${dept.id}`
         });
       } else {
@@ -79,6 +86,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
           title: `Coordenador de ${dept.name}`,
           department: dept.name,
           level: "Pleno",
+          description: `Coordena atividades no departamento de ${dept.name}`,
           parentPosition: `head-${dept.id}`
         });
         
@@ -87,6 +95,7 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
           title: `Analista de ${dept.name}`,
           department: dept.name,
           level: "Junior",
+          description: `Analisa processos no departamento de ${dept.name}`,
           parentPosition: `coordinator-${dept.id}`
         });
       }
@@ -130,13 +139,13 @@ export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
         } else {
           // Fallback to default demo positions
           setPositions([
-            { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior", isDepartmentHead: true },
-            { id: "2", title: "Supervisor de Produção", department: "Produção", level: "Pleno", parentPosition: "1" },
-            { id: "3", title: "Analista de Produção", department: "Produção", level: "Junior", parentPosition: "2" },
-            { id: "4", title: "Gerente de Qualidade", department: "Qualidade", level: "Senior", isDepartmentHead: true },
-            { id: "5", title: "Analista de Qualidade", department: "Qualidade", level: "Junior", parentPosition: "4" },
-            { id: "6", title: "Gerente de RH", department: "Recursos Humanos", level: "Senior", isDepartmentHead: true },
-            { id: "7", title: "Analista de RH", department: "Recursos Humanos", level: "Junior", parentPosition: "6" }
+            { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior", description: "Gerencia o departamento de produção", isDepartmentHead: true },
+            { id: "2", title: "Supervisor de Produção", department: "Produção", level: "Pleno", description: "Supervisiona a produção", parentPosition: "1" },
+            { id: "3", title: "Analista de Produção", department: "Produção", level: "Junior", description: "Analisa processos de produção", parentPosition: "2" },
+            { id: "4", title: "Gerente de Qualidade", department: "Qualidade", level: "Senior", description: "Gerencia o departamento de qualidade", isDepartmentHead: true },
+            { id: "5", title: "Analista de Qualidade", department: "Qualidade", level: "Junior", description: "Analisa qualidade", parentPosition: "4" },
+            { id: "6", title: "Gerente de RH", department: "Recursos Humanos", level: "Senior", description: "Gerencia o RH", isDepartmentHead: true },
+            { id: "7", title: "Analista de RH", department: "Recursos Humanos", level: "Junior", description: "Analisa processos de RH", parentPosition: "6" }
           ]);
         }
       } finally {

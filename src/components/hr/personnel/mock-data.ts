@@ -13,6 +13,7 @@ export const mockRequests: PersonnelRequest[] = [
     requester: "João Silva",
     requester_id: "emp-123",
     employeeName: "Marcos Oliveira",
+    employee_id: "emp-marco-123",
     justification: "Necessidade de reposição devido ao aumento de produção."
   },
   {
@@ -28,6 +29,7 @@ export const mockRequests: PersonnelRequest[] = [
     approved_by: "Carlos Mendes",
     approval_date: "2023-09-12",
     employeeName: "Ana Paula",
+    employee_id: "emp-ana-456",
     currentSalary: "R$ 2.500,00",
     proposedSalary: "R$ 2.800,00",
     justification: "Aumento de responsabilidades e bom desempenho."
@@ -43,6 +45,7 @@ export const mockRequests: PersonnelRequest[] = [
     requester: "Paula Ferreira",
     requester_id: "emp-789",
     employeeName: "Roberto Almeida",
+    employee_id: "emp-roberto-789",
     rejection_reason: "Não foi apresentada justificativa suficiente para o desligamento."
   },
   {
@@ -56,6 +59,7 @@ export const mockRequests: PersonnelRequest[] = [
     requester: "Eduardo Costa",
     requester_id: "emp-101",
     employeeName: "Fernanda Lima",
+    employee_id: "emp-fernanda-101",
     justification: "Necessidade de ajuste de horário para cursar especialização."
   }
 ];

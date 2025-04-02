@@ -9,7 +9,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
-import { Notification } from '@/services/notificationService';
+import { Notification, getNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '@/services/notificationService';
 import { useToast } from '@/hooks/use-toast';
 
 export function NotificationCenter() {
@@ -25,12 +25,7 @@ export function NotificationCenter() {
     const fetchNotifications = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
+        const { data, error } = await getNotifications(user.id);
         
         if (error) throw error;
         
@@ -75,12 +70,9 @@ export function NotificationCenter() {
     };
   }, [user, toast]);
 
-  const markAsRead = async (notificationId: string) => {
+  const handleMarkAsRead = async (notificationId: string) => {
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
+      const { error } = await markNotificationAsRead(notificationId);
       
       if (error) throw error;
       
@@ -96,15 +88,11 @@ export function NotificationCenter() {
     }
   };
 
-  const markAllAsRead = async () => {
+  const handleMarkAllAsRead = async () => {
     try {
       if (!user) return;
       
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user.id)
-        .eq('read', false);
+      const { error } = await markAllNotificationsAsRead(user.id);
       
       if (error) throw error;
       
@@ -139,7 +127,7 @@ export function NotificationCenter() {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={markAllAsRead} 
+              onClick={handleMarkAllAsRead} 
               className="text-xs h-auto py-1"
             >
               Marcar todas como lidas
@@ -158,7 +146,7 @@ export function NotificationCenter() {
                   key={notification.id}
                   className={`p-4 cursor-pointer hover:bg-accent transition-colors ${!notification.read ? 'bg-accent/30' : ''}`}
                   onClick={() => {
-                    if (!notification.read) markAsRead(notification.id);
+                    if (!notification.read) handleMarkAsRead(notification.id);
                     if (notification.link) window.location.href = notification.link;
                   }}
                 >

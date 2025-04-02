@@ -1,70 +1,94 @@
 
-// Notification Service
-// This is a temporary implementation - should be replaced with actual implementation
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Notification {
   id: string;
   user_id: string;
   title: string;
   message: string;
-  type: string;
-  link?: string;
-  reference_id?: string;
-  read: boolean;
   created_at: string;
+  read: boolean;
+  link?: string;
+  type?: string;
+  reference_id?: string;
 }
 
-/**
- * Creates a notification for a specific user
- * 
- * @param user_id ID of the user to notify
- * @param title Title of the notification
- * @param message Content of the notification
- * @param type Type of notification (e.g. 'personnel_request', 'task_assigned')
- * @param reference_id Optional reference ID to link to the original entity
- * @param link Optional URL to navigate to when clicking the notification
- * @returns The created notification
- */
 export async function createNotification(
-  user_id: string,
+  userId: string,
   title: string,
   message: string,
-  type: string,
-  reference_id?: string,
-  link?: string
-): Promise<Notification> {
-  console.log('Creating notification:', { user_id, title, message, type, link, reference_id });
-  
-  // Mock implementation returns a fake notification
-  const mockNotification: Notification = {
-    id: `notification-${Date.now()}`,
-    user_id,
-    title,
-    message,
-    type,
-    link,
-    reference_id,
-    read: false,
-    created_at: new Date().toISOString()
-  };
-  
-  // In a real implementation, this would save to database
-  return Promise.resolve(mockNotification);
+  type: string = "general",
+  referenceId: string = "",
+  link: string = ""
+): Promise<{ success: boolean; error?: any }> {
+  try {
+    const { error } = await supabase.from("notifications").insert({
+      user_id: userId,
+      title,
+      message,
+      read: false,
+      type,
+      reference_id: referenceId,
+      link,
+    });
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    return { success: false, error };
+  }
 }
 
-export async function getUserNotifications(user_id: string): Promise<Notification[]> {
-  // This would fetch notifications from the database in a real implementation
-  return Promise.resolve([]);
+export async function markNotificationAsRead(
+  notificationId: string
+): Promise<{ success: boolean; error?: any }> {
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", notificationId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    return { success: false, error };
+  }
 }
 
-export async function markNotificationAsRead(notification_id: string): Promise<void> {
-  // This would update the database in a real implementation
-  console.log('Marking notification as read:', notification_id);
-  return Promise.resolve();
+export async function markAllNotificationsAsRead(
+  userId: string
+): Promise<{ success: boolean; error?: any }> {
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", userId)
+      .eq("read", false);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking all notifications as read:", error);
+    return { success: false, error };
+  }
 }
 
-export async function deleteNotification(notification_id: string): Promise<void> {
-  // This would delete from the database in a real implementation
-  console.log('Deleting notification:', notification_id);
-  return Promise.resolve();
+export async function getNotifications(
+  userId: string
+): Promise<{ data: Notification[] | null; error?: any }> {
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return { data };
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return { data: null, error };
+  }
 }

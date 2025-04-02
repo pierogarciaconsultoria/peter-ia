@@ -40,10 +40,7 @@ export function JobPositionDetailsDialog({
           <JobPositionDetailsHeader jobPosition={jobPosition} />
         </DialogHeader>
 
-        <JobPositionDetailsContent 
-          jobPosition={jobPosition} 
-          isOpen={isOpen} 
-        />
+        <JobPositionDetailsContent jobPosition={jobPosition} />
 
         <DialogFooter>
           <JobPositionDetailsFooter 

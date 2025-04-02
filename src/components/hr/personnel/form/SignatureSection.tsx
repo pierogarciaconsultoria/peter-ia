@@ -5,12 +5,16 @@ import { UseFormReturn } from "react-hook-form";
 import { RequestFormValues } from "../types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import React from "react";
 
 interface SignatureSectionProps {
   form: UseFormReturn<RequestFormValues>;
 }
 
 export function SignatureSection({ form }: SignatureSectionProps) {
+  // Create a hardcoded value for display only
+  const statusValue = form.getValues("status") || "pending";
+
   return (
     <>
       {/* Approval Status Indicator */}
@@ -25,31 +29,33 @@ export function SignatureSection({ form }: SignatureSectionProps) {
         </AlertDescription>
       </Alert>
 
-      {/* Status Section */}
-      <FormField
-        control={form.control}
-        name="status"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Status da solicitação</FormLabel>
-            <FormControl>
-              <div className="p-3 border rounded-md bg-gray-50 text-gray-500">
-                {field.value || "Pendente"}
-              </div>
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      {/* Status Section - Just show the current status as text */}
+      <div className="space-y-2">
+        <div className="text-sm font-medium">Status da solicitação</div>
+        <div className="p-3 border rounded-md bg-gray-50 text-gray-500">
+          {(() => {
+            switch (statusValue) {
+              case "approved": return "Aprovado";
+              case "rejected": return "Reprovado";
+              case "canceled": return "Cancelado";
+              case "manager_approval": return "Aguardando aprovação do gestor";
+              case "pending":
+              default:
+                return "Pendente";
+            }
+          })()}
+        </div>
+      </div>
 
       {/* Rejection/Cancellation Reason */}
-      {(form.watch("status") === "rejected" || form.watch("status") === "canceled") && (
+      {(statusValue === "rejected" || statusValue === "canceled") && (
         <FormField
           control={form.control}
           name="rejection_reason"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {form.watch("status") === "rejected" ? "Motivo da reprovação" : "Motivo do cancelamento"}
+                {statusValue === "rejected" ? "Motivo da reprovação" : "Motivo do cancelamento"}
               </FormLabel>
               <FormControl>
                 <Textarea 
@@ -65,7 +71,7 @@ export function SignatureSection({ form }: SignatureSectionProps) {
       )}
 
       {/* HR Observation Field (only visible when approved or in review) */}
-      {(form.watch("status") === "approved" || form.watch("status") === "pending") && (
+      {(statusValue === "approved" || statusValue === "pending") && (
         <FormField
           control={form.control}
           name="hr_observation"

@@ -36,6 +36,8 @@ export interface RequestFormValues {
   noticePeriod?: boolean;
   days?: string;
   hr_observation?: string;
+  status?: "pending" | "approved" | "rejected" | "canceled" | "manager_approval";
+  rejection_reason?: string;
 }
 
 export interface PersonnelRequest {
@@ -45,7 +47,7 @@ export interface PersonnelRequest {
   position: string;
   position_id: string;
   requestDate: string;
-  status: "pending" | "approved" | "rejected" | "canceled";
+  status: "pending" | "approved" | "rejected" | "canceled" | "manager_approval";
   requester: string;
   requester_id: string;
   employeeName: string;
