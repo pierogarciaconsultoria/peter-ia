@@ -1,298 +1,226 @@
-import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Navigation } from "@/components/Navigation";
-import { PlusCircle, AlertCircle } from "lucide-react";
-import { StatisticCard } from "@/components/StatisticCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IndicatorForm } from "@/components/indicators/IndicatorForm";
-import { IndicatorsTable } from "@/components/indicators/IndicatorsTable";
-import { ProcessDashboard } from "@/components/indicators/ProcessDashboard";
-import { MonthlyMeasurementForm } from "@/components/indicators/MonthlyMeasurementForm";
-import { getAllIndicators, getAllMeasurements } from "@/services/indicatorService";
-import { IndicatorType, MeasurementType } from "@/types/indicators";
-import { Footer } from "@/components/Footer";
-import { useProcesses } from "@/hooks/useProcesses";
+
+import React, { useState, useEffect } from 'react';
+import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
+import { ProcessDashboard } from '@/components/indicators/ProcessDashboard';
+import { IndicatorsTable } from '@/components/indicators/IndicatorsTable';
+import { IndicatorForm } from '@/components/indicators/IndicatorForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PlusCircle } from 'lucide-react';
+import { useIndicators } from '@/hooks/useIndicators';
+import { useProcesses } from '@/hooks/useProcesses'; 
+
+type IndicatorFormMode = 'create' | 'edit';
 
 const PerformanceIndicators = () => {
-  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [isMeasurementDialogOpen, setIsMeasurementDialogOpen] = React.useState(false);
-  const [selectedIndicator, setSelectedIndicator] = React.useState<IndicatorType | null>(null);
-  
-  const queryClient = useQueryClient();
-  
-  const { 
-    data: indicators = [], 
-    isLoading: isLoadingIndicators,
-    error: indicatorsError 
-  } = useQuery({
-    queryKey: ["indicators"],
-    queryFn: getAllIndicators,
-  });
+  const [showIndicatorForm, setShowIndicatorForm] = useState(false);
+  const [editingIndicator, setEditingIndicator] = useState(null);
+  const [formMode, setFormMode] = useState<IndicatorFormMode>('create');
+  const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('table');
+  const [uniqueProcesses, setUniqueProcesses] = useState<string[]>([]);
   
   const { 
-    data: measurements = [], 
-    isLoading: isLoadingMeasurements,
-    error: measurementsError 
-  } = useQuery({
-    queryKey: ["measurements"],
-    queryFn: getAllMeasurements,
-  });
+    indicators, 
+    addIndicator, 
+    updateIndicator, 
+    deleteIndicator,
+    isLoading,
+    error
+  } = useIndicators();
 
-  const { allProcesses = [] } = useProcesses();
-  
-  const processIndicators = React.useMemo(() => {
-    const result: any[] = [];
+  const { processes } = useProcesses();
+
+  useEffect(() => {
+    // Extract unique process names from indicators
+    const processNames = Array.from(
+      new Set(indicators.map(indicator => indicator.process))
+    ).filter(Boolean);
     
-    allProcesses.forEach(process => {
-      if (process.indicators && process.indicators.length) {
-        process.indicators.forEach((indicator: any) => {
-          result.push({
-            ...indicator,
-            processId: process.id,
-            processName: process.name,
-            process: process.type || 'Sem categoria'
-          });
-        });
-      }
-    });
+    // Also add processes from the processes list that have indicators
+    const processesWithIndicators = processes
+      .filter(process => process.indicators && process.indicators.length > 0)
+      .map(process => process.name);
     
-    return result;
-  }, [allProcesses]);
-  
-  const totalIndicators = indicators.length + processIndicators.length;
-  const indicatorsAchievingGoals = indicators.length > 0 && measurements.length > 0 
-    ? calculateIndicatorsAchievingGoals(indicators, measurements)
-    : 0;
-  
-  const handleEditIndicator = (indicator: IndicatorType) => {
-    setSelectedIndicator(indicator);
-    setIsEditDialogOpen(true);
-  };
-  
-  const handleAddMeasurement = (indicator: IndicatorType) => {
-    setSelectedIndicator(indicator);
-    setIsMeasurementDialogOpen(true);
+    // Combine and deduplicate
+    const combined = [...new Set([...processNames, ...processesWithIndicators])];
+    setUniqueProcesses(combined);
+    
+    // If we have processes but none selected, select the first one
+    if (combined.length > 0 && !selectedProcess) {
+      setSelectedProcess(combined[0]);
+    }
+  }, [indicators, processes, selectedProcess]);
+
+  const handleCreateIndicator = () => {
+    setFormMode('create');
+    setEditingIndicator(null);
+    setShowIndicatorForm(true);
   };
 
-  const uniqueProcesses = React.useMemo(() => {
-    const allProcesses = new Set<string>();
-    
-    indicators.forEach(ind => {
-      if (ind.process) {
-        allProcesses.add(ind.process);
-      }
-    });
-    
-    processIndicators.forEach(ind => {
-      if (ind.process) {
-        allProcesses.add(ind.process);
-      }
-    });
-    
-    return Array.from(allProcesses);
-  }, [indicators, processIndicators]);
+  const handleEditIndicator = (indicator) => {
+    setFormMode('edit');
+    setEditingIndicator(indicator);
+    setShowIndicatorForm(true);
+  };
 
-  const processIndicatorsByType = React.useMemo(() => {
-    const grouped: Record<string, any[]> = {};
-    
-    processIndicators.forEach(indicator => {
-      const process = indicator.process || 'Sem categoria';
-      if (!grouped[process]) {
-        grouped[process] = [];
-      }
-      grouped[process].push(indicator);
-    });
-    
-    return grouped;
-  }, [processIndicators]);
+  const handleSubmitIndicator = (indicatorData) => {
+    if (formMode === 'create') {
+      addIndicator({
+        ...indicatorData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      });
+    } else {
+      updateIndicator(editingIndicator.id, indicatorData);
+    }
+    setShowIndicatorForm(false);
+  };
+
+  const handleDeleteIndicator = (id) => {
+    deleteIndicator(id);
+  };
+
+  const handleCloseDialog = () => {
+    setShowIndicatorForm(false);
+  };
+
+  const selectNextProcess = () => {
+    const currentIndex = uniqueProcesses.indexOf(selectedProcess);
+    const nextIndex = (currentIndex + 1) % uniqueProcesses.length;
+    setSelectedProcess(uniqueProcesses[nextIndex]);
+  };
+
+  const selectPrevProcess = () => {
+    const currentIndex = uniqueProcesses.indexOf(selectedProcess);
+    const prevIndex = (currentIndex - 1 + uniqueProcesses.length) % uniqueProcesses.length;
+    setSelectedProcess(uniqueProcesses[prevIndex]);
+  };
+
+  // Filter indicators for the selected process
+  const processIndicators = selectedProcess 
+    ? indicators.filter(i => i.process === selectedProcess)
+    : [];
+
+  // Find any process data from the processes array that matches the selected process
+  const processData = selectedProcess 
+    ? processes.find(p => p.name === selectedProcess)
+    : null;
+
+  // Combine indicators from both sources
+  const combinedIndicators = processData?.indicators 
+    ? [...processIndicators, ...processData.indicators]
+    : processIndicators;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-7xl mx-auto">
+          {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Indicadores de Desempenho</h1>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
+            <div>
+              <h1 className="text-3xl font-bold">Indicadores de Desempenho</h1>
+              <p className="text-muted-foreground mt-1">
+                Monitore e gerencie os indicadores de desempenho da organização
+              </p>
+            </div>
+            <Button onClick={handleCreateIndicator}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Novo Indicador
             </Button>
           </div>
-          
-          <p className="text-muted-foreground mb-8">
-            Monitore e analise os indicadores de desempenho da sua organização.
-          </p>
-          
-          <div className="grid gap-4 md:grid-cols-3 mb-8">
-            <StatisticCard 
-              title="Indicadores Cadastrados" 
-              value={totalIndicators} 
-              description="Total de indicadores" 
-              color="bg-blue-500"
-              total={100}
-            />
-            <StatisticCard 
-              title="Indicadores na Meta" 
-              value={indicatorsAchievingGoals} 
-              description="Atingindo objetivos" 
-              color="bg-green-500"
-              total={totalIndicators}
-            />
-            <StatisticCard 
-              title="Processos Monitorados" 
-              value={uniqueProcesses.length} 
-              description="Áreas cobertas" 
-              color="bg-purple-500"
-              total={10}
-            />
-          </div>
-          
-          <Tabs defaultValue="dashboards" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="dashboards">Dashboards</TabsTrigger>
-              <TabsTrigger value="table">Tabela de Indicadores</TabsTrigger>
-              <TabsTrigger value="processes">Por Processo</TabsTrigger>
+
+          {/* Process Selection */}
+          {uniqueProcesses.length > 0 ? (
+            <div className="mb-6">
+              <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
+                <Button 
+                  variant="ghost" 
+                  onClick={selectPrevProcess}
+                  disabled={uniqueProcesses.length <= 1}
+                >
+                  &lt;
+                </Button>
+                
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold">{selectedProcess}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {combinedIndicators.length} indicadores
+                  </p>
+                </div>
+                
+                <Button 
+                  variant="ghost" 
+                  onClick={selectNextProcess}
+                  disabled={uniqueProcesses.length <= 1}
+                >
+                  &gt;
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-muted p-6 rounded-lg text-center mb-6">
+              <p className="text-muted-foreground">
+                Nenhum processo com indicadores encontrado. Crie um novo indicador ou adicione indicadores a um processo.
+              </p>
+            </div>
+          )}
+
+          {/* Tabs for different views */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="grid grid-cols-2 w-[400px]">
+              <TabsTrigger value="table">Tabela</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="dashboards">
-              {(isLoadingIndicators || isLoadingMeasurements) ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Carregando dashboards...</p>
-                </div>
-              ) : indicatorsError ? (
-                <div className="flex justify-center items-center h-64 text-destructive">
-                  <AlertCircle className="mr-2" />
-                  <p>Erro ao carregar os indicadores</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {uniqueProcesses.map(process => (
-                    <ProcessDashboard 
-                      key={process}
-                      process={process}
-                      indicators={indicators}
-                      measurements={measurements}
-                      processIndicators={processIndicatorsByType[process] || []}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="table">
-              {(isLoadingIndicators || isLoadingMeasurements) ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Carregando indicadores...</p>
-                </div>
-              ) : indicatorsError ? (
-                <div className="flex justify-center items-center h-64 text-destructive">
-                  <AlertCircle className="mr-2" />
-                  <p>Erro ao carregar os indicadores</p>
-                </div>
-              ) : (
+
+            <TabsContent value="table" className="mt-4">
+              {selectedProcess && (
                 <IndicatorsTable 
-                  indicators={indicators} 
-                  measurements={measurements} 
+                  indicators={combinedIndicators}
                   onEdit={handleEditIndicator}
-                  onAddMeasurement={handleAddMeasurement}
+                  onDelete={handleDeleteIndicator}
+                  isLoading={isLoading}
                 />
               )}
             </TabsContent>
             
-            <TabsContent value="processes">
-              <div className="grid gap-8">
-                {getUniqueProcesses(indicators).map((process) => (
-                  <div key={process} className="border rounded-lg p-4">
-                    <h3 className="text-xl font-bold mb-4">{process}</h3>
-                    <IndicatorsTable 
-                      indicators={indicators.filter(ind => ind.process === process)} 
-                      measurements={measurements} 
-                      onEdit={handleEditIndicator}
-                      onAddMeasurement={handleAddMeasurement}
-                    />
-                  </div>
-                ))}
-              </div>
+            <TabsContent value="dashboard" className="mt-4">
+              {selectedProcess && (
+                <ProcessDashboard 
+                  indicators={combinedIndicators}
+                  processName={selectedProcess}
+                />
+              )}
             </TabsContent>
           </Tabs>
+
+          {/* Indicator Form Dialog */}
+          <Dialog open={showIndicatorForm} onOpenChange={handleCloseDialog}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {formMode === 'create' ? 'Novo Indicador' : 'Editar Indicador'}
+                </DialogTitle>
+              </DialogHeader>
+              <IndicatorForm 
+                initialData={editingIndicator}
+                onSubmit={handleSubmitIndicator}
+                onCancel={handleCloseDialog}
+                processes={uniqueProcesses}
+                defaultProcess={selectedProcess}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
       
       <Footer />
-      
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <IndicatorForm 
-          onClose={() => setIsAddDialogOpen(false)} 
-          afterSubmit={() => {
-            queryClient.invalidateQueries({ queryKey: ["indicators"] });
-            setIsAddDialogOpen(false);
-          }}
-        />
-      </Dialog>
-      
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        {selectedIndicator && (
-          <IndicatorForm 
-            indicator={selectedIndicator}
-            onClose={() => setIsEditDialogOpen(false)}
-            afterSubmit={() => {
-              queryClient.invalidateQueries({ queryKey: ["indicators"] });
-              setIsEditDialogOpen(false);
-            }}
-          />
-        )}
-      </Dialog>
-      
-      <Dialog open={isMeasurementDialogOpen} onOpenChange={setIsMeasurementDialogOpen}>
-        {selectedIndicator && (
-          <MonthlyMeasurementForm 
-            indicator={selectedIndicator}
-            onClose={() => setIsMeasurementDialogOpen(false)}
-            afterSubmit={() => {
-              queryClient.invalidateQueries({ queryKey: ["measurements"] });
-              setIsMeasurementDialogOpen(false);
-            }}
-          />
-        )}
-      </Dialog>
     </div>
   );
 };
-
-function countUniqueProcesses(indicators: IndicatorType[]): number {
-  return new Set(indicators.map(ind => ind.process)).size;
-}
-
-function calculateIndicatorsAchievingGoals(
-  indicators: IndicatorType[], 
-  measurements: MeasurementType[]
-): number {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
-  
-  return indicators.filter(indicator => {
-    const relevantMeasurements = measurements.filter(
-      m => m.indicator_id === indicator.id && 
-      m.year === currentYear && 
-      m.month === currentMonth
-    );
-    
-    if (relevantMeasurements.length === 0) return false;
-    
-    const value = relevantMeasurements[0].value;
-    
-    if (indicator.goal_type === 'higher_better') {
-      return value >= indicator.goal_value;
-    } else if (indicator.goal_type === 'lower_better') {
-      return value <= indicator.goal_value;
-    } else {
-      return value === indicator.goal_value;
-    }
-  }).length;
-}
 
 export default PerformanceIndicators;

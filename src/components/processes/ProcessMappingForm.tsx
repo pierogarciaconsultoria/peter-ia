@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -28,6 +29,8 @@ import {
 } from "@/components/ui/accordion";
 
 import { useProcesses } from "@/hooks/useProcesses";
+import { ProcessActorSelector } from "./ProcessActorSelector";
+import { DocumentSelector } from "./DocumentSelector";
 
 interface ProcessIndicator {
   name: string;
@@ -111,7 +114,7 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
 
   const handleAddActivity = () => {
     if (newActivity) {
-      setActivities([...activities, { id: Date.now(), activity: newActivity }]);
+      setActivities([...activities, { id: Date.now(), activity: newActivity, actor: "" }]);
       setNewActivity("");
     }
   };
@@ -122,9 +125,15 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
     setActivities(updatedActivities);
   };
 
+  const handleUpdateActivityActor = (index: number, actor: string) => {
+    const updatedActivities = [...activities];
+    updatedActivities[index] = { ...updatedActivities[index], actor };
+    setActivities(updatedActivities);
+  };
+
   const handleAddDocument = () => {
     if (newDocument) {
-      setDocuments([...documents, { id: Date.now(), document: newDocument }]);
+      setDocuments([...documents, { id: Date.now(), document: newDocument, documentId: null }]);
       setNewDocument("");
     }
   };
@@ -132,6 +141,12 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
   const handleRemoveDocument = (index: number) => {
     const updatedDocuments = [...documents];
     updatedDocuments.splice(index, 1);
+    setDocuments(updatedDocuments);
+  };
+
+  const handleUpdateDocumentId = (index: number, documentId: string) => {
+    const updatedDocuments = [...documents];
+    updatedDocuments[index] = { ...updatedDocuments[index], documentId };
     setDocuments(updatedDocuments);
   };
 
@@ -176,7 +191,11 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
 
   const handleAddIndicator = () => {
     if (newIndicator.name && newIndicator.goal) {
-      setIndicators([...indicators, { ...newIndicator, id: Date.now() }]);
+      const newIndicatorWithId = { 
+        ...newIndicator, 
+        generatedId: Date.now() // Use generatedId instead of id to avoid type conflict
+      };
+      setIndicators([...indicators, newIndicatorWithId]);
       setNewIndicator({ name: "", goal: "", current: "" });
     }
   };
@@ -202,8 +221,8 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
       owner,
       status: "active",
       lastUpdated: new Date().toISOString().split("T")[0],
-      risks: risks.length,
-      documents: documents.length,
+      risksCount: risks.length,
+      documentsCount: documents.length,
       inputs,
       outputs,
       activities,
@@ -416,6 +435,7 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Atividade</TableHead>
+                        <TableHead>Responsável</TableHead>
                         <TableHead className="w-[100px]">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -423,6 +443,12 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
                       {activities.map((activity, index) => (
                         <TableRow key={activity.id}>
                           <TableCell className="font-medium">{activity.activity}</TableCell>
+                          <TableCell>
+                            <ProcessActorSelector 
+                              value={activity.actor || ""}
+                              onChange={(value) => handleUpdateActivityActor(index, value)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
@@ -466,6 +492,7 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Documento</TableHead>
+                        <TableHead>Vínculo</TableHead>
                         <TableHead className="w-[100px]">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -473,6 +500,12 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
                       {documents.map((document, index) => (
                         <TableRow key={document.id}>
                           <TableCell className="font-medium">{document.document}</TableCell>
+                          <TableCell>
+                            <DocumentSelector
+                              value={document.documentId || ""}
+                              onChange={(value) => handleUpdateDocumentId(index, value)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"

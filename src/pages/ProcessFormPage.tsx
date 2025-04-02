@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { ProcessMappingForm } from "@/components/processes/ProcessMappingForm";
+import ProcessMappingForm from "@/components/processes/ProcessMappingForm";
 import { ReportDialog } from "@/components/processes/ReportDialog";
 import { useProcesses } from "@/hooks/useProcesses";
 import { toast } from "sonner";
