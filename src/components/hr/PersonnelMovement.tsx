@@ -162,7 +162,7 @@ export function PersonnelMovement() {
       department: data.department,
       position: data.currentPosition || (selectedPosition ? selectedPosition.title : ""),
       position_id: data.position_id,
-      requestDate: new Date().toISOString().split('T')[0],
+      requestDate: data.requestDate || new Date().toISOString().split('T')[0],
       status: "manager_approval", // New status to indicate manager needs to approve
       requester: requester ? requester.name : "Usuário Atual",
       requester_id: data.requester_id,
@@ -171,7 +171,8 @@ export function PersonnelMovement() {
       currentSalary: data.currentSalary,
       proposedSalary: data.proposedSalary,
       justification: data.justification,
-      hr_observation: ""
+      hr_observation: "",
+      rejection_reason: ""
     };
     
     setRequests([newRequest, ...requests]);
@@ -217,16 +218,39 @@ export function PersonnelMovement() {
   };
 
   // Handle rejection of a request
-  const handleRejection = (id: string) => {
+  const handleRejection = (id: string, reason?: string) => {
     setRequests(prevRequests => 
       prevRequests.map(req => 
-        req.id === id ? { ...req, status: "rejected" } : req
+        req.id === id ? { 
+          ...req, 
+          status: "rejected",
+          rejection_reason: reason || "Solicitação rejeitada pelo gestor."
+        } : req
       )
     );
     
     toast({
       title: "Solicitação rejeitada",
       description: "A solicitação foi rejeitada.",
+      variant: "destructive"
+    });
+  };
+
+  // Handle cancellation of a request
+  const handleCancellation = (id: string, reason?: string) => {
+    setRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === id ? { 
+          ...req, 
+          status: "canceled",
+          rejection_reason: reason || "Solicitação cancelada pelo solicitante."
+        } : req
+      )
+    );
+    
+    toast({
+      title: "Solicitação cancelada",
+      description: "A solicitação foi cancelada.",
       variant: "destructive"
     });
   };

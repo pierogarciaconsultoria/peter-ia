@@ -30,9 +30,6 @@ export function RequestFormDialog({ isOpen, onOpenChange, onSubmit, jobPositions
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Movimentação de Pessoal</DialogTitle>
-          <DialogDescription>
-            Formulário para solicitação de movimentação de pessoal
-          </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>

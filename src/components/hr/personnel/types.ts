@@ -6,13 +6,14 @@ export interface PersonnelRequest {
   position: string;
   position_id?: string;
   requestDate: string;
-  status: "pending" | "approved" | "rejected" | "manager_approval";
+  status: "pending" | "approved" | "rejected" | "canceled" | "manager_approval";
   requester: string;
   requester_id: string;
   manager_id?: string;
   approved_by?: string;
   approval_date?: string;
   hr_observation?: string;
+  rejection_reason?: string;
   employeeName?: string;
   currentSalary?: string;
   proposedSalary?: string;
@@ -28,6 +29,7 @@ export interface RequestFormValues {
   position_id: string;
   justification: string;
   targetDate: string;
+  requestDate: string;
   hireDate: string;
   currentPosition: string;
   proposedPosition: string;
@@ -52,4 +54,6 @@ export interface RequestFormValues {
   justCause: boolean;
   noticePeriod: boolean;
   hr_observation?: string;
+  status?: "pending" | "approved" | "rejected" | "canceled" | "manager_approval";
+  rejection_reason?: string;
 }

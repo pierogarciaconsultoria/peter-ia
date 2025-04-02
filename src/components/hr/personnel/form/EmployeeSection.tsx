@@ -1,4 +1,3 @@
-
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
@@ -114,7 +113,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
         name="employeeId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Colaborador envolvido na movimentação</FormLabel>
+            <FormLabel>Colaborador</FormLabel>
             <Select onValueChange={(value) => {
               field.onChange(value);
               handleEmployeeChange(value);
@@ -132,20 +131,6 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
                 ))}
               </SelectContent>
             </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="employeeName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome</FormLabel>
-            <FormControl>
-              <Input placeholder="Nome do colaborador" readOnly {...field} />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}

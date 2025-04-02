@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { PersonnelRequest } from "./types";
 
 interface RequestTableProps {
@@ -25,7 +25,9 @@ export function RequestTable({ requests, onApprove, onReject }: RequestTableProp
       case "approved":
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Aprovado</Badge>;
       case "rejected":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejeitado</Badge>;
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Reprovado</Badge>;
+      case "canceled":
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Cancelado</Badge>;
       case "manager_approval":
         return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Aguardando gestor</Badge>;
       case "pending":
@@ -94,6 +96,15 @@ export function RequestTable({ requests, onApprove, onReject }: RequestTableProp
                     <div className="text-sm text-green-600">
                       Aprovado em {request.approval_date}
                       {request.approved_by && <span> por {request.approved_by}</span>}
+                    </div>
+                  )}
+                  {(request.status === "rejected" || request.status === "canceled") && (
+                    <div className="text-sm text-red-600 flex items-center">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      <span>
+                        {request.status === "rejected" ? "Reprovado" : "Cancelado"}: 
+                        {request.rejection_reason ? ` ${request.rejection_reason}` : " Sem justificativa"}
+                      </span>
                     </div>
                   )}
                 </TableCell>

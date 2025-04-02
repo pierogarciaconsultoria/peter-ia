@@ -13,8 +13,59 @@ interface SignatureSectionProps {
 export function SignatureSection({ form }: SignatureSectionProps) {
   return (
     <>
-      {/* HR Observation Field */}
-      <div className="space-y-2">
+      {/* Approval Status Indicator */}
+      <Alert variant="default" className="bg-gray-50 border-muted">
+        <Info className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          Esta solicitação passará pelos seguintes fluxos de aprovação:
+          <ol className="list-decimal ml-5 mt-2 text-xs space-y-1">
+            <li>Aprovação pelo superior imediato do requisitante</li>
+            <li>Aprovação pelo departamento de Recursos Humanos</li>
+          </ol>
+        </AlertDescription>
+      </Alert>
+
+      {/* Status Section */}
+      <FormField
+        control={form.control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Status da solicitação</FormLabel>
+            <FormControl>
+              <div className="p-3 border rounded-md bg-gray-50 text-gray-500">
+                {field.value || "Pendente"}
+              </div>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      {/* Rejection/Cancellation Reason */}
+      {(form.watch("status") === "rejected" || form.watch("status") === "canceled") && (
+        <FormField
+          control={form.control}
+          name="rejection_reason"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {form.watch("status") === "rejected" ? "Motivo da reprovação" : "Motivo do cancelamento"}
+              </FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Justificativa para a reprovação ou cancelamento"
+                  className="h-24 bg-gray-50"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* HR Observation Field (only visible when approved or in review) */}
+      {(form.watch("status") === "approved" || form.watch("status") === "pending") && (
         <FormField
           control={form.control}
           name="hr_observation"
@@ -33,19 +84,7 @@ export function SignatureSection({ form }: SignatureSectionProps) {
             </FormItem>
           )}
         />
-      </div>
-
-      {/* Approval Status Indicator */}
-      <Alert variant="default" className="bg-gray-50 border-muted">
-        <Info className="h-4 w-4" />
-        <AlertDescription className="text-sm">
-          Esta solicitação passará pelos seguintes fluxos de aprovação:
-          <ol className="list-decimal ml-5 mt-2 text-xs space-y-1">
-            <li>Aprovação pelo superior imediato do requisitante</li>
-            <li>Aprovação pelo departamento de Recursos Humanos</li>
-          </ol>
-        </AlertDescription>
-      </Alert>
+      )}
     </>
   );
 }
