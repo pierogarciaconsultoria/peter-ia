@@ -3,7 +3,6 @@ import { Room, Reservation } from '@/services/roomService';
 import { RoomCard } from './RoomCard';
 import { ReservationList } from './ReservationList';
 import { RoomCalendar } from './RoomCalendar';
-import { TabsContent } from "@/components/ui/tabs";
 
 interface AmbienteTabContentProps {
   activeTab: string;
@@ -30,6 +29,11 @@ export function AmbienteTabContent({
   onEditReservation,
   onDeleteReservation
 }: AmbienteTabContentProps) {
+  // Make sure filteredRooms is never undefined
+  const roomsToDisplay = Array.isArray(filteredRooms) ? filteredRooms : [];
+  const roomsList = Array.isArray(rooms) ? rooms : [];
+  const reservationsList = Array.isArray(reservations) ? reservations : [];
+  
   return (
     <>
       {activeTab === "rooms" && (
@@ -42,7 +46,7 @@ export function AmbienteTabContent({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredRooms.map(room => (
+              {roomsToDisplay.map(room => (
                 <RoomCard
                   key={room.id}
                   room={room}
@@ -52,7 +56,7 @@ export function AmbienteTabContent({
                 />
               ))}
               
-              {filteredRooms.length === 0 && (
+              {roomsToDisplay.length === 0 && (
                 <div className="col-span-2 text-center py-12">
                   <h3 className="text-lg font-medium text-muted-foreground">Nenhum ambiente encontrado</h3>
                   <p className="mt-2">Tente ajustar os filtros ou adicione um novo ambiente.</p>
@@ -73,8 +77,8 @@ export function AmbienteTabContent({
             </div>
           ) : (
             <ReservationList
-              reservations={reservations}
-              rooms={rooms}
+              reservations={reservationsList}
+              rooms={roomsList}
               onEdit={onEditReservation}
               onDelete={onDeleteReservation}
             />
@@ -88,8 +92,8 @@ export function AmbienteTabContent({
             <div className="h-96 animate-pulse bg-muted rounded-lg"></div>
           ) : (
             <RoomCalendar
-              reservations={reservations}
-              rooms={rooms}
+              reservations={reservationsList}
+              rooms={roomsList}
               onReserve={onReserveRoom}
               onEditReservation={onEditReservation}
             />

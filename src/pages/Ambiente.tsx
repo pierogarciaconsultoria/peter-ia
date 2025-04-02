@@ -3,9 +3,8 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { RoomHeader } from '@/components/ambiente/RoomHeader';
 import { RoomFilters } from '@/components/ambiente/RoomFilters';
-import { AmbienteTabContent } from '@/components/ambiente/AmbienteTabContent';
-import { AmbienteDialogs } from '@/components/ambiente/AmbienteDialogs';
 import { AmbienteTabs } from '@/components/ambiente/AmbienteTabs';
+import { AmbienteDialogs } from '@/components/ambiente/AmbienteDialogs';
 import { useAmbienteState } from '@/hooks/useAmbienteState';
 
 export default function Ambiente() {
@@ -48,11 +47,7 @@ export default function Ambiente() {
           
           <AmbienteTabs 
             activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-          />
-          
-          <AmbienteTabContent
-            activeTab={activeTab}
+            onTabChange={setActiveTab}
             isLoading={isLoading}
             filteredRooms={filteredRooms}
             rooms={rooms}

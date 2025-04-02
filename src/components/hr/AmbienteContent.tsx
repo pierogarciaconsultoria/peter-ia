@@ -42,11 +42,7 @@ export function AmbienteContent() {
       
       <AmbienteTabs 
         activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
-      
-      <AmbienteTabContent
-        activeTab={activeTab}
+        onTabChange={setActiveTab}
         isLoading={isLoading}
         filteredRooms={filteredRooms}
         rooms={rooms}
