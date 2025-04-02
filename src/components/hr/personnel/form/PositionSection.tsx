@@ -44,13 +44,14 @@ export function PositionSection({ form, jobPositions, selectedPosition }: Positi
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cargo proposto</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || "none"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um cargo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="none">Selecione um cargo</SelectItem>
                   {filteredPositions.map((position) => (
                     <SelectItem key={position.id} value={position.title}>
                       {position.title}
