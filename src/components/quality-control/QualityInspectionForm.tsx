@@ -1,370 +1,361 @@
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { QualityCriteria, QualityCriteriaResult, createQualityInspection, getQualityCriteria } from "@/services/qualityControlService";
-import { Loader2, Plus, Trash } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-const formSchema = z.object({
-  product_name: z.string().min(2, { message: "O nome do produto é obrigatório" }),
-  batch_number: z.string().min(1, { message: "O número do lote é obrigatório" }),
-  inspection_date: z.string().min(1, { message: "A data de inspeção é obrigatória" }),
-  inspector: z.string().min(2, { message: "O nome do inspetor é obrigatório" }),
-  inspection_type: z.enum(["process", "final"], { message: "O tipo de inspeção é obrigatório" }),
-  process_name: z.string().optional(),
-  observations: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  QualityCriteria, 
+  QualityCriteriaResult, 
+  QualityInspection,
+  getQualityCriteria, 
+  createQualityInspection 
+} from "@/services/qualityControlService";
+import { useToast } from "@/hooks/use-toast";
 
 export function QualityInspectionForm() {
-  const [availableCriteria, setAvailableCriteria] = useState<QualityCriteria[]>([]);
-  const [selectedCriteria, setSelectedCriteria] = useState<QualityCriteriaResult[]>([]);
+  const [productName, setProductName] = useState("");
+  const [batchNumber, setBatchNumber] = useState("");
+  const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().substring(0, 10));
+  const [inspector, setInspector] = useState("");
+  const [inspectionType, setInspectionType] = useState<"process" | "final">("final");
+  const [processName, setProcessName] = useState("");
+  const [observations, setObservations] = useState("");
+  const [criteria, setCriteria] = useState<QualityCriteria[]>([]);
+  const [selectedCriteria, setSelectedCriteria] = useState<string[]>([]);
+  const [criteriaResults, setCriteriaResults] = useState<QualityCriteriaResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [criteriaLoading, setCriteriaLoading] = useState(true);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      inspection_date: new Date().toISOString().split('T')[0],
-      inspection_type: "final",
-    },
-  });
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchCriteria = async () => {
       try {
-        setCriteriaLoading(true);
-        const criteria = await getQualityCriteria();
-        setAvailableCriteria(criteria);
+        setLoading(true);
+        const data = await getQualityCriteria();
+        setCriteria(data.filter(c => c.is_active));
       } catch (error) {
-        console.error("Error fetching criteria:", error);
-        toast.error("Erro ao carregar critérios de qualidade");
+        console.error("Failed to fetch criteria:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar critérios",
+          description: "Não foi possível carregar os critérios de qualidade."
+        });
       } finally {
-        setCriteriaLoading(false);
+        setLoading(false);
       }
     };
 
     fetchCriteria();
-  }, []);
+  }, [toast]);
 
-  const handleAddCriteria = (criteriaId: string) => {
-    const selectedCriterion = availableCriteria.find(c => c.id === criteriaId);
-    if (selectedCriterion && !selectedCriteria.some(c => c.criteria_id === criteriaId)) {
-      setSelectedCriteria([...selectedCriteria, {
-        criteria_id: selectedCriterion.id,
-        criteria_name: selectedCriterion.name,
-        expected_value: selectedCriterion.expected_value,
-        actual_value: "",
-        is_conforming: true,
-        observation: ""
-      }]);
+  useEffect(() => {
+    // Update criteria results when selected criteria changes
+    const results = selectedCriteria
+      .map(id => {
+        const criterion = criteria.find(c => c.id === id);
+        if (!criterion) return null;
+
+        // Check if we already have a result for this criteria
+        const existingResult = criteriaResults.find(r => r.criteria_id === id);
+        if (existingResult) return existingResult;
+
+        return {
+          criteria_id: id,
+          criteria_name: criterion.name,
+          expected_value: criterion.expected_value,
+          actual_value: "",
+          is_conforming: true,
+          observation: ""
+        };
+      })
+      .filter((r): r is QualityCriteriaResult => r !== null);
+
+    setCriteriaResults(results);
+  }, [selectedCriteria, criteria]);
+
+  const handleCriteriaChange = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCriteria(prev => [...prev, id]);
+    } else {
+      setSelectedCriteria(prev => prev.filter(c => c !== id));
+      setCriteriaResults(prev => prev.filter(r => r.criteria_id !== id));
     }
   };
 
-  const handleRemoveCriteria = (index: number) => {
-    const newCriteria = [...selectedCriteria];
-    newCriteria.splice(index, 1);
-    setSelectedCriteria(newCriteria);
+  const updateCriteriaResult = (id: string, updates: Partial<QualityCriteriaResult>) => {
+    setCriteriaResults(prev => prev.map(result => 
+      result.criteria_id === id ? { ...result, ...updates } : result
+    ));
   };
 
-  const handleCriteriaChange = (index: number, field: keyof QualityCriteriaResult, value: any) => {
-    const newCriteria = [...selectedCriteria];
-    newCriteria[index] = { ...newCriteria[index], [field]: value };
-    setSelectedCriteria(newCriteria);
-  };
-
-  const onSubmit = async (values: FormValues) => {
-    if (selectedCriteria.length === 0) {
-      toast.error("Adicione pelo menos um critério de qualidade");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (criteriaResults.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhum critério selecionado",
+        description: "Por favor, selecione pelo menos um critério para inspeção."
+      });
       return;
     }
 
-    // Check if all actual values are filled
-    const missingValues = selectedCriteria.some(c => !c.actual_value.trim());
-    if (missingValues) {
-      toast.error("Preencha todos os valores obtidos nos critérios");
-      return;
-    }
+    setSubmitLoading(true);
 
-    setSubmitting(true);
     try {
-      // Determine overall status based on criteria
-      const hasNonConforming = selectedCriteria.some(c => !c.is_conforming);
-      const status = hasNonConforming ? "rejected" : "approved";
+      // Determine status based on criteria results
+      const hasNonConforming = criteriaResults.some(result => !result.is_conforming);
+      const status = hasNonConforming ? "rejected" as const : "approved" as const;
 
-      await createQualityInspection({
-        ...values,
+      // Create inspection data
+      const inspectionData = {
+        product_name: productName,
+        batch_number: batchNumber,
+        inspection_date: inspectionDate,
+        inspector,
+        inspection_type: inspectionType,
+        process_name: inspectionType === "process" ? processName : undefined,
+        criteria_results: criteriaResults,
         status,
-        criteria_results: selectedCriteria
+        observations
+      };
+
+      await createQualityInspection(inspectionData);
+
+      toast({
+        title: "Inspeção registrada",
+        description: "A inspeção de qualidade foi registrada com sucesso."
       });
 
-      toast.success("Inspeção registrada com sucesso");
-      form.reset();
+      // Reset form
+      setProductName("");
+      setBatchNumber("");
+      setInspectionDate(new Date().toISOString().substring(0, 10));
+      setInspector("");
+      setInspectionType("final");
+      setProcessName("");
+      setObservations("");
       setSelectedCriteria([]);
+      setCriteriaResults([]);
     } catch (error) {
       console.error("Error creating inspection:", error);
-      toast.error("Erro ao registrar inspeção");
+      toast({
+        variant: "destructive",
+        title: "Erro ao registrar inspeção",
+        description: "Ocorreu um erro ao tentar registrar a inspeção de qualidade."
+      });
     } finally {
-      setSubmitting(false);
+      setSubmitLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Nova Inspeção de Qualidade</CardTitle>
-          <CardDescription>
-            Registre uma nova inspeção de qualidade para produtos ou processos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="product_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do Produto</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o nome do produto" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Nova Inspeção de Qualidade</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Informações Gerais</h3>
+            
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="product">Produto</Label>
+                <Input 
+                  id="product" 
+                  value={productName} 
+                  onChange={(e) => setProductName(e.target.value)} 
+                  required 
                 />
-
-                <FormField
-                  control={form.control}
-                  name="batch_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número do Lote</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o número do lote" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="inspection_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data da Inspeção</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="inspector"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Inspetor</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome do inspetor" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="inspection_type"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel>Tipo de Inspeção</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-col space-y-1"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="process" id="inspection-process" />
-                            <FormLabel htmlFor="inspection-process" className="font-normal">
-                              Inspeção de Processo
-                            </FormLabel>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="final" id="inspection-final" />
-                            <FormLabel htmlFor="inspection-final" className="font-normal">
-                              Inspeção Final
-                            </FormLabel>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("inspection_type") === "process" && (
-                  <FormField
-                    control={form.control}
-                    name="process_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Processo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Digite o nome do processo" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="batch">Número do Lote</Label>
+                <Input 
+                  id="batch" 
+                  value={batchNumber} 
+                  onChange={(e) => setBatchNumber(e.target.value)} 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="date">Data da Inspeção</Label>
+                <Input 
+                  id="date" 
+                  type="date" 
+                  value={inspectionDate} 
+                  onChange={(e) => setInspectionDate(e.target.value)} 
+                  required 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="inspector">Inspetor</Label>
+                <Input 
+                  id="inspector" 
+                  value={inspector} 
+                  onChange={(e) => setInspector(e.target.value)} 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de Inspeção</Label>
+              <RadioGroup 
+                value={inspectionType} 
+                onValueChange={(value: "process" | "final") => setInspectionType(value)}
+                className="flex space-x-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="final" id="final" />
+                  <Label htmlFor="final">Inspeção Final</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="process" id="process" />
+                  <Label htmlFor="process">Inspeção de Processo</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {inspectionType === "process" && (
+              <div className="space-y-2">
+                <Label htmlFor="process">Nome do Processo</Label>
+                <Input 
+                  id="process" 
+                  value={processName} 
+                  onChange={(e) => setProcessName(e.target.value)} 
+                  required 
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Critérios de Inspeção</h3>
+            
+            {loading ? (
+              <p>Carregando critérios...</p>
+            ) : criteria.length === 0 ? (
+              <p>Não há critérios de qualidade disponíveis. Por favor, crie critérios primeiro.</p>
+            ) : (
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Critérios de Qualidade</h3>
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1">
-                      <Select onValueChange={handleAddCriteria} disabled={criteriaLoading}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={criteriaLoading ? "Carregando critérios..." : "Selecione um critério para adicionar"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableCriteria.map((criteria) => (
-                            <SelectItem key={criteria.id} value={criteria.id}>
-                              {criteria.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {criteria.map((criterion) => (
+                    <div key={criterion.id} className="flex items-start space-x-2">
+                      <Checkbox 
+                        id={`criterion-${criterion.id}`} 
+                        checked={selectedCriteria.includes(criterion.id)}
+                        onCheckedChange={(checked) => handleCriteriaChange(criterion.id, checked as boolean)}
+                      />
+                      <div className="space-y-1">
+                        <Label 
+                          htmlFor={`criterion-${criterion.id}`}
+                          className="font-medium"
+                        >
+                          {criterion.name}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          {criterion.description}
+                        </p>
+                        <p className="text-xs">
+                          Valor esperado: {criterion.expected_value}
+                          {criterion.tolerance ? ` (Tolerância: ${criterion.tolerance})` : ""}
+                          {criterion.measurement_unit ? ` ${criterion.measurement_unit}` : ""}
+                        </p>
+                      </div>
                     </div>
-                    <Button type="button" variant="outline" onClick={() => form.setValue("inspection_type", form.watch("inspection_type"))}>
-                      <Plus className="h-4 w-4 mr-1" /> Adicionar
-                    </Button>
-                  </div>
+                  ))}
                 </div>
 
-                {selectedCriteria.length === 0 ? (
-                  <Alert className="bg-muted">
-                    <AlertTitle>Nenhum critério selecionado</AlertTitle>
-                    <AlertDescription>
-                      Selecione pelo menos um critério de qualidade para avaliar
-                    </AlertDescription>
-                  </Alert>
-                ) : (
-                  <div className="space-y-4">
-                    {selectedCriteria.map((criteria, index) => (
-                      <Card key={index}>
-                        <CardHeader className="py-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-base">{criteria.criteria_name}</CardTitle>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveCriteria(index)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
+                {criteriaResults.length > 0 && (
+                  <div className="space-y-6 mt-8">
+                    <h3 className="text-lg font-medium">Resultados da Inspeção</h3>
+                    
+                    {criteriaResults.map((result) => (
+                      <div key={result.criteria_id} className="space-y-4 p-4 border rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-medium">{result.criteria_name}</h4>
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor={`conformity-${result.criteria_id}`} className="text-sm">Conforme?</Label>
+                            <Checkbox 
+                              id={`conformity-${result.criteria_id}`} 
+                              checked={result.is_conforming}
+                              onCheckedChange={(checked) => 
+                                updateCriteriaResult(result.criteria_id!, { is_conforming: checked as boolean })
+                              }
+                            />
                           </div>
-                        </CardHeader>
-                        <CardContent className="py-3">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <FormLabel>Valor Esperado</FormLabel>
-                              <Input value={criteria.expected_value} readOnly className="bg-muted" />
-                            </div>
-                            <div>
-                              <FormLabel>Valor Obtido</FormLabel>
-                              <Input
-                                value={criteria.actual_value}
-                                onChange={(e) => handleCriteriaChange(index, "actual_value", e.target.value)}
-                                placeholder="Digite o valor obtido"
-                              />
-                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label>Valor Esperado</Label>
+                            <Input value={result.expected_value} disabled />
                           </div>
-                          <div className="mt-4">
-                            <FormLabel>Status</FormLabel>
-                            <RadioGroup
-                              value={criteria.is_conforming ? "conforming" : "non_conforming"}
-                              onValueChange={(value) => handleCriteriaChange(index, "is_conforming", value === "conforming")}
-                              className="flex space-x-4"
-                            >
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="conforming" id={`conforming-${index}`} />
-                                <FormLabel htmlFor={`conforming-${index}`} className="font-normal">
-                                  Conforme
-                                </FormLabel>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="non_conforming" id={`non-conforming-${index}`} />
-                                <FormLabel htmlFor={`non-conforming-${index}`} className="font-normal">
-                                  Não Conforme
-                                </FormLabel>
-                              </div>
-                            </RadioGroup>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`actual-${result.criteria_id}`}>Valor Obtido</Label>
+                            <Input 
+                              id={`actual-${result.criteria_id}`}
+                              value={result.actual_value}
+                              onChange={(e) => 
+                                updateCriteriaResult(result.criteria_id!, { actual_value: e.target.value })
+                              }
+                              required
+                            />
                           </div>
-                          {!criteria.is_conforming && (
-                            <div className="mt-4">
-                              <FormLabel>Observação</FormLabel>
-                              <Textarea
-                                value={criteria.observation || ""}
-                                onChange={(e) => handleCriteriaChange(index, "observation", e.target.value)}
-                                placeholder="Descreva o motivo da não conformidade"
-                              />
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                        
+                        {!result.is_conforming && (
+                          <div className="space-y-2">
+                            <Label htmlFor={`observation-${result.criteria_id}`}>Observação</Label>
+                            <Textarea 
+                              id={`observation-${result.criteria_id}`}
+                              value={result.observation || ""}
+                              onChange={(e) => 
+                                updateCriteriaResult(result.criteria_id!, { observation: e.target.value })
+                              }
+                              placeholder="Descreva o problema encontrado"
+                              required={!result.is_conforming}
+                            />
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
+            )}
+          </div>
 
-              <FormField
-                control={form.control}
-                name="observations"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações Gerais</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Digite observações adicionais sobre a inspeção"
-                        className="min-h-24"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="observations">Observações Gerais</Label>
+            <Textarea 
+              id="observations" 
+              value={observations} 
+              onChange={(e) => setObservations(e.target.value)} 
+              placeholder="Observações adicionais sobre a inspeção"
+              rows={3}
+            />
+          </div>
 
-              <Button type="submit" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Registrar Inspeção
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={submitLoading || criteriaResults.length === 0}>
+              {submitLoading ? "Registrando..." : "Registrar Inspeção"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

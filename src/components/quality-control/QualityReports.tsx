@@ -8,7 +8,7 @@ import { QualityInspection, getQualityInspections } from "@/services/qualityCont
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Chart } from "@/components/ui/chart";
+import { Chart } from "@/components/quality-control/QualityChart";
 import { BarChart4, Download, Filter, PieChart } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { format, isAfter, isBefore, parseISO, subDays, subMonths } from "date-fns";

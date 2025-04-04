@@ -1,79 +1,81 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { QualityCriteria, createQualityCriteria, updateQualityCriteria } from "@/services/qualityControlService";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { QualityCriteria, companySegments, createQualityCriteria, criteriaCategories, updateQualityCriteria } from "@/services/qualityControlService";
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres" }),
-  description: z.string().min(5, { message: "A descrição deve ter pelo menos 5 caracteres" }),
-  expected_value: z.string().min(1, { message: "O valor esperado é obrigatório" }),
-  tolerance: z.string().optional(),
-  measurement_unit: z.string().optional(),
-  company_segment: z.string().min(1, { message: "O segmento da empresa é obrigatório" }),
-  category: z.string().min(1, { message: "A categoria é obrigatória" }),
-  is_active: z.boolean().default(true),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 interface QualityCriteriaFormProps {
-  criteria?: QualityCriteria | null;
-  onClose: () => void;
+  criteria?: QualityCriteria;
+  onSuccess?: () => void;
 }
 
-export function QualityCriteriaForm({ criteria, onClose }: QualityCriteriaFormProps) {
+export function QualityCriteriaForm({ criteria, onSuccess }: QualityCriteriaFormProps) {
+  const [name, setName] = useState(criteria?.name || "");
+  const [description, setDescription] = useState(criteria?.description || "");
+  const [expectedValue, setExpectedValue] = useState(criteria?.expected_value || "");
+  const [tolerance, setTolerance] = useState(criteria?.tolerance || "");
+  const [measurementUnit, setMeasurementUnit] = useState(criteria?.measurement_unit || "");
+  const [category, setCategory] = useState(criteria?.category || "");
+  const [companySegment, setCompanySegment] = useState(criteria?.company_segment || "");
+  const [isActive, setIsActive] = useState(criteria?.is_active !== false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const defaultValues: Partial<FormValues> = {
-    name: criteria?.name || "",
-    description: criteria?.description || "",
-    expected_value: criteria?.expected_value || "",
-    tolerance: criteria?.tolerance || "",
-    measurement_unit: criteria?.measurement_unit || "",
-    company_segment: criteria?.company_segment || "",
-    category: criteria?.category || "",
-    is_active: criteria?.is_active ?? true,
-  };
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues,
-  });
-
-  const onSubmit = async (values: FormValues) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
+
     try {
+      const criteriaData = {
+        name,
+        description,
+        expected_value: expectedValue,
+        tolerance,
+        measurement_unit: measurementUnit,
+        category,
+        company_segment: companySegment,
+        is_active: isActive
+      };
+
       if (criteria) {
-        await updateQualityCriteria(criteria.id, values);
+        await updateQualityCriteria(criteria.id, criteriaData);
         toast({
           title: "Critério atualizado",
-          description: "O critério foi atualizado com sucesso.",
+          description: "O critério de qualidade foi atualizado com sucesso."
         });
       } else {
-        await createQualityCriteria(values);
+        await createQualityCriteria(criteriaData);
         toast({
           title: "Critério criado",
-          description: "O critério foi criado com sucesso.",
+          description: "O novo critério de qualidade foi criado com sucesso."
         });
+
+        // Reset form if creating new
+        setName("");
+        setDescription("");
+        setExpectedValue("");
+        setTolerance("");
+        setMeasurementUnit("");
+        setCategory("");
+        setCompanySegment("");
+        setIsActive(true);
       }
-      onClose();
+
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
-      console.error("Error saving criteria:", error);
+      console.error("Error saving quality criteria:", error);
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o critério de qualidade.",
+        description: "Ocorreu um erro ao tentar salvar o critério de qualidade."
       });
     } finally {
       setLoading(false);
@@ -81,172 +83,109 @@ export function QualityCriteriaForm({ criteria, onClose }: QualityCriteriaFormPr
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Critério</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Espessura do Material" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card>
+      <CardHeader>
+        <CardTitle>{criteria ? "Editar Critério" : "Novo Critério de Qualidade"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome do Critério</Label>
+              <Input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+              />
+            </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descreva o critério de qualidade"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <div className="space-y-2">
+              <Label htmlFor="category">Categoria</Label>
+              <Input 
+                id="category" 
+                value={category} 
+                onChange={(e) => setCategory(e.target.value)} 
+                required 
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="expected_value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor Esperado</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: 10mm" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Valor ou condição esperada para aprovação
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea 
+              id="description" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
+              required 
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="tolerance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tolerância</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: ±0.5mm" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Tolerância aceitável (se aplicável)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="expected_value">Valor Esperado</Label>
+              <Input 
+                id="expected_value" 
+                value={expectedValue} 
+                onChange={(e) => setExpectedValue(e.target.value)} 
+                required 
+              />
+            </div>
 
-          <FormField
-            control={form.control}
-            name="measurement_unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidade de Medida</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: mm, cm, kg" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <div className="space-y-2">
+              <Label htmlFor="tolerance">Tolerância</Label>
+              <Input 
+                id="tolerance" 
+                value={tolerance} 
+                onChange={(e) => setTolerance(e.target.value)} 
+              />
+            </div>
 
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Ativo</FormLabel>
-                  <FormDescription>
-                    Este critério estará disponível para inspeções
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="measurement_unit">Unidade de Medida</Label>
+              <Input 
+                id="measurement_unit" 
+                value={measurementUnit} 
+                onChange={(e) => setMeasurementUnit(e.target.value)} 
+              />
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="company_segment"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Segmento da Empresa</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o segmento" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {companySegments.map((segment) => (
-                      <SelectItem key={segment.value} value={segment.value}>
-                        {segment.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="segment">Segmento da Empresa</Label>
+            <Select value={companySegment} onValueChange={setCompanySegment}>
+              <SelectTrigger id="segment">
+                <SelectValue placeholder="Selecione o segmento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Alimentos">Alimentos</SelectItem>
+                <SelectItem value="Automotivo">Automotivo</SelectItem>
+                <SelectItem value="Eletrônicos">Eletrônicos</SelectItem>
+                <SelectItem value="Farmacêutico">Farmacêutico</SelectItem>
+                <SelectItem value="Plásticos">Plásticos</SelectItem>
+                <SelectItem value="Químico">Químico</SelectItem>
+                <SelectItem value="Têxtil">Têxtil</SelectItem>
+                <SelectItem value="Outro">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a categoria" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {criteriaCategories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="active"
+              checked={isActive}
+              onCheckedChange={setIsActive}
+            />
+            <Label htmlFor="active">Critério Ativo</Label>
+          </div>
 
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {criteria ? "Atualizar" : "Criar"} Critério
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={loading}>
+              {loading ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
