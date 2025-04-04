@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   Building2,
@@ -21,6 +22,7 @@ import {
   Settings,
   HelpCircle,
   GitBranch,
+  ClipboardCheck,
 } from "lucide-react";
 
 interface MenuItem {
@@ -75,6 +77,11 @@ export const menuItems = [
     title: "Produtos Não Conformes",
     href: "/non-conforming-products",
     icon: PackageCheck,
+  },
+  {
+    title: "Controle de Qualidade",
+    href: "/quality-control",
+    icon: ClipboardCheck,
   },
   {
     title: "Indicadores de Desempenho",

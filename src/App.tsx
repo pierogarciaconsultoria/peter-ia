@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ProcessoPage from "./pages/ProcessoPage";
 import ProcessFormPage from "./pages/ProcessFormPage";
+import QualityControl from "./pages/QualityControl";
 
 // Importando as demais páginas
 import PerformanceIndicators from "./pages/PerformanceIndicators";
@@ -68,6 +69,9 @@ const App = () => {
                 {/* Rotas de Processo */}
                 <Route path="/processo" element={<ProcessoPage />} />
                 <Route path="/processo/novo" element={<ProcessFormPage />} />
+                
+                {/* Nova rota para Controle de Qualidade */}
+                <Route path="/quality-control" element={<QualityControl />} />
                 
                 {/* Rotas que não requerem mais autenticação */}
                 <Route path="/documents" element={<Documents />} />
