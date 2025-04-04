@@ -2,36 +2,51 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Edit, Plus, Trash } from "lucide-react";
-import { QualityCriteria, deleteQualityCriteria, getQualityCriteria } from "@/services/qualityControlService";
-import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { QualityCriteriaForm } from "./QualityCriteriaForm";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { companySegments, criteriaCategories } from "@/services/qualityControlService";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { QualityCriteriaForm } from "@/components/quality-control/QualityCriteriaForm";
+import { QualityCriteria, getQualityCriteria, deleteQualityCriteria } from "@/services/qualityControlService";
+import { useToast } from "@/hooks/use-toast";
+import { Pencil, Trash2, Plus, Filter } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function QualityCriteriaManager() {
   const [criteria, setCriteria] = useState<QualityCriteria[]>([]);
+  const [filteredCriteria, setFilteredCriteria] = useState<QualityCriteria[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingCriteria, setEditingCriteria] = useState<QualityCriteria | null>(null);
-  const [segmentFilter, setSegmentFilter] = useState<string>("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [criteriaToDelete, setCriteriaToDelete] = useState<QualityCriteria | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [segmentFilter, setSegmentFilter] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [currentCriteria, setCurrentCriteria] = useState<QualityCriteria | null>(null);
   const { toast } = useToast();
 
-  const fetchCriteria = async () => {
+  // Define company segments and criteria categories from the data
+  const [companySegments, setCompanySegments] = useState<string[]>([]);
+  const [criteriaCategories, setCriteriaCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadCriteria();
+  }, []);
+
+  const loadCriteria = async () => {
     try {
       setLoading(true);
-      const data = await getQualityCriteria(segmentFilter || undefined, categoryFilter || undefined);
+      const data = await getQualityCriteria();
       setCriteria(data);
+      setFilteredCriteria(data);
+      
+      // Extract unique segments and categories
+      const segments = Array.from(new Set(data.map(c => c.company_segment))).filter(Boolean);
+      const categories = Array.from(new Set(data.map(c => c.category))).filter(Boolean);
+      
+      setCompanySegments(segments as string[]);
+      setCriteriaCategories(categories as string[]);
     } catch (error) {
-      console.error("Failed to fetch criteria:", error);
+      console.error("Failed to load criteria:", error);
       toast({
         variant: "destructive",
         title: "Erro ao carregar critérios",
@@ -43,46 +58,54 @@ export function QualityCriteriaManager() {
   };
 
   useEffect(() => {
-    fetchCriteria();
-  }, [segmentFilter, categoryFilter, toast]);
-
-  const handleEdit = (criteria: QualityCriteria) => {
-    setEditingCriteria(criteria);
-    setFormOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!criteriaToDelete) return;
+    // Apply filters
+    let results = criteria;
     
+    if (searchTerm) {
+      results = results.filter(
+        c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+             c.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (categoryFilter !== "all") {
+      results = results.filter(c => c.category === categoryFilter);
+    }
+    
+    if (segmentFilter !== "all") {
+      results = results.filter(c => c.company_segment === segmentFilter);
+    }
+    
+    setFilteredCriteria(results);
+  }, [criteria, searchTerm, categoryFilter, segmentFilter]);
+
+  const handleDelete = async (id: string) => {
     try {
-      await deleteQualityCriteria(criteriaToDelete.id);
+      await deleteQualityCriteria(id);
+      setCriteria(prevCriteria => prevCriteria.filter(c => c.id !== id));
       toast({
         title: "Critério excluído",
-        description: "O critério foi excluído com sucesso."
+        description: "O critério de qualidade foi excluído com sucesso."
       });
-      fetchCriteria();
     } catch (error) {
       console.error("Error deleting criteria:", error);
       toast({
         variant: "destructive",
-        title: "Erro ao excluir critério",
-        description: "Não foi possível excluir o critério."
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o critério de qualidade."
       });
-    } finally {
-      setDeleteDialogOpen(false);
-      setCriteriaToDelete(null);
     }
   };
 
-  const confirmDelete = (criteria: QualityCriteria) => {
-    setCriteriaToDelete(criteria);
-    setDeleteDialogOpen(true);
+  const handleEdit = (criteria: QualityCriteria) => {
+    setCurrentCriteria(criteria);
+    setShowEditDialog(true);
   };
 
-  const handleCloseForm = () => {
-    setFormOpen(false);
-    setEditingCriteria(null);
-    fetchCriteria();
+  const handleSuccess = () => {
+    loadCriteria();
+    setShowAddDialog(false);
+    setShowEditDialog(false);
   };
 
   return (
@@ -91,144 +114,159 @@ export function QualityCriteriaManager() {
         <div>
           <h2 className="text-xl font-semibold">Critérios de Qualidade</h2>
           <p className="text-muted-foreground">
-            Gerencie critérios de qualidade para inspeções
+            Gerencie os critérios de inspeção de qualidade
           </p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
+        
+        <Button onClick={() => setShowAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Novo Critério
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-          <SelectTrigger className="w-full sm:w-[250px]">
-            <SelectValue placeholder="Filtrar por segmento" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos os segmentos</SelectItem>
-            {companySegments.map((segment) => (
-              <SelectItem key={segment.value} value={segment.value}>
-                {segment.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full sm:w-[250px]">
-            <SelectValue placeholder="Filtrar por categoria" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todas as categorias</SelectItem>
-            {criteriaCategories.map((category) => (
-              <SelectItem key={category.value} value={category.value}>
-                {category.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <Card>
-        {loading ? (
-          <CardContent className="p-6">
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+          <CardDescription>
+            Refine a lista de critérios de qualidade
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <Input
+                placeholder="Pesquisar critérios..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+              />
             </div>
-          </CardContent>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Valor Esperado</TableHead>
-                <TableHead>Segmento</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {criteria.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Nenhum critério encontrado
-                  </TableCell>
-                </TableRow>
-              ) : (
-                criteria.map((criterion) => (
-                  <TableRow key={criterion.id}>
-                    <TableCell className="font-medium">{criterion.name}</TableCell>
-                    <TableCell className="max-w-xs truncate">{criterion.description}</TableCell>
-                    <TableCell>{criterion.expected_value}</TableCell>
-                    <TableCell>
-                      {companySegments.find(s => s.value === criterion.company_segment)?.label || criterion.company_segment}
-                    </TableCell>
-                    <TableCell>
-                      {criteriaCategories.find(c => c.value === criterion.category)?.label || criterion.category}
-                    </TableCell>
-                    <TableCell>
-                      {criterion.is_active ? (
-                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                          Ativo
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
-                          Inativo
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(criterion)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => confirmDelete(criterion)}>
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        )}
+            <div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {criteriaCategories.map((category) => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por segmento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os segmentos</SelectItem>
+                  {companySegments.map((segment) => (
+                    <SelectItem key={segment} value={segment}>{segment}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Lista de Critérios</CardTitle>
+          <CardDescription>
+            {filteredCriteria.length} critérios encontrados
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : filteredCriteria.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">Nenhum critério encontrado</p>
+              <Button variant="outline" className="mt-4" onClick={() => setShowAddDialog(true)}>
+                Adicionar novo critério
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredCriteria.map((item) => (
+                <Card key={item.id} className="overflow-hidden">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(item)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Valor Esperado</p>
+                        <p className="text-sm font-medium">
+                          {item.expected_value} 
+                          {item.measurement_unit && <span> {item.measurement_unit}</span>}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tolerância</p>
+                        <p className="text-sm font-medium">{item.tolerance || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Status</p>
+                        <Badge variant={item.is_active ? "default" : "outline"} className="mt-1">
+                          {item.is_active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <Badge variant="secondary">{item.category}</Badge>
+                      <Badge variant="outline">{item.company_segment}</Badge>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add Criteria Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
-            <DialogTitle>
-              {editingCriteria ? "Editar Critério" : "Novo Critério de Qualidade"}
-            </DialogTitle>
+            <DialogTitle>Novo Critério de Qualidade</DialogTitle>
           </DialogHeader>
-          <QualityCriteriaForm 
-            criteria={editingCriteria} 
-            onClose={handleCloseForm} 
-          />
+          <QualityCriteriaForm onSuccess={handleSuccess} />
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o critério "{criteriaToDelete?.name}"? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Edit Criteria Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Editar Critério de Qualidade</DialogTitle>
+          </DialogHeader>
+          {currentCriteria && (
+            <QualityCriteriaForm 
+              criteria={currentCriteria} 
+              onSuccess={handleSuccess} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

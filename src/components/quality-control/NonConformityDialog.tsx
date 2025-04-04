@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { QualityInspection } from "@/services/qualityControlService";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { NonConformingProduct } from "@/services/nonConformingProductService";
 
 interface NonConformityDialogProps {
   open: boolean;
