@@ -10,26 +10,18 @@ import {
 import { StatCard } from "./StatCard";
 import { ChartCard } from "./ChartCard";
 import { useNavigate } from "react-router-dom";
+import { useHRDashboard } from "./HRDashboardProvider";
 
-interface PeopleTabProps {
-  metrics: {
-    approvedPositions: number;
-    filledPositions: number;
-    pendingRecruitments: number;
-    vacationRequests: number;
-  };
-  discDistribution: Array<{ name: string; value: number; color: string }>;
-  recruitmentStatus: Array<{ name: string; value: number }>;
-  evaluationScores: Array<{ name: string; value: number }>;
-}
-
-export function PeopleTab({ 
-  metrics, 
-  discDistribution, 
-  recruitmentStatus, 
-  evaluationScores 
-}: PeopleTabProps) {
+export function PeopleTab() {
   const navigate = useNavigate();
+  const { dashboardData } = useHRDashboard();
+  const { 
+    metrics, 
+    discDistribution, 
+    recruitmentStatus, 
+    evaluationScores 
+  } = dashboardData;
+  
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
   
   const navigateToSection = (section: string) => {

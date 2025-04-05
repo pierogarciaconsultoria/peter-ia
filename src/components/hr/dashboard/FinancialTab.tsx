@@ -9,23 +9,12 @@ import {
 import { StatCard } from "./StatCard";
 import { ChartCard } from "./ChartCard";
 import { useNavigate } from "react-router-dom";
+import { useHRDashboard } from "./HRDashboardProvider";
 
-interface FinancialTabProps {
-  salaryComparisonData: Array<{ 
-    position: string; 
-    Empresa: number; 
-    Mercado: number;
-  }>;
-  employeeCostsData: Array<{
-    month: string;
-    salaries: number;
-    benefits: number;
-    taxes: number;
-  }>;
-}
-
-export function FinancialTab({ salaryComparisonData, employeeCostsData }: FinancialTabProps) {
+export function FinancialTab() {
   const navigate = useNavigate();
+  const { dashboardData } = useHRDashboard();
+  const { salaryComparisonData, employeeCostsData } = dashboardData;
   
   const navigateToSection = (section: string) => {
     navigate("/human-resources", { state: { activeTab: section } });

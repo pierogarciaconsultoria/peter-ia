@@ -11,28 +11,12 @@ import {
 import { StatCard } from "./StatCard";
 import { ChartCard } from "./ChartCard";
 import { useNavigate } from "react-router-dom";
+import { useHRDashboard } from "./HRDashboardProvider";
 
-interface OverviewTabProps {
-  metrics: {
-    totalEmployees: number;
-    newHires: number;
-    upcomingEvaluations: number;
-    pendingTrainings: number;
-    departments: number;
-    turnoverRate: number;
-    averageTenure: number;
-    pendingRecruitments: number;
-    vacationRequests: number;
-    approvedPositions: number;
-    filledPositions: number;
-    medicalLeaves: number;
-  };
-  departmentDistribution: Array<{ name: string; value: number }>;
-  turnoverData: Array<{ month: string; value: number }>;
-}
-
-export function OverviewTab({ metrics, departmentDistribution, turnoverData }: OverviewTabProps) {
+export function OverviewTab() {
   const navigate = useNavigate();
+  const { dashboardData } = useHRDashboard();
+  const { metrics, departmentDistribution, turnoverData } = dashboardData;
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
   

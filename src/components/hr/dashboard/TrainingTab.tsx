@@ -10,13 +10,13 @@ import {
 import { StatCard } from "./StatCard";
 import { ChartCard } from "./ChartCard";
 import { useNavigate } from "react-router-dom";
+import { useHRDashboard } from "./HRDashboardProvider";
 
-interface TrainingTabProps {
-  trainingCompletionData: Array<{ name: string; value: number }>;
-}
-
-export function TrainingTab({ trainingCompletionData }: TrainingTabProps) {
+export function TrainingTab() {
   const navigate = useNavigate();
+  const { dashboardData } = useHRDashboard();
+  const { trainingCompletionData } = dashboardData;
+  
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
   
   const navigateToSection = (section: string) => {
