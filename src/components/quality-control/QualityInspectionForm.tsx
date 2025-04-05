@@ -16,6 +16,13 @@ import {
   createQualityInspection 
 } from "@/services/qualityControlService";
 import { useToast } from "@/hooks/use-toast";
+import { getQualityInspectors } from "@/services/employeeService";
+
+// Employee type definition
+interface QualityInspector {
+  id: string;
+  name: string;
+}
 
 export function QualityInspectionForm() {
   const [productName, setProductName] = useState("");
@@ -30,6 +37,7 @@ export function QualityInspectionForm() {
   const [criteriaResults, setCriteriaResults] = useState<QualityCriteriaResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [inspectors, setInspectors] = useState<QualityInspector[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,7 +58,23 @@ export function QualityInspectionForm() {
       }
     };
 
+    const fetchInspectors = async () => {
+      try {
+        // Fetch quality inspectors
+        const inspectorsData = await getQualityInspectors();
+        setInspectors(inspectorsData);
+      } catch (error) {
+        console.error("Failed to fetch inspectors:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar inspetores",
+          description: "Não foi possível carregar a lista de inspetores de qualidade."
+        });
+      }
+    };
+
     fetchCriteria();
+    fetchInspectors();
   }, [toast]);
 
   useEffect(() => {
@@ -200,12 +224,21 @@ export function QualityInspectionForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="inspector">Inspetor</Label>
-                <Input 
-                  id="inspector" 
+                <Select 
                   value={inspector} 
-                  onChange={(e) => setInspector(e.target.value)} 
-                  required 
-                />
+                  onValueChange={setInspector}
+                >
+                  <SelectTrigger id="inspector">
+                    <SelectValue placeholder="Selecione um inspetor de qualidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {inspectors.map((inspector) => (
+                      <SelectItem key={inspector.id} value={inspector.id}>
+                        {inspector.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
