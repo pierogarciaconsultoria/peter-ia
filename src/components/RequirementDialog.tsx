@@ -1,15 +1,16 @@
-
 import { ISORequirement } from "@/utils/isoRequirements";
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, ClipboardList, Plus } from "lucide-react";
+import { FileText, ClipboardList, Plus, Calendar, User, Clock, AlertTriangle } from "lucide-react";
 import { DocumentItem } from "@/components/DocumentItem";
 import { TaskItem } from "@/components/TaskItem";
 import { getDocumentsForRequirement, getTasksForRequirement } from "@/utils/isoTemplates";
 import { DocumentTemplate } from "@/components/DocumentTemplate";
+import { getRequirementDeadline, isOverdue } from "@/utils/isoDeadlines";
+import { Badge } from "@/components/ui/badge";
 
 interface RequirementDialogProps {
   requirement: ISORequirement;
@@ -17,6 +18,25 @@ interface RequirementDialogProps {
 }
 
 export function RequirementDialog({ requirement, onChildRequirementClick }: RequirementDialogProps) {
+  const deadline = getRequirementDeadline(requirement.number);
+  const isDeadlineOverdue = deadline ? isOverdue(deadline) : false;
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR').format(date);
+  };
+  
+  const getPriorityColor = (priority?: 'low' | 'medium' | 'high' | 'critical') => {
+    switch (priority) {
+      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
     <>
       <DialogHeader>
@@ -24,6 +44,20 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
           <span className="text-sm font-medium text-primary px-3 py-0.5 bg-primary/10 rounded-full">
             {requirement.number}
           </span>
+          
+          {deadline && (
+            <Badge variant={isDeadlineOverdue ? "destructive" : "outline"} 
+                  className={!isDeadlineOverdue ? getPriorityColor(deadline.priority) : ""}>
+              {isDeadlineOverdue ? (
+                <span className="flex items-center gap-1">
+                  <AlertTriangle size={12} />
+                  Atrasado
+                </span>
+              ) : (
+                <span>Prioridade: {deadline.priority}</span>
+              )}
+            </Badge>
+          )}
         </div>
         <DialogTitle className="text-2xl">
           {requirement.title}
@@ -32,6 +66,42 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
           {requirement.description}
         </DialogDescription>
       </DialogHeader>
+      
+      {deadline && (
+        <div className="mt-4 p-4 rounded-md bg-muted/30">
+          <h3 className="text-sm font-medium mb-2">Informações de Prazo</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-muted-foreground" />
+              <span className="text-sm">
+                <strong>Data Alvo:</strong> {formatDate(deadline.targetDate)}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <User size={16} className="text-muted-foreground" />
+              <span className="text-sm">
+                <strong>Responsável:</strong> {deadline.responsiblePerson}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-muted-foreground" />
+              <span className="text-sm">
+                <strong>Status:</strong> {
+                  {
+                    'not-started': 'Não iniciado',
+                    'in-progress': 'Em andamento',
+                    'review': 'Em revisão',
+                    'completed': 'Concluído',
+                    'overdue': 'Atrasado'
+                  }[deadline.status]
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       
       <ProgressIndicator 
         status={requirement.status} 
@@ -99,7 +169,6 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
             </div>
           )}
           
-          {/* Document template section */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium mb-4">Modelo de Formulário para Requisito {requirement.number}</h3>
             <DocumentTemplate requirement={requirement} />

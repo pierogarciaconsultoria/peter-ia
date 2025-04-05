@@ -1,4 +1,3 @@
-
 export interface ISODocument {
   id: string;
   title: string;
@@ -46,7 +45,6 @@ export interface ISORecord {
   updated_at: string;
 }
 
-// Add this interface to make it compatible with the existing code
 export interface TemplateDocument {
   id: string;
   title: string;
@@ -54,4 +52,12 @@ export interface TemplateDocument {
   description: string;
   requirementIds: string[];
   template?: string;
+}
+
+export interface RequirementDeadline {
+  requirementId: string;
+  targetDate: string;
+  responsiblePerson: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'not-started' | 'in-progress' | 'review' | 'completed' | 'overdue';
 }
