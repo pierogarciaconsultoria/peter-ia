@@ -1,38 +1,29 @@
 
 export type ActionStatus = 'planned' | 'in_progress' | 'completed' | 'delayed' | 'cancelled';
 export type ActionPriority = 'low' | 'medium' | 'high' | 'critical';
-export type ProcessArea = 'manufacturing' | 'quality' | 'management' | 'hr' | 'sales' | 'supply_chain' | 'other';
-export type ActionSource = 'planning' | 'audit' | 'non_conformity' | 'corrective_action' | 'critical_analysis' | 'customer_satisfaction' | 'supplier_evaluation' | 'customer_complaint' | 'performance_indicator' | 'other';
+export type ProcessArea = 'Comercial' | 'Financeiro' | 'Produção' | 'Qualidade' | 'RH' | 'TI' | 'Logística' | 'Compras' | 'Treinamento' | 'Administrativo' | string;
+export type ActionSource = 'internal_audit' | 'external_audit' | 'customer_complaint' | 'non_conformity' | 'improvement_opportunity' | 'management_review' | 'strategic_planning' | 'risk_management' | 'other';
 
 export interface Action5W2H {
   id: string;
   title: string;
-  // Source
-  source: ActionSource;
-  // What
   what: string;
-  // Why
   why: string;
-  // Where
   where: string;
-  // When
+  when?: string;
+  who?: string;
+  how: string;
+  responsible: string;
+  how_much: number;
+  currency?: string;
   due_date: string;
   start_date?: string;
-  // Who
-  responsible: string;
-  involved_people?: string;
-  // How
-  how: string;
-  // How Much
-  how_much: number | null;
-  currency?: string;
-  
-  // Additional fields
+  created_at?: string;
+  updated_at?: string;
+  completed_at?: string;
   status: ActionStatus;
   priority: ActionPriority;
   process_area: ProcessArea;
-  created_at: string;
-  updated_at?: string;
-  completed_at?: string;
+  source?: ActionSource;
   comments?: string;
 }

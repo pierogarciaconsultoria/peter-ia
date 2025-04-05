@@ -23,6 +23,7 @@ import {
   HelpCircle,
   GitBranch,
   ClipboardCheck,
+  ClipboardList,
 } from "lucide-react";
 
 interface MenuItem {
@@ -69,6 +70,11 @@ export const menuItems = [
     icon: Users,
   },
   {
+    title: "Plano de Ação",
+    href: "/action-schedule",
+    icon: ClipboardList,
+  },
+  {
     title: "Não Conformidades",
     href: "/non-compliance",
     icon: AlertTriangle,
@@ -107,11 +113,6 @@ export const menuItems = [
     title: "Inspeção de Matéria Prima",
     href: "/raw-material-inspection",
     icon: CheckSquare,
-  },
-  {
-    title: "Plano de Ação",
-    href: "/action-schedule",
-    icon: Calendar,
   },
   {
     title: "Agenda de Auditoria",
