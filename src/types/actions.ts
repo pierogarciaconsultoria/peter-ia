@@ -1,7 +1,7 @@
 
 export type ActionStatus = 'planned' | 'in_progress' | 'completed' | 'delayed' | 'cancelled';
 export type ActionPriority = 'low' | 'medium' | 'high' | 'critical';
-export type ProcessArea = 'Comercial' | 'Financeiro' | 'Produção' | 'Qualidade' | 'RH' | 'TI' | 'Logística' | 'Compras' | 'Treinamento' | 'Administrativo' | string;
+export type ProcessArea = 'Comercial' | 'Financeiro' | 'Produção' | 'Qualidade' | 'RH' | 'TI' | 'Logística' | 'Compras' | 'Treinamento' | 'Administrativo' | 'manufacturing' | 'quality' | 'management' | 'hr' | 'sales' | 'supply_chain' | 'other';
 export type ActionSource = 
   | 'internal_audit' 
   | 'external_audit' 

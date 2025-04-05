@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,14 +12,17 @@ import { createAction, updateAction } from "@/services/actionService";
 import { Action5W2H, ActionStatus, ActionPriority, ProcessArea, ActionSource } from "@/types/actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const processAreaValues = ['manufacturing', 'quality', 'management', 'hr', 'sales', 'supply_chain', 'other'] as const;
+const actionSourceValues = [
+  'planning', 'audit', 'internal_audit', 'external_audit', 'non_conformity',
+  'corrective_action', 'critical_analysis', 'management_review', 'customer_satisfaction',
+  'supplier_evaluation', 'customer_complaint', 'performance_indicator',
+  'improvement_opportunity', 'strategic_planning', 'risk_management', 'other'
+] as const;
+
 const actionSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
-  source: z.enum([
-    "planning", "audit", "non_conformity", "corrective_action", "critical_analysis", 
-    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "performance_indicator",
-    "internal_audit", "external_audit", "improvement_opportunity", "management_review", 
-    "strategic_planning", "risk_management", "other"
-  ] as const),
+  source: z.enum(actionSourceValues),
   what: z.string().min(3, "O que deve ser feito deve ter pelo menos 3 caracteres"),
   why: z.string().min(3, "Por que deve ser feito deve ter pelo menos 3 caracteres"),
   where: z.string().min(2, "Onde deve ser feito deve ter pelo menos 2 caracteres"),
@@ -33,7 +35,7 @@ const actionSchema = z.object({
   currency: z.string().optional(),
   status: z.enum(["planned", "in_progress", "completed", "delayed", "cancelled"] as const),
   priority: z.enum(["low", "medium", "high", "critical"] as const),
-  process_area: z.enum(["manufacturing", "quality", "management", "hr", "sales", "supply_chain", "other"] as const),
+  process_area: z.enum(processAreaValues),
   comments: z.string().optional(),
 });
 
@@ -55,10 +57,11 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
       ...action,
       how_much: action.how_much || null,
       involved_people: action.involved_people || "",
-      source: action.source || "planning" as ActionSource,
+      source: (action.source || "planning") as ActionFormValues["source"],
+      process_area: action.process_area as ActionFormValues["process_area"],
     } : {
       title: "",
-      source: "planning" as ActionSource,
+      source: "planning",
       what: "",
       why: "",
       where: "",
@@ -69,9 +72,9 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
       how: "",
       how_much: null,
       currency: "BRL",
-      status: "planned" as ActionStatus,
-      priority: "medium" as ActionPriority,
-      process_area: "quality" as ProcessArea,
+      status: "planned",
+      priority: "medium",
+      process_area: "quality",
       comments: "",
     }
   });
@@ -81,36 +84,21 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
     
     try {
       if (action?.id) {
-        await updateAction(action.id, values);
+        await updateAction(action.id, values as unknown as Partial<Action5W2H>);
         toast({
           title: "Ação atualizada",
           description: "A ação foi atualizada com sucesso",
         });
       } else {
-        // Ensure all required properties are present when creating a new action
         const newAction = {
           ...values,
-          // These properties are required in the Action5W2H type but not in the form
-          title: values.title,
-          source: values.source,
-          what: values.what,
-          why: values.why,
-          where: values.where,
-          responsible: values.responsible,
-          involved_people: values.involved_people,
-          due_date: values.due_date,
-          how: values.how,
-          status: values.status,
-          priority: values.priority,
-          process_area: values.process_area,
-          // Optional properties that might be undefined
           start_date: values.start_date,
           how_much: values.how_much,
           currency: values.currency || "BRL",
           comments: values.comments || ""
         };
         
-        await createAction(newAction);
+        await createAction(newAction as unknown as Omit<Action5W2H, 'id' | 'created_at' | 'updated_at' | 'completed_at'>);
         toast({
           title: "Ação criada",
           description: "A ação foi criada com sucesso",
@@ -157,7 +145,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
               )}
             />
             
-            {/* Origem da Ação */}
             <FormField
               control={form.control}
               name="source"
@@ -193,7 +180,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
             />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* What */}
               <FormField
                 control={form.control}
                 name="what"
@@ -208,7 +194,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
                 )}
               />
               
-              {/* Why */}
               <FormField
                 control={form.control}
                 name="why"
@@ -225,7 +210,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Where */}
               <FormField
                 control={form.control}
                 name="where"
@@ -240,7 +224,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
                 )}
               />
               
-              {/* Who */}
               <FormField
                 control={form.control}
                 name="responsible"
@@ -256,7 +239,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
               />
             </div>
             
-            {/* Envolvidos */}
             <FormField
               control={form.control}
               name="involved_people"
@@ -272,7 +254,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
             />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* When */}
               <FormField
                 control={form.control}
                 name="start_date"
@@ -302,7 +283,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
               />
             </div>
             
-            {/* How */}
             <FormField
               control={form.control}
               name="how"
@@ -318,7 +298,6 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
             />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* How Much */}
               <FormField
                 control={form.control}
                 name="how_much"

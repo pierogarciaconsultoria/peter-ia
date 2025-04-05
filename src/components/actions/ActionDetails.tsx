@@ -1,4 +1,3 @@
-
 import { Action5W2H } from "@/types/actions";
 import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,16 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
       case "hr": return "Recursos Humanos";
       case "sales": return "Vendas";
       case "supply_chain": return "Cadeia de Suprimentos";
+      case "Comercial": return "Comercial";
+      case "Financeiro": return "Financeiro";
+      case "Produção": return "Produção";
+      case "Qualidade": return "Qualidade";
+      case "RH": return "RH";
+      case "TI": return "TI";
+      case "Logística": return "Logística";
+      case "Compras": return "Compras";
+      case "Treinamento": return "Treinamento";
+      case "Administrativo": return "Administrativo";
       case "other": return "Outro";
       default: return process;
     }
