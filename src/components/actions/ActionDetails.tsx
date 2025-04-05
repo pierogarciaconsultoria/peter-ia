@@ -71,12 +71,19 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
     switch (source) {
       case "planning": return "Planejamento";
       case "audit": return "Auditoria";
+      case "internal_audit": return "Auditoria Interna";
+      case "external_audit": return "Auditoria Externa";
       case "non_conformity": return "Não Conformidade";
       case "corrective_action": return "Ação Corretiva";
       case "critical_analysis": return "Análise Crítica";
+      case "management_review": return "Análise Crítica da Direção";
       case "customer_satisfaction": return "Pesquisa de Satisfação";
       case "supplier_evaluation": return "Avaliação de Fornecedor";
       case "customer_complaint": return "Reclamação de Cliente";
+      case "performance_indicator": return "Indicador de Desempenho";
+      case "improvement_opportunity": return "Oportunidade de Melhoria";
+      case "strategic_planning": return "Planejamento Estratégico";
+      case "risk_management": return "Gestão de Riscos";
       case "other": return "Outro";
       default: return source;
     }
@@ -101,7 +108,7 @@ export function ActionDetails({ action, onClose, onEdit }: ActionDetailsProps) {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Origem:</p>
-              <p className="font-medium">{getSourceText(action.source)}</p>
+              <p className="font-medium">{getSourceText(action.source || "other")}</p>
             </div>
           </div>
           

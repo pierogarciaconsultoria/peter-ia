@@ -17,7 +17,9 @@ const actionSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
   source: z.enum([
     "planning", "audit", "non_conformity", "corrective_action", "critical_analysis", 
-    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "performance_indicator", "other"
+    "customer_satisfaction", "supplier_evaluation", "customer_complaint", "performance_indicator",
+    "internal_audit", "external_audit", "improvement_opportunity", "management_review", 
+    "strategic_planning", "risk_management", "other"
   ] as const),
   what: z.string().min(3, "O que deve ser feito deve ter pelo menos 3 caracteres"),
   why: z.string().min(3, "Por que deve ser feito deve ter pelo menos 3 caracteres"),
@@ -53,6 +55,7 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
       ...action,
       how_much: action.how_much || null,
       involved_people: action.involved_people || "",
+      source: action.source || "planning" as ActionSource,
     } : {
       title: "",
       source: "planning" as ActionSource,
@@ -168,13 +171,19 @@ export function ActionForm({ action, onClose, afterSubmit }: ActionFormProps) {
                     >
                       <option value="planning">Planejamento</option>
                       <option value="audit">Auditoria</option>
+                      <option value="internal_audit">Auditoria Interna</option>
+                      <option value="external_audit">Auditoria Externa</option>
                       <option value="non_conformity">Não Conformidade</option>
                       <option value="corrective_action">Ação Corretiva</option>
                       <option value="critical_analysis">Análise Crítica</option>
+                      <option value="management_review">Análise Crítica da Direção</option>
                       <option value="customer_satisfaction">Pesquisa de Satisfação de Cliente</option>
                       <option value="supplier_evaluation">Avaliação de Provedor Externo</option>
                       <option value="customer_complaint">Reclamação de Cliente</option>
                       <option value="performance_indicator">Indicador de Desempenho</option>
+                      <option value="improvement_opportunity">Oportunidade de Melhoria</option>
+                      <option value="strategic_planning">Planejamento Estratégico</option>
+                      <option value="risk_management">Gestão de Riscos</option>
                       <option value="other">Outro</option>
                     </select>
                   </FormControl>
