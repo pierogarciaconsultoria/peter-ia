@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -45,7 +44,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Trash2, User, Building2, CheckSquare } from "lucide-react";
+import { Loader2, Plus, Trash2, User, Building2, CheckSquare, Shield } from "lucide-react";
 
 interface Company {
   id: string;

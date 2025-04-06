@@ -63,9 +63,9 @@ const App = () => {
                   </AuthGuard>
                 } />
                 
-                {/* Rota de administração - requer ser admin */}
+                {/* Rota de administração - requer ser admin, mas permite bypass para master admin */}
                 <Route path="/admin" element={
-                  <AuthGuard requireSuperAdmin>
+                  <AuthGuard requireSuperAdmin bypassForMasterAdmin>
                     <Admin />
                   </AuthGuard>
                 } />

@@ -8,16 +8,23 @@ interface AuthGuardProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
   requireSuperAdmin?: boolean;
+  bypassForMasterAdmin?: boolean;
 }
 
 export const AuthGuard = ({ 
   children, 
   requireAdmin = false,
-  requireSuperAdmin = false
+  requireSuperAdmin = false,
+  bypassForMasterAdmin = false
 }: AuthGuardProps) => {
   const { user, isLoading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
+
+  // Bypass authentication for master admin access through Lovable settings
+  const isMasterAdminAccess = bypassForMasterAdmin && 
+    window.location.search.includes('master_admin=true') && 
+    process.env.NODE_ENV === 'development';
 
   useEffect(() => {
     // Short delay to prevent flash of redirect
@@ -35,6 +42,11 @@ export const AuthGuard = ({
         <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
+  }
+
+  // Special bypass for master admin access
+  if (isMasterAdminAccess) {
+    return <>{children}</>;
   }
 
   if (!user) {
