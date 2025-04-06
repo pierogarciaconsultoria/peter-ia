@@ -1,12 +1,9 @@
 
+import { FC } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProgressIndicator } from "@/components/ProgressIndicator";
-import { cn } from "@/lib/utils";
-import { ChevronRight, Calendar, AlertTriangle, User } from "lucide-react";
-import { getRequirementDeadline, isOverdue } from "@/utils/isoDeadlines";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ProgressCircle } from "@/components/ProgressIndicator";
+import { Button } from "@/components/ui/button";
+import { Navigation } from "lucide-react";
 
 interface RequirementCardProps {
   requirement: ISORequirement;
@@ -14,87 +11,87 @@ interface RequirementCardProps {
   onClick: (requirement: ISORequirement) => void;
 }
 
-export function RequirementCard({ requirement, index, onClick }: RequirementCardProps) {
-  const deadline = getRequirementDeadline(requirement.number);
-  const isDeadlineOverdue = deadline ? isOverdue(deadline) : false;
-  
-  // Formatação da data para exibição
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR').format(date);
-  };
+// Mapeamento de requisitos para rotas do sistema
+const requirementToRouteMap: Record<string, string | undefined> = {
+  "4.1": "/organization-context", // Contexto da organização
+  "4.2": "/organization-context",
+  "4.3": "/strategic-planning", // Planejamento estratégico
+  "4.4": "/processo", // Processos
+  "5.1": "/critical-analysis", // Análise Crítica
+  "5.2": "/strategic-planning", // Política e objetivos
+  "5.3": "/human-resources", // Funções e responsabilidades
+  "6.1": "/risk-management", // Gestão de riscos
+  "6.2": "/performance-indicators", // Indicadores de desempenho
+  "6.3": "/action-schedule", // Plano de ação
+  "7.1": "/human-resources", // Recursos/Pessoas
+  "7.2": "/human-resources", // Competência
+  "7.5": "/documents", // Documentos
+  "8.2": "/customer-complaints", // Reclamações de clientes
+  "8.4": "/supplier-evaluation", // Avaliação de fornecedores
+  "8.5": "/quality-control", // Controle de qualidade
+  "8.7": "/non-conforming-products", // Produtos não conformes
+  "9.1": "/performance-indicators", // Indicadores
+  "9.2": "/audit-schedule", // Auditorias
+  "9.3": "/critical-analysis", // Análise crítica
+  "10.2": "/non-compliance", // Não conformidades 
+  "10.3": "/action-schedule", // Plano de ação para melhoria contínua
+};
+
+export const RequirementCard: FC<RequirementCardProps> = ({
+  requirement,
+  index,
+  onClick,
+}) => {
+  // Verifica a rota correspondente para este requisito
+  const correspondingRoute = requirementToRouteMap[requirement.number];
 
   return (
-    <Card 
-      className={cn(
-        "cursor-pointer card-hover appear-animate overflow-hidden",
-        "border border-border/40 bg-card/80 backdrop-blur-sm"
-      )}
+    <div 
+      className="bg-card border rounded-lg p-6 hover:shadow-md transition duration-200 appear-animate"
       style={{ "--delay": index } as React.CSSProperties}
-      onClick={() => onClick(requirement)}
     >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-primary px-2 py-0.5 bg-primary/10 rounded-full">
-            {requirement.number}
-          </span>
-          
-          {isDeadlineOverdue && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="destructive" className="flex items-center gap-1">
-                    <AlertTriangle size={12} />
-                    <span>Atrasado</span>
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Prazo expirado em {formatDate(deadline?.targetDate)}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          
-          {deadline && deadline.priority === 'critical' && !isDeadlineOverdue && (
-            <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200">
-              Crítico
-            </Badge>
-          )}
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold tracking-tight">
+            {requirement.number} - {requirement.title}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {requirement.description.length > 120 
+              ? `${requirement.description.substring(0, 120)}...` 
+              : requirement.description
+            }
+          </p>
         </div>
-        <CardTitle className="text-xl mt-2">{requirement.title}</CardTitle>
-        <CardDescription className="line-clamp-2">
-          {requirement.description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ProgressIndicator 
-          status={requirement.status} 
-          progress={requirement.progress} 
+        <ProgressCircle 
+          progress={requirement.progressPercentage} 
+          size={50} 
+          color="bg-green-500"
         />
+      </div>
+
+      <div className="flex justify-between mt-4 gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onClick(requirement)}
+        >
+          Ver Detalhes
+        </Button>
         
-        {deadline && (
-          <div className="mt-3 flex flex-col gap-1">
-            <div className="flex items-center text-xs text-muted-foreground gap-1">
-              <Calendar size={12} />
-              <span>Prazo: {formatDate(deadline.targetDate)}</span>
-            </div>
-            
-            {deadline.responsiblePerson && (
-              <div className="flex items-center text-xs text-muted-foreground gap-1">
-                <User size={12} />
-                <span>Responsável: {deadline.responsiblePerson}</span>
-              </div>
-            )}
-          </div>
+        {correspondingRoute && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-blue-600 hover:text-blue-700"
+            asChild
+          >
+            <a href={correspondingRoute}>
+              <Navigation className="h-4 w-4 mr-1" />
+              Ver Aplicação
+            </a>
+          </Button>
         )}
-      </CardContent>
-      <CardFooter className="flex justify-between pt-2 pb-4">
-        <span className="text-xs text-muted-foreground">
-          {requirement.children?.length || 0} subitems
-        </span>
-        <ChevronRight size={16} className="text-muted-foreground" />
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
-}
+};
