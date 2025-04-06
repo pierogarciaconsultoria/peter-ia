@@ -32,17 +32,16 @@ interface MenuItem {
   icon: LucideIcon;
 }
 
-// Adicionar um novo item no menu para a home/landing page
 export const menuItems = [
   {
-    title: "Home",
+    title: "Dashboard",
     href: "/",
-    icon: Home,
+    icon: LayoutDashboard,
   },
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    title: "Landing Page",
+    href: "/landing",
+    icon: Home,
   },
   {
     title: "Processo",

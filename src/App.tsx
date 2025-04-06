@@ -9,7 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AuthGuard } from "@/components/AuthGuard";
 
 // Pages
-import LandingPage from "./pages/LandingPage";
+import PublicLandingPage from "./pages/PublicLandingPage";
 import Index from "./pages/Index";
 import Documents from "./pages/Documents";
 import NonCompliance from "./pages/NonCompliance";
@@ -51,11 +51,11 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Landing page como rota inicial */}
-                <Route path="/" element={<LandingPage />} />
+                {/* Dashboard interno como rota inicial */}
+                <Route path="/" element={<Index />} />
                 
-                {/* Dashboard interno como /dashboard */}
-                <Route path="/dashboard" element={<Index />} />
+                {/* Landing page pública movida para /landing */}
+                <Route path="/landing" element={<PublicLandingPage />} />
                 
                 {/* Página de autenticação pública */}
                 <Route path="/auth" element={<Auth />} />
@@ -96,6 +96,9 @@ const App = () => {
                 
                 {/* Redirect ambiente path */}
                 <Route path="/ambiente" element={<Navigate to="/human-resources" state={{activeTab: "ambiente"}} />} />
+                
+                {/* Mantenha a rota /dashboard para compatibilidade */}
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 
                 {/* Página 404 para rotas não encontradas */}
                 <Route path="*" element={<NotFound />} />
