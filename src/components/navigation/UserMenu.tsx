@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings, Building2, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { 
@@ -17,12 +17,11 @@ import { Button } from "@/components/ui/button";
 
 export function UserMenu() {
   const navigate = useNavigate();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success("Logout realizado com sucesso");
       navigate("/auth");
     } catch (error) {
       toast.error("Erro ao fazer logout");
@@ -56,7 +55,7 @@ export function UserMenu() {
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-56 bg-card text-card-foreground"
+            className="w-64 bg-card text-card-foreground"
             alignOffset={0}
             side="bottom"
             sideOffset={5}
@@ -67,17 +66,31 @@ export function UserMenu() {
                   {user.user_metadata?.first_name} {user.user_metadata?.last_name}
                 </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
+                {userCompany && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Building2 className="h-3 w-3 text-muted-foreground" />
+                    <p className="text-xs font-medium">{userCompany.name}</p>
+                  </div>
+                )}
+                {isAdmin && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <Shield className="h-3 w-3 text-primary" />
+                    <p className="text-xs text-primary font-medium">
+                      {isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Admin da Empresa' : ''}
+                    </p>
+                  </div>
+                )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
               {isAdmin && (
                 <DropdownMenuItem onClick={() => navigate("/admin")}>
-                  <User className="mr-2 h-4 w-4" />
+                  <Settings className="mr-2 h-4 w-4" />
                   <span>Administração</span>
                 </DropdownMenuItem>
               )}
@@ -90,8 +103,8 @@ export function UserMenu() {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button variant="outline" size="sm" onClick={() => navigate("/")}>
-          Início
+        <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+          Entrar
         </Button>
       )}
     </div>

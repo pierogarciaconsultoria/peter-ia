@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Table,
   TableBody,
@@ -43,7 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Trash2, User } from "lucide-react";
+import { Loader2, Plus, Trash2, User, Building2, CheckSquare } from "lucide-react";
 
 interface Company {
   id: string;
@@ -51,8 +53,7 @@ interface Company {
   slug: string;
   created_at: string;
   active_modules: string[];
-  active?: boolean; // Make this optional since it might not be in the database yet
-  // Add other fields from the database that we need
+  active?: boolean;
   address?: string;
   cnpj?: string;
   email?: string;
@@ -82,14 +83,14 @@ interface Role {
   name: string;
   company_id: string;
   company_name?: string;
-  is_admin?: boolean; // Make this optional since it might not be in the database yet
-  // Add other fields that might come from the database
+  is_admin?: boolean;
   is_default?: boolean;
   created_at?: string;
   companies?: { name: string };
 }
 
 const Admin = () => {
+  const { isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -114,14 +115,18 @@ const Admin = () => {
     fetchCompanies();
     fetchUsers();
     fetchRoles();
-  }, []);
+  }, [isSuperAdmin, isCompanyAdmin, userCompany]);
 
   const fetchCompanies = async () => {
     try {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .order('name');
+      let query = supabase.from('companies').select('*');
+      
+      // Se não for super admin, filtra apenas a empresa do usuário
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('name');
         
       if (error) throw error;
       
@@ -152,13 +157,19 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('user_profiles')
         .select(`
           *,
           companies:company_id (name)
-        `)
-        .order('created_at', { ascending: false });
+        `);
+      
+      // Se não for super admin, filtra apenas usuários da empresa do usuário
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('company_id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
         
       if (error) throw error;
       
@@ -179,13 +190,19 @@ const Admin = () => {
 
   const fetchRoles = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('roles')
         .select(`
           *,
           companies:company_id (name)
-        `)
-        .order('name');
+        `);
+      
+      // Se não for super admin, filtra apenas papéis da empresa do usuário
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('company_id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('name');
         
       if (error) throw error;
       
@@ -216,6 +233,13 @@ const Admin = () => {
   const handleCreateUser = async () => {
     setLoading(true);
     try {
+      // Definir o ID da empresa (ou usar a empresa atual para admins de empresa)
+      const companyId = isSuperAdmin ? newUserCompany : (userCompany?.id || null);
+      
+      if (!companyId) {
+        throw new Error("É necessário selecionar uma empresa");
+      }
+
       // Step 1: Create the user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: newUserEmail,
@@ -233,8 +257,9 @@ const Admin = () => {
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({
-          company_id: newUserCompany || null,
+          company_id: companyId,
           is_company_admin: newUserIsAdmin,
+          is_super_admin: false, // Apenas superadmins podem criar outros superadmins
           first_name: newUserFirstName,
           last_name: newUserLastName
         })
@@ -264,6 +289,11 @@ const Admin = () => {
   const handleCreateCompany = async () => {
     setLoading(true);
     try {
+      // Apenas super admins podem criar empresas
+      if (!isSuperAdmin) {
+        throw new Error("Apenas administradores do sistema podem criar empresas");
+      }
+      
       const { data, error } = await supabase
         .from('companies')
         .insert({
@@ -297,10 +327,26 @@ const Admin = () => {
     setLoading(true);
     try {
       if (itemToDelete.type === 'user') {
+        // Verificar se tem permissão para excluir o usuário
+        if (!isSuperAdmin) {
+          const userToDelete = users.find(u => u.id === itemToDelete.id);
+          if (userToDelete?.is_super_admin) {
+            throw new Error("Você não tem permissão para excluir um Super Admin");
+          }
+          if (userToDelete?.company_id !== userCompany?.id) {
+            throw new Error("Você só pode excluir usuários da sua empresa");
+          }
+        }
+        
         const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
         if (error) throw error;
         fetchUsers();
       } else if (itemToDelete.type === 'company') {
+        // Apenas super admin pode excluir empresas
+        if (!isSuperAdmin) {
+          throw new Error("Apenas administradores do sistema podem excluir empresas");
+        }
+        
         const { error } = await supabase
           .from('companies')
           .delete()
@@ -331,23 +377,162 @@ const Admin = () => {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Administração</h1>
               <p className="text-muted-foreground">
-                Gerencie usuários, empresas e permissões do sistema
+                {isSuperAdmin 
+                  ? "Gerencie empresas, usuários e permissões do sistema" 
+                  : "Gerencie usuários e permissões da sua empresa"}
               </p>
             </div>
             
-            <Tabs defaultValue="users">
+            <Tabs defaultValue={isSuperAdmin ? "companies" : "users"}>
               <TabsList className="mb-4">
+                {isSuperAdmin && <TabsTrigger value="companies">Empresas</TabsTrigger>}
                 <TabsTrigger value="users">Usuários</TabsTrigger>
-                <TabsTrigger value="companies">Empresas</TabsTrigger>
                 <TabsTrigger value="roles">Papéis</TabsTrigger>
               </TabsList>
+              
+              {isSuperAdmin && (
+                <TabsContent value="companies" className="space-y-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Empresas</CardTitle>
+                        <CardDescription>Gerenciar empresas do sistema</CardDescription>
+                      </div>
+                      <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Nova Empresa
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Criar Nova Empresa</DialogTitle>
+                            <DialogDescription>
+                              Preencha os dados para criar uma nova empresa no sistema
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="companyName">Nome da Empresa</Label>
+                              <Input
+                                id="companyName"
+                                placeholder="Nome da Empresa"
+                                value={newCompanyName}
+                                onChange={(e) => {
+                                  setNewCompanyName(e.target.value);
+                                  setNewCompanySlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
+                                }}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="companySlug">Identificador Único (Slug)</Label>
+                              <Input
+                                id="companySlug"
+                                placeholder="identificador-unico"
+                                value={newCompanySlug}
+                                onChange={(e) => setNewCompanySlug(e.target.value)}
+                              />
+                              <p className="text-sm text-muted-foreground">
+                                O identificador único será usado para URLs e identificação da empresa.
+                              </p>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>Cancelar</Button>
+                            <Button onClick={handleCreateCompany} disabled={loading}>
+                              {loading ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Processando...
+                                </>
+                              ) : 'Criar Empresa'}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </CardHeader>
+                    <CardContent>
+                      {loading ? (
+                        <div className="flex justify-center items-center h-40">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                          <span className="ml-2">Carregando...</span>
+                        </div>
+                      ) : (
+                        <div className="rounded-md border">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Identificador</TableHead>
+                                <TableHead>Módulos Ativos</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="w-[100px]">Ações</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {companies.length === 0 ? (
+                                <TableRow>
+                                  <TableCell colSpan={5} className="h-24 text-center">
+                                    Nenhuma empresa encontrada.
+                                  </TableCell>
+                                </TableRow>
+                              ) : (
+                                companies.map((company) => (
+                                  <TableRow key={company.id}>
+                                    <TableCell>
+                                      <div className="flex items-center">
+                                        <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                                        {company.name}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{company.slug}</TableCell>
+                                    <TableCell>
+                                      {(company.active_modules || []).length > 0 
+                                        ? company.active_modules.join(', ') 
+                                        : 'Todos'}
+                                    </TableCell>
+                                    <TableCell>
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                        company.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                      }`}>
+                                        {company.active ? 'Ativa' : 'Inativa'}
+                                      </span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                          setItemToDelete({ id: company.id, type: 'company' });
+                                          setDeleteDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))
+                              )}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
               
               <TabsContent value="users" className="space-y-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle>Usuários</CardTitle>
-                      <CardDescription>Gerenciar usuários do sistema</CardDescription>
+                      <CardDescription>
+                        {isSuperAdmin 
+                          ? "Gerenciar todos os usuários do sistema" 
+                          : "Gerenciar usuários da sua empresa"}
+                      </CardDescription>
                     </div>
                     <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
                       <DialogTrigger asChild>
@@ -404,32 +589,37 @@ const Admin = () => {
                               onChange={(e) => setNewUserPassword(e.target.value)}
                             />
                           </div>
+                          {isSuperAdmin && (
+                            <div className="space-y-2">
+                              <Label htmlFor="company">Empresa</Label>
+                              <Select value={newUserCompany} onValueChange={setNewUserCompany}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma empresa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {companies.map((company) => (
+                                    <SelectItem key={company.id} value={company.id}>
+                                      {company.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
                           <div className="space-y-2">
-                            <Label htmlFor="company">Empresa</Label>
-                            <Select value={newUserCompany} onValueChange={setNewUserCompany}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione uma empresa" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {companies.map((company) => (
-                                  <SelectItem key={company.id} value={company.id}>
-                                    {company.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="isAdmin">
+                            <Label htmlFor="isAdmin" className="flex items-center gap-2">
                               <input
                                 id="isAdmin"
                                 type="checkbox"
                                 checked={newUserIsAdmin}
                                 onChange={(e) => setNewUserIsAdmin(e.target.checked)}
-                                className="mr-2"
+                                className="h-4 w-4"
                               />
                               Administrador da Empresa
                             </Label>
+                            <p className="text-xs text-muted-foreground ml-6">
+                              Administradores de empresa podem gerenciar usuários e configurações da empresa.
+                            </p>
                           </div>
                         </div>
                         <DialogFooter>
@@ -505,132 +695,7 @@ const Admin = () => {
                                         setItemToDelete({ id: user.id, type: 'user' });
                                         setDeleteDialogOpen(true);
                                       }}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="companies" className="space-y-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Empresas</CardTitle>
-                      <CardDescription>Gerenciar empresas do sistema</CardDescription>
-                    </div>
-                    <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Nova Empresa
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Criar Nova Empresa</DialogTitle>
-                          <DialogDescription>
-                            Preencha os dados para criar uma nova empresa no sistema
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="companyName">Nome da Empresa</Label>
-                            <Input
-                              id="companyName"
-                              placeholder="Nome da Empresa"
-                              value={newCompanyName}
-                              onChange={(e) => {
-                                setNewCompanyName(e.target.value);
-                                setNewCompanySlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-                              }}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="companySlug">Identificador Único (Slug)</Label>
-                            <Input
-                              id="companySlug"
-                              placeholder="identificador-unico"
-                              value={newCompanySlug}
-                              onChange={(e) => setNewCompanySlug(e.target.value)}
-                            />
-                            <p className="text-sm text-muted-foreground">
-                              O identificador único será usado para URLs e identificação da empresa.
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>Cancelar</Button>
-                          <Button onClick={handleCreateCompany} disabled={loading}>
-                            {loading ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processando...
-                              </>
-                            ) : 'Criar Empresa'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Identificador</TableHead>
-                              <TableHead>Módulos Ativos</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead className="w-[100px]">Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {companies.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                  Nenhuma empresa encontrada.
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              companies.map((company) => (
-                                <TableRow key={company.id}>
-                                  <TableCell>{company.name}</TableCell>
-                                  <TableCell>{company.slug}</TableCell>
-                                  <TableCell>
-                                    {(company.active_modules || []).length > 0 
-                                      ? company.active_modules.join(', ') 
-                                      : 'Todos'}
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                      company.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
-                                      {company.active ? 'Ativa' : 'Inativa'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setItemToDelete({ id: company.id, type: 'company' });
-                                        setDeleteDialogOpen(true);
-                                      }}
+                                      disabled={user.is_super_admin && !isSuperAdmin}
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -653,9 +718,52 @@ const Admin = () => {
                     <CardDescription>Gerenciar papéis e permissões de usuários</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p>
-                      Esta área está em desenvolvimento. Em breve você poderá gerenciar papéis e permissões detalhadas.
-                    </p>
+                    <div className="flex flex-col gap-6">
+                      <div className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="bg-primary/10 p-3 rounded-full">
+                          <Shield className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium">Super Admin</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Acesso total ao sistema e todas as empresas.
+                          </p>
+                        </div>
+                        <CheckSquare className="h-5 w-5 text-primary" />
+                      </div>
+                      
+                      <div className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="bg-primary/10 p-3 rounded-full">
+                          <Building2 className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium">Administrador de Empresa</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Gerencia usuários e configurações da sua empresa.
+                          </p>
+                        </div>
+                        <CheckSquare className="h-5 w-5 text-primary" />
+                      </div>
+                      
+                      <div className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="bg-primary/10 p-3 rounded-full">
+                          <User className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium">Usuário</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Acesso apenas às funcionalidades permitidas dentro da sua empresa.
+                          </p>
+                        </div>
+                        <CheckSquare className="h-5 w-5 text-primary" />
+                      </div>
+                      
+                      <div className="mt-4 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          Funcionalidades avançadas de gerenciamento de papéis e permissões estão em desenvolvimento.
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

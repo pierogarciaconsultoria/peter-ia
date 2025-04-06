@@ -7,15 +7,15 @@ import { Loader2 } from "lucide-react";
 interface AuthGuardProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireSuperAdmin?: boolean;
 }
 
-export const AuthGuard = ({ children, requireAdmin = false }: AuthGuardProps) => {
-  // Em um ambiente de desenvolvimento/teste, vamos permitir acesso sem autenticação
-  return <>{children}</>;
-  
-  // O código original abaixo foi comentado para permitir navegação sem autenticação
-  /*
-  const { user, isLoading, isAdmin } = useAuth();
+export const AuthGuard = ({ 
+  children, 
+  requireAdmin = false,
+  requireSuperAdmin = false
+}: AuthGuardProps) => {
+  const { user, isLoading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
 
@@ -42,12 +42,16 @@ export const AuthGuard = ({ children, requireAdmin = false }: AuthGuardProps) =>
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  if (requireSuperAdmin && !isSuperAdmin) {
+    // Redirect to dashboard if super admin access is required but user is not a super admin
+    return <Navigate to="/" replace />;
+  }
+
   if (requireAdmin && !isAdmin) {
     // Redirect to dashboard if admin access is required but user is not an admin
     return <Navigate to="/" replace />;
   }
 
-  // User is authenticated (and is admin if required)
+  // User is authenticated (and has required permissions if specified)
   return <>{children}</>;
-  */
 };

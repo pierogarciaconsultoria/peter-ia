@@ -51,51 +51,133 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Dashboard interno como rota inicial */}
-                <Route path="/" element={<Index />} />
-                
-                {/* Landing page pública movida para /landing */}
+                {/* Rotas públicas - não requerem autenticação */}
                 <Route path="/landing" element={<PublicLandingPage />} />
-                
-                {/* Página de autenticação pública */}
                 <Route path="/auth" element={<Auth />} />
-                
-                {/* Rota para upload externo de documentos */}
                 <Route path="/document-upload/:token" element={<DocumentUpload />} />
                 
-                {/* Página de administração (não requer mais ser admin) */}
-                <Route path="/admin" element={<Admin />} />
+                {/* Dashboard interno como rota inicial - requer autenticação */}
+                <Route path="/" element={
+                  <AuthGuard>
+                    <Index />
+                  </AuthGuard>
+                } />
                 
-                {/* Rotas de Processo */}
-                <Route path="/processo" element={<ProcessoPage />} />
-                <Route path="/processo/novo" element={<ProcessFormPage />} />
+                {/* Rota de administração - requer ser admin */}
+                <Route path="/admin" element={
+                  <AuthGuard requireSuperAdmin>
+                    <Admin />
+                  </AuthGuard>
+                } />
                 
-                {/* Nova rota para Controle de Qualidade */}
-                <Route path="/quality-control" element={<QualityControl />} />
-                
-                {/* Rotas que não requerem mais autenticação */}
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/non-compliance" element={<NonCompliance />} />
-                <Route path="/non-conforming-products" element={<NonConformingProducts />} />
-                
-                {/* Demais rotas sem proteção */}
-                <Route path="/performance-indicators" element={<PerformanceIndicators />} />
-                <Route path="/customer-complaints" element={<CustomerComplaints />} />
-                <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
-                <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
-                <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
-                <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
-                <Route path="/action-schedule" element={<ActionSchedule />} />
-                <Route path="/audit-schedule" element={<AuditSchedule />} />
-                <Route path="/risk-management" element={<RiskManagement />} />
-                <Route path="/organization-context" element={<OrganizationContext />} />
-                <Route path="/critical-analysis" element={<CriticalAnalysis />} />
-                <Route path="/human-resources" element={<HumanResources />} />
-                <Route path="/strategic-planning" element={<StrategicPlanning />} />
-                <Route path="/training-control" element={<TrainingControl />} />
+                {/* Rotas protegidas - requerem autenticação */}
+                <Route path="/processo" element={
+                  <AuthGuard>
+                    <ProcessoPage />
+                  </AuthGuard>
+                } />
+                <Route path="/processo/novo" element={
+                  <AuthGuard>
+                    <ProcessFormPage />
+                  </AuthGuard>
+                } />
+                <Route path="/quality-control" element={
+                  <AuthGuard>
+                    <QualityControl />
+                  </AuthGuard>
+                } />
+                <Route path="/documents" element={
+                  <AuthGuard>
+                    <Documents />
+                  </AuthGuard>
+                } />
+                <Route path="/non-compliance" element={
+                  <AuthGuard>
+                    <NonCompliance />
+                  </AuthGuard>
+                } />
+                <Route path="/non-conforming-products" element={
+                  <AuthGuard>
+                    <NonConformingProducts />
+                  </AuthGuard>
+                } />
+                <Route path="/performance-indicators" element={
+                  <AuthGuard>
+                    <PerformanceIndicators />
+                  </AuthGuard>
+                } />
+                <Route path="/customer-complaints" element={
+                  <AuthGuard>
+                    <CustomerComplaints />
+                  </AuthGuard>
+                } />
+                <Route path="/supplier-evaluation" element={
+                  <AuthGuard>
+                    <SupplierEvaluation />
+                  </AuthGuard>
+                } />
+                <Route path="/equipment-calibration" element={
+                  <AuthGuard>
+                    <EquipmentCalibration />
+                  </AuthGuard>
+                } />
+                <Route path="/satisfaction-survey" element={
+                  <AuthGuard>
+                    <SatisfactionSurvey />
+                  </AuthGuard>
+                } />
+                <Route path="/raw-material-inspection" element={
+                  <AuthGuard>
+                    <RawMaterialInspection />
+                  </AuthGuard>
+                } />
+                <Route path="/action-schedule" element={
+                  <AuthGuard>
+                    <ActionSchedule />
+                  </AuthGuard>
+                } />
+                <Route path="/audit-schedule" element={
+                  <AuthGuard>
+                    <AuditSchedule />
+                  </AuthGuard>
+                } />
+                <Route path="/risk-management" element={
+                  <AuthGuard>
+                    <RiskManagement />
+                  </AuthGuard>
+                } />
+                <Route path="/organization-context" element={
+                  <AuthGuard>
+                    <OrganizationContext />
+                  </AuthGuard>
+                } />
+                <Route path="/critical-analysis" element={
+                  <AuthGuard>
+                    <CriticalAnalysis />
+                  </AuthGuard>
+                } />
+                <Route path="/human-resources" element={
+                  <AuthGuard>
+                    <HumanResources />
+                  </AuthGuard>
+                } />
+                <Route path="/strategic-planning" element={
+                  <AuthGuard>
+                    <StrategicPlanning />
+                  </AuthGuard>
+                } />
+                <Route path="/training-control" element={
+                  <AuthGuard>
+                    <TrainingControl />
+                  </AuthGuard>
+                } />
                 
                 {/* Redirect ambiente path */}
-                <Route path="/ambiente" element={<Navigate to="/human-resources" state={{activeTab: "ambiente"}} />} />
+                <Route path="/ambiente" element={
+                  <AuthGuard>
+                    <Navigate to="/human-resources" state={{activeTab: "ambiente"}} />
+                  </AuthGuard>
+                } />
                 
                 {/* Mantenha a rota /dashboard para compatibilidade */}
                 <Route path="/dashboard" element={<Navigate to="/" replace />} />
