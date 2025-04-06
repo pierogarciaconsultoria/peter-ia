@@ -6,7 +6,7 @@ import { isoRequirements, ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Dashboard } from "@/components/Dashboard";
 import { RequirementsList } from "@/components/RequirementsList";
-import { RequirementDialog } from "@/components/RequirementDialog";
+import { RequirementDialog } from "@/components/requirement-dialog/RequirementDialog";
 import { ChildRequirementDialog } from "@/components/ChildRequirementDialog";
 
 const Index = () => {
