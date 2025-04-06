@@ -1,6 +1,6 @@
 
-import { useNavigate } from "react-router-dom";
-import { LogOut, User, Settings, Building2, Shield } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { LogOut, User, Settings, Building2, Shield, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { 
@@ -17,7 +17,13 @@ import { Button } from "@/components/ui/button";
 
 export function UserMenu() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut, isAdmin, isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
+  
+  // Verificar se o acesso é via master admin
+  const isMasterAdminAccess = 
+    window.location.search.includes('master_admin=true') && 
+    process.env.NODE_ENV === 'development';
 
   const handleSignOut = async () => {
     try {
@@ -30,6 +36,7 @@ export function UserMenu() {
 
   // Extract user initials for avatar
   const getUserInitials = () => {
+    if (isMasterAdminAccess) return "MA";
     if (!user?.user_metadata) return "U";
     
     const firstName = user.user_metadata.first_name || "";
@@ -40,16 +47,18 @@ export function UserMenu() {
 
   return (
     <div className="fixed top-5 right-5 z-50">
-      {user ? (
+      {user || isMasterAdminAccess ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
-              variant="ghost" 
+              variant={isMasterAdminAccess ? "destructive" : "ghost"} 
               size="icon" 
               className="rounded-full h-10 w-10 p-0"
             >
               <Avatar>
-                <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                <AvatarFallback className={isMasterAdminAccess ? "bg-destructive text-destructive-foreground" : ""}>
+                  {getUserInitials()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -62,44 +71,81 @@ export function UserMenu() {
           >
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">
-                  {user.user_metadata?.first_name} {user.user_metadata?.last_name}
-                </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-                {userCompany && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Building2 className="h-3 w-3 text-muted-foreground" />
-                    <p className="text-xs font-medium">{userCompany.name}</p>
-                  </div>
-                )}
-                {isAdmin && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Shield className="h-3 w-3 text-primary" />
-                    <p className="text-xs text-primary font-medium">
-                      {isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Admin da Empresa' : ''}
+                {isMasterAdminAccess ? (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm font-medium text-destructive">Acesso Master Admin</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Acesso administrativo via Lovable</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">
+                      {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
                     </p>
-                  </div>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    {userCompany && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Building2 className="h-3 w-3 text-muted-foreground" />
+                        <p className="text-xs font-medium">{userCompany.name}</p>
+                      </div>
+                    )}
+                    {isAdmin && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Shield className="h-3 w-3 text-primary" />
+                        <p className="text-xs text-primary font-medium">
+                          {isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Admin da Empresa' : ''}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
-              </DropdownMenuItem>
-              {isAdmin && (
+            
+            {isMasterAdminAccess ? (
+              <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => navigate("/admin")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Administração</span>
                 </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
+              </DropdownMenuGroup>
+            ) : (
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Perfil</span>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Administração</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuGroup>
+            )}
+            
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sair</span>
-            </DropdownMenuItem>
+            
+            {!isMasterAdminAccess && (
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair</span>
+              </DropdownMenuItem>
+            )}
+            
+            {isMasterAdminAccess && (
+              <DropdownMenuItem onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('master_admin');
+                window.location.href = url.toString();
+              }}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sair do Modo Master Admin</span>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (

@@ -15,7 +15,7 @@ export const AuthGuard = ({
   children, 
   requireAdmin = false,
   requireSuperAdmin = false,
-  bypassForMasterAdmin = false
+  bypassForMasterAdmin = true // Alterado o padrão para true, permitindo bypass em todas as rotas
 }: AuthGuardProps) => {
   const { user, isLoading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
@@ -44,8 +44,9 @@ export const AuthGuard = ({
     );
   }
 
-  // Special bypass for master admin access
+  // Special bypass for master admin access - agora é a primeira verificação após o carregamento
   if (isMasterAdminAccess) {
+    console.log("Master admin access granted via URL parameter");
     return <>{children}</>;
   }
 

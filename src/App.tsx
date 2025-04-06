@@ -1,4 +1,3 @@
-
 import React from "react"; 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -65,7 +64,7 @@ const App = () => {
                 
                 {/* Rota de administração - requer ser admin, mas permite bypass para master admin */}
                 <Route path="/admin" element={
-                  <AuthGuard requireSuperAdmin bypassForMasterAdmin>
+                  <AuthGuard requireSuperAdmin>
                     <Admin />
                   </AuthGuard>
                 } />
