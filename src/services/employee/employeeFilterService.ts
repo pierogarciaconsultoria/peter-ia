@@ -1,8 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "./types";
 import { mockEmployees } from "./mockData";
 import { toast } from "@/components/ui/use-toast";
+import { getEmployees } from "./employeeBasicService";
 
 /**
  * Get employees by department
