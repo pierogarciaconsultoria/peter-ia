@@ -12,7 +12,7 @@ export interface Employee {
   status: 'active' | 'inactive' | 'on_leave';
   avatar_url?: string;
   hire_date: string;
-  company_id?: string; // Adicionando company_id como propriedade opcional
+  company_id?: string; // Adding company_id as optional property
 }
 
 // Mock data for development
@@ -183,7 +183,7 @@ export async function createEmployee(employeeData: Omit<Employee, 'id'>): Promis
     // Set a default company_id if not provided
     const employeeWithCompany = {
       ...employeeData,
-      company_id: employeeData.company_id || '00000000-0000-0000-0000-000000000000' // Usando um UUID padrão
+      company_id: employeeData.company_id || '00000000-0000-0000-0000-000000000000' // Using a standard UUID
     };
     
     const { data, error } = await supabase
