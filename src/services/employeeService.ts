@@ -12,6 +12,7 @@ export interface Employee {
   status: 'active' | 'inactive' | 'on_leave';
   avatar_url?: string;
   hire_date: string;
+  company_id?: string; // Adicionando company_id como propriedade opcional
 }
 
 // Mock data for development
@@ -179,9 +180,15 @@ export async function getEmployeeById(id: string): Promise<Employee | null> {
  */
 export async function createEmployee(employeeData: Omit<Employee, 'id'>): Promise<Employee | null> {
   try {
+    // Set a default company_id if not provided
+    const employeeWithCompany = {
+      ...employeeData,
+      company_id: employeeData.company_id || '00000000-0000-0000-0000-000000000000' // Usando um UUID padrão
+    };
+    
     const { data, error } = await supabase
       .from("employees")
-      .insert([employeeData])
+      .insert(employeeWithCompany)
       .select()
       .single();
     
@@ -202,9 +209,16 @@ export async function createEmployee(employeeData: Omit<Employee, 'id'>): Promis
  */
 export async function updateEmployee(id: string, employeeData: Partial<Employee>): Promise<Employee | null> {
   try {
+    // Ensure we don't try to update the company_id if it's not provided
+    const updateData = { ...employeeData };
+    
+    if (!updateData.company_id) {
+      delete updateData.company_id;
+    }
+    
     const { data, error } = await supabase
       .from("employees")
-      .update(employeeData)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
