@@ -27,10 +27,7 @@ export async function getExternalAudits(): Promise<ExternalAudit[]> {
     throw new Error(error.message);
   }
   
-  return (data || []).map(item => ({
-    ...item,
-    status: item.status as ExternalAudit['status'],
-  }));
+  return data as ExternalAudit[];
 }
 
 export async function getExternalAuditById(id: string): Promise<ExternalAudit> {
@@ -45,10 +42,7 @@ export async function getExternalAuditById(id: string): Promise<ExternalAudit> {
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as ExternalAudit['status'],
-  };
+  return data as ExternalAudit;
 }
 
 export async function createExternalAudit(audit: Omit<ExternalAudit, 'id' | 'created_at' | 'updated_at'>): Promise<ExternalAudit> {
@@ -63,10 +57,7 @@ export async function createExternalAudit(audit: Omit<ExternalAudit, 'id' | 'cre
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as ExternalAudit['status'],
-  };
+  return data as ExternalAudit;
 }
 
 export async function updateExternalAudit(id: string, audit: Partial<Omit<ExternalAudit, 'id' | 'created_at' | 'updated_at'>>): Promise<ExternalAudit> {
@@ -85,10 +76,7 @@ export async function updateExternalAudit(id: string, audit: Partial<Omit<Extern
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as ExternalAudit['status'],
-  };
+  return data as ExternalAudit;
 }
 
 export async function deleteExternalAudit(id: string): Promise<void> {

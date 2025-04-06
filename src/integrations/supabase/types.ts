@@ -993,6 +993,51 @@ export type Database = {
         }
         Relationships: []
       }
+      external_audits: {
+        Row: {
+          audit_date: string
+          auditor_company: string | null
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          external_auditor: string
+          findings: string | null
+          id: string
+          report_url: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audit_date: string
+          auditor_company?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          external_auditor: string
+          findings?: string | null
+          id?: string
+          report_url?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audit_date?: string
+          auditor_company?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          external_auditor?: string
+          findings?: string | null
+          id?: string
+          report_url?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feedbacks: {
         Row: {
           company_id: string
