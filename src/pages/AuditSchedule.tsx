@@ -1,47 +1,74 @@
 
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, differenceInDays, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, CalendarClock, ListFilter, Clipboard, FileCheck2 } from "lucide-react";
+import { Plus, CalendarClock, ListFilter, Clipboard, FileCheck2, AlertCircle, Calendar, CalendarDays } from "lucide-react";
 import { getAudits, Audit } from "@/services/auditService";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const AuditSchedule = () => {
-  const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  useEffect(() => {
-    fetchAudits();
-  }, []);
-
-  const fetchAudits = async () => {
-    try {
-      setLoading(true);
-      const data = await getAudits();
-      setAudits(data);
-    } catch (error) {
-      console.error("Error fetching audits:", error);
-      toast.error("Falha ao carregar as auditorias");
-    } finally {
-      setLoading(false);
+  // Fetch audits using React Query
+  const { data: audits = [], isLoading, refetch } = useQuery({
+    queryKey: ['internal-audits'],
+    queryFn: getAudits,
+    meta: {
+      onSettled: (data, error) => {
+        if (error) {
+          console.error("Error fetching audits:", error);
+          toast.error("Falha ao carregar as auditorias internas");
+        }
+        setLoading(false);
+      }
     }
-  };
+  });
   
+  // Find next scheduled audit
+  const today = new Date();
+  const upcomingAudits = audits
+    .filter(audit => {
+      const auditDate = new Date(audit.audit_date);
+      return isAfter(auditDate, today) && audit.status === 'planned';
+    })
+    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime());
+
+  const nextAudit = upcomingAudits.length > 0 ? upcomingAudits[0] : null;
+  
+  // Calculate days remaining for next audit
+  const daysRemaining = nextAudit ? 
+    differenceInDays(new Date(nextAudit.audit_date), today) : null;
+
   // Filter audits based on status
-  const upcomingAudits = audits.filter(audit => audit.status === 'planned');
+  const plannedAudits = audits.filter(audit => audit.status === 'planned');
   const inProgressAudits = audits.filter(audit => audit.status === 'in_progress');
   const completedAudits = audits.filter(audit => audit.status === 'completed');
+
+  // Detect if sidebar is collapsed
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
+      <main className={`transition-all duration-300 pt-16 p-6 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-64'}`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -56,6 +83,42 @@ const AuditSchedule = () => {
             </Button>
           </div>
           
+          {/* Next Audit Countdown Card */}
+          {nextAudit && (
+            <Card className="mb-6 border-blue-200 bg-blue-50/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center">
+                  <Calendar className="mr-2 h-5 w-5 text-blue-600" />
+                  Próxima Auditoria Interna
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Título</h3>
+                    <p className="text-base font-medium">{nextAudit.title}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Data</h3>
+                    <p className="text-base font-medium flex items-center">
+                      <CalendarDays className="mr-2 h-4 w-4 text-blue-600" />
+                      {format(new Date(nextAudit.audit_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                    <div className="flex items-center">
+                      <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+                      <p className="text-base font-bold text-amber-600">
+                        {daysRemaining === 1 ? 'Falta 1 dia' : `Faltam ${daysRemaining} dias`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardHeader className="pb-3">
@@ -67,7 +130,7 @@ const AuditSchedule = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{upcomingAudits.length}</p>
+                <p className="text-2xl font-bold">{plannedAudits.length}</p>
               </CardContent>
             </Card>
             
@@ -122,7 +185,7 @@ const AuditSchedule = () => {
               </TabsList>
             </div>
             
-            {loading ? (
+            {isLoading ? (
               <Card>
                 <CardContent className="p-6">
                   <p className="text-center text-muted-foreground">Carregando auditorias...</p>
@@ -131,9 +194,9 @@ const AuditSchedule = () => {
             ) : (
               <>
                 <TabsContent value="upcoming">
-                  {upcomingAudits.length > 0 ? (
+                  {plannedAudits.length > 0 ? (
                     <div className="grid gap-4">
-                      {upcomingAudits.map(audit => (
+                      {plannedAudits.map(audit => (
                         <AuditCard key={audit.id} audit={audit} />
                       ))}
                     </div>
@@ -236,6 +299,23 @@ const AuditCard = ({ audit }: { audit: Audit }) => {
     }
   };
 
+  // Calculate days remaining if audit is planned
+  const getDaysRemaining = () => {
+    if (audit.status === 'planned') {
+      const today = new Date();
+      const auditDate = new Date(audit.audit_date);
+      if (isAfter(auditDate, today)) {
+        const days = differenceInDays(auditDate, today);
+        return (
+          <div className="mt-2 text-xs font-medium text-amber-600">
+            {days === 1 ? 'Falta 1 dia' : `Faltam ${days} dias`}
+          </div>
+        );
+      }
+    }
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -258,6 +338,7 @@ const AuditCard = ({ audit }: { audit: Audit }) => {
               <span>Conclusão: {format(new Date(audit.completion_date), 'PPP', { locale: ptBR })}</span>
             )}
           </div>
+          {getDaysRemaining()}
         </div>
       </CardContent>
     </Card>
