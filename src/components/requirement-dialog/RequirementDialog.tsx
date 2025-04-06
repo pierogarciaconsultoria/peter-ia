@@ -7,7 +7,7 @@ import { RequirementHeader } from "./RequirementHeader";
 import { RequirementDeadlineInfo } from "./RequirementDeadlineInfo";
 import { 
   RequirementsTab, 
-  DocumentsTab, 
+  ApplicationTab, 
   TasksTab 
 } from "./RequirementTabContent";
 
@@ -34,7 +34,7 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
       <Tabs defaultValue="requirements" className="mt-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="requirements">Requisitos</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="application">Aplicação</TabsTrigger>
           <TabsTrigger value="tasks">Tarefas</TabsTrigger>
         </TabsList>
         
@@ -45,8 +45,8 @@ export function RequirementDialog({ requirement, onChildRequirementClick }: Requ
           />
         </TabsContent>
         
-        <TabsContent value="documents">
-          <DocumentsTab requirement={requirement} />
+        <TabsContent value="application">
+          <ApplicationTab requirement={requirement} />
         </TabsContent>
         
         <TabsContent value="tasks">

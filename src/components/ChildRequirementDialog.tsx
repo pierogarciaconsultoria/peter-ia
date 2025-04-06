@@ -4,10 +4,11 @@ import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { Button } from "@/components/ui/button";
-import { FileText, ClipboardList, Plus, ChevronLeft } from "lucide-react";
+import { FileText, ClipboardList, Plus, ChevronLeft, Navigation, ArrowRight } from "lucide-react";
 import { DocumentItem } from "@/components/DocumentItem";
 import { TaskItem } from "@/components/TaskItem";
 import { getDocumentsForRequirement, getTasksForRequirement } from "@/utils/isoTemplates";
+import { requirementToRouteMap } from "@/utils/requirementRouteMapping";
 
 interface ChildRequirementDialogProps {
   requirement: ISORequirement;
@@ -15,6 +16,8 @@ interface ChildRequirementDialogProps {
 }
 
 export function ChildRequirementDialog({ requirement, onClose }: ChildRequirementDialogProps) {
+  const mappedRoute = requirementToRouteMap[requirement.number];
+
   return (
     <>
       <DialogHeader>
@@ -48,7 +51,7 @@ export function ChildRequirementDialog({ requirement, onClose }: ChildRequiremen
       <Tabs defaultValue="details" className="mt-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details">Detalhes</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="application">Aplicação</TabsTrigger>
           <TabsTrigger value="tasks">Tarefas</TabsTrigger>
         </TabsList>
         <TabsContent value="details" className="mt-4 space-y-4">
@@ -72,26 +75,36 @@ export function ChildRequirementDialog({ requirement, onClose }: ChildRequiremen
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="documents">
-          {getDocumentsForRequirement(requirement.number).length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 mt-4">
-              {getDocumentsForRequirement(requirement.number).map((document) => (
-                <DocumentItem key={document.id} document={document} />
-              ))}
+        <TabsContent value="application">
+          {mappedRoute ? (
+            <div className="bg-muted/30 p-6 rounded-lg border border-border/40 mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium text-primary px-2 py-0.5 bg-primary/10 rounded-full">
+                  Aplicação Relacionada
+                </span>
+              </div>
+              
+              <h3 className="text-xl font-medium mb-2">{mappedRoute.title}</h3>
+              <p className="text-muted-foreground mb-4">
+                {mappedRoute.description}
+              </p>
+              
+              <Button className="mt-2" asChild>
+                <a href={mappedRoute.route}>
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                  Acessar Aplicação
+                </a>
+              </Button>
             </div>
           ) : (
-            <div className="p-8 text-center">
+            <div className="p-8 text-center mt-4">
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
-                <FileText size={28} className="text-muted-foreground" />
+                <Navigation size={28} className="text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium">Nenhum documento encontrado</h3>
+              <h3 className="text-lg font-medium">Nenhuma aplicação vinculada</h3>
               <p className="text-muted-foreground mt-2">
-                Não há documentos associados a este requisito ainda.
+                Este requisito ainda não possui uma aplicação específica no sistema.
               </p>
-              <Button className="mt-4">
-                <Plus size={16} className="mr-2" />
-                Adicionar Documento
-              </Button>
             </div>
           )}
         </TabsContent>

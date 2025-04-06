@@ -13,7 +13,7 @@ export const AuditHeader = ({ onNewAudit }: AuditHeaderProps) => {
         <h1 className="text-3xl font-bold">Auditoria</h1>
         <p className="text-muted-foreground mt-1">
           Planeje e acompanhe o cronograma de auditorias internas da sua organização.
-          <span className="text-blue-600 ml-1">
+          <span className="text-blue-600 ml-1 hover:underline cursor-pointer" onClick={() => window.location.href = '/'}>
             Requisito ISO 9001:2015: 9.2 - Auditoria Interna
           </span>
         </p>
