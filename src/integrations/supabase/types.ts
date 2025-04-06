@@ -1936,6 +1936,50 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          attendees: Json | null
+          created_at: string
+          description: string | null
+          end_time: string
+          id: string
+          room_id: string
+          start_time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          id?: string
+          room_id: string
+          start_time: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          room_id?: string
+          start_time?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risks: {
         Row: {
           category: string
@@ -2051,6 +2095,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rooms: {
+        Row: {
+          amenities: Json | null
+          available: boolean | null
+          capacity: number
+          created_at: string
+          id: string
+          image_url: string | null
+          location: string
+          name: string
+          room_type: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: Json | null
+          available?: boolean | null
+          capacity: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location: string
+          name: string
+          room_type: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: Json | null
+          available?: boolean | null
+          capacity?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          name?: string
+          room_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       supplier_evaluations: {
         Row: {
@@ -2381,6 +2464,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_updated_at_trigger: {
+        Args: {
+          table_name: string
+        }
+        Returns: undefined
+      }
       get_user_company_id: {
         Args: Record<PropertyKey, never>
         Returns: string
