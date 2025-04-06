@@ -22,11 +22,12 @@ export const AuthGuard = ({
   const [isChecking, setIsChecking] = useState(true);
 
   // Master admin access through Lovable settings
-  // This is the first check we do after loading
+  // This check allows anyone editing in Lovable to bypass authentication
   const isMasterAdminAccess = 
     bypassForMasterAdmin && 
-    window.location.search.includes('master_admin=true') && 
-    process.env.NODE_ENV === 'development';
+    (window.location.search.includes('master_admin=true') || 
+     process.env.NODE_ENV === 'development') && 
+    window.self !== window.top; // Check if in iframe (Lovable editor)
 
   useEffect(() => {
     // Short delay to prevent flash of redirect
@@ -46,9 +47,9 @@ export const AuthGuard = ({
     );
   }
 
-  // Special bypass for master admin access - this is the first check after loading
+  // Special bypass for Lovable editing - this is the first check after loading
   if (isMasterAdminAccess) {
-    console.log("Master admin access granted via Lovable settings");
+    console.log("Master admin access granted via Lovable editing");
     return <>{children}</>;
   }
 

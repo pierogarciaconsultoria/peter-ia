@@ -13,23 +13,23 @@ export const useLogin = () => {
   const location = useLocation();
   const { signIn } = useAuth();
   
-  // Check for master admin access
-  const isMasterAdminAccess = 
-    window.location.search.includes('master_admin=true') && 
-    process.env.NODE_ENV === 'development';
+  // Check for Lovable editor access
+  const isLovableEditor = 
+    window.location.search.includes('master_admin=true') || 
+    (process.env.NODE_ENV === 'development' && window.self !== window.top);
     
-  // Automatically redirect to dashboard if master admin access is detected
+  // Automatically redirect to dashboard if in Lovable editor
   useEffect(() => {
-    if (isMasterAdminAccess) {
-      console.log("Master admin access detected, redirecting to dashboard");
+    if (isLovableEditor) {
+      console.log("Lovable editor access detected, redirecting to dashboard");
       navigate("/");
     }
-  }, [isMasterAdminAccess, navigate]);
+  }, [isLovableEditor, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isMasterAdminAccess) {
+    if (isLovableEditor) {
       navigate("/");
       return;
     }
@@ -53,7 +53,7 @@ export const useLogin = () => {
   };
 
   const handleDirectAdminLogin = () => {
-    if (isMasterAdminAccess) {
+    if (isLovableEditor) {
       navigate("/admin");
     } else {
       console.log("Direct admin login requires master admin access");

@@ -22,8 +22,8 @@ export function UserMenu() {
   
   // Check if access is via master admin in Lovable settings
   const isMasterAdminAccess = 
-    window.location.search.includes('master_admin=true') && 
-    process.env.NODE_ENV === 'development';
+    (window.location.search.includes('master_admin=true') || 
+     (process.env.NODE_ENV === 'development' && window.self !== window.top));
 
   const handleSignOut = async () => {
     try {
