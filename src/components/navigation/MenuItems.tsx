@@ -24,6 +24,7 @@ import {
   GitBranch,
   ClipboardCheck,
   ClipboardList,
+  Shield,
 } from "lucide-react";
 
 interface MenuItem {
@@ -87,6 +88,11 @@ export const menuItems = [
     title: "Controle de Qualidade",
     href: "/quality-control",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Auditoria Externa",
+    href: "/external-audit",
+    icon: Shield,
   },
   {
     title: "Indicadores de Desempenho",

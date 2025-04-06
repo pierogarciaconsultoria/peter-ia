@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -19,6 +20,7 @@ import { EmployeeOnboarding } from "@/components/hr/EmployeeOnboarding";
 // Adicione as novas importações para as páginas de privacidade e perfil
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Profile from "./pages/Profile";
+import ExternalAudit from "./pages/ExternalAudit";
 import { CookieConsent } from "./components/CookieConsent";
 
 function App() {
@@ -63,6 +65,16 @@ function App() {
             element={
               <AuthGuard requireAdmin>
                 <EmployeeOnboarding />
+              </AuthGuard>
+            }
+          />
+
+          {/* Rota para a página de auditoria externa */}
+          <Route
+            path="/external-audit"
+            element={
+              <AuthGuard>
+                <ExternalAudit />
               </AuthGuard>
             }
           />
