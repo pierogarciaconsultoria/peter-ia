@@ -18,7 +18,7 @@ import {
 
 export {
   // Types
-  Employee,
+  type Employee,
   mockEmployees,
   
   // Basic operations

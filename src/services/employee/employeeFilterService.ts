@@ -1,12 +1,23 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Employee, mockEmployees } from "./types";
+import { Employee } from "./types";
+import { mockEmployees } from "./mockData";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * Get employees by department
  */
 export async function getEmployeesByDepartment(department: string): Promise<Employee[]> {
   try {
+    if (!department) {
+      toast({
+        title: "Invalid request",
+        description: "Department is required",
+        variant: "destructive",
+      });
+      return [];
+    }
+
     const { data, error } = await supabase
       .from("employees")
       .select("*")
@@ -14,6 +25,11 @@ export async function getEmployeesByDepartment(department: string): Promise<Empl
     
     if (error) {
       console.error(`Error fetching employees from department ${department}:`, error);
+      toast({
+        title: "Failed to fetch employees by department",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to mock data
       return mockEmployees.filter(emp => emp.department === department);
     }
@@ -26,6 +42,11 @@ export async function getEmployeesByDepartment(department: string): Promise<Empl
     return mockEmployees.filter(emp => emp.department === department);
   } catch (error) {
     console.error(`Error fetching employees from department ${department}:`, error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not fetch employees by department",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     return mockEmployees.filter(emp => emp.department === department);
   }
@@ -43,6 +64,11 @@ export async function getEmployeesByStatus(status: 'active' | 'inactive' | 'on_l
     
     if (error) {
       console.error(`Error fetching employees with status ${status}:`, error);
+      toast({
+        title: "Failed to fetch employees by status",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to mock data
       return mockEmployees.filter(emp => emp.status === status);
     }
@@ -55,6 +81,11 @@ export async function getEmployeesByStatus(status: 'active' | 'inactive' | 'on_l
     return mockEmployees.filter(emp => emp.status === status);
   } catch (error) {
     console.error(`Error fetching employees with status ${status}:`, error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not fetch employees by status",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     return mockEmployees.filter(emp => emp.status === status);
   }
@@ -65,6 +96,10 @@ export async function getEmployeesByStatus(status: 'active' | 'inactive' | 'on_l
  */
 export async function searchEmployees(searchTerm: string): Promise<Employee[]> {
   try {
+    if (!searchTerm.trim()) {
+      return getEmployees();
+    }
+
     const { data, error } = await supabase
       .from("employees")
       .select("*")
@@ -72,6 +107,11 @@ export async function searchEmployees(searchTerm: string): Promise<Employee[]> {
     
     if (error) {
       console.error(`Error searching employees with term "${searchTerm}":`, error);
+      toast({
+        title: "Failed to search employees",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to mock data
       return mockEmployees.filter(emp => 
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,6 +134,11 @@ export async function searchEmployees(searchTerm: string): Promise<Employee[]> {
     );
   } catch (error) {
     console.error(`Error searching employees with term "${searchTerm}":`, error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not complete the search",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     return mockEmployees.filter(emp => 
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,6 +163,11 @@ export async function getQualityInspectors() {
     
     if (error) {
       console.error("Error fetching quality inspectors from Supabase:", error);
+      toast({
+        title: "Failed to fetch quality inspectors",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to filtering mock data
       return mockEmployees
         .filter(emp => 
@@ -146,6 +196,11 @@ export async function getQualityInspectors() {
       }));
   } catch (error) {
     console.error("Error fetching quality inspectors:", error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not fetch quality inspectors",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     return mockEmployees
       .filter(emp => 

@@ -1,6 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Employee, mockEmployees } from "./types";
+import { Employee } from "./types";
+import { mockEmployees } from "./mockData";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * Gets all employees
@@ -12,6 +14,11 @@ export async function getEmployees(): Promise<Employee[]> {
     
     if (error) {
       console.error("Error fetching employees from Supabase:", error);
+      toast({
+        title: "Failed to fetch employees",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to mock data
       return mockEmployees;
     }
@@ -24,6 +31,11 @@ export async function getEmployees(): Promise<Employee[]> {
     return mockEmployees;
   } catch (error) {
     console.error("Error fetching employees:", error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not fetch employee data. Using mock data instead.",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     return mockEmployees;
   }
@@ -34,15 +46,29 @@ export async function getEmployees(): Promise<Employee[]> {
  */
 export async function getEmployeeById(id: string): Promise<Employee | null> {
   try {
+    if (!id) {
+      toast({
+        title: "Invalid request",
+        description: "Employee ID is required",
+        variant: "destructive",
+      });
+      return null;
+    }
+
     // Attempt to fetch from Supabase
     const { data, error } = await supabase
       .from("employees")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error(`Error fetching employee with id ${id} from Supabase:`, error);
+      toast({
+        title: "Failed to fetch employee",
+        description: error.message,
+        variant: "destructive",
+      });
       // Fallback to mock data
       const employee = mockEmployees.find(emp => emp.id === id);
       return employee || null;
@@ -54,9 +80,21 @@ export async function getEmployeeById(id: string): Promise<Employee | null> {
     
     // If no data returned but no error, search in mock data
     const employee = mockEmployees.find(emp => emp.id === id);
+    if (!employee) {
+      toast({
+        title: "Employee not found",
+        description: `No employee found with ID: ${id}`,
+        variant: "destructive",
+      });
+    }
     return employee || null;
   } catch (error) {
     console.error(`Error fetching employee with id ${id}:`, error);
+    toast({
+      title: "An unexpected error occurred",
+      description: "Could not fetch employee data",
+      variant: "destructive",
+    });
     // Fallback to mock data in case of exception
     const employee = mockEmployees.find(emp => emp.id === id);
     return employee || null;
