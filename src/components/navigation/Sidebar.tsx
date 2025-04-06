@@ -1,13 +1,16 @@
+
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { menuItems } from "./MenuItems";
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 interface SidebarProps {
   isOpen: boolean;
   className?: string;
 }
+
 export function Sidebar({
   isOpen,
   className
@@ -15,24 +18,50 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+
   const toggleCollapsed = () => {
     setIsCollapsed(prev => !prev);
+    
+    // Update back button positioning
+    const backButton = document.querySelector('.left-20, .left-72') as HTMLElement;
+    if (backButton) {
+      if (!isCollapsed) {
+        backButton.classList.remove('md:left-72');
+        backButton.classList.add('md:left-20');
+      } else {
+        backButton.classList.remove('md:left-20');
+        backButton.classList.add('md:left-72');
+      }
+    }
   };
 
   // Controla a visibilidade da barra ao passar o mouse
   const handleMouseEnter = () => {
     setIsHovered(true);
   };
+
   const handleMouseLeave = () => {
     setIsHovered(false);
   };
-  return <div ref={sidebarRef} className={cn("fixed inset-y-0 left-0 z-40 bg-card/95 backdrop-blur-sm border-r border-border/40 transition-all duration-300 ease-in-out shadow-lg", isOpen ? "translate-x-0" : "-translate-x-full", isCollapsed && !isHovered ? "md:w-20" : "md:w-72", "md:translate-x-0", className)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+
+  return (
+    <div 
+      ref={sidebarRef} 
+      className={cn(
+        "fixed inset-y-0 left-0 z-40 bg-card/95 backdrop-blur-sm border-r border-border/40 transition-all duration-300 ease-in-out shadow-lg", 
+        isOpen ? "translate-x-0" : "-translate-x-full", 
+        isCollapsed && !isHovered ? "md:w-20" : "md:w-72", 
+        "md:translate-x-0", 
+        className
+      )} 
+      onMouseEnter={handleMouseEnter} 
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="flex flex-col h-full">
         <div className={cn("p-6 mt-2 flex items-center", isCollapsed && !isHovered && "justify-center p-4")}>
           <div className={cn("transition-opacity", isCollapsed && !isHovered ? "opacity-0 w-0 overflow-hidden" : "opacity-100")}>
             <h1 className="text-xl font-bold">Peter.IA</h1>
-            <p className="text-sm text-muted-foreground mt-1">Gestão com inteligência
-          </p>
+            <p className="text-sm text-muted-foreground mt-1">Gestão com inteligência</p>
           </div>
           
           {isCollapsed && !isHovered && <h1 className="text-xl font-bold">G</h1>}
@@ -66,5 +95,6 @@ export function Sidebar({
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }

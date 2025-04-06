@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { MenuToggle } from "./navigation/MenuToggle";
 import { UserMenu } from "./navigation/UserMenu";
 import { Sidebar } from "./navigation/Sidebar";
+import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -31,6 +32,7 @@ export function Navigation() {
         toggleCollapsed={toggleCollapsed}
         isCollapsed={isCollapsed}
       />
+      <BackToHomeButton />
       <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <NotificationCenter />
         <UserMenu />
