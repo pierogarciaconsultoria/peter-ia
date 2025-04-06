@@ -15,14 +15,16 @@ export const AuthGuard = ({
   children, 
   requireAdmin = false,
   requireSuperAdmin = false,
-  bypassForMasterAdmin = true // Alterado o padrão para true, permitindo bypass em todas as rotas
+  bypassForMasterAdmin = true
 }: AuthGuardProps) => {
   const { user, isLoading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
 
-  // Bypass authentication for master admin access through Lovable settings
-  const isMasterAdminAccess = bypassForMasterAdmin && 
+  // Master admin access through Lovable settings
+  // This is the first check we do after loading
+  const isMasterAdminAccess = 
+    bypassForMasterAdmin && 
     window.location.search.includes('master_admin=true') && 
     process.env.NODE_ENV === 'development';
 
@@ -44,9 +46,9 @@ export const AuthGuard = ({
     );
   }
 
-  // Special bypass for master admin access - agora é a primeira verificação após o carregamento
+  // Special bypass for master admin access - this is the first check after loading
   if (isMasterAdminAccess) {
-    console.log("Master admin access granted via URL parameter");
+    console.log("Master admin access granted via Lovable settings");
     return <>{children}</>;
   }
 

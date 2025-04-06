@@ -20,7 +20,7 @@ export function UserMenu() {
   const location = useLocation();
   const { user, signOut, isAdmin, isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
   
-  // Verificar se o acesso é via master admin
+  // Check if access is via master admin in Lovable settings
   const isMasterAdminAccess = 
     window.location.search.includes('master_admin=true') && 
     process.env.NODE_ENV === 'development';
@@ -36,7 +36,7 @@ export function UserMenu() {
 
   // Extract user initials for avatar
   const getUserInitials = () => {
-    if (isMasterAdminAccess) return "MA";
+    if (isMasterAdminAccess) return "MA"; // Master Admin
     if (!user?.user_metadata) return "U";
     
     const firstName = user.user_metadata.first_name || "";
