@@ -1,168 +1,101 @@
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { ExternalAuditHeader } from "@/components/external-audit/ExternalAuditHeader";
 import { ExternalAuditStatusCards } from "@/components/external-audit/ExternalAuditStatusCards";
 import { ExternalAuditTable } from "@/components/external-audit/ExternalAuditTable";
-import { ExternalAuditForm } from "@/components/external-audit/ExternalAuditForm";
 import { ExternalAuditDialog } from "@/components/external-audit/ExternalAuditDialog";
 import { ExternalAuditReportDialog } from "@/components/external-audit/ExternalAuditReportDialog";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  getExternalAudits, 
-  createExternalAudit, 
-  ExternalAudit 
-} from "@/services/externalAuditService";
+import { ExternalAudit as ExternalAuditType } from "@/services/externalAuditService";
+import { useQuery } from "@tanstack/react-query";
+import { getExternalAudits } from "@/services/externalAuditService";
+import { toast } from "sonner";
 
-const ExternalAuditPage = () => {
-  const [isNewAuditDialogOpen, setIsNewAuditDialogOpen] = useState(false);
-  const [selectedAudit, setSelectedAudit] = useState<ExternalAudit | null>(null);
-  const [isAuditDialogOpen, setIsAuditDialogOpen] = useState(false);
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const ExternalAudit = () => {
+  const [isNewAuditOpen, setIsNewAuditOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [selectedAudit, setSelectedAudit] = useState<ExternalAuditType | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const { 
-    data: audits = [], 
-    isLoading, 
-    refetch 
-  } = useQuery({
-    queryKey: ['externalAudits'],
+  // Fetch audits data
+  const { data: audits = [], isLoading, refetch } = useQuery({
+    queryKey: ['external-audits'],
     queryFn: getExternalAudits,
+    onError: (error) => {
+      console.error("Error fetching audits:", error);
+      toast.error("Erro ao carregar auditorias externas");
+    }
   });
 
-  const openNewAuditDialog = () => {
-    setIsNewAuditDialogOpen(true);
+  const handleNewAudit = () => {
+    setIsNewAuditOpen(true);
   };
 
-  const closeNewAuditDialog = () => {
-    setIsNewAuditDialogOpen(false);
-  };
-
-  const handleCreateAudit = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      await createExternalAudit({
-        ...values,
-        audit_date: values.audit_date.toISOString(),
-        completion_date: values.completion_date ? values.completion_date.toISOString() : null,
-      });
-      toast.success("Auditoria criada com sucesso");
-      closeNewAuditDialog();
-      refetch();
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao criar auditoria");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditAudit = (audit: ExternalAudit) => {
-    setSelectedAudit(audit);
-    setIsAuditDialogOpen(true);
-  };
-
-  const handleViewAudit = (audit: ExternalAudit) => {
-    setSelectedAudit(audit);
-    setIsReportDialogOpen(true);
-  };
-
-  const handleAuditUpdated = () => {
+  const handleCloseDialog = () => {
+    setIsNewAuditOpen(false);
     refetch();
   };
 
-  const handleShareAudit = (audit: ExternalAudit) => {
-    if (audit.report_url) {
-      try {
-        navigator.clipboard.writeText(audit.report_url);
-        toast.success("Link do relatório copiado para a área de transferência");
-      } catch (error) {
-        toast.error("Não foi possível copiar o link");
-        console.error(error);
-      }
-    }
+  const handleOpenReport = (audit: ExternalAuditType) => {
+    setSelectedAudit(audit);
+    setIsReportOpen(true);
   };
 
-  const handleDownloadAudit = (audit: ExternalAudit) => {
-    if (audit.report_url) {
-      window.open(audit.report_url, '_blank');
-    }
+  const handleCloseReport = () => {
+    setIsReportOpen(false);
+    setSelectedAudit(null);
+    refetch();
   };
+
+  // Detect if sidebar is collapsed
+  useState(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  });
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <ExternalAuditHeader onNewAudit={openNewAuditDialog} />
+      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
+        <div className="max-w-6xl mx-auto space-y-6">
+          <ExternalAuditHeader onNewAudit={handleNewAudit} />
           
-          {isLoading ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, index) => (
-                  <Skeleton key={index} className="h-24 w-full" />
-                ))}
-              </div>
-              <Skeleton className="h-[400px] w-full" />
-            </div>
-          ) : (
-            <>
-              <ExternalAuditStatusCards audits={audits} />
-              <ExternalAuditTable 
-                audits={audits}
-                onEdit={handleEditAudit}
-                onView={handleViewAudit}
-                onShare={handleShareAudit}
-                onDownload={handleDownloadAudit}
-              />
-            </>
-          )}
+          <ExternalAuditStatusCards audits={audits} />
+          
+          <ExternalAuditTable 
+            audits={audits} 
+            isLoading={isLoading} 
+            onViewReport={handleOpenReport}
+          />
         </div>
       </main>
-
-      {/* Dialog for creating a new audit */}
-      <Dialog open={isNewAuditDialogOpen} onOpenChange={closeNewAuditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nova Auditoria Externa</DialogTitle>
-          </DialogHeader>
-          <ExternalAuditForm 
-            onSubmit={handleCreateAudit}
-            isLoading={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog for editing an existing audit */}
+      
       <ExternalAuditDialog 
-        audit={selectedAudit} 
-        isOpen={isAuditDialogOpen} 
-        onClose={() => setIsAuditDialogOpen(false)}
-        onSave={handleAuditUpdated}
+        isOpen={isNewAuditOpen}
+        onClose={handleCloseDialog}
+        audit={null}
       />
-
-      {/* Dialog for viewing an audit report */}
-      <ExternalAuditReportDialog 
-        audit={selectedAudit}
-        isOpen={isReportDialogOpen}
-        onClose={() => setIsReportDialogOpen(false)}
-        onShare={handleShareAudit}
-        onDownload={handleDownloadAudit}
-      />
+      
+      {selectedAudit && (
+        <ExternalAuditReportDialog
+          isOpen={isReportOpen}
+          onClose={handleCloseReport}
+          audit={selectedAudit}
+        />
+      )}
       
       <Footer />
     </div>
   );
 };
 
-export default ExternalAuditPage;
+export default ExternalAudit;

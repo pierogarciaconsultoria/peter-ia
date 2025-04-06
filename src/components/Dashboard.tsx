@@ -6,6 +6,7 @@ import { DocumentForm } from "@/components/DocumentForm";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ImplementationSchedule } from "@/components/dashboard/ImplementationSchedule";
 import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface DashboardProps {
   requirements: ISORequirement[];
@@ -23,8 +24,18 @@ export function Dashboard({ requirements }: DashboardProps) {
   };
 
   return (
-    <header className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
+    <div className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
       <DashboardHeader onNewDocument={handleNewDocument} />
+      
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Requisitos ISO 9001:2015</h2>
+          <p className="text-muted-foreground">
+            Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
+            e melhoria contínua do Sistema de Gestão da Qualidade.
+          </p>
+        </CardContent>
+      </Card>
       
       <ImplementationSchedule />
       
@@ -35,6 +46,6 @@ export function Dashboard({ requirements }: DashboardProps) {
           <DocumentForm document={null} onClose={handleCloseDialog} />
         </DialogContent>
       </Dialog>
-    </header>
+    </div>
   );
 }

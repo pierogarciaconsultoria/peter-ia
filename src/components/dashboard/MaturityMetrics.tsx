@@ -2,6 +2,7 @@
 import { MaturityThermometer } from "@/components/MaturityThermometer";
 import { StatisticCard } from "@/components/StatisticCard";
 import { ISORequirement } from "@/utils/isoRequirements";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MaturityMetricsProps {
   requirements: ISORequirement[];
@@ -49,41 +50,49 @@ export function MaturityMetrics({ requirements }: MaturityMetricsProps) {
   return (
     <div className="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4">
       <div className="md:col-span-2">
-        <MaturityThermometer 
-          score={maturityScore}
-          modulesCompletion={modulesCompletion}
-          goalsAchievement={goalsAchievement}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Termômetro de Maturidade</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px] flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-5xl font-bold mb-2">{maturityScore}%</div>
+                <div className="text-sm text-muted-foreground">Maturidade do SGQ</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       <div className="md:col-span-3">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatisticCard 
-            title="Progress" 
+            title="Progresso" 
             value={calculateTotalProgress()} 
-            description="Overall Progress" 
+            description="Progresso Geral" 
             color="bg-primary" 
           />
           
           <StatisticCard 
-            title="Not Started" 
+            title="Não Iniciados" 
             value={stats.notStarted} 
-            description="Not Started" 
+            description="Não Iniciados" 
             color="bg-gray-400" 
             total={requirements.length} 
           />
           
           <StatisticCard 
-            title="In Progress" 
+            title="Em Progresso" 
             value={stats.inProgress} 
-            description="In Progress" 
+            description="Em Andamento" 
             color="bg-blue-500" 
             total={requirements.length} 
           />
           
           <StatisticCard 
-            title="Completed" 
+            title="Concluídos" 
             value={stats.completed} 
-            description="Completed" 
+            description="Concluídos" 
             color="bg-green-500" 
             total={requirements.length} 
           />

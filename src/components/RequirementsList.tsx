@@ -22,12 +22,12 @@ export function RequirementsList({ requirements, onSelectRequirement }: Requirem
     <section className="mb-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
         <h2 className="text-xl font-semibold appear-animate" style={{ "--delay": 1 } as React.CSSProperties}>
-          ISO 9001:2015 Requirements
+          Requisitos ISO 9001:2015
         </h2>
         <div className="relative mt-2 md:mt-0 w-full md:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search requirements..."
+            placeholder="Buscar requisitos..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -48,7 +48,7 @@ export function RequirementsList({ requirements, onSelectRequirement }: Requirem
         </div>
       ) : (
         <div className="text-center py-8 bg-muted/30 rounded-lg">
-          <p className="text-muted-foreground">No requirements found matching "{searchTerm}"</p>
+          <p className="text-muted-foreground">Nenhum requisito encontrado correspondente a "{searchTerm}"</p>
         </div>
       )}
     </section>
