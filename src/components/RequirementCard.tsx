@@ -63,7 +63,7 @@ export const RequirementCard: FC<RequirementCardProps> = ({
           </p>
         </div>
         <ProgressCircle 
-          progress={requirement.progressPercentage} 
+          progress={requirement.progress} 
           size={50} 
           color="bg-green-500"
         />

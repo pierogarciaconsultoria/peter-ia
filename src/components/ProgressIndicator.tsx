@@ -55,3 +55,45 @@ export function ProgressIndicator({ status, progress, className }: ProgressIndic
     </div>
   );
 }
+
+// Add the new ProgressCircle component that was missing
+interface ProgressCircleProps {
+  progress: number;
+  size: number;
+  color: string;
+}
+
+export function ProgressCircle({ progress, size, color }: ProgressCircleProps) {
+  const radius = size / 2 - 5;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          className="text-gray-200"
+          strokeWidth="5"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+        <circle
+          className={color}
+          strokeWidth="5"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+      </svg>
+      <span className="absolute text-xs font-medium">{progress}%</span>
+    </div>
+  );
+}

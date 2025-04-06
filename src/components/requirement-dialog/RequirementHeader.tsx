@@ -46,7 +46,7 @@ export const RequirementHeader = ({ requirement }: RequirementHeaderProps) => {
           {requirement.number} - {requirement.title}
         </DialogTitle>
         <ProgressCircle 
-          progress={requirement.progressPercentage} 
+          progress={requirement.progress} 
           size={60} 
           color="bg-green-500"
         />
