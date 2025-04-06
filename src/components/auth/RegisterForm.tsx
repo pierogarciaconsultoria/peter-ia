@@ -5,6 +5,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, Building2 } from "lucide-react";
 import { useRegistration } from "@/hooks/useRegistration";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RegisterFormProps {
   setActiveTab: (tab: string) => void;
@@ -22,6 +23,8 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
     setRegisterPassword,
     companyName,
     setCompanyName,
+    lgpdConsent,
+    setLgpdConsent,
     loading,
     errorDetails,
     handleRegister
@@ -108,12 +111,30 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
             Se você for o administrador de uma empresa, digite o nome aqui.
           </p>
         </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="lgpdConsent" 
+            checked={lgpdConsent} 
+            onCheckedChange={(checked) => setLgpdConsent(checked === true)}
+            required
+          />
+          <Label 
+            htmlFor="lgpdConsent" 
+            className="text-sm leading-tight"
+          >
+            Concordo com a <a href="#" className="text-primary hover:underline" onClick={(e) => {
+              e.preventDefault();
+              window.open("/privacy-policy", "_blank");
+            }}>Política de Privacidade</a> e o uso dos meus dados pessoais de acordo com a LGPD.
+          </Label>
+        </div>
       </CardContent>
       <CardFooter>
         <Button
           type="submit"
           className="w-full"
-          disabled={loading}
+          disabled={loading || !lgpdConsent}
         >
           {loading ? "Processando..." : "Cadastrar"}
         </Button>

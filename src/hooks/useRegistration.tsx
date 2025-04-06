@@ -12,6 +12,7 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [lgpdConsent, setLgpdConsent] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +41,7 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
       console.log("Registration successful:", authData);
       
       // Step 2: Create a company if provided
+      let companyId = null;
       if (companyName.trim()) {
         const { data: companyData, error: companyError } = await supabase
           .from("companies")
@@ -52,17 +54,21 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
           
         if (companyError) throw companyError;
         
-        // Step 3: Update the user profile with company and admin role
-        const { error: profileError } = await supabase
-          .from("user_profiles")
-          .update({
-            company_id: companyData.id,
-            is_company_admin: true
-          })
-          .eq("id", authData.user?.id);
-          
-        if (profileError) throw profileError;
+        companyId = companyData.id;
       }
+      
+      // Step 3: Update the user profile with company, admin role and LGPD consent
+      const { error: profileError } = await supabase
+        .from("user_profiles")
+        .update({
+          company_id: companyId,
+          is_company_admin: companyId ? true : false,
+          lgpd_consent: lgpdConsent,
+          lgpd_consent_date: new Date().toISOString()
+        })
+        .eq("id", authData.user?.id);
+        
+      if (profileError) throw profileError;
       
       toast.success("Cadastro realizado com sucesso! Verifique seu email.");
       setActiveTab("login");
@@ -85,6 +91,8 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
     setRegisterPassword,
     companyName,
     setCompanyName,
+    lgpdConsent,
+    setLgpdConsent,
     loading,
     errorDetails,
     handleRegister
