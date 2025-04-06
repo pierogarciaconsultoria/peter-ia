@@ -22,9 +22,11 @@ const ExternalAudit = () => {
   const { data: audits = [], isLoading, refetch } = useQuery({
     queryKey: ['external-audits'],
     queryFn: getExternalAudits,
-    onError: (error) => {
-      console.error("Error fetching audits:", error);
-      toast.error("Erro ao carregar auditorias externas");
+    meta: {
+      onError: (error: Error) => {
+        console.error("Error fetching audits:", error);
+        toast.error("Erro ao carregar auditorias externas");
+      }
     }
   });
 
@@ -46,6 +48,28 @@ const ExternalAudit = () => {
     setIsReportOpen(false);
     setSelectedAudit(null);
     refetch();
+  };
+
+  const handleSaveAudit = (audit: ExternalAuditType) => {
+    refetch();
+  };
+
+  const handleEditAudit = (audit: ExternalAuditType) => {
+    setSelectedAudit(audit);
+    setIsNewAuditOpen(true);
+  };
+
+  const handleShareAudit = (audit: ExternalAuditType) => {
+    if (audit.report_url) {
+      navigator.clipboard.writeText(audit.report_url);
+      toast.success("Link do relatório copiado para a área de transferência");
+    }
+  };
+
+  const handleDownloadAudit = (audit: ExternalAuditType) => {
+    if (audit.report_url) {
+      window.open(audit.report_url, '_blank');
+    }
   };
 
   // Detect if sidebar is collapsed
@@ -73,8 +97,10 @@ const ExternalAudit = () => {
           
           <ExternalAuditTable 
             audits={audits} 
-            isLoading={isLoading} 
-            onViewReport={handleOpenReport}
+            onEdit={handleEditAudit}
+            onView={handleOpenReport}
+            onShare={handleShareAudit}
+            onDownload={handleDownloadAudit}
           />
         </div>
       </main>
@@ -82,7 +108,8 @@ const ExternalAudit = () => {
       <ExternalAuditDialog 
         isOpen={isNewAuditOpen}
         onClose={handleCloseDialog}
-        audit={null}
+        audit={selectedAudit}
+        onSave={handleSaveAudit}
       />
       
       {selectedAudit && (
@@ -90,6 +117,8 @@ const ExternalAudit = () => {
           isOpen={isReportOpen}
           onClose={handleCloseReport}
           audit={selectedAudit}
+          onDownload={handleDownloadAudit}
+          onShare={handleShareAudit}
         />
       )}
       
