@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Dashboard as DashboardComponent } from "@/components/Dashboard";
@@ -6,7 +5,7 @@ import { RequirementsList } from "@/components/RequirementsList";
 import { isoRequirements } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RequirementDialog } from "@/components/requirement-dialog/RequirementDialog";
-import { ChildRequirementDialog } from "@/components/ChildRequirementDialog";
+import { ChildRequirementDialog } from "@/components/child-requirement-dialog/ChildRequirementDialog";
 import { ISORequirement } from "@/utils/isoRequirements";
 
 export default function Dashboard() {
@@ -15,8 +14,6 @@ export default function Dashboard() {
   const [selectedChildRequirement, setSelectedChildRequirement] = useState<ISORequirement | null>(null);
 
   useEffect(() => {
-    // In a real application, we would fetch the requirements from an API
-    // For now, we're using mock data
     setRequirements(isoRequirements);
   }, []);
 
@@ -54,7 +51,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Main requirement dialog */}
       <Dialog open={!!selectedRequirement} onOpenChange={() => closeRequirementDialog()}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedRequirement && (
@@ -66,7 +62,6 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       
-      {/* Child requirement dialog */}
       <Dialog open={!!selectedChildRequirement} onOpenChange={() => closeChildRequirementDialog()}>
         <DialogContent className="max-w-2xl">
           {selectedChildRequirement && (

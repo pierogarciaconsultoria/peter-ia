@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -7,7 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Dashboard } from "@/components/Dashboard";
 import { RequirementsList } from "@/components/RequirementsList";
 import { RequirementDialog } from "@/components/requirement-dialog/RequirementDialog";
-import { ChildRequirementDialog } from "@/components/ChildRequirementDialog";
+import { ChildRequirementDialog } from "@/components/child-requirement-dialog/ChildRequirementDialog";
 
 const Index = () => {
   const [selectedRequirement, setSelectedRequirement] = useState<ISORequirement | null>(null);
