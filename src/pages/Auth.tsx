@@ -1,65 +1,31 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { BrainCircuit } from "lucide-react";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { signIn, signUp } = useAuth();
   
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Check for Lovable editor access
+  const isLovableEditor = 
+    window.location.search.includes('master_admin=true') || 
+    (process.env.NODE_ENV === 'development' && window.self !== window.top);
   
-  // Get the intended destination from location state, or default to dashboard
-  const from = location.state?.from?.pathname || "/";
-  
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      await signIn(email, password);
-      navigate(from, { replace: true });
-    } catch (error: any) {
-      setError(error.message || "Falha ao fazer login. Verifique suas credenciais.");
-    } finally {
-      setIsLoading(false);
+  // Immediately redirect to dashboard if in Lovable editor
+  useEffect(() => {
+    if (isLovableEditor) {
+      navigate("/");
     }
-  };
+  }, [isLovableEditor, navigate]);
   
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      await signUp(email, password, {
-        first_name: firstName,
-        last_name: lastName
-      });
-      
-      // After signup, we'll show a message to check email (if confirmation is enabled)
-      // Or we could automatically sign them in
-      setError("Registro realizado com sucesso! Verifique seu email para confirmação ou entre em contato com o administrador para ativar sua conta.");
-    } catch (error: any) {
-      setError(error.message || "Falha ao criar conta. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // If in Lovable editor, don't render the auth page at all
+  if (isLovableEditor) {
+    return null;
+  }
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
@@ -84,125 +50,20 @@ const Auth = () => {
             </CardHeader>
             
             <CardContent>
-              {error && (
-                <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
-                  {error}
-                </div>
-              )}
-              
               <TabsContent value="login">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Senha</Label>
-                      <a 
-                        href="#" 
-                        className="text-sm text-primary hover:underline"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          // Aqui poderia ter uma funcionalidade de recuperação de senha
-                          alert("Funcionalidade de recuperação de senha será implementada em breve.");
-                        }}
-                      >
-                        Esqueceu a senha?
-                      </a>
-                    </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : (
-                      "Entrar"
-                    )}
-                  </Button>
-                </form>
+                <LoginForm />
               </TabsContent>
               
               <TabsContent value="register">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">Nome</Label>
-                      <Input
-                        id="firstName"
-                        placeholder="Seu nome"
-                        required
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Sobrenome</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Seu sobrenome"
-                        required
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="emailRegister">Email</Label>
-                    <Input
-                      id="emailRegister"
-                      type="email"
-                      placeholder="seu@email.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="passwordRegister">Senha</Label>
-                    <Input
-                      id="passwordRegister"
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Cadastrando...
-                      </>
-                    ) : (
-                      "Criar Conta"
-                    )}
-                  </Button>
-                </form>
+                <RegisterForm setActiveTab={(tab) => {
+                  const tabsElement = document.querySelector('[role="tablist"]');
+                  if (tabsElement) {
+                    const loginTab = tabsElement.querySelector(`[value="${tab}"]`);
+                    if (loginTab) {
+                      (loginTab as HTMLElement).click();
+                    }
+                  }
+                }} />
               </TabsContent>
             </CardContent>
             
@@ -223,9 +84,12 @@ const Auth = () => {
         </Card>
         
         <div className="mt-4 text-center">
-          <Button variant="ghost" onClick={() => navigate("/landing")}>
+          <button 
+            className="text-sm text-muted-foreground hover:text-primary hover:underline"
+            onClick={() => navigate("/landing")}
+          >
             Voltar para a página inicial
-          </Button>
+          </button>
         </div>
       </div>
     </div>

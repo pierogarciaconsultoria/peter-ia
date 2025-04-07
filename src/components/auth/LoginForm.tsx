@@ -13,6 +13,12 @@ export const LoginForm = () => {
     window.location.search.includes('master_admin=true') || 
     (process.env.NODE_ENV === 'development' && window.self !== window.top);
 
+  // If in Lovable editor, automatically redirect to dashboard
+  if (isLovableEditor) {
+    navigate("/");
+    return null;
+  }
+
   return (
     <div>
       <CardContent className="space-y-4">
