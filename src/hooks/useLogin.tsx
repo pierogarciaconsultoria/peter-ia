@@ -13,15 +13,16 @@ export const useLogin = () => {
   const location = useLocation();
   const { signIn } = useAuth();
   
-  // Check for Lovable editor access
+  // Enhanced Lovable editor detection
   const isLovableEditor = 
     window.location.search.includes('master_admin=true') || 
-    (process.env.NODE_ENV === 'development' && window.self !== window.top);
+    (process.env.NODE_ENV === 'development' && window.self !== window.top) ||
+    window.location.hostname.includes('lovable.app');
     
   // Automatically redirect to dashboard if in Lovable editor
   useEffect(() => {
     if (isLovableEditor) {
-      console.log("Lovable editor access detected, redirecting to dashboard");
+      console.log("Acesso total concedido via Lovable editor - redirecionando para dashboard");
       navigate("/");
     }
   }, [isLovableEditor, navigate]);
