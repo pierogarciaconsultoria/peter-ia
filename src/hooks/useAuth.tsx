@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { isLovableEditor, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 interface CompanyProfile {
   id: string;
@@ -40,8 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isCompanyAdmin, setIsCompanyAdmin] = useState<boolean>(false);
   const [userCompany, setUserCompany] = useState<CompanyProfile | null>(null);
 
-  // Add import for Lovable editor detection
-  const { isSuperAdminInLovable } = require("@/utils/lovableEditorDetection");
+  const isEditorAdmin = isSuperAdminInLovable();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -55,7 +55,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           fetchUserProfile(session.user.id);
         } else {
           // Check if user is in Lovable editor and grant super admin privileges
-          const isEditorAdmin = isSuperAdminInLovable();
           setIsAdmin(isEditorAdmin);
           setIsSuperAdmin(isEditorAdmin);
           setIsCompanyAdmin(isEditorAdmin);
@@ -78,7 +77,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         fetchUserProfile(session.user.id);
       } else {
         // Check if user is in Lovable editor and grant super admin privileges
-        const isEditorAdmin = isSuperAdminInLovable();
         setIsAdmin(isEditorAdmin);
         setIsSuperAdmin(isEditorAdmin);
         setIsCompanyAdmin(isEditorAdmin);
@@ -88,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isEditorAdmin]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
