@@ -33,9 +33,16 @@ export function DatabaseConnectionStatus() {
     setStatus('loading');
     setExpanded(true);
     try {
-      const result = await initializeSupabaseConnection();
-      setResults(result);
-      setStatus(result.connection.success ? 'success' : 'error');
+      const diagnosticResult = await initializeSupabaseConnection();
+      setResults(diagnosticResult);
+      // Fix: Access the success property directly on the result or from the connectionResult property
+      setStatus(
+        diagnosticResult && 
+        ((diagnosticResult.connectionResult && diagnosticResult.connectionResult.success) || 
+         diagnosticResult.success) 
+          ? 'success' 
+          : 'error'
+      );
     } catch (error) {
       console.error("Error running diagnostics:", error);
       setStatus('error');

@@ -69,8 +69,9 @@ export async function testSupabaseConnection() {
 export async function verifyTableStructure(tableName: string) {
   try {
     // First check if we can access the table
+    // Use type assertion to handle dynamic table names
     const { data, error } = await supabase
-      .from(tableName)
+      .from(tableName as any)
       .select('*')
       .limit(1);
     
@@ -84,8 +85,9 @@ export async function verifyTableStructure(tableName: string) {
     }
     
     // Get table structure info from postgres
+    // Use type assertion for RPC function call
     const { data: columns, error: columnsError } = await supabase
-      .rpc('get_table_columns', { table_name: tableName });
+      .rpc('get_table_columns' as any, { table_name: tableName });
     
     if (columnsError) {
       console.warn(`Could not retrieve column info for ${tableName}:`, columnsError);
@@ -118,7 +120,8 @@ export async function verifyTableStructure(tableName: string) {
  */
 export async function createColumnInfoFunction() {
   try {
-    const { error } = await supabase.rpc('create_column_info_function');
+    // Use type assertion for RPC function call
+    const { error } = await supabase.rpc('create_column_info_function' as any);
     if (error) {
       console.error("Could not create column info function:", error);
       return false;
@@ -141,7 +144,10 @@ export async function initializeSupabaseConnection() {
   const connectionResult = await testSupabaseConnection();
   
   if (!connectionResult.success) {
-    return connectionResult;
+    return { 
+      connectionResult,
+      success: false
+    };
   }
   
   // Check critical tables
@@ -153,14 +159,15 @@ export async function initializeSupabaseConnection() {
     'customer_complaints'
   ];
   
-  const tableResults = {};
+  const tableResults: Record<string, any> = {};
   
   for (const table of tables) {
     tableResults[table] = await verifyTableStructure(table);
   }
   
   return {
-    connection: connectionResult,
-    tables: tableResults
+    connectionResult,
+    tables: tableResults,
+    success: true
   };
 }

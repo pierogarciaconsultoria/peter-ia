@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 export async function setupDatabaseHelpers() {
   try {
     // Create a function to get table columns information
-    const { error } = await supabase.rpc('execute_sql', {
+    // Use type assertion to avoid TypeScript errors with RPC function names
+    const { error } = await supabase.rpc('execute_sql' as any, {
       sql_query: `
         CREATE OR REPLACE FUNCTION public.get_table_columns(table_name text)
         RETURNS TABLE (
@@ -63,7 +64,8 @@ export async function setupDatabaseHelpers() {
  */
 export async function executeQuery(sql: string) {
   try {
-    const { data, error } = await supabase.rpc('execute_sql', {
+    // Use type assertion to avoid TypeScript errors with RPC function names
+    const { data, error } = await supabase.rpc('execute_sql' as any, {
       sql_query: sql
     });
     
