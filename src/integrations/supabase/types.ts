@@ -399,6 +399,24 @@ export type Database = {
         }
         Relationships: []
       }
+      connection_test: {
+        Row: {
+          connection_time: string | null
+          id: string
+          message: string
+        }
+        Insert: {
+          connection_time?: string | null
+          id?: string
+          message: string
+        }
+        Update: {
+          connection_time?: string | null
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       critical_analysis: {
         Row: {
           analysis_date: string
@@ -1663,6 +1681,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_receipts: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payer_name: string | null
+          payment_date: string
+          payment_method: string
+          receipt_number: string
+          receivable_id: string
+        }
+        Insert: {
+          amount_paid: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payer_name?: string | null
+          payment_date: string
+          payment_method: string
+          receipt_number: string
+          receivable_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payer_name?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_number?: string
+          receivable_id?: string
+        }
+        Relationships: []
+      }
       performance_evaluations: {
         Row: {
           comments: string | null
@@ -1812,6 +1869,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      process_mappings: {
+        Row: {
+          activities: Json | null
+          created_at: string | null
+          date: string
+          entry_requirements: string | null
+          expected_result: string | null
+          id: string
+          name: string
+          performance_indicators: string | null
+          problems: string | null
+          process_issues: string | null
+          process_objective: string | null
+          process_risks: string | null
+          process_type: string | null
+          risks: string | null
+          status: string | null
+        }
+        Insert: {
+          activities?: Json | null
+          created_at?: string | null
+          date: string
+          entry_requirements?: string | null
+          expected_result?: string | null
+          id?: string
+          name: string
+          performance_indicators?: string | null
+          problems?: string | null
+          process_issues?: string | null
+          process_objective?: string | null
+          process_risks?: string | null
+          process_type?: string | null
+          risks?: string | null
+          status?: string | null
+        }
+        Update: {
+          activities?: Json | null
+          created_at?: string | null
+          date?: string
+          entry_requirements?: string | null
+          expected_result?: string | null
+          id?: string
+          name?: string
+          performance_indicators?: string | null
+          problems?: string | null
+          process_issues?: string | null
+          process_objective?: string | null
+          process_risks?: string | null
+          process_type?: string | null
+          risks?: string | null
+          status?: string | null
+        }
+        Relationships: []
       }
       quality_actions: {
         Row: {

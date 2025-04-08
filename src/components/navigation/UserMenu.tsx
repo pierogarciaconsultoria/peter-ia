@@ -14,16 +14,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isAdmin, isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
   
-  // Check if access is via master admin in Lovable settings
-  const isMasterAdminAccess = 
-    (window.location.search.includes('master_admin=true') || 
-     (process.env.NODE_ENV === 'development' && window.self !== window.top));
+  // Check if access is via Lovable editor
+  const isMasterAdminAccess = isLovableEditor();
 
   const handleSignOut = async () => {
     try {

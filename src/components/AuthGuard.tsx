@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -23,10 +24,7 @@ export const AuthGuard = ({
 
   // Enhanced Lovable editor detection
   // This check allows anyone editing in Lovable to bypass authentication entirely
-  const isLovableEditor = 
-    window.location.search.includes('master_admin=true') || 
-    (process.env.NODE_ENV === 'development' && window.self !== window.top) ||
-    window.location.hostname.includes('lovable.app');
+  const isEditor = isLovableEditor();
 
   useEffect(() => {
     // Short delay to prevent flash of redirect
@@ -48,7 +46,7 @@ export const AuthGuard = ({
 
   // Special bypass for Lovable editing - always return children directly
   // This completely bypasses all authentication for Lovable editors
-  if (isLovableEditor) {
+  if (isEditor) {
     console.log("Acesso total concedido via Lovable editor - autenticação ignorada");
     return <>{children}</>;
   }

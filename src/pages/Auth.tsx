@@ -6,26 +6,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrainCircuit } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 const Auth = () => {
   const navigate = useNavigate();
   
-  // Enhanced Lovable editor detection
-  const isLovableEditor = 
-    window.location.search.includes('master_admin=true') || 
-    (process.env.NODE_ENV === 'development' && window.self !== window.top) ||
-    window.location.hostname.includes('lovable.app');
+  // Use the centralized Lovable editor detection
+  const isEditor = isLovableEditor();
   
   // Immediately redirect to dashboard if in Lovable editor
   useEffect(() => {
-    if (isLovableEditor) {
+    if (isEditor) {
       console.log("Acesso total concedido via Lovable editor - redirecionando para dashboard");
       navigate("/");
     }
-  }, [isLovableEditor, navigate]);
+  }, [isEditor, navigate]);
   
   // If in Lovable editor, don't render the auth page at all
-  if (isLovableEditor) {
+  if (isEditor) {
     return null;
   }
   

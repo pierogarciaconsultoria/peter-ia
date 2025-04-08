@@ -4,35 +4,33 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { useLogin } from "@/hooks/useLogin";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 export const LoginForm = () => {
   const { loading, handleDirectAdminLogin } = useLogin();
   const navigate = useNavigate();
   
-  // Enhanced Lovable editor detection
-  const isLovableEditor = 
-    window.location.search.includes('master_admin=true') || 
-    (process.env.NODE_ENV === 'development' && window.self !== window.top) ||
-    window.location.hostname.includes('lovable.app');
+  // Use the centralized Lovable editor detection
+  const isEditor = isLovableEditor();
 
   // If in Lovable editor, automatically redirect to dashboard
   useEffect(() => {
-    if (isLovableEditor) {
+    if (isEditor) {
       console.log("Acesso total concedido via Lovable editor - redirecionando para dashboard");
       navigate("/");
     }
-  }, [isLovableEditor, navigate]);
+  }, [isEditor, navigate]);
 
   // If in Lovable editor, don't render login form at all
-  if (isLovableEditor) {
+  if (isEditor) {
     return null;
   }
 
   return (
     <div>
       <CardContent className="space-y-4">
-        <div className={`p-3 ${isLovableEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
-          {isLovableEditor ? (
+        <div className={`p-3 ${isEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
+          {isEditor ? (
             "Acesso total concedido! Você pode acessar todas as funcionalidades do sistema via Lovable Editor."
           ) : (
             "A funcionalidade de login está temporariamente desativada."
@@ -40,7 +38,7 @@ export const LoginForm = () => {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
-        {isLovableEditor ? (
+        {isEditor ? (
           <>
             <Button
               type="button" 
@@ -68,7 +66,7 @@ export const LoginForm = () => {
           </Button>
         )}
         <p className="text-xs text-muted-foreground text-center pt-2">
-          {isLovableEditor ? 
+          {isEditor ? 
             "Você está usando o acesso total via Lovable Editor." : 
             "Entre em contato com o suporte para mais informações."}
         </p>
