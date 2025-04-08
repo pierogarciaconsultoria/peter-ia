@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { menuItems } from "./MenuItems";
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const isEditor = isLovableEditor();
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => !prev);
@@ -73,16 +76,22 @@ export function Sidebar({
         
         <nav className={cn("flex-1 overflow-y-auto", isCollapsed && !isHovered ? "px-2" : "px-4")}>
           <ul className="space-y-1">
-            {menuItems.map(item => <li key={item.href}>
-                <Button variant="ghost" className={cn("w-full", isCollapsed && !isHovered ? "justify-center px-2" : "justify-start")} asChild>
-                  <a href={item.href} title={isCollapsed && !isHovered ? item.title : undefined}>
+            {menuItems.map(item => (
+              <li key={item.href}>
+                <Button 
+                  variant="ghost" 
+                  className={cn("w-full", isCollapsed && !isHovered ? "justify-center px-2" : "justify-start")} 
+                  asChild
+                >
+                  <Link to={item.href} title={isCollapsed && !isHovered ? item.title : undefined}>
                     <item.icon size={16} className={isCollapsed && !isHovered ? "mr-0" : "mr-2"} />
                     <span className={isCollapsed && !isHovered ? "sr-only" : ""}>
                       {item.title}
                     </span>
-                  </a>
+                  </Link>
                 </Button>
-              </li>)}
+              </li>
+            ))}
           </ul>
         </nav>
         

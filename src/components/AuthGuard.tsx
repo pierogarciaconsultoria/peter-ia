@@ -4,6 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { toast } from "sonner";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -27,13 +28,24 @@ export const AuthGuard = ({
   const isEditor = isLovableEditor();
 
   useEffect(() => {
+    // Log access for debugging
+    if (isEditor) {
+      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor`);
+      
+      // Show toast for first access only
+      if (sessionStorage.getItem('lovableEditorAccessNotified') !== 'true') {
+        toast.success("Acesso total concedido via Lovable Editor");
+        sessionStorage.setItem('lovableEditorAccessNotified', 'true');
+      }
+    }
+    
     // Short delay to prevent flash of redirect
     const timer = setTimeout(() => {
       setIsChecking(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, location.pathname, isEditor]);
 
   if (isLoading || isChecking) {
     return (
