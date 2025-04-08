@@ -1,4 +1,3 @@
-
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, User, Settings, Building2, Shield, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,15 +13,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { isLovableEditor, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, isAdmin, isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
   
-  // Check if access is via Lovable editor
-  const isMasterAdminAccess = isLovableEditor();
+  // Check if access is via Lovable editor with super admin privileges
+  const isMasterAdminAccess = isSuperAdminInLovable();
 
   const handleSignOut = async () => {
     try {
@@ -35,7 +34,7 @@ export function UserMenu() {
 
   // Extract user initials for avatar
   const getUserInitials = () => {
-    if (isMasterAdminAccess) return "MA"; // Master Admin
+    if (isMasterAdminAccess) return "SA"; // Super Admin
     if (!user?.user_metadata) return "U";
     
     const firstName = user.user_metadata.first_name || "";
@@ -74,9 +73,9 @@ export function UserMenu() {
                   <>
                     <div className="flex items-center gap-1">
                       <AlertTriangle className="h-4 w-4 text-destructive" />
-                      <p className="text-sm font-medium text-destructive">Acesso Master Admin</p>
+                      <p className="text-sm font-medium text-destructive">Acesso Super Admin</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Acesso administrativo via Lovable</p>
+                    <p className="text-xs text-muted-foreground">Acesso total via Lovable Editor</p>
                   </>
                 ) : (
                   <>
@@ -139,10 +138,12 @@ export function UserMenu() {
               <DropdownMenuItem onClick={() => {
                 const url = new URL(window.location.href);
                 url.searchParams.delete('master_admin');
+                localStorage.removeItem('lovableEditorAccess');
+                sessionStorage.removeItem('lovableEditorAccessNotified');
                 window.location.href = url.toString();
               }}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Sair do Modo Master Admin</span>
+                <span>Sair do Modo Super Admin</span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

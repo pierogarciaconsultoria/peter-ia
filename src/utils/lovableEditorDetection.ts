@@ -26,9 +26,17 @@ export const isLovableEditor = (): boolean => {
   );
 };
 
+/**
+ * Check if the user should be granted super admin privileges
+ * This is true for users in the Lovable editor environment
+ */
+export const isSuperAdminInLovable = (): boolean => {
+  return isLovableEditor();
+};
+
 // Set the localStorage flag to true to ensure persistence between refreshes
 // This helps maintain editor access even if URL parameters change
 if (isLovableEditor()) {
   localStorage.setItem('lovableEditorAccess', 'true');
-  console.log("Lovable Editor detectado - acesso total concedido");
+  console.log("Lovable Editor detectado - acesso total concedido como super administrador");
 }

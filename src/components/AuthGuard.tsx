@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
 interface AuthGuardProps {
@@ -25,16 +25,17 @@ export const AuthGuard = ({
 
   // Enhanced Lovable editor detection
   // This check allows anyone editing in Lovable to bypass authentication entirely
-  const isEditor = isLovableEditor();
+  // AND automatically grants them super admin privileges
+  const isEditorSuperAdmin = isSuperAdminInLovable();
 
   useEffect(() => {
     // Log access for debugging
-    if (isEditor) {
-      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor`);
+    if (isEditorSuperAdmin) {
+      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor com privilégios de super admin`);
       
       // Show toast for first access only
       if (sessionStorage.getItem('lovableEditorAccessNotified') !== 'true') {
-        toast.success("Acesso total concedido via Lovable Editor");
+        toast.success("Acesso total como super administrador concedido via Lovable Editor");
         sessionStorage.setItem('lovableEditorAccessNotified', 'true');
       }
     }
@@ -45,7 +46,7 @@ export const AuthGuard = ({
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [user, location.pathname, isEditor]);
+  }, [user, location.pathname, isEditorSuperAdmin]);
 
   if (isLoading || isChecking) {
     return (
@@ -58,8 +59,9 @@ export const AuthGuard = ({
 
   // Special bypass for Lovable editing - always return children directly
   // This completely bypasses all authentication for Lovable editors
-  if (isEditor) {
-    console.log("Acesso total concedido via Lovable editor - autenticação ignorada");
+  // and grants them super admin privileges
+  if (isEditorSuperAdmin) {
+    console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
     return <>{children}</>;
   }
 
