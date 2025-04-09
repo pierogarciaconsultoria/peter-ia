@@ -9,6 +9,91 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      action_items: {
+        Row: {
+          action_plan_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          responsible: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          action_plan_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          responsible?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          action_plan_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          responsible?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_items_action_plan_id_fkey"
+            columns: ["action_plan_id"]
+            isOneToOne: false
+            referencedRelation: "action_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_plans: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          progress: number | null
+          sector: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          sector?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          sector?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -353,6 +438,7 @@ export type Database = {
       }
       companies: {
         Row: {
+          active: boolean
           active_modules: string[]
           address: string | null
           cnpj: string | null
@@ -368,6 +454,7 @@ export type Database = {
           slug: string
         }
         Insert: {
+          active?: boolean
           active_modules?: string[]
           address?: string | null
           cnpj?: string | null
@@ -383,6 +470,7 @@ export type Database = {
           slug: string
         }
         Update: {
+          active?: boolean
           active_modules?: string[]
           address?: string | null
           cnpj?: string | null
@@ -2554,6 +2642,7 @@ export type Database = {
           lgpd_consent: boolean | null
           lgpd_consent_date: string | null
           phone: string | null
+          role: string
           role_id: string | null
           status: string | null
           updated_at: string | null
@@ -2574,6 +2663,7 @@ export type Database = {
           lgpd_consent?: boolean | null
           lgpd_consent_date?: string | null
           phone?: string | null
+          role?: string
           role_id?: string | null
           status?: string | null
           updated_at?: string | null
@@ -2594,6 +2684,7 @@ export type Database = {
           lgpd_consent?: boolean | null
           lgpd_consent_date?: string | null
           phone?: string | null
+          role?: string
           role_id?: string | null
           status?: string | null
           updated_at?: string | null
@@ -2627,6 +2718,14 @@ export type Database = {
       get_user_company_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_company_admin: {
+        Args: { user_id: string }
+        Returns: boolean
       }
       is_user_admin: {
         Args: Record<PropertyKey, never>

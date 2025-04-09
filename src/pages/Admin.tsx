@@ -52,7 +52,7 @@ interface Company {
   slug: string;
   created_at: string;
   active_modules: string[];
-  active?: boolean;
+  active: boolean;
   address?: string;
   cnpj?: string;
   email?: string;
@@ -99,7 +99,6 @@ const Admin = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company'} | null>(null);
   
-  // Form states
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserFirstName, setNewUserFirstName] = useState("");
@@ -120,7 +119,6 @@ const Admin = () => {
     try {
       let query = supabase.from('companies').select('*');
       
-      // Se não for super admin, filtra apenas a empresa do usuário
       if (!isSuperAdmin && userCompany) {
         query = query.eq('id', userCompany.id);
       }
@@ -129,28 +127,12 @@ const Admin = () => {
         
       if (error) throw error;
       
-      // Convert database records to Company type
-      const formattedCompanies = (data || []).map(company => {
-        // Create a properly typed company object with all required fields
-        const typedCompany: Company = {
-          ...company as any,
-          active: false // Default value that will be overwritten if exists
-        };
-        
-        // Now safely check if the property exists and assign it
-        if ('active' in company) {
-          typedCompany.active = (company as any).active;
-        } else {
-          typedCompany.active = true; // Default value
-        }
-        
-        return typedCompany;
-      });
-      
-      setCompanies(formattedCompanies);
+      setCompanies(data || []);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast.error("Erro ao carregar empresas");
+      setLoading(false);
     }
   };
 
@@ -163,7 +145,6 @@ const Admin = () => {
           companies:company_id (name)
         `);
       
-      // Se não for super admin, filtra apenas usuários da empresa do usuário
       if (!isSuperAdmin && userCompany) {
         query = query.eq('company_id', userCompany.id);
       }
@@ -172,7 +153,6 @@ const Admin = () => {
         
       if (error) throw error;
       
-      // Format the data to include company_name
       const formattedUsers = data?.map(user => ({
         ...user,
         company_name: user.companies?.name
@@ -196,7 +176,6 @@ const Admin = () => {
           companies:company_id (name)
         `);
       
-      // Se não for super admin, filtra apenas papéis da empresa do usuário
       if (!isSuperAdmin && userCompany) {
         query = query.eq('company_id', userCompany.id);
       }
@@ -205,19 +184,12 @@ const Admin = () => {
         
       if (error) throw error;
       
-      // Format the data to include company_name and ensure is_admin field exists
       const formattedRoles = (data || []).map(role => {
-        // Create a properly typed role object with all required fields
         const typedRole: Role = {
           ...role as any,
           company_name: role.companies?.name,
-          is_admin: false // Default value that will be overwritten if exists
+          is_admin: false
         };
-        
-        // Now safely check if the property exists and assign it
-        if ('is_admin' in role) {
-          typedRole.is_admin = (role as any).is_admin;
-        }
         
         return typedRole;
       });
@@ -232,14 +204,12 @@ const Admin = () => {
   const handleCreateUser = async () => {
     setLoading(true);
     try {
-      // Definir o ID da empresa (ou usar a empresa atual para admins de empresa)
       const companyId = isSuperAdmin ? newUserCompany : (userCompany?.id || null);
       
       if (!companyId) {
         throw new Error("É necessário selecionar uma empresa");
       }
 
-      // Step 1: Create the user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: newUserEmail,
         password: newUserPassword,
@@ -252,13 +222,12 @@ const Admin = () => {
       
       if (authError) throw authError;
       
-      // Step 2: Update the user profile with company and admin status
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({
           company_id: companyId,
           is_company_admin: newUserIsAdmin,
-          is_super_admin: false, // Apenas superadmins podem criar outros superadmins
+          is_super_admin: false,
           first_name: newUserFirstName,
           last_name: newUserLastName
         })
@@ -270,7 +239,6 @@ const Admin = () => {
       setUserDialogOpen(false);
       fetchUsers();
       
-      // Reset form
       setNewUserEmail("");
       setNewUserPassword("");
       setNewUserFirstName("");
@@ -288,7 +256,6 @@ const Admin = () => {
   const handleCreateCompany = async () => {
     setLoading(true);
     try {
-      // Apenas super admins podem criar empresas
       if (!isSuperAdmin) {
         throw new Error("Apenas administradores do sistema podem criar empresas");
       }
@@ -309,7 +276,6 @@ const Admin = () => {
       setCompanyDialogOpen(false);
       fetchCompanies();
       
-      // Reset form
       setNewCompanyName("");
       setNewCompanySlug("");
     } catch (error: any) {
@@ -326,7 +292,6 @@ const Admin = () => {
     setLoading(true);
     try {
       if (itemToDelete.type === 'user') {
-        // Verificar se tem permissão para excluir o usuário
         if (!isSuperAdmin) {
           const userToDelete = users.find(u => u.id === itemToDelete.id);
           if (userToDelete?.is_super_admin) {
@@ -341,7 +306,6 @@ const Admin = () => {
         if (error) throw error;
         fetchUsers();
       } else if (itemToDelete.type === 'company') {
-        // Apenas super admin pode excluir empresas
         if (!isSuperAdmin) {
           throw new Error("Apenas administradores do sistema podem excluir empresas");
         }
@@ -772,7 +736,6 @@ const Admin = () => {
         
         <Footer />
         
-        {/* Confirmação de exclusão */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
