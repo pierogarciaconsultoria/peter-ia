@@ -98,7 +98,7 @@ const Admin = () => {
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company'} | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company' | 'role'} | null>(null);
   
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
@@ -109,6 +109,13 @@ const Admin = () => {
   
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanySlug, setNewCompanySlug] = useState("");
+
+  // Role management states
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleCompany, setNewRoleCompany] = useState("");
+  const [newRoleIsAdmin, setNewRoleIsAdmin] = useState(false);
+  const [newRoleIsDefault, setNewRoleIsDefault] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -293,6 +300,43 @@ const Admin = () => {
     }
   };
 
+  const handleCreateRole = async () => {
+    setLoading(true);
+    try {
+      const companyId = isSuperAdmin ? newRoleCompany : (userCompany?.id || null);
+      
+      if (!companyId) {
+        throw new Error("É necessário selecionar uma empresa");
+      }
+      
+      const { data, error } = await supabase
+        .from('roles')
+        .insert({
+          name: newRoleName,
+          company_id: companyId,
+          is_default: newRoleIsDefault
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      
+      toast.success("Papel criado com sucesso");
+      setRoleDialogOpen(false);
+      fetchRoles();
+      
+      setNewRoleName("");
+      setNewRoleCompany("");
+      setNewRoleIsAdmin(false);
+      setNewRoleIsDefault(false);
+    } catch (error: any) {
+      console.error("Error creating role:", error);
+      toast.error(error.message || "Erro ao criar papel");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
     
@@ -324,12 +368,32 @@ const Admin = () => {
           
         if (error) throw error;
         fetchCompanies();
+      } else if (itemToDelete.type === 'role') {
+        const roleToDelete = roles.find(r => r.id === itemToDelete.id);
+        
+        if (!isSuperAdmin && roleToDelete?.company_id !== userCompany?.id) {
+          throw new Error("Você só pode excluir papéis da sua empresa");
+        }
+        
+        const { error } = await supabase
+          .from('roles')
+          .delete()
+          .eq('id', itemToDelete.id);
+          
+        if (error) throw error;
+        fetchRoles();
       }
       
-      toast.success(`${itemToDelete.type === 'user' ? 'Usuário' : 'Empresa'} excluído(a) com sucesso`);
+      toast.success(`${
+        itemToDelete.type === 'user' ? 'Usuário' : 
+        itemToDelete.type === 'company' ? 'Empresa' : 'Papel'
+      } excluído(a) com sucesso`);
     } catch (error: any) {
       console.error(`Error deleting ${itemToDelete.type}:`, error);
-      toast.error(error.message || `Erro ao excluir ${itemToDelete.type === 'user' ? 'usuário' : 'empresa'}`);
+      toast.error(error.message || `Erro ao excluir ${
+        itemToDelete.type === 'user' ? 'usuário' : 
+        itemToDelete.type === 'company' ? 'empresa' : 'papel'
+      }`);
     } finally {
       setLoading(false);
       setDeleteDialogOpen(false);
@@ -683,57 +747,188 @@ const Admin = () => {
               
               <TabsContent value="roles" className="space-y-4">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Papéis e Permissões</CardTitle>
-                    <CardDescription>Gerenciar papéis e permissões de usuários</CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Papéis e Permissões</CardTitle>
+                      <CardDescription>Gerenciar papéis e permissões de usuários</CardDescription>
+                    </div>
+                    <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Novo Papel
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Criar Novo Papel</DialogTitle>
+                          <DialogDescription>
+                            Defina um novo papel para usuários do sistema
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="roleName">Nome do Papel</Label>
+                            <Input
+                              id="roleName"
+                              placeholder="Ex: Gerente de Vendas"
+                              value={newRoleName}
+                              onChange={(e) => setNewRoleName(e.target.value)}
+                            />
+                          </div>
+                          
+                          {isSuperAdmin && (
+                            <div className="space-y-2">
+                              <Label htmlFor="roleCompany">Empresa</Label>
+                              <Select value={newRoleCompany} onValueChange={setNewRoleCompany}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma empresa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {companies.map((company) => (
+                                    <SelectItem key={company.id} value={company.id}>
+                                      {company.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="isDefault" className="flex items-center gap-2">
+                              <input
+                                id="isDefault"
+                                type="checkbox"
+                                checked={newRoleIsDefault}
+                                onChange={(e) => setNewRoleIsDefault(e.target.checked)}
+                                className="h-4 w-4"
+                              />
+                              Papel Padrão
+                            </Label>
+                            <p className="text-xs text-muted-foreground ml-6">
+                              Papéis padrão são atribuídos automaticamente a novos usuários.
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
+                          <Button onClick={handleCreateRole} disabled={loading}>
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processando...
+                              </>
+                            ) : 'Criar Papel'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col gap-6">
-                      <div className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="bg-primary/10 p-3 rounded-full">
-                          <Shield className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium">Super Admin</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Acesso total ao sistema e todas as empresas.
-                          </p>
-                        </div>
-                        <CheckSquare className="h-5 w-5 text-primary" />
+                    {loading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="ml-2">Carregando...</span>
                       </div>
-                      
-                      <div className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="bg-primary/10 p-3 rounded-full">
-                          <Building2 className="h-6 w-6 text-primary" />
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="rounded-md border">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Empresa</TableHead>
+                                <TableHead>Tipo</TableHead>
+                                <TableHead>Criado em</TableHead>
+                                <TableHead className="w-[100px]">Ações</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {roles.length === 0 ? (
+                                <TableRow>
+                                  <TableCell colSpan={5} className="h-24 text-center">
+                                    Nenhum papel personalizado encontrado.
+                                  </TableCell>
+                                </TableRow>
+                              ) : (
+                                roles.map((role) => (
+                                  <TableRow key={role.id}>
+                                    <TableCell>
+                                      <div className="font-medium">{role.name}</div>
+                                    </TableCell>
+                                    <TableCell>{role.company_name || '-'}</TableCell>
+                                    <TableCell>
+                                      {role.is_default && (
+                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                          Padrão
+                                        </span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell>
+                                      {role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                          setItemToDelete({ id: role.id, type: 'role' });
+                                          setDeleteDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))
+                              )}
+                            </TableBody>
+                          </Table>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium">Administrador de Empresa</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Gerencia usuários e configurações da sua empresa.
-                          </p>
+                        
+                        <div className="flex flex-col gap-6">
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="bg-primary/10 p-3 rounded-full">
+                              <Shield className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">Super Admin</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Acesso total ao sistema e todas as empresas.
+                              </p>
+                            </div>
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          </div>
+                          
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="bg-primary/10 p-3 rounded-full">
+                              <Building2 className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">Administrador de Empresa</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Gerencia usuários e configurações da sua empresa.
+                              </p>
+                            </div>
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          </div>
+                          
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="bg-primary/10 p-3 rounded-full">
+                              <User className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">Usuário</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Acesso apenas às funcionalidades permitidas dentro da sua empresa.
+                              </p>
+                            </div>
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          </div>
                         </div>
-                        <CheckSquare className="h-5 w-5 text-primary" />
                       </div>
-                      
-                      <div className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="bg-primary/10 p-3 rounded-full">
-                          <User className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium">Usuário</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Acesso apenas às funcionalidades permitidas dentro da sua empresa.
-                          </p>
-                        </div>
-                        <CheckSquare className="h-5 w-5 text-primary" />
-                      </div>
-                      
-                      <div className="mt-4 text-center">
-                        <p className="text-sm text-muted-foreground">
-                          Funcionalidades avançadas de gerenciamento de papéis e permissões estão em desenvolvimento.
-                        </p>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -748,7 +943,10 @@ const Admin = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza de que deseja excluir este {itemToDelete?.type === 'user' ? 'usuário' : 'empresa'}?
+                Tem certeza de que deseja excluir este {
+                  itemToDelete?.type === 'user' ? 'usuário' : 
+                  itemToDelete?.type === 'company' ? 'empresa' : 'papel'
+                }?
                 {itemToDelete?.type === 'company' && (
                   <span className="block mt-2 font-bold text-destructive">
                     Atenção: Esta ação também excluirá todos os usuários e dados associados à empresa.
