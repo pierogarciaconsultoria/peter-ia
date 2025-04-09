@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -127,7 +128,13 @@ const Admin = () => {
         
       if (error) throw error;
       
-      setCompanies(data || []);
+      // Garantir que todos os itens tenham a propriedade 'active'
+      const formattedCompanies = (data || []).map(company => ({
+        ...company,
+        active: company.active !== undefined ? company.active : true
+      }));
+      
+      setCompanies(formattedCompanies);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching companies:", error);
@@ -265,7 +272,7 @@ const Admin = () => {
         .insert({
           name: newCompanyName,
           slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-'),
-          active: true
+          active: true // Garantir que a propriedade 'active' seja definida
         })
         .select()
         .single();
