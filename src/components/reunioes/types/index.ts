@@ -1,4 +1,3 @@
-
 export interface Reuniao {
   id: string;
   titulo: string;
@@ -46,4 +45,19 @@ export interface Acao {
   status?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface VisualizarAtaProps {
+  reuniaoId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface ReuniaoDetalhes {
+  id: string;
+  titulo: string;
+  descricao: string;
+  data: string;
+  local: string;
+  criado_por: string;
 }
