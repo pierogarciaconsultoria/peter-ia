@@ -20,21 +20,24 @@ export function useDepartamentosFiltered() {
     setIsLoading(true);
     
     try {
-      // Criamos a query base - usando any para contornar as restrições de tipo
-      let query = supabase.from('departamentos').select('*') as any;
+      // Usando o tipo any aqui para contornar as restrições de tipo
+      // já que a tabela 'departamentos' não está presente nas definições de tipo automáticas
+      const query = supabase.from('departamentos') as any;
+      
+      // Seleção de todos os campos
+      const selectQuery = query.select('*');
       
       // Aplicamos o filtro de empresa
-      query = applyFilter(query);
+      const filteredQuery = applyFilter(selectQuery);
       
-      const { data, error } = await query;
+      const { data, error } = await filteredQuery;
       
       if (error) {
         throw error;
       }
       
-      // Garantimos que o tipo dos dados corresponda a Departamento[]
-      const typedData = data as unknown as Departamento[];
-      setDepartamentos(typedData || []);
+      // Usando tipagem explícita para garantir que os dados correspondam ao tipo Departamento
+      setDepartamentos((data || []) as Departamento[]);
     } catch (error: any) {
       console.error("Erro ao buscar departamentos:", error);
       toast.error("Falha ao carregar departamentos");
