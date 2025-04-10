@@ -30,6 +30,28 @@ export const executeQuery = async (query: string): Promise<SqlExecutionResult> =
 };
 
 /**
+ * Sets up database helper functions and tests the connection
+ * @returns boolean indicating if setup was successful
+ */
+export const setupDatabaseHelpers = async (): Promise<boolean> => {
+  try {
+    // Run a test query to verify connection
+    const testResult = await executeQuery('SELECT 1 as test');
+    
+    if (!testResult.success) {
+      console.error("Failed to setup database helpers:", testResult.error);
+      return false;
+    }
+    
+    console.log("Database helpers initialized successfully");
+    return true;
+  } catch (error) {
+    console.error("Error setting up database helpers:", error);
+    return false;
+  }
+};
+
+/**
  * Type definition for SQL execution result
  */
 export interface SqlExecutionResult {
