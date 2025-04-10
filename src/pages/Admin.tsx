@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -47,6 +46,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, Plus, Trash2, User, Building2, CheckSquare, Shield } from "lucide-react";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { executeQuery } from "@/utils/databaseHelpers";
 
 interface Company {
   id: string;
@@ -90,6 +90,13 @@ interface Role {
   companies?: { name: string };
 }
 
+// Type for execute_sql function response
+interface SqlExecutionResult {
+  success: boolean;
+  data?: any[];
+  error?: string;
+}
+
 const Admin = () => {
   const { isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -131,30 +138,20 @@ const Admin = () => {
     try {
       setLoading(true);
       
-      // Usar o execute_sql para administradores do Lovable Editor
+      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: 'SELECT * FROM public.companies ORDER BY name' 
-        });
+        const result = await executeQuery('SELECT * FROM public.companies ORDER BY name');
         
-        if (error) {
-          console.error("Error executing SQL for companies:", error);
+        if (!result.success) {
+          console.error("Error executing SQL for companies:", result.error);
           toast.error("Erro ao carregar empresas");
           setCompanies([]);
           setLoading(false);
           return;
         }
         
-        // Parsear o resultado para formato de array
-        if (data && data.success) {
-          try {
-            // Se não houver dados, retornar array vazio
-            setCompanies([]);
-          } catch (parseError) {
-            console.error("Error parsing companies data:", parseError);
-            setCompanies([]);
-          }
-        }
+        // Set companies from result data
+        setCompanies(result.data || []);
       } else {
         let query = supabase.from('companies').select('*');
         
@@ -191,35 +188,25 @@ const Admin = () => {
     try {
       setLoading(true);
       
-      // Usar o execute_sql para administradores do Lovable Editor
+      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: `
-            SELECT p.*, c.name as company_name
-            FROM public.user_profiles p
-            LEFT JOIN public.companies c ON p.company_id = c.id
-            ORDER BY p.created_at DESC
-          `
-        });
+        const result = await executeQuery(`
+          SELECT p.*, c.name as company_name
+          FROM public.user_profiles p
+          LEFT JOIN public.companies c ON p.company_id = c.id
+          ORDER BY p.created_at DESC
+        `);
         
-        if (error) {
-          console.error("Error executing SQL for users:", error);
+        if (!result.success) {
+          console.error("Error executing SQL for users:", result.error);
           toast.error("Erro ao carregar usuários");
           setUsers([]);
           setLoading(false);
           return;
         }
         
-        // Parsear o resultado
-        if (data && data.success) {
-          try {
-            // Se não houver dados, retornar array vazio
-            setUsers([]);
-          } catch (parseError) {
-            console.error("Error parsing users data:", parseError);
-            setUsers([]);
-          }
-        }
+        // Set users from result data
+        setUsers(result.data || []);
       } else {
         let query = supabase
           .from('user_profiles')
@@ -258,34 +245,24 @@ const Admin = () => {
 
   const fetchRoles = async () => {
     try {
-      // Usar o execute_sql para administradores do Lovable Editor
+      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: `
-            SELECT r.*, c.name as company_name
-            FROM public.roles r
-            LEFT JOIN public.companies c ON r.company_id = c.id
-            ORDER BY r.name
-          `
-        });
+        const result = await executeQuery(`
+          SELECT r.*, c.name as company_name
+          FROM public.roles r
+          LEFT JOIN public.companies c ON r.company_id = c.id
+          ORDER BY r.name
+        `);
         
-        if (error) {
-          console.error("Error executing SQL for roles:", error);
+        if (!result.success) {
+          console.error("Error executing SQL for roles:", result.error);
           toast.error("Erro ao carregar papéis");
           setRoles([]);
           return;
         }
         
-        // Parsear o resultado
-        if (data && data.success) {
-          try {
-            // Se não houver dados, retornar array vazio
-            setRoles([]);
-          } catch (parseError) {
-            console.error("Error parsing roles data:", parseError);
-            setRoles([]);
-          }
-        }
+        // Set roles from result data
+        setRoles(result.data || []);
       } else {
         let query = supabase
           .from('roles')
@@ -384,7 +361,7 @@ const Admin = () => {
         throw new Error("Apenas administradores do sistema podem criar empresas");
       }
       
-      // Para Lovable Editor, use RPC para evitar problemas com RLS
+      // Para Lovable Editor, use executeQuery para evitar problemas com RLS
       if (isEditorSuperAdmin) {
         const sqlQuery = `
           INSERT INTO public.companies (
@@ -398,11 +375,9 @@ const Admin = () => {
           ) RETURNING *;
         `;
         
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: sqlQuery 
-        });
+        const result = await executeQuery(sqlQuery);
         
-        if (error) throw error;
+        if (!result.success) throw new Error(result.error);
         
         toast.success("Empresa criada com sucesso");
         setCompanyDialogOpen(false);
@@ -447,7 +422,7 @@ const Admin = () => {
         throw new Error("É necessário selecionar uma empresa");
       }
       
-      // Para Lovable Editor, use RPC para evitar problemas com RLS
+      // Para Lovable Editor, use executeQuery para evitar problemas com RLS
       if (isEditorSuperAdmin) {
         const sqlQuery = `
           INSERT INTO public.roles (
@@ -461,11 +436,9 @@ const Admin = () => {
           ) RETURNING *;
         `;
         
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: sqlQuery 
-        });
+        const result = await executeQuery(sqlQuery);
         
-        if (error) throw error;
+        if (!result.success) throw new Error(result.error);
         
         toast.success("Papel criado com sucesso");
         setRoleDialogOpen(false);
@@ -521,11 +494,9 @@ const Admin = () => {
           sqlQuery = `DELETE FROM public.roles WHERE id = '${itemToDelete.id}';`;
         }
         
-        const { data, error } = await supabase.rpc('execute_sql', { 
-          sql_query: sqlQuery 
-        });
+        const result = await executeQuery(sqlQuery);
         
-        if (error) throw error;
+        if (!result.success) throw new Error(result.error);
         
         if (itemToDelete.type === 'user') fetchUsers();
         else if (itemToDelete.type === 'company') fetchCompanies();
@@ -613,6 +584,7 @@ const Admin = () => {
                 <TabsTrigger value="users">Usuários</TabsTrigger>
                 <TabsTrigger value="roles">Papéis</TabsTrigger>
               </TabsList>
+              
               
               {isSuperAdmin && (
                 <TabsContent value="companies" className="space-y-4">
@@ -746,6 +718,7 @@ const Admin = () => {
                   </Card>
                 </TabsContent>
               )}
+              
               
               <TabsContent value="users" className="space-y-4">
                 <Card>
@@ -935,6 +908,7 @@ const Admin = () => {
                 </Card>
               </TabsContent>
               
+              
               <TabsContent value="roles" className="space-y-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
@@ -1000,116 +974,3 @@ const Admin = () => {
                               Papéis padrão são atribuídos automaticamente a novos usuários da empresa.
                             </p>
                           </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
-                          <Button onClick={handleCreateRole} disabled={loading}>
-                            {loading ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processando...
-                              </>
-                            ) : 'Criar Papel'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Empresa</TableHead>
-                              <TableHead>Padrão</TableHead>
-                              <TableHead className="w-[100px]">Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {roles.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
-                                  Nenhum papel encontrado.
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              roles.map((role) => (
-                                <TableRow key={role.id}>
-                                  <TableCell>
-                                    <div className="flex items-center">
-                                      <Shield className="mr-2 h-4 w-4 text-muted-foreground" />
-                                      {role.name}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>{role.company_name || '-'}</TableCell>
-                                  <TableCell>
-                                    {role.is_default ? (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        Padrão
-                                      </span>
-                                    ) : '-'}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setItemToDelete({ id: role.id, type: 'role' });
-                                        setDeleteDialogOpen(true);
-                                      }}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
-      
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              {itemToDelete?.type === 'user' 
-                ? 'Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.'
-                : itemToDelete?.type === 'company'
-                  ? 'Tem certeza que deseja excluir esta empresa? Todos os usuários associados também serão excluídos. Esta ação não pode ser desfeita.'
-                  : 'Tem certeza que deseja excluir este papel? Esta ação não pode ser desfeita.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive text-destructive-foreground">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processando...
-                </>
-              ) : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </AuthGuard>
-  );
-};
-
-export default Admin;
