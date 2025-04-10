@@ -21,7 +21,7 @@ export function useUserPermissions() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Usar useCallback para evitar recriações desnecessárias da função
+  // Função para buscar permissões do usuário
   const fetchPermissoes = useCallback(async () => {
     if (!user?.id) {
       setPermissoes([]);
@@ -123,6 +123,7 @@ export function useUserPermissions() {
     }
   }, [isMaster, isAdmin, permissoes]);
 
+  // Funções auxiliares para simplificar o uso
   const podeVisualizar = useCallback((modulo: string): boolean => {
     return temPermissao(modulo, 'visualizar');
   }, [temPermissao]);
