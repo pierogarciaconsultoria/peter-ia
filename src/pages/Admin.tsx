@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -371,14 +370,16 @@ const Admin = () => {
             active
           ) VALUES (
             '${newCompanyName}',
-            '${newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-')}',
+            '${newCompanySlug || newCompanyName.toLowerCase().replace(/\\s+/g, '-')}',
             true
           ) RETURNING *;
         `;
         
         const result = await executeQuery(sqlQuery);
         
-        if (!result.success) throw new Error(result.error);
+        if (!result.success) {
+          throw new Error(result.error || "Erro ao criar empresa");
+        }
         
         toast.success("Empresa criada com sucesso");
         setCompanyDialogOpen(false);
@@ -391,7 +392,7 @@ const Admin = () => {
           .from('companies')
           .insert({
             name: newCompanyName,
-            slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-'),
+            slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\\s+/g, '-'),
             active: true
           })
           .select()
@@ -408,7 +409,18 @@ const Admin = () => {
       }
     } catch (error: any) {
       console.error("Error creating company:", error);
-      toast.error(error.message || "Erro ao criar empresa");
+      
+      // Improved error handling to avoid [object Object] message
+      let errorMessage = "Erro ao criar empresa";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // For Supabase errors that might be nested
+        errorMessage = error.message || (error.error?.message) || JSON.stringify(error);
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
