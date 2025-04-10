@@ -50,22 +50,38 @@ export function ReunioesAgendadas() {
       setLoading(true);
       
       // Buscar reuniões futuras
-      const { data, error } = await supabase
+      const { data: reunioesData, error: reunioesError } = await supabase
         .from('reunioes')
         .select(`
           id,
           titulo,
           data,
           local,
-          descricao,
-          participantes_count:reunioes_participantes(count)
+          descricao
         `)
         .gt('data', new Date().toISOString())
         .order('data', { ascending: true });
       
-      if (error) throw error;
+      if (reunioesError) throw reunioesError;
       
-      setReunioes(data || []);
+      // Buscar contagem de participantes para cada reunião
+      const reunioesProcessadas: Reuniao[] = [];
+      
+      for (const reuniao of reunioesData || []) {
+        const { count, error: countError } = await supabase
+          .from('reunioes_participantes')
+          .select('*', { count: 'exact', head: true })
+          .eq('reuniao_id', reuniao.id);
+          
+        if (countError) throw countError;
+        
+        reunioesProcessadas.push({
+          ...reuniao,
+          participantes_count: count || 0
+        });
+      }
+      
+      setReunioes(reunioesProcessadas);
     } catch (error) {
       console.error("Erro ao buscar reuniões:", error);
       toast.error("Não foi possível carregar as reuniões");

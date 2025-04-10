@@ -104,17 +104,33 @@ export function ExportarRelatorioReuniao({ reuniaoId }: ExportarRelatorioReuniao
     if (reuniaoError) throw reuniaoError;
     
     // Buscar participantes
-    const { data: participantes, error: participantesError } = await supabase
+    const { data: participantesData, error: participantesError } = await supabase
       .from('reunioes_participantes')
       .select(`
         id,
         presente,
-        employee:employees(name),
-        registro:reunioes_registros(o_que_fiz, o_que_vou_fazer, dificuldades)
+        employee:employees(name)
       `)
       .eq('reuniao_id', id);
     
     if (participantesError) throw participantesError;
+    
+    // Buscar registros separadamente
+    const { data: registrosData, error: registrosError } = await supabase
+      .from('reunioes_registros')
+      .select('*')
+      .eq('reuniao_id', id);
+      
+    if (registrosError) throw registrosError;
+    
+    // Combinar os dados de participantes com seus registros
+    const participantes = participantesData.map(participante => {
+      const registro = registrosData?.find(r => r.employee_id === participante.employee.id);
+      return {
+        ...participante,
+        registro: registro || undefined
+      };
+    });
     
     // Buscar ações
     const { data: acoes, error: acoesError } = await supabase

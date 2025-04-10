@@ -30,6 +30,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExportarRelatorioReuniao } from "./ExportarRelatorioReuniao";
 
+interface Registro {
+  id: string;
+  o_que_fiz: string;
+  o_que_vou_fazer: string;
+  dificuldades: string;
+}
+
 interface Participante {
   id: string;
   presente: boolean;
@@ -37,12 +44,7 @@ interface Participante {
     name: string;
     avatar_url?: string;
   };
-  registro?: {
-    id: string;
-    o_que_fiz: string;
-    o_que_vou_fazer: string;
-    dificuldades: string;
-  };
+  registro?: Registro;
 }
 
 interface Reuniao {
@@ -103,20 +105,36 @@ export function VisualizarAta({
       
       setReuniao(reuniaoData);
       
-      // Buscar participantes e seus registros
+      // Buscar participantes
       const { data: participantesData, error: participantesError } = await supabase
         .from('reunioes_participantes')
         .select(`
           id,
           presente,
-          employee:employees(name, avatar_url),
-          registro:reunioes_registros(id, o_que_fiz, o_que_vou_fazer, dificuldades)
+          employee:employees(name, avatar_url)
         `)
         .eq('reuniao_id', reuniaoId);
       
       if (participantesError) throw participantesError;
       
-      setParticipantes(participantesData);
+      // Buscar registros separadamente
+      const { data: registrosData, error: registrosError } = await supabase
+        .from('reunioes_registros')
+        .select('*')
+        .eq('reuniao_id', reuniaoId);
+        
+      if (registrosError) throw registrosError;
+      
+      // Combinar os dados de participantes com seus registros
+      const participantesComRegistros = participantesData.map(participante => {
+        const registro = registrosData?.find(r => r.employee_id === participante.employee.id);
+        return {
+          ...participante,
+          registro: registro || undefined
+        };
+      });
+      
+      setParticipantes(participantesComRegistros);
       
       // Buscar ações associadas
       const { data: acoesData, error: acoesError } = await supabase

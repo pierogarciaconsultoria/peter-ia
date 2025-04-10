@@ -31,6 +31,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NovaAcaoDialog } from "./NovaAcaoDialog";
 
+interface Registro {
+  id: string;
+  o_que_fiz: string;
+  o_que_vou_fazer: string;
+  dificuldades: string;
+}
+
 interface Participante {
   id: string;
   employee_id: string;
@@ -39,12 +46,7 @@ interface Participante {
     name: string;
     avatar_url?: string;
   };
-  registro?: {
-    id: string;
-    o_que_fiz: string;
-    o_que_vou_fazer: string;
-    dificuldades: string;
-  };
+  registro?: Registro;
 }
 
 interface Reuniao {
@@ -97,21 +99,37 @@ export function DetalheReuniaoDialog({
       
       setReuniao(reuniaoData);
       
-      // Buscar participantes e seus registros
+      // Buscar participantes 
       const { data: participantesData, error: participantesError } = await supabase
         .from('reunioes_participantes')
         .select(`
           id,
           employee_id,
           presente,
-          employee:employees(name, avatar_url),
-          registro:reunioes_registros(id, o_que_fiz, o_que_vou_fazer, dificuldades)
+          employee:employees(name, avatar_url)
         `)
         .eq('reuniao_id', reuniaoId);
       
       if (participantesError) throw participantesError;
       
-      setParticipantes(participantesData);
+      // Buscar registros separadamente
+      const { data: registrosData, error: registrosError } = await supabase
+        .from('reunioes_registros')
+        .select('*')
+        .eq('reuniao_id', reuniaoId);
+        
+      if (registrosError) throw registrosError;
+      
+      // Combinar os dados de participantes com seus registros
+      const participantesComRegistros = participantesData.map(participante => {
+        const registro = registrosData?.find(r => r.employee_id === participante.employee_id);
+        return {
+          ...participante,
+          registro: registro || undefined
+        };
+      });
+      
+      setParticipantes(participantesComRegistros);
     } catch (error) {
       console.error("Erro ao carregar detalhes da reunião:", error);
       toast.error("Não foi possível carregar os detalhes da reunião");

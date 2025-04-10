@@ -50,7 +50,7 @@ const Reunioes = () => {
         try {
           // Tentar selecionar uma linha da tabela para verificar se existe
           const { data, error } = await supabase
-            .from(table)
+            .from(table as any)
             .select('*')
             .limit(1);
           
