@@ -1,13 +1,13 @@
 
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { PostgrestFilterBuilder } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // Função para aplicar o filtro de empresa a qualquer consulta do Supabase
 export function applyEmpresaFilter<T>(
-  query: PostgrestFilterBuilder<any, any, T>, 
+  query: ReturnType<SupabaseClient["from"]>, 
   empresaId: string | null, 
   isMaster: boolean
-): PostgrestFilterBuilder<any, any, T> {
+): ReturnType<SupabaseClient["from"]> {
   // Se o usuário for master, não aplicamos o filtro (pode ver tudo)
   if (isMaster) {
     return query;
@@ -27,7 +27,7 @@ export function useEmpresaFilter() {
   const { empresaId, isMaster } = useCurrentUser();
   
   return {
-    applyFilter: <T>(query: PostgrestFilterBuilder<any, any, T>) => 
+    applyFilter: <T>(query: ReturnType<SupabaseClient["from"]>) => 
       applyEmpresaFilter(query, empresaId, isMaster),
     empresaId,
     isMaster

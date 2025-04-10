@@ -32,7 +32,9 @@ export function useDepartamentosFiltered() {
         throw error;
       }
       
-      setDepartamentos(data || []);
+      // Garantimos que o tipo dos dados corresponda a Departamento[]
+      const typedData = data as unknown as Departamento[];
+      setDepartamentos(typedData || []);
     } catch (error: any) {
       console.error("Erro ao buscar departamentos:", error);
       toast.error("Falha ao carregar departamentos");
