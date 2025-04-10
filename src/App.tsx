@@ -44,6 +44,7 @@ import SupplierEvaluation from "./pages/SupplierEvaluation";
 import EquipmentCalibration from "./pages/EquipmentCalibration";
 import RawMaterialInspection from "./pages/RawMaterialInspection";
 import TrainingControl from "./pages/TrainingControl";
+import Reunioes from "./pages/Reunioes";
 
 function App() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -157,6 +158,14 @@ function App() {
             element={
               <AuthGuard>
                 <HumanResources />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="/reunioes"
+            element={
+              <AuthGuard>
+                <Reunioes />
               </AuthGuard>
             }
           />

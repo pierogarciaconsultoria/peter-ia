@@ -25,6 +25,8 @@ import {
   ClipboardCheck,
   ClipboardList,
   Shield,
+  Video,
+  Users2
 } from "lucide-react";
 
 interface MenuItem {
@@ -68,6 +70,11 @@ export const menuItems = [
     title: "Gente e Gestão",
     href: "/human-resources",
     icon: Users,
+  },
+  {
+    title: "Reuniões",
+    href: "/reunioes",
+    icon: Users2,
   },
   {
     title: "Plano de Ação",

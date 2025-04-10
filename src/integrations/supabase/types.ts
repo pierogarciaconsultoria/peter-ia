@@ -2347,6 +2347,185 @@ export type Database = {
           },
         ]
       }
+      reunioes: {
+        Row: {
+          created_at: string
+          criado_por: string | null
+          data: string
+          descricao: string | null
+          id: string
+          local: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string | null
+          data: string
+          descricao?: string | null
+          id?: string
+          local?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string | null
+          data?: string
+          descricao?: string | null
+          id?: string
+          local?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes_acoes: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          prazo: string | null
+          responsavel_id: string | null
+          reuniao_id: string
+          status: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          prazo?: string | null
+          responsavel_id?: string | null
+          reuniao_id: string
+          status?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          prazo?: string | null
+          responsavel_id?: string | null
+          reuniao_id?: string
+          status?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_acoes_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_acoes_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes_participantes: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          presente: boolean | null
+          reuniao_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          presente?: boolean | null
+          reuniao_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          presente?: boolean | null
+          reuniao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_participantes_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_participantes_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes_registros: {
+        Row: {
+          created_at: string
+          dificuldades: string | null
+          employee_id: string
+          id: string
+          o_que_fiz: string | null
+          o_que_vou_fazer: string | null
+          reuniao_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dificuldades?: string | null
+          employee_id: string
+          id?: string
+          o_que_fiz?: string | null
+          o_que_vou_fazer?: string | null
+          reuniao_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dificuldades?: string | null
+          employee_id?: string
+          id?: string
+          o_que_fiz?: string | null
+          o_que_vou_fazer?: string | null
+          reuniao_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_registros_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_registros_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risks: {
         Row: {
           category: string
