@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, Plus, Trash2, User, Building2, CheckSquare, Shield } from "lucide-react";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
-import { executeQuery, verificarEmpresaSalva, SqlExecutionResult } from "@/utils/databaseHelpers";
+import { executeQuery, verificarEmpresaSalva } from "@/utils/databaseHelpers";
 
 interface Company {
   id: string;
@@ -88,12 +88,6 @@ interface Role {
   is_default?: boolean;
   created_at?: string;
   companies?: { name: string };
-}
-
-interface SqlExecutionResult {
-  success: boolean;
-  data?: any[];
-  error?: string;
 }
 
 const Admin = () => {
