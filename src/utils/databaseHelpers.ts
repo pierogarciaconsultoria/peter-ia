@@ -59,3 +59,54 @@ export interface SqlExecutionResult {
   data?: any[];
   error?: string;
 }
+
+/**
+ * Verifica se uma empresa foi salva corretamente no banco de dados
+ * @param companyId ID da empresa a ser verificada
+ * @returns Resultado da verificação
+ */
+export const verificarEmpresaSalva = async (companyId: string): Promise<{
+  success: boolean;
+  company?: any;
+  error?: string;
+}> => {
+  try {
+    if (!companyId) {
+      return {
+        success: false,
+        error: "ID da empresa não fornecido"
+      };
+    }
+
+    // Consulta SQL para verificar se a empresa existe
+    const result = await executeQuery(`
+      SELECT * FROM public.companies 
+      WHERE id = '${companyId}'
+    `);
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || "Erro ao verificar empresa"
+      };
+    }
+
+    if (!result.data || result.data.length === 0) {
+      return {
+        success: false,
+        error: "Empresa não encontrada no banco de dados"
+      };
+    }
+
+    return {
+      success: true,
+      company: result.data[0]
+    };
+  } catch (error: any) {
+    console.error("Erro ao verificar empresa:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+};

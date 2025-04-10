@@ -357,9 +357,18 @@ const Admin = () => {
   const handleCreateCompany = async () => {
     setLoading(true);
     try {
+      // Validação básica
+      if (!newCompanyName.trim()) {
+        throw new Error("O nome da empresa é obrigatório");
+      }
+      
+      let companySlug = newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-');
+      
       if (!isSuperAdmin && !isEditorSuperAdmin) {
         throw new Error("Apenas administradores do sistema podem criar empresas");
       }
+      
+      let novaEmpresaId: string | null = null;
       
       // Para Lovable Editor, use executeQuery para evitar problemas com RLS
       if (isEditorSuperAdmin) {
@@ -367,11 +376,13 @@ const Admin = () => {
           INSERT INTO public.companies (
             name, 
             slug, 
-            active
+            active,
+            created_at
           ) VALUES (
             '${newCompanyName}',
-            '${newCompanySlug || newCompanyName.toLowerCase().replace(/\\s+/g, '-')}',
-            true
+            '${companySlug}',
+            true,
+            NOW()
           ) RETURNING *;
         `;
         
@@ -381,43 +392,87 @@ const Admin = () => {
           throw new Error(result.error || "Erro ao criar empresa");
         }
         
+        if (result.data && result.data.length > 0) {
+          novaEmpresaId = result.data[0].id;
+          
+          // Verificar se a empresa foi realmente salva
+          const verificacao = await verificarEmpresaSalva(novaEmpresaId);
+          if (!verificacao.success) {
+            console.error("Verificação de empresa falhou:", verificacao.error);
+            throw new Error("A empresa foi criada mas não pôde ser verificada no banco de dados");
+          } else {
+            console.log("Empresa verificada com sucesso:", verificacao.company);
+          }
+        } else {
+          throw new Error("Empresa criada mas nenhum ID retornado");
+        }
+        
         toast.success("Empresa criada com sucesso");
         setCompanyDialogOpen(false);
-        fetchCompanies();
+        await fetchCompanies();
         
         setNewCompanyName("");
         setNewCompanySlug("");
       } else {
-        const { data, error } = await supabase
-          .from('companies')
-          .insert({
-            name: newCompanyName,
-            slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\\s+/g, '-'),
-            active: true
-          })
-          .select()
-          .single();
+        try {
+          const { data, error } = await supabase
+            .from('companies')
+            .insert({
+              name: newCompanyName,
+              slug: companySlug,
+              active: true,
+              created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+            
+          if (error) {
+            console.error("Erro no Supabase ao criar empresa:", error);
+            
+            // Extrair mensagem de erro mais útil
+            let errorMessage = "Erro ao criar empresa";
+            if (error.message) {
+              errorMessage = error.message;
+            } else if (error.details) {
+              errorMessage = error.details;
+            } else if (typeof error === 'object') {
+              errorMessage = JSON.stringify(error);
+            }
+            
+            throw new Error(errorMessage);
+          }
           
-        if (error) throw error;
-        
-        toast.success("Empresa criada com sucesso");
-        setCompanyDialogOpen(false);
-        fetchCompanies();
-        
-        setNewCompanyName("");
-        setNewCompanySlug("");
+          if (data) {
+            novaEmpresaId = data.id;
+            console.log("Nova empresa criada:", data);
+            toast.success("Empresa criada com sucesso");
+          } else {
+            throw new Error("Empresa criada mas nenhum dado retornado");
+          }
+          
+          setCompanyDialogOpen(false);
+          await fetchCompanies();
+          
+          setNewCompanyName("");
+          setNewCompanySlug("");
+        } catch (supabaseError: any) {
+          console.error("Erro completo do Supabase:", supabaseError);
+          throw supabaseError;
+        }
       }
     } catch (error: any) {
-      console.error("Error creating company:", error);
+      console.error("Erro detalhado ao criar empresa:", error);
       
-      // Improved error handling to avoid [object Object] message
+      // Melhor tratamento de erro para exibir mensagem mais útil
       let errorMessage = "Erro ao criar empresa";
       
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'object' && error !== null) {
-        // For Supabase errors that might be nested
-        errorMessage = error.message || (error.error?.message) || JSON.stringify(error);
+        // Para erros que possam ser objetos
+        errorMessage = error.message || error.details || JSON.stringify(error);
+      } else if (typeof error === 'string') {
+        errorMessage = error;
       }
       
       toast.error(errorMessage);
