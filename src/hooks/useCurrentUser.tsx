@@ -32,6 +32,7 @@ export function useCurrentUser() {
         setLoading(true);
         
         // Buscar o perfil do usuário da tabela 'usuarios'
+        // Usamos o método genérico .from() para evitar problemas de tipagem
         const { data, error } = await supabase
           .from('usuarios')
           .select('*')
@@ -44,8 +45,20 @@ export function useCurrentUser() {
           throw error;
         }
 
-        setCurrentUser(data);
-        console.log("Perfil do usuário carregado:", data);
+        // Garantimos que o tipo do data corresponda ao UserProfile
+        const userProfile: UserProfile = {
+          id: data.id,
+          nome: data.nome,
+          email: data.email,
+          empresa_id: data.empresa_id,
+          is_master: data.is_master,
+          is_admin: data.is_admin,
+          created_at: data.created_at,
+          updated_at: data.updated_at
+        };
+        
+        setCurrentUser(userProfile);
+        console.log("Perfil do usuário carregado:", userProfile);
       } catch (err: any) {
         console.error("Erro inesperado:", err);
         setError(err);
@@ -72,17 +85,32 @@ export function useCurrentUser() {
         .from('usuarios')
         .update(updates)
         .eq('id', user.id)
-        .select()
-        .single();
+        .select();
       
       if (error) {
         toast.error(`Erro ao atualizar perfil: ${error.message}`);
         return { success: false, error };
       }
       
-      setCurrentUser(data);
-      toast.success("Perfil atualizado com sucesso");
-      return { success: true, data };
+      if (data && data.length > 0) {
+        // Garantimos que o tipo do data[0] corresponda ao UserProfile
+        const updatedUser: UserProfile = {
+          id: data[0].id,
+          nome: data[0].nome,
+          email: data[0].email,
+          empresa_id: data[0].empresa_id,
+          is_master: data[0].is_master,
+          is_admin: data[0].is_admin,
+          created_at: data[0].created_at,
+          updated_at: data[0].updated_at
+        };
+        
+        setCurrentUser(updatedUser);
+        toast.success("Perfil atualizado com sucesso");
+        return { success: true, data: updatedUser };
+      }
+      
+      return { success: true, data: null };
     } catch (err: any) {
       toast.error(`Falha ao atualizar perfil: ${err.message}`);
       return { success: false, error: err };
