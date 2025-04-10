@@ -125,11 +125,14 @@ export function ExportarRelatorioReuniao({ reuniaoId }: ExportarRelatorioReuniao
     
     // Combinar os dados de participantes com seus registros
     const participantes = participantesData.map(participante => {
-      // Obtenha o employee_id do employee para fazer a correspondência com os registros
-      // Como não temos employee_id diretamente, usamos o nome do employee para comparação
+      // Como não temos um campo de employee_name, vamos fazer a correspondência baseada nos IDs
+      const employee = participante.employee as { name: string };
+      // Tentamos encontrar um registro que corresponda ao participante
       const registro = registrosData?.find(r => {
-        const employee = participante.employee as { name: string };
-        return r.employee_id && employee && r.employee_name === employee.name;
+        // Aqui precisamos encontrar por alguma lógica que faça sentido, como o ID do employee
+        // Como não temos um campo direto, podemos tentar usar outros meios
+        return employee && r.employee_id && 
+          Object.values(participante).some(val => val === r.employee_id);
       });
       
       return {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +16,13 @@ import {
 } from "@/components/ui/tabs";
 import {
   ScrollArea,
+} from "@/components/ui/scroll-area";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Badge,
-} from "@/components/ui";
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, Clock, MapPin, Users, FileText, Download, CheckCircle2, XCircle } from "lucide-react";
@@ -123,10 +124,11 @@ export function VisualizarAta({
       if (registrosError) throw registrosError;
       
       const participantesComRegistros = participantesData.map(participante => {
-        // Obtenha o employee_id a partir do nome do employee para fazer a correspondência
         const employee = participante.employee as { name: string; avatar_url?: string };
         const registro = registrosData?.find(r => 
-          r.employee_name === employee.name
+          r.employee_id && employee && r.employee_id === registrosData.find(reg => 
+            reg.employee_id && employee.name === Object.values(employees || {}).find(emp => emp.id === reg.employee_id)?.name
+          )?.employee_id
         );
         
         return {
