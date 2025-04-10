@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface PermissionGuardProps {
   children: React.ReactNode;
@@ -15,13 +16,20 @@ export const PermissionGuard = ({
   requerPermissao = 'visualizar',
   fallback = null
 }: PermissionGuardProps) => {
+  const { isMaster } = useCurrentUser();
   const { temPermissao, isLoading } = useUserPermissions();
   
+  // Se estiver carregando, não mostra nada ou pode mostrar um loader
   if (isLoading) {
-    // Opcional: mostrar indicador de carregamento
     return null;
   }
   
+  // Usuários master têm acesso irrestrito a todos os módulos
+  if (isMaster) {
+    return <>{children}</>;
+  }
+  
+  // Para usuários não-master, verifica as permissões específicas
   if (!temPermissao(modulo, requerPermissao)) {
     return <>{fallback}</>;
   }
