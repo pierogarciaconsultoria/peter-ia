@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileText, Loader2 } from "lucide-react";
@@ -124,9 +125,13 @@ export function ExportarRelatorioReuniao({ reuniaoId }: ExportarRelatorioReuniao
     
     // Combinar os dados de participantes com seus registros
     const participantes = participantesData.map(participante => {
-      // Modificar esta linha - agora temos que buscar o registro por employee name
-      // já que não temos o id disponível na resposta da consulta
-      const registro = registrosData?.find(r => r.employee_id === participante.employee_id);
+      // Obtenha o employee_id do employee para fazer a correspondência com os registros
+      // Como não temos employee_id diretamente, usamos o nome do employee para comparação
+      const registro = registrosData?.find(r => {
+        const employee = participante.employee as { name: string };
+        return r.employee_id && employee && r.employee_name === employee.name;
+      });
+      
       return {
         ...participante,
         registro: registro || undefined

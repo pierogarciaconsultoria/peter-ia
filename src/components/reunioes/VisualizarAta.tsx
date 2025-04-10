@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,10 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
+} from "@/components/ui/tabs";
+import {
   ScrollArea,
   Avatar,
   AvatarFallback,
@@ -118,7 +123,12 @@ export function VisualizarAta({
       if (registrosError) throw registrosError;
       
       const participantesComRegistros = participantesData.map(participante => {
-        const registro = registrosData?.find(r => r.employee_id === participante.employee_id);
+        // Obtenha o employee_id a partir do nome do employee para fazer a correspondência
+        const employee = participante.employee as { name: string; avatar_url?: string };
+        const registro = registrosData?.find(r => 
+          r.employee_name === employee.name
+        );
+        
         return {
           ...participante,
           registro: registro || undefined
