@@ -181,6 +181,56 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_exempt: boolean | null
+          justification: string | null
+          meeting_id: string
+          member_id: string
+          name: string
+          spouse_name: string | null
+          spouse_present: boolean | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_exempt?: boolean | null
+          justification?: string | null
+          meeting_id: string
+          member_id: string
+          name: string
+          spouse_name?: string | null
+          spouse_present?: boolean | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_exempt?: boolean | null
+          justification?: string | null
+          meeting_id?: string
+          member_id?: string
+          name?: string
+          spouse_name?: string | null
+          spouse_present?: boolean | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audits: {
         Row: {
           area: string
@@ -1138,6 +1188,38 @@ export type Database = {
         }
         Relationships: []
       }
+      external_attendees: {
+        Row: {
+          created_at: string | null
+          id: string
+          meeting_id: string
+          name: string
+          relationship: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meeting_id: string
+          name: string
+          relationship?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meeting_id?: string
+          name?: string
+          relationship?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_attendees_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_audits: {
         Row: {
           audit_date: string
@@ -1450,6 +1532,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      justifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          meeting_id: string
+          member_id: string
+          member_name: string
+          reason: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meeting_id: string
+          member_id: string
+          member_name: string
+          reason: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meeting_id?: string
+          member_id?: string
+          member_name?: string
+          reason?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "justifications_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          attendance_count: number | null
+          attendance_percentage: number | null
+          confirmation_token: string | null
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          title: string
+          total_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          attendance_count?: number | null
+          attendance_percentage?: number | null
+          confirmation_token?: string | null
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          title: string
+          total_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          attendance_count?: number | null
+          attendance_percentage?: number | null
+          confirmation_token?: string | null
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          title?: string
+          total_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       modules: {
         Row: {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,26 +7,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  ScrollArea,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+} from "@/components/ui";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Users,
-  FileText,
-  Download,
-  CheckCircle2,
-  XCircle
-} from "lucide-react";
+import { Calendar, Clock, MapPin, Users, FileText, Download, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ExportarRelatorioReuniao } from "./ExportarRelatorioReuniao";
 
 interface Registro {
@@ -94,7 +89,6 @@ export function VisualizarAta({
     try {
       setLoading(true);
       
-      // Buscar detalhes da reunião
       const { data: reuniaoData, error: reuniaoError } = await supabase
         .from('reunioes')
         .select('*')
@@ -105,7 +99,6 @@ export function VisualizarAta({
       
       setReuniao(reuniaoData);
       
-      // Buscar participantes
       const { data: participantesData, error: participantesError } = await supabase
         .from('reunioes_participantes')
         .select(`
@@ -117,17 +110,15 @@ export function VisualizarAta({
       
       if (participantesError) throw participantesError;
       
-      // Buscar registros separadamente
       const { data: registrosData, error: registrosError } = await supabase
         .from('reunioes_registros')
         .select('*')
         .eq('reuniao_id', reuniaoId);
-        
+      
       if (registrosError) throw registrosError;
       
-      // Combinar os dados de participantes com seus registros
       const participantesComRegistros = participantesData.map(participante => {
-        const registro = registrosData?.find(r => r.employee_id === participante.employee.id);
+        const registro = registrosData?.find(r => r.employee_id === participante.employee_id);
         return {
           ...participante,
           registro: registro || undefined
@@ -136,7 +127,6 @@ export function VisualizarAta({
       
       setParticipantes(participantesComRegistros);
       
-      // Buscar ações associadas
       const { data: acoesData, error: acoesError } = await supabase
         .from('reunioes_acoes')
         .select(`
