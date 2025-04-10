@@ -1,52 +1,18 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Trash2, User, Building2, CheckSquare, Shield } from "lucide-react";
+import CompanyManagement from "@/components/admin/CompanyManagement";
+import UserManagement from "@/components/admin/UserManagement";
+import RoleManagement from "@/components/admin/RoleManagement";
+import DeleteConfirmDialog from "@/components/admin/DeleteConfirmDialog";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
-import { executeQuery, verificarEmpresaSalva } from "@/utils/databaseHelpers";
+import { executeQuery } from "@/utils/databaseHelpers";
 
 interface Company {
   id: string;
@@ -96,26 +62,8 @@ const Admin = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company' | 'role'} | null>(null);
-  
-  const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserFirstName, setNewUserFirstName] = useState("");
-  const [newUserLastName, setNewUserLastName] = useState("");
-  const [newUserCompany, setNewUserCompany] = useState("");
-  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
-  
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanySlug, setNewCompanySlug] = useState("");
-
-  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
-  const [newRoleName, setNewRoleName] = useState("");
-  const [newRoleCompany, setNewRoleCompany] = useState("");
-  const [newRoleIsAdmin, setNewRoleIsAdmin] = useState(false);
-  const [newRoleIsDefault, setNewRoleIsDefault] = useState(false);
   
   const isEditorSuperAdmin = isSuperAdminInLovable();
 
@@ -286,242 +234,6 @@ const Admin = () => {
     }
   };
 
-  const handleCreateUser = async () => {
-    setLoading(true);
-    try {
-      const companyId = isSuperAdmin ? newUserCompany : (userCompany?.id || null);
-      
-      if (!companyId) {
-        throw new Error("É necessário selecionar uma empresa");
-      }
-
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newUserEmail,
-        password: newUserPassword,
-        email_confirm: true,
-        user_metadata: {
-          first_name: newUserFirstName,
-          last_name: newUserLastName
-        }
-      });
-      
-      if (authError) throw authError;
-      
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          company_id: companyId,
-          is_company_admin: newUserIsAdmin,
-          is_super_admin: false,
-          first_name: newUserFirstName,
-          last_name: newUserLastName
-        })
-        .eq('id', authData.user.id);
-        
-      if (profileError) throw profileError;
-      
-      toast.success("Usuário criado com sucesso");
-      setUserDialogOpen(false);
-      fetchUsers();
-      
-      setNewUserEmail("");
-      setNewUserPassword("");
-      setNewUserFirstName("");
-      setNewUserLastName("");
-      setNewUserCompany("");
-      setNewUserIsAdmin(false);
-    } catch (error: any) {
-      console.error("Error creating user:", error);
-      toast.error(error.message || "Erro ao criar usuário");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateCompany = async () => {
-    setLoading(true);
-    try {
-      if (!newCompanyName.trim()) {
-        throw new Error("O nome da empresa é obrigatório");
-      }
-      
-      let companySlug = newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-');
-      
-      if (!isSuperAdmin && !isEditorSuperAdmin) {
-        throw new Error("Apenas administradores do sistema podem criar empresas");
-      }
-      
-      let novaEmpresaId: string | null = null;
-      
-      if (isEditorSuperAdmin) {
-        const sqlQuery = `
-          INSERT INTO public.companies (
-            name, 
-            slug, 
-            active,
-            created_at
-          ) VALUES (
-            '${newCompanyName}',
-            '${companySlug}',
-            true,
-            NOW()
-          ) RETURNING *;
-        `;
-        
-        const result = await executeQuery(sqlQuery);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Erro ao criar empresa");
-        }
-        
-        if (result.data && result.data.length > 0) {
-          novaEmpresaId = result.data[0].id;
-          
-          const verificacao = await verificarEmpresaSalva(novaEmpresaId);
-          if (!verificacao.success) {
-            console.error("Verificação de empresa falhou:", verificacao.error);
-            throw new Error("A empresa foi criada mas não pôde ser verificada no banco de dados");
-          } else {
-            console.log("Empresa verificada com sucesso:", verificacao.company);
-          }
-        } else {
-          throw new Error("Empresa criada mas nenhum ID retornado");
-        }
-        
-        toast.success("Empresa criada com sucesso");
-        setCompanyDialogOpen(false);
-        await fetchCompanies();
-        
-        setNewCompanyName("");
-        setNewCompanySlug("");
-      } else {
-        try {
-          const { data, error } = await supabase
-            .from('companies')
-            .insert({
-              name: newCompanyName,
-              slug: companySlug,
-              active: true
-            })
-            .select();
-            
-          if (error) {
-            console.error("Erro no Supabase ao criar empresa:", error);
-            
-            let errorMessage = "Erro ao criar empresa";
-            if (error.message) {
-              errorMessage = error.message;
-            } else if (error.details) {
-              errorMessage = error.details;
-            } else if (typeof error === 'object') {
-              errorMessage = JSON.stringify(error);
-            }
-            
-            throw new Error(errorMessage);
-          }
-          
-          if (data && data.length > 0) {
-            novaEmpresaId = data[0].id;
-            console.log("Nova empresa criada:", data[0]);
-            toast.success("Empresa criada com sucesso");
-          } else {
-            console.error("Empresa criada mas nenhum dado retornado");
-            throw new Error("Empresa criada mas nenhum ID retornado");
-          }
-          
-          setCompanyDialogOpen(false);
-          await fetchCompanies();
-          
-          setNewCompanyName("");
-          setNewCompanySlug("");
-        } catch (supabaseError: any) {
-          console.error("Erro completo do Supabase:", supabaseError);
-          throw supabaseError;
-        }
-      }
-    } catch (error: any) {
-      console.error("Erro detalhado ao criar empresa:", error);
-      
-      let errorMessage = "Erro ao criar empresa";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        errorMessage = error.message || error.details || JSON.stringify(error);
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-      
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateRole = async () => {
-    setLoading(true);
-    try {
-      const companyId = isSuperAdmin ? newRoleCompany : (userCompany?.id || null);
-      
-      if (!companyId) {
-        throw new Error("É necessário selecionar uma empresa");
-      }
-      
-      if (isEditorSuperAdmin) {
-        const sqlQuery = `
-          INSERT INTO public.roles (
-            name, 
-            company_id, 
-            is_default
-          ) VALUES (
-            '${newRoleName}',
-            '${companyId}',
-            ${newRoleIsDefault}
-          ) RETURNING *;
-        `;
-        
-        const result = await executeQuery(sqlQuery);
-        
-        if (!result.success) throw new Error(result.error);
-        
-        toast.success("Papel criado com sucesso");
-        setRoleDialogOpen(false);
-        fetchRoles();
-        
-        setNewRoleName("");
-        setNewRoleCompany("");
-        setNewRoleIsAdmin(false);
-        setNewRoleIsDefault(false);
-      } else {
-        const { data, error } = await supabase
-          .from('roles')
-          .insert({
-            name: newRoleName,
-            company_id: companyId,
-            is_default: newRoleIsDefault
-          })
-          .select()
-          .single();
-          
-        if (error) throw error;
-        
-        toast.success("Papel criado com sucesso");
-        setRoleDialogOpen(false);
-        fetchRoles();
-        
-        setNewRoleName("");
-        setNewRoleCompany("");
-        setNewRoleIsAdmin(false);
-        setNewRoleIsDefault(false);
-      }
-    } catch (error: any) {
-      console.error("Error creating role:", error);
-      toast.error(error.message || "Erro ao criar papel");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
     
@@ -631,491 +343,51 @@ const Admin = () => {
               
               {isSuperAdmin && (
                 <TabsContent value="companies" className="space-y-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Empresas</CardTitle>
-                        <CardDescription>Gerenciar empresas do sistema</CardDescription>
-                      </div>
-                      <Dialog open={companyDialogOpen} onOpenChange={setCompanyDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Nova Empresa
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Criar Nova Empresa</DialogTitle>
-                            <DialogDescription>
-                              Preencha os dados para criar uma nova empresa no sistema
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="companyName">Nome da Empresa</Label>
-                              <Input
-                                id="companyName"
-                                placeholder="Nome da Empresa"
-                                value={newCompanyName}
-                                onChange={(e) => {
-                                  setNewCompanyName(e.target.value);
-                                  setNewCompanySlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-                                }}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="companySlug">Identificador Único (Slug)</Label>
-                              <Input
-                                id="companySlug"
-                                placeholder="identificador-unico"
-                                value={newCompanySlug}
-                                onChange={(e) => setNewCompanySlug(e.target.value)}
-                              />
-                              <p className="text-sm text-muted-foreground">
-                                O identificador único será usado para URLs e identificação da empresa.
-                              </p>
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>Cancelar</Button>
-                            <Button onClick={handleCreateCompany} disabled={loading}>
-                              {loading ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Processando...
-                                </>
-                              ) : 'Criar Empresa'}
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </CardHeader>
-                    <CardContent>
-                      {loading ? (
-                        <div className="flex justify-center items-center h-40">
-                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                          <span className="ml-2">Carregando...</span>
-                        </div>
-                      ) : (
-                        <div className="rounded-md border">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Nome</TableHead>
-                                <TableHead>Identificador</TableHead>
-                                <TableHead>Módulos Ativos</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="w-[100px]">Ações</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {companies.length === 0 ? (
-                                <TableRow>
-                                  <TableCell colSpan={5} className="h-24 text-center">
-                                    Nenhuma empresa encontrada.
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                companies.map((company) => (
-                                  <TableRow key={company.id}>
-                                    <TableCell>
-                                      <div className="flex items-center">
-                                        <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
-                                        {company.name}
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>{company.slug}</TableCell>
-                                    <TableCell>
-                                      {(company.active_modules || []).length > 0 
-                                        ? company.active_modules.join(', ') 
-                                        : 'Todos'}
-                                    </TableCell>
-                                    <TableCell>
-                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                        company.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                      }`}>
-                                        {company.active ? 'Ativa' : 'Inativa'}
-                                      </span>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => {
-                                          setItemToDelete({ id: company.id, type: 'company' });
-                                          setDeleteDialogOpen(true);
-                                        }}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </TableCell>
-                                  </TableRow>
-                                ))
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <CompanyManagement
+                    companies={companies}
+                    loading={loading}
+                    fetchCompanies={fetchCompanies}
+                    setItemToDelete={setItemToDelete}
+                    setDeleteDialogOpen={setDeleteDialogOpen}
+                    isSuperAdmin={isSuperAdmin}
+                  />
                 </TabsContent>
               )}
               
               <TabsContent value="users" className="space-y-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Usuários</CardTitle>
-                      <CardDescription>
-                        {isSuperAdmin 
-                          ? "Gerenciar todos os usuários do sistema" 
-                          : "Gerenciar usuários da sua empresa"}
-                      </CardDescription>
-                    </div>
-                    <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Novo Usuário
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Criar Novo Usuário</DialogTitle>
-                          <DialogDescription>
-                            Preencha os dados para criar um novo usuário no sistema
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="firstName">Nome</Label>
-                              <Input
-                                id="firstName"
-                                placeholder="Nome"
-                                value={newUserFirstName}
-                                onChange={(e) => setNewUserFirstName(e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="lastName">Sobrenome</Label>
-                              <Input
-                                id="lastName"
-                                placeholder="Sobrenome"
-                                value={newUserLastName}
-                                onChange={(e) => setNewUserLastName(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                              id="email"
-                              placeholder="usuario@empresa.com"
-                              type="email"
-                              value={newUserEmail}
-                              onChange={(e) => setNewUserEmail(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="password">Senha</Label>
-                            <Input
-                              id="password"
-                              placeholder="Senha"
-                              type="password"
-                              value={newUserPassword}
-                              onChange={(e) => setNewUserPassword(e.target.value)}
-                            />
-                          </div>
-                          {isSuperAdmin && (
-                            <div className="space-y-2">
-                              <Label htmlFor="company">Empresa</Label>
-                              <Select value={newUserCompany} onValueChange={setNewUserCompany}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione uma empresa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {companies.map((company) => (
-                                    <SelectItem key={company.id} value={company.id}>
-                                      {company.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                          <div className="space-y-2">
-                            <Label htmlFor="isAdmin" className="flex items-center gap-2">
-                              <input
-                                id="isAdmin"
-                                type="checkbox"
-                                checked={newUserIsAdmin}
-                                onChange={(e) => setNewUserIsAdmin(e.target.checked)}
-                                className="h-4 w-4"
-                              />
-                              Administrador da Empresa
-                            </Label>
-                            <p className="text-xs text-muted-foreground ml-6">
-                              Administradores de empresa podem gerenciar usuários e configurações da empresa.
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setUserDialogOpen(false)}>Cancelar</Button>
-                          <Button onClick={handleCreateUser} disabled={loading}>
-                            {loading ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processando...
-                              </>
-                            ) : 'Criar Usuário'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>Empresa</TableHead>
-                              <TableHead>Função</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead className="w-[100px]">Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {users.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                  Nenhum usuário encontrado.
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              users.map((user) => (
-                                <TableRow key={user.id}>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <User className="h-4 w-4 text-muted-foreground" />
-                                      {user.first_name} {user.last_name}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>{user.email}</TableCell>
-                                  <TableCell>{user.company_name || '-'}</TableCell>
-                                  <TableCell>
-                                    {user.is_super_admin 
-                                      ? 'Super Admin' 
-                                      : user.is_company_admin 
-                                        ? 'Admin da Empresa' 
-                                        : 'Usuário'}
-                                  </TableCell>
-                                  <TableCell>
-                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                      user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
-                                      {user.is_active ? 'Ativo' : 'Inativo'}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setItemToDelete({ id: user.id, type: 'user' });
-                                        setDeleteDialogOpen(true);
-                                      }}
-                                      disabled={user.is_super_admin && !isSuperAdmin}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <UserManagement
+                  users={users}
+                  companies={companies}
+                  loading={loading}
+                  fetchUsers={fetchUsers}
+                  setItemToDelete={setItemToDelete}
+                  setDeleteDialogOpen={setDeleteDialogOpen}
+                  isSuperAdmin={isSuperAdmin}
+                  userCompany={userCompany}
+                />
               </TabsContent>
               
               <TabsContent value="roles" className="space-y-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Papéis</CardTitle>
-                      <CardDescription>
-                        {isSuperAdmin 
-                          ? "Gerenciar papéis do sistema" 
-                          : "Gerenciar papéis da sua empresa"}
-                      </CardDescription>
-                    </div>
-                    <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Novo Papel
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Criar Novo Papel</DialogTitle>
-                          <DialogDescription>
-                            Preencha os dados para criar um novo papel no sistema
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="roleName">Nome do Papel</Label>
-                            <Input
-                              id="roleName"
-                              placeholder="Nome do Papel"
-                              value={newRoleName}
-                              onChange={(e) => setNewRoleName(e.target.value)}
-                            />
-                          </div>
-                          {isSuperAdmin && (
-                            <div className="space-y-2">
-                              <Label htmlFor="roleCompany">Empresa</Label>
-                              <Select value={newRoleCompany} onValueChange={setNewRoleCompany}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione uma empresa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {companies.map((company) => (
-                                    <SelectItem key={company.id} value={company.id}>
-                                      {company.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                          <div className="space-y-2">
-                            <Label htmlFor="isDefault" className="flex items-center gap-2">
-                              <input
-                                id="isDefault"
-                                type="checkbox"
-                                checked={newRoleIsDefault}
-                                onChange={(e) => setNewRoleIsDefault(e.target.checked)}
-                                className="h-4 w-4"
-                              />
-                              Papel Padrão
-                            </Label>
-                            <p className="text-xs text-muted-foreground ml-6">
-                              O papel padrão é atribuído a novos usuários automaticamente.
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
-                          <Button onClick={handleCreateRole} disabled={loading}>
-                            {loading ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processando...
-                              </>
-                            ) : 'Criar Papel'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Empresa</TableHead>
-                              <TableHead>Padrão</TableHead>
-                              <TableHead className="w-[100px]">Ações</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {roles.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
-                                  Nenhum papel encontrado.
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              roles.map((role) => (
-                                <TableRow key={role.id}>
-                                  <TableCell>
-                                    <div className="flex items-center gap-2">
-                                      <Shield className="h-4 w-4 text-muted-foreground" />
-                                      {role.name}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>{role.company_name || '-'}</TableCell>
-                                  <TableCell>
-                                    {role.is_default ? (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        <CheckSquare className="h-3 w-3 mr-1" />
-                                        Padrão
-                                      </span>
-                                    ) : '-'}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setItemToDelete({ id: role.id, type: 'role' });
-                                        setDeleteDialogOpen(true);
-                                      }}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <RoleManagement
+                  roles={roles}
+                  companies={companies}
+                  loading={loading}
+                  fetchRoles={fetchRoles}
+                  setItemToDelete={setItemToDelete}
+                  setDeleteDialogOpen={setDeleteDialogOpen}
+                  isSuperAdmin={isSuperAdmin}
+                  userCompany={userCompany}
+                />
               </TabsContent>
             </Tabs>
             
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmação de exclusão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {itemToDelete?.type === 'user' && "Esta ação não pode ser desfeita. O usuário será removido permanentemente do sistema."}
-                    {itemToDelete?.type === 'company' && "Esta ação não pode ser desfeita. A empresa e todos os seus dados serão removidos permanentemente."}
-                    {itemToDelete?.type === 'role' && "Esta ação não pode ser desfeita. O papel será removido permanentemente do sistema."}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Excluir
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DeleteConfirmDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+              itemToDelete={itemToDelete}
+              onDelete={handleDeleteItem}
+              loading={loading}
+            />
           </div>
         </main>
       </div>
