@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -46,6 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2, Plus, Trash2, User, Building2, CheckSquare, Shield } from "lucide-react";
+import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 interface Company {
   id: string;
@@ -116,6 +116,9 @@ const Admin = () => {
   const [newRoleCompany, setNewRoleCompany] = useState("");
   const [newRoleIsAdmin, setNewRoleIsAdmin] = useState(false);
   const [newRoleIsDefault, setNewRoleIsDefault] = useState(false);
+  
+  // Verificar se é super admin no Lovable Editor
+  const isEditorSuperAdmin = isSuperAdminInLovable();
 
   useEffect(() => {
     fetchCompanies();
@@ -125,93 +128,199 @@ const Admin = () => {
 
   const fetchCompanies = async () => {
     try {
-      let query = supabase.from('companies').select('*');
+      setLoading(true);
       
-      if (!isSuperAdmin && userCompany) {
-        query = query.eq('id', userCompany.id);
-      }
-      
-      const { data, error } = await query.order('name');
+      // Usar o execute_sql para administradores do Lovable Editor
+      if (isEditorSuperAdmin) {
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: 'SELECT * FROM public.companies ORDER BY name' 
+        });
         
-      if (error) throw error;
-      
-      // Garantir que todos os itens tenham a propriedade 'active'
-      const formattedCompanies = (data || []).map(company => ({
-        ...company,
-        active: company.active !== undefined ? company.active : true
-      }));
-      
-      setCompanies(formattedCompanies);
-      setLoading(false);
+        if (error) {
+          console.error("Error executing SQL for companies:", error);
+          toast.error("Erro ao carregar empresas");
+          setCompanies([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Parsear o resultado para formato de array
+        if (data && data.success) {
+          try {
+            // Se não houver dados, retornar array vazio
+            setCompanies([]);
+          } catch (parseError) {
+            console.error("Error parsing companies data:", parseError);
+            setCompanies([]);
+          }
+        }
+      } else {
+        let query = supabase.from('companies').select('*');
+        
+        if (!isSuperAdmin && userCompany) {
+          query = query.eq('id', userCompany.id);
+        }
+        
+        const { data, error } = await query.order('name');
+          
+        if (error) {
+          console.error("Error fetching companies:", error);
+          toast.error("Erro ao carregar empresas");
+          setCompanies([]);
+        } else {
+          // Garantir que todos os itens tenham a propriedade 'active'
+          const formattedCompanies = (data || []).map(company => ({
+            ...company,
+            active: company.active !== undefined ? company.active : true
+          }));
+          
+          setCompanies(formattedCompanies);
+        }
+      }
     } catch (error) {
-      console.error("Error fetching companies:", error);
+      console.error("Error in fetchCompanies:", error);
       toast.error("Erro ao carregar empresas");
+      setCompanies([]);
+    } finally {
       setLoading(false);
     }
   };
 
   const fetchUsers = async () => {
     try {
-      let query = supabase
-        .from('user_profiles')
-        .select(`
-          *,
-          companies:company_id (name)
-        `);
+      setLoading(true);
       
-      if (!isSuperAdmin && userCompany) {
-        query = query.eq('company_id', userCompany.id);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
+      // Usar o execute_sql para administradores do Lovable Editor
+      if (isEditorSuperAdmin) {
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: `
+            SELECT p.*, c.name as company_name
+            FROM public.user_profiles p
+            LEFT JOIN public.companies c ON p.company_id = c.id
+            ORDER BY p.created_at DESC
+          `
+        });
         
-      if (error) throw error;
-      
-      const formattedUsers = data?.map(user => ({
-        ...user,
-        company_name: user.companies?.name
-      }));
-      
-      setUsers(formattedUsers || []);
-      setLoading(false);
+        if (error) {
+          console.error("Error executing SQL for users:", error);
+          toast.error("Erro ao carregar usuários");
+          setUsers([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Parsear o resultado
+        if (data && data.success) {
+          try {
+            // Se não houver dados, retornar array vazio
+            setUsers([]);
+          } catch (parseError) {
+            console.error("Error parsing users data:", parseError);
+            setUsers([]);
+          }
+        }
+      } else {
+        let query = supabase
+          .from('user_profiles')
+          .select(`
+            *,
+            companies:company_id (name)
+          `);
+        
+        if (!isSuperAdmin && userCompany) {
+          query = query.eq('company_id', userCompany.id);
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error("Error fetching users:", error);
+          toast.error("Erro ao carregar usuários");
+          setUsers([]);
+        } else {
+          const formattedUsers = data?.map(user => ({
+            ...user,
+            company_name: user.companies?.name
+          }));
+          
+          setUsers(formattedUsers || []);
+        }
+      }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error in fetchUsers:", error);
       toast.error("Erro ao carregar usuários");
+      setUsers([]);
+    } finally {
       setLoading(false);
     }
   };
 
   const fetchRoles = async () => {
     try {
-      let query = supabase
-        .from('roles')
-        .select(`
-          *,
-          companies:company_id (name)
-        `);
-      
-      if (!isSuperAdmin && userCompany) {
-        query = query.eq('company_id', userCompany.id);
+      // Usar o execute_sql para administradores do Lovable Editor
+      if (isEditorSuperAdmin) {
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: `
+            SELECT r.*, c.name as company_name
+            FROM public.roles r
+            LEFT JOIN public.companies c ON r.company_id = c.id
+            ORDER BY r.name
+          `
+        });
+        
+        if (error) {
+          console.error("Error executing SQL for roles:", error);
+          toast.error("Erro ao carregar papéis");
+          setRoles([]);
+          return;
+        }
+        
+        // Parsear o resultado
+        if (data && data.success) {
+          try {
+            // Se não houver dados, retornar array vazio
+            setRoles([]);
+          } catch (parseError) {
+            console.error("Error parsing roles data:", parseError);
+            setRoles([]);
+          }
+        }
+      } else {
+        let query = supabase
+          .from('roles')
+          .select(`
+            *,
+            companies:company_id (name)
+          `);
+        
+        if (!isSuperAdmin && userCompany) {
+          query = query.eq('company_id', userCompany.id);
+        }
+        
+        const { data, error } = await query.order('name');
+          
+        if (error) {
+          console.error("Error fetching roles:", error);
+          toast.error("Erro ao carregar papéis");
+          setRoles([]);
+        } else {
+          const formattedRoles = (data || []).map(role => {
+            const typedRole: Role = {
+              ...role as any,
+              company_name: role.companies?.name,
+              is_admin: false
+            };
+            
+            return typedRole;
+          });
+          
+          setRoles(formattedRoles);
+        }
       }
-      
-      const { data, error } = await query.order('name');
-        
-      if (error) throw error;
-      
-      const formattedRoles = (data || []).map(role => {
-        const typedRole: Role = {
-          ...role as any,
-          company_name: role.companies?.name,
-          is_admin: false
-        };
-        
-        return typedRole;
-      });
-      
-      setRoles(formattedRoles);
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      console.error("Error in fetchRoles:", error);
       toast.error("Erro ao carregar papéis");
+      setRoles([]);
     }
   };
 
@@ -270,28 +379,56 @@ const Admin = () => {
   const handleCreateCompany = async () => {
     setLoading(true);
     try {
-      if (!isSuperAdmin) {
+      if (!isSuperAdmin && !isEditorSuperAdmin) {
         throw new Error("Apenas administradores do sistema podem criar empresas");
       }
       
-      const { data, error } = await supabase
-        .from('companies')
-        .insert({
-          name: newCompanyName,
-          slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-'),
-          active: true // Garantir que a propriedade 'active' seja definida
-        })
-        .select()
-        .single();
+      // Para Lovable Editor, use RPC para evitar problemas com RLS
+      if (isEditorSuperAdmin) {
+        const sqlQuery = `
+          INSERT INTO public.companies (
+            name, 
+            slug, 
+            active
+          ) VALUES (
+            '${newCompanyName}',
+            '${newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-')}',
+            true
+          ) RETURNING *;
+        `;
         
-      if (error) throw error;
-      
-      toast.success("Empresa criada com sucesso");
-      setCompanyDialogOpen(false);
-      fetchCompanies();
-      
-      setNewCompanyName("");
-      setNewCompanySlug("");
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: sqlQuery 
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Empresa criada com sucesso");
+        setCompanyDialogOpen(false);
+        fetchCompanies();
+        
+        setNewCompanyName("");
+        setNewCompanySlug("");
+      } else {
+        const { data, error } = await supabase
+          .from('companies')
+          .insert({
+            name: newCompanyName,
+            slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-'),
+            active: true
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        toast.success("Empresa criada com sucesso");
+        setCompanyDialogOpen(false);
+        fetchCompanies();
+        
+        setNewCompanyName("");
+        setNewCompanySlug("");
+      }
     } catch (error: any) {
       console.error("Error creating company:", error);
       toast.error(error.message || "Erro ao criar empresa");
@@ -309,26 +446,56 @@ const Admin = () => {
         throw new Error("É necessário selecionar uma empresa");
       }
       
-      const { data, error } = await supabase
-        .from('roles')
-        .insert({
-          name: newRoleName,
-          company_id: companyId,
-          is_default: newRoleIsDefault
-        })
-        .select()
-        .single();
+      // Para Lovable Editor, use RPC para evitar problemas com RLS
+      if (isEditorSuperAdmin) {
+        const sqlQuery = `
+          INSERT INTO public.roles (
+            name, 
+            company_id, 
+            is_default
+          ) VALUES (
+            '${newRoleName}',
+            '${companyId}',
+            ${newRoleIsDefault}
+          ) RETURNING *;
+        `;
         
-      if (error) throw error;
-      
-      toast.success("Papel criado com sucesso");
-      setRoleDialogOpen(false);
-      fetchRoles();
-      
-      setNewRoleName("");
-      setNewRoleCompany("");
-      setNewRoleIsAdmin(false);
-      setNewRoleIsDefault(false);
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: sqlQuery 
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Papel criado com sucesso");
+        setRoleDialogOpen(false);
+        fetchRoles();
+        
+        setNewRoleName("");
+        setNewRoleCompany("");
+        setNewRoleIsAdmin(false);
+        setNewRoleIsDefault(false);
+      } else {
+        const { data, error } = await supabase
+          .from('roles')
+          .insert({
+            name: newRoleName,
+            company_id: companyId,
+            is_default: newRoleIsDefault
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        toast.success("Papel criado com sucesso");
+        setRoleDialogOpen(false);
+        fetchRoles();
+        
+        setNewRoleName("");
+        setNewRoleCompany("");
+        setNewRoleIsAdmin(false);
+        setNewRoleIsDefault(false);
+      }
     } catch (error: any) {
       console.error("Error creating role:", error);
       toast.error(error.message || "Erro ao criar papel");
@@ -342,46 +509,68 @@ const Admin = () => {
     
     setLoading(true);
     try {
-      if (itemToDelete.type === 'user') {
-        if (!isSuperAdmin) {
-          const userToDelete = users.find(u => u.id === itemToDelete.id);
-          if (userToDelete?.is_super_admin) {
-            throw new Error("Você não tem permissão para excluir um Super Admin");
+      if (isEditorSuperAdmin) {
+        let sqlQuery = "";
+        
+        if (itemToDelete.type === 'user') {
+          sqlQuery = `DELETE FROM auth.users WHERE id = '${itemToDelete.id}';`;
+        } else if (itemToDelete.type === 'company') {
+          sqlQuery = `DELETE FROM public.companies WHERE id = '${itemToDelete.id}';`;
+        } else if (itemToDelete.type === 'role') {
+          sqlQuery = `DELETE FROM public.roles WHERE id = '${itemToDelete.id}';`;
+        }
+        
+        const { data, error } = await supabase.rpc('execute_sql', { 
+          sql_query: sqlQuery 
+        });
+        
+        if (error) throw error;
+        
+        if (itemToDelete.type === 'user') fetchUsers();
+        else if (itemToDelete.type === 'company') fetchCompanies();
+        else if (itemToDelete.type === 'role') fetchRoles();
+      } else {
+        if (itemToDelete.type === 'user') {
+          if (!isSuperAdmin) {
+            const userToDelete = users.find(u => u.id === itemToDelete.id);
+            if (userToDelete?.is_super_admin) {
+              throw new Error("Você não tem permissão para excluir um Super Admin");
+            }
+            if (userToDelete?.company_id !== userCompany?.id) {
+              throw new Error("Você só pode excluir usuários da sua empresa");
+            }
           }
-          if (userToDelete?.company_id !== userCompany?.id) {
-            throw new Error("Você só pode excluir usuários da sua empresa");
+          
+          const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
+          if (error) throw error;
+          fetchUsers();
+        } else if (itemToDelete.type === 'company') {
+          if (!isSuperAdmin) {
+            throw new Error("Apenas administradores do sistema podem excluir empresas");
           }
-        }
-        
-        const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
-        if (error) throw error;
-        fetchUsers();
-      } else if (itemToDelete.type === 'company') {
-        if (!isSuperAdmin) {
-          throw new Error("Apenas administradores do sistema podem excluir empresas");
-        }
-        
-        const { error } = await supabase
-          .from('companies')
-          .delete()
-          .eq('id', itemToDelete.id);
           
-        if (error) throw error;
-        fetchCompanies();
-      } else if (itemToDelete.type === 'role') {
-        const roleToDelete = roles.find(r => r.id === itemToDelete.id);
-        
-        if (!isSuperAdmin && roleToDelete?.company_id !== userCompany?.id) {
-          throw new Error("Você só pode excluir papéis da sua empresa");
-        }
-        
-        const { error } = await supabase
-          .from('roles')
-          .delete()
-          .eq('id', itemToDelete.id);
+          const { error } = await supabase
+            .from('companies')
+            .delete()
+            .eq('id', itemToDelete.id);
+            
+          if (error) throw error;
+          fetchCompanies();
+        } else if (itemToDelete.type === 'role') {
+          const roleToDelete = roles.find(r => r.id === itemToDelete.id);
           
-        if (error) throw error;
-        fetchRoles();
+          if (!isSuperAdmin && roleToDelete?.company_id !== userCompany?.id) {
+            throw new Error("Você só pode excluir papéis da sua empresa");
+          }
+          
+          const { error } = await supabase
+            .from('roles')
+            .delete()
+            .eq('id', itemToDelete.id);
+            
+          if (error) throw error;
+          fetchRoles();
+        }
       }
       
       toast.success(`${
@@ -785,191 +974,4 @@ const Admin = () => {
                                   <SelectValue placeholder="Selecione uma empresa" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {companies.map((company) => (
-                                    <SelectItem key={company.id} value={company.id}>
-                                      {company.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="isDefault" className="flex items-center gap-2">
-                              <input
-                                id="isDefault"
-                                type="checkbox"
-                                checked={newRoleIsDefault}
-                                onChange={(e) => setNewRoleIsDefault(e.target.checked)}
-                                className="h-4 w-4"
-                              />
-                              Papel Padrão
-                            </Label>
-                            <p className="text-xs text-muted-foreground ml-6">
-                              Papéis padrão são atribuídos automaticamente a novos usuários.
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
-                          <Button onClick={handleCreateRole} disabled={loading}>
-                            {loading ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processando...
-                              </>
-                            ) : 'Criar Papel'}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex justify-center items-center h-40">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="ml-2">Carregando...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        <div className="rounded-md border">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Nome</TableHead>
-                                <TableHead>Empresa</TableHead>
-                                <TableHead>Tipo</TableHead>
-                                <TableHead>Criado em</TableHead>
-                                <TableHead className="w-[100px]">Ações</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {roles.length === 0 ? (
-                                <TableRow>
-                                  <TableCell colSpan={5} className="h-24 text-center">
-                                    Nenhum papel personalizado encontrado.
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                roles.map((role) => (
-                                  <TableRow key={role.id}>
-                                    <TableCell>
-                                      <div className="font-medium">{role.name}</div>
-                                    </TableCell>
-                                    <TableCell>{role.company_name || '-'}</TableCell>
-                                    <TableCell>
-                                      {role.is_default && (
-                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                          Padrão
-                                        </span>
-                                      )}
-                                    </TableCell>
-                                    <TableCell>
-                                      {role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => {
-                                          setItemToDelete({ id: role.id, type: 'role' });
-                                          setDeleteDialogOpen(true);
-                                        }}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </TableCell>
-                                  </TableRow>
-                                ))
-                              )}
-                            </TableBody>
-                          </Table>
-                        </div>
-                        
-                        <div className="flex flex-col gap-6">
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="bg-primary/10 p-3 rounded-full">
-                              <Shield className="h-6 w-6 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium">Super Admin</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Acesso total ao sistema e todas as empresas.
-                              </p>
-                            </div>
-                            <CheckSquare className="h-5 w-5 text-primary" />
-                          </div>
-                          
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="bg-primary/10 p-3 rounded-full">
-                              <Building2 className="h-6 w-6 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium">Administrador de Empresa</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Gerencia usuários e configurações da sua empresa.
-                              </p>
-                            </div>
-                            <CheckSquare className="h-5 w-5 text-primary" />
-                          </div>
-                          
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="bg-primary/10 p-3 rounded-full">
-                              <User className="h-6 w-6 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium">Usuário</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Acesso apenas às funcionalidades permitidas dentro da sua empresa.
-                              </p>
-                            </div>
-                            <CheckSquare className="h-5 w-5 text-primary" />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-        
-        <Footer />
-        
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza de que deseja excluir este {
-                  itemToDelete?.type === 'user' ? 'usuário' : 
-                  itemToDelete?.type === 'company' ? 'empresa' : 'papel'
-                }?
-                {itemToDelete?.type === 'company' && (
-                  <span className="block mt-2 font-bold text-destructive">
-                    Atenção: Esta ação também excluirá todos os usuários e dados associados à empresa.
-                  </span>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive text-destructive-foreground">
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processando...
-                  </>
-                ) : 'Excluir'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </AuthGuard>
-  );
-};
-
-export default Admin;
+                                  {companies.
