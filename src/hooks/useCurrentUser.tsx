@@ -126,5 +126,7 @@ export function useCurrentUser() {
     updateUserProfile,
     isMaster: currentUser?.is_master || false,
     isAdmin: currentUser?.is_admin || false,
+    // Expor explicitamente o empresa_id para facilitar o uso em filtros
+    empresaId: currentUser?.empresa_id || null,
   };
 }
