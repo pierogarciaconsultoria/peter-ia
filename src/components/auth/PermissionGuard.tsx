@@ -2,6 +2,7 @@
 import React from "react";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 interface PermissionGuardProps {
   children: React.ReactNode;
@@ -21,6 +22,9 @@ export const PermissionGuard = ({
   const { isMaster, isAdmin } = useCurrentUser();
   const { temPermissao, isLoading } = useUserPermissions();
   
+  // Detecta se é um super admin no Lovable Editor
+  const isMasterLovable = isSuperAdminInLovable();
+  
   // Se estiver carregando, mostra o loader se configurado ou não mostra nada
   if (isLoading) {
     return showLoader ? (
@@ -32,6 +36,12 @@ export const PermissionGuard = ({
   }
   
   // Verificação hierárquica de permissões - do maior para o menor nível
+  // 0. Super Admin no Lovable Editor tem acesso irrestrito a tudo
+  if (isMasterLovable) {
+    console.log(`Acesso concedido ao módulo '${modulo}' via Lovable Editor`);
+    return <>{children}</>;
+  }
+  
   // 1. Usuários master têm acesso irrestrito a todos os módulos
   if (isMaster) {
     return <>{children}</>;

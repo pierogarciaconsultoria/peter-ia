@@ -7,6 +7,8 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,6 +23,23 @@ export function Sidebar({
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const isEditor = isLovableEditor();
+  const { temPermissao } = useUserPermissions();
+  const { isMaster, isAdmin } = useCurrentUser();
+
+  // Filtra os itens de menu com base nas permissões do usuário
+  const filteredMenuItems = menuItems.filter(item => {
+    // No Lovable Editor ou para usuário master, mostrar todos os itens
+    if (isEditor || isMaster) return true;
+    
+    // Para itens que requerem apenas admin
+    if (item.adminOnly) return isAdmin;
+    
+    // Para itens com módulo específico, verificar permissão
+    if (item.modulo) return isAdmin || temPermissao(item.modulo, 'visualizar');
+    
+    // Itens sem restrições (como Dashboard ou Ajuda)
+    return true;
+  });
 
   const toggleCollapsed = () => {
     setIsCollapsed(prev => !prev);
@@ -76,7 +95,7 @@ export function Sidebar({
         
         <nav className={cn("flex-1 overflow-y-auto", isCollapsed && !isHovered ? "px-2" : "px-4")}>
           <ul className="space-y-1">
-            {menuItems.map(item => (
+            {filteredMenuItems.map(item => (
               <li key={item.href}>
                 <Button 
                   variant="ghost" 

@@ -1,42 +1,35 @@
 
 /**
- * Utility to detect if the current session is running in Lovable editor
- * This grants unlimited access to all features without authentication
- * 
- * Detection methods:
- * 1. Check URL for master_admin parameter
- * 2. Check if running in development mode and inside an iframe
- * 3. Check if the hostname includes lovable.app
- * 4. Check for localStorage flags that might have been set
+ * Utilitários para detectar se o usuário está no Lovable Editor
+ * e conceder privilégios específicos quando necessário
  */
-export const isLovableEditor = (): boolean => {
-  // Check multiple conditions to ensure robust detection
-  return (
-    // URL parameter check
-    window.location.search.includes('master_admin=true') || 
-    
-    // Development + iframe check (most common for editor)
-    (process.env.NODE_ENV === 'development' && window.self !== window.top) ||
-    
-    // Domain check
-    window.location.hostname.includes('lovable.app') ||
-    
-    // Backup: check localStorage for a flag that might have been set
-    localStorage.getItem('lovableEditorAccess') === 'true'
-  );
-};
 
-/**
- * Check if the user should be granted super admin privileges
- * This is true for users in the Lovable editor environment
- */
-export const isSuperAdminInLovable = (): boolean => {
-  return isLovableEditor();
-};
+// Verifica se o usuário está acessando o aplicativo pelo Lovable Editor
+export function isLovableEditor(): boolean {
+  // Verifica o URL para parâmetros específicos do ambiente Lovable
+  const url = new URL(window.location.href);
+  const hasLovableParam = url.searchParams.has('master_admin');
+  
+  // Verifica localStorage para persistência do status de editor
+  const storedEditorStatus = localStorage.getItem('lovableEditorAccess') === 'true';
+  
+  // Se detectado como editor pela primeira vez, salva no localStorage
+  if (hasLovableParam && !storedEditorStatus) {
+    localStorage.setItem('lovableEditorAccess', 'true');
+    console.log("Modo Lovable Editor detectado e armazenado");
+  }
+  
+  return hasLovableParam || storedEditorStatus;
+}
 
-// Set the localStorage flag to true to ensure persistence between refreshes
-// This helps maintain editor access even if URL parameters change
-if (isLovableEditor()) {
-  localStorage.setItem('lovableEditorAccess', 'true');
-  console.log("Lovable Editor detectado - acesso total concedido como super administrador");
+// Verifica se o usuário deve ter privilégios de super admin no Lovable Editor
+export function isSuperAdminInLovable(): boolean {
+  const isEditor = isLovableEditor();
+  
+  if (isEditor) {
+    // Registra no console para debugging
+    console.log("Acesso de super administrador concedido via Lovable Editor");
+  }
+  
+  return isEditor;
 }

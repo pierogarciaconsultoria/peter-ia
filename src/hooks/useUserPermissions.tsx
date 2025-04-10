@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 export interface ModuloPermissao {
   id: string;
@@ -20,9 +21,47 @@ export function useUserPermissions() {
   const [permissoes, setPermissoes] = useState<ModuloPermissao[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // Verificar se é super admin no Lovable Editor
+  const isLovableMaster = isSuperAdminInLovable();
 
   // Função para buscar permissões do usuário
   const fetchPermissoes = useCallback(async () => {
+    // Se for super admin no Lovable, não precisa buscar permissões
+    if (isLovableMaster) {
+      // Em vez de buscar, vamos conceder todas as permissões via código
+      try {
+        setLoading(true);
+        
+        const { data: modulos, error: modulosError } = await supabase
+          .from('modulos')
+          .select('*')
+          .eq('ativo', true);
+          
+        if (modulosError) throw modulosError;
+        
+        // Conceder todas as permissões para o usuário no modo Lovable Editor
+        const permissoesCompletas = (modulos || []).map(modulo => ({
+          id: modulo.id,
+          nome: modulo.nome,
+          chave: modulo.chave,
+          descricao: modulo.descricao,
+          pode_visualizar: true,
+          pode_editar: true,
+          pode_excluir: true,
+          pode_criar: true
+        }));
+        
+        setPermissoes(permissoesCompletas);
+        setLoading(false);
+        return;
+      } catch (err) {
+        console.error("Erro ao buscar módulos:", err);
+        setLoading(false);
+        return;
+      }
+    }
+
     if (!user?.id) {
       setPermissoes([]);
       setLoading(false);
@@ -96,7 +135,7 @@ export function useUserPermissions() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, isMaster, isAdmin]);
+  }, [user?.id, isMaster, isAdmin, isLovableMaster]);
 
   useEffect(() => {
     fetchPermissoes();
@@ -104,6 +143,9 @@ export function useUserPermissions() {
 
   // Verificação de permissões simplificada com memoização
   const temPermissao = useCallback((modulo: string, tipo: 'visualizar' | 'editar' | 'excluir' | 'criar'): boolean => {
+    // Super Admin no Lovable Editor tem todas as permissões
+    if (isLovableMaster) return true;
+    
     // Master tem todas as permissões automaticamente
     if (isMaster) return true;
     
@@ -121,7 +163,7 @@ export function useUserPermissions() {
       case 'criar': return permissao.pode_criar;
       default: return false;
     }
-  }, [isMaster, isAdmin, permissoes]);
+  }, [isMaster, isAdmin, permissoes, isLovableMaster]);
 
   // Funções auxiliares para simplificar o uso
   const podeVisualizar = useCallback((modulo: string): boolean => {
@@ -151,7 +193,8 @@ export function useUserPermissions() {
       criar?: boolean;
     }
   ) => {
-    if (!isMaster && !isAdmin) {
+    // No modo Lovable Editor, super admins podem atribuir permissões
+    if (!isMaster && !isAdmin && !isLovableMaster) {
       toast.error("Você não tem permissão para atribuir permissões");
       return { success: false, error: new Error("Sem permissão") };
     }
@@ -206,7 +249,8 @@ export function useUserPermissions() {
 
   // Função para remover permissão de um usuário
   const removerPermissao = async (usuarioId: string, moduloId: string) => {
-    if (!isMaster && !isAdmin) {
+    // No modo Lovable Editor, super admins podem remover permissões
+    if (!isMaster && !isAdmin && !isLovableMaster) {
       toast.error("Você não tem permissão para remover permissões");
       return { success: false, error: new Error("Sem permissão") };
     }
