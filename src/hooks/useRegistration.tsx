@@ -20,7 +20,34 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
     setErrorDetails(null);
     
     try {
-      // Step 1: Register the user
+      console.log("Starting registration process...");
+      
+      // Step 1: Create a company if provided
+      let companyId = null;
+      if (companyName.trim()) {
+        console.log("Creating company:", companyName);
+        const companySlug = companyName.toLowerCase().replace(/\s+/g, '-');
+        
+        const { data: companyData, error: companyError } = await supabase
+          .from("companies")
+          .insert({
+            name: companyName,
+            slug: companySlug,
+          })
+          .select("id")
+          .single();
+          
+        if (companyError) {
+          console.error("Company creation error:", companyError);
+          throw new Error(`Erro ao criar empresa: ${companyError.message}`);
+        }
+        
+        companyId = companyData.id;
+        console.log("Company created with ID:", companyId);
+      }
+      
+      // Step 2: Register the user with appropriate metadata
+      console.log("Registering user:", registerEmail);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registerEmail,
         password: registerPassword,
@@ -28,6 +55,10 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
           data: {
             first_name: firstName,
             last_name: lastName,
+            company_id: companyId,
+            is_company_admin: companyId ? true : false,
+            lgpd_consent: lgpdConsent,
+            lgpd_consent_date: new Date().toISOString()
           },
         },
       });
@@ -40,40 +71,14 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
       
       console.log("Registration successful:", authData);
       
-      // Step 2: Create a company if provided
-      let companyId = null;
-      if (companyName.trim()) {
-        const { data: companyData, error: companyError } = await supabase
-          .from("companies")
-          .insert({
-            name: companyName,
-            slug: companyName.toLowerCase().replace(/\s+/g, '-'),
-          })
-          .select("id")
-          .single();
-          
-        if (companyError) throw companyError;
-        
-        companyId = companyData.id;
-      }
-      
-      // Step 3: Update the user profile with company, admin role and LGPD consent
-      const { error: profileError } = await supabase
-        .from("user_profiles")
-        .update({
-          company_id: companyId,
-          is_company_admin: companyId ? true : false,
-          lgpd_consent: lgpdConsent,
-          lgpd_consent_date: new Date().toISOString()
-        })
-        .eq("id", authData.user?.id);
-        
-      if (profileError) throw profileError;
+      // No need to update user_profiles separately as this will be handled by the trigger
+      // that creates the user_profiles entry based on the auth.users metadata
       
       toast.success("Cadastro realizado com sucesso! Verifique seu email.");
       setActiveTab("login");
     } catch (error: any) {
       console.error("Full registration error:", error);
+      setErrorDetails(error.message || "Falha ao criar conta");
       toast.error(error.message || "Falha ao criar conta");
     } finally {
       setLoading(false);
