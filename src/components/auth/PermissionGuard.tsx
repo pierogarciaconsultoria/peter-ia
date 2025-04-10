@@ -8,20 +8,27 @@ interface PermissionGuardProps {
   modulo: string;
   requerPermissao?: 'visualizar' | 'editar' | 'excluir' | 'criar';
   fallback?: React.ReactNode;
+  showLoader?: boolean;
 }
 
 export const PermissionGuard = ({
   children,
   modulo,
   requerPermissao = 'visualizar',
-  fallback = null
+  fallback = null,
+  showLoader = false
 }: PermissionGuardProps) => {
-  const { isMaster } = useCurrentUser();
+  const { isMaster, isAdmin } = useCurrentUser();
   const { temPermissao, isLoading } = useUserPermissions();
   
-  // Se estiver carregando, não mostra nada ou pode mostrar um loader
+  // Se estiver carregando, mostra o loader se configurado ou não mostra nada
   if (isLoading) {
-    return null;
+    return showLoader ? (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mr-2"></div>
+        <span className="text-sm text-muted-foreground">Verificando permissões...</span>
+      </div>
+    ) : null;
   }
   
   // Usuários master têm acesso irrestrito a todos os módulos
@@ -29,8 +36,14 @@ export const PermissionGuard = ({
     return <>{children}</>;
   }
   
-  // Para usuários não-master, verifica as permissões específicas
+  // Administradores têm acesso a tudo dentro de sua empresa
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+  
+  // Para usuários comuns, verifica as permissões específicas
   if (!temPermissao(modulo, requerPermissao)) {
+    console.log(`Acesso negado: usuário não tem permissão '${requerPermissao}' para módulo '${modulo}'`);
     return <>{fallback}</>;
   }
   

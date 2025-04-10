@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,91 +16,96 @@ export interface ModuloPermissao {
 }
 
 export function useUserPermissions() {
-  const { user, isMaster, isAdmin } = useCurrentUser();
+  const { user, isMaster, isAdmin, empresaId } = useCurrentUser();
   const [permissoes, setPermissoes] = useState<ModuloPermissao[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    async function fetchPermissoes() {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        
-        // Se for master ou admin, busca todos os módulos com todas as permissões
-        if (isMaster || isAdmin) {
-          const { data: modulos, error: modulosError } = await supabase
-            .from('modulos')
-            .select('*')
-            .eq('ativo', true);
-            
-          if (modulosError) throw modulosError;
-          
-          // Para master e admin, concede todas as permissões automaticamente
-          const permissoesCompletas = (modulos || []).map(modulo => ({
-            ...modulo,
-            pode_visualizar: true,
-            pode_editar: true,
-            pode_excluir: true,
-            pode_criar: true
-          }));
-          
-          setPermissoes(permissoesCompletas);
-        } else {
-          // Para usuários normais, busca as permissões específicas
-          const { data, error } = await supabase
-            .from('permissoes_usuario')
-            .select(`
-              modulo_id,
-              pode_visualizar,
-              pode_editar,
-              pode_excluir,
-              pode_criar,
-              modulos:modulo_id (
-                id, 
-                nome, 
-                chave, 
-                descricao
-              )
-            `)
-            .eq('usuario_id', user.id);
-            
-          if (error) throw error;
-          
-          // Formatar os dados para o formato esperado
-          const permissoesUsuario = (data || []).map(item => ({
-            id: item.modulos.id,
-            nome: item.modulos.nome,
-            chave: item.modulos.chave,
-            descricao: item.modulos.descricao,
-            pode_visualizar: item.pode_visualizar,
-            pode_editar: item.pode_editar,
-            pode_excluir: item.pode_excluir,
-            pode_criar: item.pode_criar,
-          }));
-          
-          setPermissoes(permissoesUsuario);
-        }
-      } catch (err: any) {
-        console.error("Erro ao buscar permissões:", err);
-        setError(err);
-        toast.error("Falha ao carregar permissões do usuário");
-      } finally {
-        setLoading(false);
-      }
+  // Usar useCallback para evitar recriações desnecessárias da função
+  const fetchPermissoes = useCallback(async () => {
+    if (!user?.id) {
+      setPermissoes([]);
+      setLoading(false);
+      return;
     }
 
-    fetchPermissoes();
+    try {
+      setLoading(true);
+      
+      // Se for master ou admin, busca todos os módulos com todas as permissões
+      if (isMaster || isAdmin) {
+        const { data: modulos, error: modulosError } = await supabase
+          .from('modulos')
+          .select('*')
+          .eq('ativo', true);
+          
+        if (modulosError) throw modulosError;
+        
+        // Para master e admin, concede todas as permissões automaticamente
+        const permissoesCompletas = (modulos || []).map(modulo => ({
+          ...modulo,
+          pode_visualizar: true,
+          pode_editar: true,
+          pode_excluir: true,
+          pode_criar: true
+        }));
+        
+        setPermissoes(permissoesCompletas);
+      } else {
+        // Para usuários normais, busca as permissões específicas
+        const { data, error } = await supabase
+          .from('permissoes_usuario')
+          .select(`
+            modulo_id,
+            pode_visualizar,
+            pode_editar,
+            pode_excluir,
+            pode_criar,
+            modulos:modulo_id (
+              id, 
+              nome, 
+              chave, 
+              descricao
+            )
+          `)
+          .eq('usuario_id', user.id);
+          
+        if (error) throw error;
+        
+        // Formatar os dados para o formato esperado
+        const permissoesUsuario = (data || []).map(item => ({
+          id: item.modulos.id,
+          nome: item.modulos.nome,
+          chave: item.modulos.chave,
+          descricao: item.modulos.descricao,
+          pode_visualizar: item.pode_visualizar,
+          pode_editar: item.pode_editar,
+          pode_excluir: item.pode_excluir,
+          pode_criar: item.pode_criar,
+        }));
+        
+        setPermissoes(permissoesUsuario);
+      }
+    } catch (err: any) {
+      console.error("Erro ao buscar permissões:", err);
+      setError(err);
+      toast.error("Falha ao carregar permissões do usuário");
+    } finally {
+      setLoading(false);
+    }
   }, [user?.id, isMaster, isAdmin]);
 
-  // Funções úteis para verificar permissões
-  const temPermissao = (modulo: string, tipo: 'visualizar' | 'editar' | 'excluir' | 'criar'): boolean => {
-    // Master e admin sempre têm todas as permissões
-    if (isMaster || isAdmin) return true;
+  useEffect(() => {
+    fetchPermissoes();
+  }, [fetchPermissoes]);
+
+  // Melhorar a verificação de permissões com memoização
+  const temPermissao = useCallback((modulo: string, tipo: 'visualizar' | 'editar' | 'excluir' | 'criar'): boolean => {
+    // Master tem todas as permissões automaticamente
+    if (isMaster) return true;
+    
+    // Admin tem todas as permissões para sua empresa
+    if (isAdmin) return true;
     
     // Procura pela permissão específica
     const permissao = permissoes.find(p => p.chave === modulo);
@@ -113,23 +118,23 @@ export function useUserPermissions() {
       case 'criar': return permissao.pode_criar;
       default: return false;
     }
-  };
+  }, [isMaster, isAdmin, permissoes]);
 
-  const podeVisualizar = (modulo: string): boolean => {
+  const podeVisualizar = useCallback((modulo: string): boolean => {
     return temPermissao(modulo, 'visualizar');
-  };
+  }, [temPermissao]);
 
-  const podeEditar = (modulo: string): boolean => {
+  const podeEditar = useCallback((modulo: string): boolean => {
     return temPermissao(modulo, 'editar');
-  };
+  }, [temPermissao]);
 
-  const podeExcluir = (modulo: string): boolean => {
+  const podeExcluir = useCallback((modulo: string): boolean => {
     return temPermissao(modulo, 'excluir');
-  };
+  }, [temPermissao]);
 
-  const podeCriar = (modulo: string): boolean => {
+  const podeCriar = useCallback((modulo: string): boolean => {
     return temPermissao(modulo, 'criar');
-  };
+  }, [temPermissao]);
 
   // Função para atribuir permissão a um usuário
   const atribuirPermissao = async (
@@ -186,6 +191,7 @@ export function useUserPermissions() {
       }
       
       toast.success("Permissão atualizada com sucesso");
+      fetchPermissoes(); // Atualizar permissões após alteração
       return { success: true };
     } catch (err: any) {
       console.error("Erro ao atribuir permissão:", err);
@@ -211,6 +217,7 @@ export function useUserPermissions() {
       if (error) throw error;
       
       toast.success("Permissão removida com sucesso");
+      fetchPermissoes(); // Atualizar permissões após alteração
       return { success: true };
     } catch (err: any) {
       console.error("Erro ao remover permissão:", err);
@@ -230,5 +237,6 @@ export function useUserPermissions() {
     podeCriar,
     atribuirPermissao,
     removerPermissao,
+    recarregarPermissoes: fetchPermissoes
   };
 }
