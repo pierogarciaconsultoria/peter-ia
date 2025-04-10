@@ -28,21 +28,27 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
         console.log("Creating company:", companyName);
         const companySlug = companyName.toLowerCase().replace(/\s+/g, '-');
         
-        const { data: companyData, error: companyError } = await supabase
+        // Modificação: Simplificar a criação de empresa e melhorar o tratamento de erros
+        const { data, error } = await supabase
           .from("companies")
           .insert({
             name: companyName,
             slug: companySlug,
+            active: true
           })
-          .select("id")
-          .single();
+          .select();
           
-        if (companyError) {
-          console.error("Company creation error:", companyError);
-          throw new Error(`Erro ao criar empresa: ${companyError.message}`);
+        if (error) {
+          console.error("Company creation error:", error);
+          throw new Error(`Erro ao criar empresa: ${error.message}`);
         }
         
-        companyId = companyData.id;
+        if (!data || data.length === 0) {
+          console.error("No company data returned after successful creation");
+          throw new Error("Empresa foi criada mas nenhum dado foi retornado");
+        }
+        
+        companyId = data[0].id;
         console.log("Company created with ID:", companyId);
       }
       

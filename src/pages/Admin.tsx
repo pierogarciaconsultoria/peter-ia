@@ -401,11 +401,9 @@ const Admin = () => {
             .insert({
               name: newCompanyName,
               slug: companySlug,
-              active: true,
-              created_at: new Date().toISOString()
+              active: true
             })
-            .select()
-            .single();
+            .select();
             
           if (error) {
             console.error("Erro no Supabase ao criar empresa:", error);
@@ -422,12 +420,13 @@ const Admin = () => {
             throw new Error(errorMessage);
           }
           
-          if (data) {
-            novaEmpresaId = data.id;
-            console.log("Nova empresa criada:", data);
+          if (data && data.length > 0) {
+            novaEmpresaId = data[0].id;
+            console.log("Nova empresa criada:", data[0]);
             toast.success("Empresa criada com sucesso");
           } else {
-            throw new Error("Empresa criada mas nenhum dado retornado");
+            console.error("Empresa criada mas nenhum dado retornado");
+            throw new Error("Empresa criada mas nenhum ID retornado");
           }
           
           setCompanyDialogOpen(false);
