@@ -1054,6 +1054,45 @@ export type Database = {
           },
         ]
       }
+      empresas: {
+        Row: {
+          cnpj: string | null
+          created_at: string | null
+          email: string | null
+          endereco: string | null
+          id: string
+          id_responsavel: string | null
+          nome: string
+          setor: string | null
+          telefone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          id_responsavel?: string | null
+          nome: string
+          setor?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          id_responsavel?: string | null
+          nome?: string
+          setor?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       equipment_calibrations: {
         Row: {
           calibration_date: string
@@ -1436,6 +1475,39 @@ export type Database = {
           key?: string
           name?: string
           price?: number
+        }
+        Relationships: []
+      }
+      modulos: {
+        Row: {
+          ativo: boolean | null
+          chave: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          preco: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          chave: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          preco?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          chave?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          preco?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1954,6 +2026,57 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permissoes_usuario: {
+        Row: {
+          created_at: string | null
+          id: string
+          modulo_id: string | null
+          pode_criar: boolean | null
+          pode_editar: boolean | null
+          pode_excluir: boolean | null
+          pode_visualizar: boolean | null
+          updated_at: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          modulo_id?: string | null
+          pode_criar?: boolean | null
+          pode_editar?: boolean | null
+          pode_excluir?: boolean | null
+          pode_visualizar?: boolean | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          modulo_id?: string | null
+          pode_criar?: boolean | null
+          pode_editar?: boolean | null
+          pode_excluir?: boolean | null
+          pode_visualizar?: boolean | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissoes_usuario_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permissoes_usuario_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -2702,6 +2825,47 @@ export type Database = {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios: {
+        Row: {
+          created_at: string | null
+          email: string
+          empresa_id: string | null
+          id: string
+          is_admin: boolean | null
+          is_master: boolean | null
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          empresa_id?: string | null
+          id: string
+          is_admin?: boolean | null
+          is_master?: boolean | null
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          empresa_id?: string | null
+          id?: string
+          is_admin?: boolean | null
+          is_master?: boolean | null
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
