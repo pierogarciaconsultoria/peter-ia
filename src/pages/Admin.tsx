@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -585,7 +586,6 @@ const Admin = () => {
                 <TabsTrigger value="roles">Papéis</TabsTrigger>
               </TabsList>
               
-              
               {isSuperAdmin && (
                 <TabsContent value="companies" className="space-y-4">
                   <Card>
@@ -718,7 +718,6 @@ const Admin = () => {
                   </Card>
                 </TabsContent>
               )}
-              
               
               <TabsContent value="users" className="space-y-4">
                 <Card>
@@ -908,7 +907,6 @@ const Admin = () => {
                 </Card>
               </TabsContent>
               
-              
               <TabsContent value="roles" className="space-y-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
@@ -974,3 +972,121 @@ const Admin = () => {
                               Papéis padrão são atribuídos automaticamente a novos usuários da empresa.
                             </p>
                           </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
+                          <Button onClick={handleCreateRole} disabled={loading}>
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processando...
+                              </>
+                            ) : 'Criar Papel'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nome</TableHead>
+                              <TableHead>Empresa</TableHead>
+                              <TableHead>Padrão</TableHead>
+                              <TableHead className="w-[100px]">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {roles.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={4} className="h-24 text-center">
+                                  Nenhum papel encontrado.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              roles.map((role) => (
+                                <TableRow key={role.id}>
+                                  <TableCell>
+                                    <div className="flex items-center">
+                                      <Shield className="mr-2 h-4 w-4 text-muted-foreground" />
+                                      {role.name}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>{role.company_name || '-'}</TableCell>
+                                  <TableCell>
+                                    {role.is_default ? (
+                                      <CheckSquare className="h-4 w-4 text-green-600" />
+                                    ) : (
+                                      <span className="text-muted-foreground">Não</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        setItemToDelete({ id: role.id, type: 'role' });
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {itemToDelete?.type === 'user' 
+                  ? 'Esta ação não pode ser desfeita. O usuário será permanentemente excluído do sistema.'
+                  : itemToDelete?.type === 'company'
+                    ? 'Esta ação não pode ser desfeita. A empresa e todos seus usuários associados serão permanentemente excluídos do sistema.'
+                    : 'Esta ação não pode ser desfeita. O papel será permanentemente excluído do sistema.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteItem} 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  'Excluir'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </AuthGuard>
+  );
+};
+
+export default Admin;
