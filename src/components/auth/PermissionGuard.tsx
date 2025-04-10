@@ -31,21 +31,23 @@ export const PermissionGuard = ({
     ) : null;
   }
   
-  // Usuários master têm acesso irrestrito a todos os módulos
+  // Verificação hierárquica de permissões - do maior para o menor nível
+  // 1. Usuários master têm acesso irrestrito a todos os módulos
   if (isMaster) {
     return <>{children}</>;
   }
   
-  // Administradores têm acesso a tudo dentro de sua empresa
+  // 2. Administradores têm acesso a tudo dentro de sua empresa
   if (isAdmin) {
     return <>{children}</>;
   }
   
-  // Para usuários comuns, verifica as permissões específicas
+  // 3. Para usuários comuns, verifica as permissões específicas
   if (!temPermissao(modulo, requerPermissao)) {
     console.log(`Acesso negado: usuário não tem permissão '${requerPermissao}' para módulo '${modulo}'`);
     return <>{fallback}</>;
   }
   
+  // Se chegou até aqui, o usuário tem permissão
   return <>{children}</>;
 };

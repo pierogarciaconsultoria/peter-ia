@@ -32,7 +32,7 @@ export function useUserPermissions() {
     try {
       setLoading(true);
       
-      // Se for master ou admin, busca todos os módulos com todas as permissões
+      // Para master e admin, buscamos todos os módulos e concedemos todas as permissões
       if (isMaster || isAdmin) {
         const { data: modulos, error: modulosError } = await supabase
           .from('modulos')
@@ -41,9 +41,12 @@ export function useUserPermissions() {
           
         if (modulosError) throw modulosError;
         
-        // Para master e admin, concede todas as permissões automaticamente
+        // Conceder todas as permissões para master e admin
         const permissoesCompletas = (modulos || []).map(modulo => ({
-          ...modulo,
+          id: modulo.id,
+          nome: modulo.nome,
+          chave: modulo.chave,
+          descricao: modulo.descricao,
           pode_visualizar: true,
           pode_editar: true,
           pode_excluir: true,
@@ -52,7 +55,7 @@ export function useUserPermissions() {
         
         setPermissoes(permissoesCompletas);
       } else {
-        // Para usuários normais, busca as permissões específicas
+        // Para usuários normais, buscamos as permissões específicas
         const { data, error } = await supabase
           .from('permissoes_usuario')
           .select(`
@@ -99,7 +102,7 @@ export function useUserPermissions() {
     fetchPermissoes();
   }, [fetchPermissoes]);
 
-  // Melhorar a verificação de permissões com memoização
+  // Verificação de permissões simplificada com memoização
   const temPermissao = useCallback((modulo: string, tipo: 'visualizar' | 'editar' | 'excluir' | 'criar'): boolean => {
     // Master tem todas as permissões automaticamente
     if (isMaster) return true;
