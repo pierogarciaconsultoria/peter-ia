@@ -90,7 +90,6 @@ interface Role {
   companies?: { name: string };
 }
 
-// Type for execute_sql function response
 interface SqlExecutionResult {
   success: boolean;
   data?: any[];
@@ -118,14 +117,12 @@ const Admin = () => {
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanySlug, setNewCompanySlug] = useState("");
 
-  // Role management states
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleCompany, setNewRoleCompany] = useState("");
   const [newRoleIsAdmin, setNewRoleIsAdmin] = useState(false);
   const [newRoleIsDefault, setNewRoleIsDefault] = useState(false);
   
-  // Verificar se é super admin no Lovable Editor
   const isEditorSuperAdmin = isSuperAdminInLovable();
 
   useEffect(() => {
@@ -138,7 +135,6 @@ const Admin = () => {
     try {
       setLoading(true);
       
-      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
         const result = await executeQuery('SELECT * FROM public.companies ORDER BY name');
         
@@ -150,7 +146,6 @@ const Admin = () => {
           return;
         }
         
-        // Set companies from result data
         setCompanies(result.data || []);
       } else {
         let query = supabase.from('companies').select('*');
@@ -166,7 +161,6 @@ const Admin = () => {
           toast.error("Erro ao carregar empresas");
           setCompanies([]);
         } else {
-          // Garantir que todos os itens tenham a propriedade 'active'
           const formattedCompanies = (data || []).map(company => ({
             ...company,
             active: company.active !== undefined ? company.active : true
@@ -188,7 +182,6 @@ const Admin = () => {
     try {
       setLoading(true);
       
-      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
         const result = await executeQuery(`
           SELECT p.*, c.name as company_name
@@ -205,7 +198,6 @@ const Admin = () => {
           return;
         }
         
-        // Set users from result data
         setUsers(result.data || []);
       } else {
         let query = supabase
@@ -245,7 +237,6 @@ const Admin = () => {
 
   const fetchRoles = async () => {
     try {
-      // Usar o executeQuery helper para administradores do Lovable Editor
       if (isEditorSuperAdmin) {
         const result = await executeQuery(`
           SELECT r.*, c.name as company_name
@@ -261,7 +252,6 @@ const Admin = () => {
           return;
         }
         
-        // Set roles from result data
         setRoles(result.data || []);
       } else {
         let query = supabase
@@ -357,7 +347,6 @@ const Admin = () => {
   const handleCreateCompany = async () => {
     setLoading(true);
     try {
-      // Validação básica
       if (!newCompanyName.trim()) {
         throw new Error("O nome da empresa é obrigatório");
       }
@@ -370,7 +359,6 @@ const Admin = () => {
       
       let novaEmpresaId: string | null = null;
       
-      // Para Lovable Editor, use executeQuery para evitar problemas com RLS
       if (isEditorSuperAdmin) {
         const sqlQuery = `
           INSERT INTO public.companies (
@@ -395,7 +383,6 @@ const Admin = () => {
         if (result.data && result.data.length > 0) {
           novaEmpresaId = result.data[0].id;
           
-          // Verificar se a empresa foi realmente salva
           const verificacao = await verificarEmpresaSalva(novaEmpresaId);
           if (!verificacao.success) {
             console.error("Verificação de empresa falhou:", verificacao.error);
@@ -429,7 +416,6 @@ const Admin = () => {
           if (error) {
             console.error("Erro no Supabase ao criar empresa:", error);
             
-            // Extrair mensagem de erro mais útil
             let errorMessage = "Erro ao criar empresa";
             if (error.message) {
               errorMessage = error.message;
@@ -463,13 +449,11 @@ const Admin = () => {
     } catch (error: any) {
       console.error("Erro detalhado ao criar empresa:", error);
       
-      // Melhor tratamento de erro para exibir mensagem mais útil
       let errorMessage = "Erro ao criar empresa";
       
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'object' && error !== null) {
-        // Para erros que possam ser objetos
         errorMessage = error.message || error.details || JSON.stringify(error);
       } else if (typeof error === 'string') {
         errorMessage = error;
@@ -490,7 +474,6 @@ const Admin = () => {
         throw new Error("É necessário selecionar uma empresa");
       }
       
-      // Para Lovable Editor, use executeQuery para evitar problemas com RLS
       if (isEditorSuperAdmin) {
         const sqlQuery = `
           INSERT INTO public.roles (
@@ -976,4 +959,175 @@ const Admin = () => {
               
               <TabsContent value="roles" className="space-y-4">
                 <Card>
-                  <Card
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Papéis</CardTitle>
+                      <CardDescription>
+                        {isSuperAdmin 
+                          ? "Gerenciar papéis do sistema" 
+                          : "Gerenciar papéis da sua empresa"}
+                      </CardDescription>
+                    </div>
+                    <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Novo Papel
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Criar Novo Papel</DialogTitle>
+                          <DialogDescription>
+                            Preencha os dados para criar um novo papel no sistema
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="roleName">Nome do Papel</Label>
+                            <Input
+                              id="roleName"
+                              placeholder="Nome do Papel"
+                              value={newRoleName}
+                              onChange={(e) => setNewRoleName(e.target.value)}
+                            />
+                          </div>
+                          {isSuperAdmin && (
+                            <div className="space-y-2">
+                              <Label htmlFor="roleCompany">Empresa</Label>
+                              <Select value={newRoleCompany} onValueChange={setNewRoleCompany}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione uma empresa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {companies.map((company) => (
+                                    <SelectItem key={company.id} value={company.id}>
+                                      {company.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                          <div className="space-y-2">
+                            <Label htmlFor="isDefault" className="flex items-center gap-2">
+                              <input
+                                id="isDefault"
+                                type="checkbox"
+                                checked={newRoleIsDefault}
+                                onChange={(e) => setNewRoleIsDefault(e.target.checked)}
+                                className="h-4 w-4"
+                              />
+                              Papel Padrão
+                            </Label>
+                            <p className="text-xs text-muted-foreground ml-6">
+                              O papel padrão é atribuído a novos usuários automaticamente.
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancelar</Button>
+                          <Button onClick={handleCreateRole} disabled={loading}>
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processando...
+                              </>
+                            ) : 'Criar Papel'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-40">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="ml-2">Carregando...</span>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Nome</TableHead>
+                              <TableHead>Empresa</TableHead>
+                              <TableHead>Padrão</TableHead>
+                              <TableHead className="w-[100px]">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {roles.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={4} className="h-24 text-center">
+                                  Nenhum papel encontrado.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              roles.map((role) => (
+                                <TableRow key={role.id}>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <Shield className="h-4 w-4 text-muted-foreground" />
+                                      {role.name}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>{role.company_name || '-'}</TableCell>
+                                  <TableCell>
+                                    {role.is_default ? (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <CheckSquare className="h-3 w-3 mr-1" />
+                                        Padrão
+                                      </span>
+                                    ) : '-'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        setItemToDelete({ id: role.id, type: 'role' });
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmação de exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {itemToDelete?.type === 'user' && "Esta ação não pode ser desfeita. O usuário será removido permanentemente do sistema."}
+                    {itemToDelete?.type === 'company' && "Esta ação não pode ser desfeita. A empresa e todos os seus dados serão removidos permanentemente."}
+                    {itemToDelete?.type === 'role' && "Esta ação não pode ser desfeita. O papel será removido permanentemente do sistema."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Excluir
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </main>
+      </div>
+    </AuthGuard>
+  );
+};
+
+export default Admin;
