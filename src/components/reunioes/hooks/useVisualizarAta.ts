@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Participante, Acao, ReuniaoDetalhes } from "../types";
+import { Participante, Acao, ReuniaoDetalhes, Registro } from "../types";
 
 export function useVisualizarAta(reuniaoId: string, isOpen: boolean) {
   const [activeTab, setActiveTab] = useState('resumo');
@@ -35,6 +35,7 @@ export function useVisualizarAta(reuniaoId: string, isOpen: boolean) {
         .from('reunioes_participantes')
         .select(`
           id,
+          reuniao_id,
           presente,
           employee:employees(name, avatar_url)
         `)
@@ -60,9 +61,12 @@ export function useVisualizarAta(reuniaoId: string, isOpen: boolean) {
         );
         
         return {
-          ...participante,
-          registro: registro || undefined
-        };
+          id: participante.id,
+          reuniao_id: participante.reuniao_id,
+          presente: participante.presente,
+          employee: employee,
+          registro: registro as Registro | undefined
+        } as Participante;
       });
       
       setParticipantes(participantesComRegistros);
@@ -71,6 +75,7 @@ export function useVisualizarAta(reuniaoId: string, isOpen: boolean) {
         .from('reunioes_acoes')
         .select(`
           id,
+          reuniao_id,
           titulo,
           descricao,
           prazo,

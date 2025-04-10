@@ -24,6 +24,7 @@ import { ResumoTab } from "./ata/ResumoTab";
 import { ParticipantesTab } from "./ata/ParticipantesTab";
 import { AcoesTab } from "./ata/AcoesTab";
 import { VisualizarAtaProps } from "./types";
+import { formatarData } from "./utils/formatters";
 
 export function VisualizarAta({ 
   reuniaoId, 
@@ -48,14 +49,7 @@ export function VisualizarAta({
             {loading ? "Carregando..." : `Ata de Reunião: ${reuniao?.titulo}`}
           </DialogTitle>
           <DialogDescription>
-            {loading ? "" : reuniao?.data ? new Date(reuniao.data).toLocaleDateString('pt-BR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              locale: 'pt-BR'
-            }) : ''}
+            {loading ? "" : reuniao?.data ? formatarData(reuniao.data) : ''}
           </DialogDescription>
         </DialogHeader>
         
