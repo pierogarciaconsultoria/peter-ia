@@ -3,11 +3,11 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 // Função para aplicar o filtro de empresa a qualquer consulta do Supabase
-export function applyEmpresaFilter<T>(
-  query: ReturnType<SupabaseClient["from"]>, 
+export function applyEmpresaFilter<T extends object>(
+  query: any, 
   empresaId: string | null, 
   isMaster: boolean
-): ReturnType<SupabaseClient["from"]> {
+): any {
   // Se o usuário for master, não aplicamos o filtro (pode ver tudo)
   if (isMaster) {
     return query;
@@ -27,8 +27,8 @@ export function useEmpresaFilter() {
   const { empresaId, isMaster } = useCurrentUser();
   
   return {
-    applyFilter: <T>(query: ReturnType<SupabaseClient["from"]>) => 
-      applyEmpresaFilter(query, empresaId, isMaster),
+    applyFilter: <T extends object>(query: any) => 
+      applyEmpresaFilter<T>(query, empresaId, isMaster),
     empresaId,
     isMaster
   };

@@ -20,8 +20,8 @@ export function useDepartamentosFiltered() {
     setIsLoading(true);
     
     try {
-      // Criamos a query base
-      let query = supabase.from('departamentos').select('*');
+      // Criamos a query base - usando any para contornar as restrições de tipo
+      let query = supabase.from('departamentos').select('*') as any;
       
       // Aplicamos o filtro de empresa
       query = applyFilter(query);
