@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +81,10 @@ export function DatabaseConnectionTest() {
                     {JSON.stringify(result.details, null, 2)}
                   </pre>
                 )}
+                <div className="text-xs mt-2 bg-gray-50 p-2 rounded-md">
+                  <p>Ambiente atual: {getEnvironmentInfo()}</p>
+                  <p>Isto pode afetar como a conexão com o banco de dados é estabelecida.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -101,6 +104,10 @@ export function DatabaseConnectionTest() {
                     Última conexão: {new Date(result.lastConnection.connection_time).toLocaleString()}
                   </p>
                 )}
+                <div className="text-xs mt-2 bg-gray-50 p-2 rounded-md">
+                  <p>Ambiente atual: {getEnvironmentInfo()}</p>
+                  <p>Sistema multi-empresa ativo. Filtragem por empresa aplicada conforme permissões.</p>
+                </div>
               </div>
             </div>
           </div>
