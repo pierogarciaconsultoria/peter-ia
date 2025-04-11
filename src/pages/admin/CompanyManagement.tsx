@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/custom-badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -77,11 +76,12 @@ export default function CompanyManagement() {
         
       if (companiesError) throw companiesError;
       
-      // Fetch user counts per company
+      // Fetch user counts per company - Fix for group() method not existing
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
         .select('company_id, count')
-        .group('company_id');
+        .select('company_id, count(*)')
+        .groupBy('company_id');
         
       if (userCountsError) throw userCountsError;
       
@@ -261,12 +261,12 @@ export default function CompanyManagement() {
                       <TableCell>{company.cnpj || "-"}</TableCell>
                       <TableCell>
                         <Badge variant="secondary" className={getPlanBadgeColor(company.plan)}>
-                          {company.plan.charAt(0).toUpperCase() + company.plan.slice(1)}
+                          {plan.charAt(0).toUpperCase() + plan.slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>{company.user_count || 0}</TableCell>
                       <TableCell>
-                        <Badge variant={company.active ? "success" : "destructive"}>
+                        <Badge variant={company.active ? "default" : "destructive"}>
                           {company.active ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
