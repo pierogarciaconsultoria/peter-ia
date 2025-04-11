@@ -81,7 +81,7 @@ export default function CompanyManagement() {
         .from('user_profiles')
         .select('company_id, count')
         .select('company_id, count(*)')
-        .groupBy('company_id');
+        .group('company_id');
         
       if (userCountsError) throw userCountsError;
       
@@ -195,8 +195,8 @@ export default function CompanyManagement() {
     setIsEditDialogOpen(true);
   };
   
-  const getPlanBadgeColor = (plan: string) => {
-    switch (plan) {
+  const getPlanBadgeColor = (planId: string) => {
+    switch (planId) {
       case 'free': return 'bg-gray-100 text-gray-800';
       case 'basic': return 'bg-blue-100 text-blue-800';
       case 'pro': return 'bg-purple-100 text-purple-800';
@@ -261,7 +261,7 @@ export default function CompanyManagement() {
                       <TableCell>{company.cnpj || "-"}</TableCell>
                       <TableCell>
                         <Badge variant="secondary" className={getPlanBadgeColor(company.plan)}>
-                          {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                          {company.plan.charAt(0).toUpperCase() + company.plan.slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>{company.user_count || 0}</TableCell>

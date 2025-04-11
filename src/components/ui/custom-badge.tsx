@@ -1,9 +1,10 @@
 
-import { BadgeProps, Badge as ShadcnBadge } from "./badge";
+import { Badge as ShadcnBadge } from "./badge";
 import { cn } from "@/lib/utils";
 
-interface CustomBadgeProps extends BadgeProps {
+interface CustomBadgeProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'variant'> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "success";
+  className?: string;
 }
 
 export function Badge({ className, variant = "default", ...props }: CustomBadgeProps) {
@@ -22,5 +23,5 @@ export function Badge({ className, variant = "default", ...props }: CustomBadgeP
   }
   
   // Use the regular Badge for other variants
-  return <ShadcnBadge className={className} variant={variant} {...props} />;
+  return <ShadcnBadge className={className} variant={variant as any} {...props} />;
 }
