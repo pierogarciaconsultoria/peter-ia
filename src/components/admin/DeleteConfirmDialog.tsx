@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ interface DeleteConfirmDialogProps {
   loading: boolean;
 }
 
-const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
+const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = memo(({
   open,
   onOpenChange,
   itemToDelete,
@@ -50,6 +50,8 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+});
+
+DeleteConfirmDialog.displayName = "DeleteConfirmDialog";
 
 export default DeleteConfirmDialog;

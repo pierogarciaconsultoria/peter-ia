@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
@@ -67,7 +67,7 @@ interface RoleManagementProps {
   userCompany: Company | null;
 }
 
-const RoleManagement: React.FC<RoleManagementProps> = ({
+const RoleManagement: React.FC<RoleManagementProps> = memo(({
   roles,
   companies,
   loading,
@@ -80,13 +80,12 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleCompany, setNewRoleCompany] = useState("");
-  const [newRoleIsAdmin, setNewRoleIsAdmin] = useState(false);
   const [newRoleIsDefault, setNewRoleIsDefault] = useState(false);
   const [creatingRole, setCreatingRole] = useState(false);
   
   const isEditorSuperAdmin = isSuperAdminInLovable();
 
-  const handleCreateRole = async () => {
+  const handleCreateRole = useCallback(async () => {
     setCreatingRole(true);
     try {
       const companyId = isSuperAdmin ? newRoleCompany : (userCompany?.id || null);
@@ -118,7 +117,6 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
         
         setNewRoleName("");
         setNewRoleCompany("");
-        setNewRoleIsAdmin(false);
         setNewRoleIsDefault(false);
       } else {
         const { data, error } = await supabase
@@ -128,8 +126,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
             company_id: companyId,
             is_default: newRoleIsDefault
           })
-          .select()
-          .single();
+          .select();
           
         if (error) throw error;
         
@@ -139,7 +136,6 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
         
         setNewRoleName("");
         setNewRoleCompany("");
-        setNewRoleIsAdmin(false);
         setNewRoleIsDefault(false);
       }
     } catch (error: any) {
@@ -148,7 +144,15 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
     } finally {
       setCreatingRole(false);
     }
-  };
+  }, [
+    newRoleName, 
+    newRoleCompany, 
+    newRoleIsDefault, 
+    isSuperAdmin, 
+    userCompany, 
+    isEditorSuperAdmin,
+    fetchRoles
+  ]);
 
   return (
     <Card>
@@ -296,6 +300,8 @@ const RoleManagement: React.FC<RoleManagementProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+RoleManagement.displayName = "RoleManagement";
 
 export default RoleManagement;
