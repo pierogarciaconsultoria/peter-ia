@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, XCircle, Database, RefreshCw } from "lucide-react";
 import { testSupabaseConnection } from "@/utils/supabaseConnectionTest";
 import { toast } from "sonner";
+import { getEnvironmentInfo } from "@/utils/lovableEditorDetection";
 
 export function DatabaseConnectionTest() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
