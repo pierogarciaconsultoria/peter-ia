@@ -6,24 +6,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrainCircuit } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 const Auth = () => {
   const navigate = useNavigate();
   
   // Use the centralized Lovable editor detection
   const isEditor = isLovableEditor();
+  // Verifica se é modo de acesso gratuito
+  const isFreeAccess = shouldGrantFreeAccess();
   
-  // Immediately redirect to dashboard if in Lovable editor
+  // Immediately redirect to dashboard if in Lovable editor or free access mode
   useEffect(() => {
-    if (isEditor) {
-      console.log("Acesso total concedido via Lovable editor - redirecionando para dashboard");
+    if (isEditor || isFreeAccess) {
+      console.log("Acesso total concedido - redirecionando para dashboard");
       navigate("/");
     }
-  }, [isEditor, navigate]);
+  }, [isEditor, isFreeAccess, navigate]);
   
-  // If in Lovable editor, don't render the auth page at all
-  if (isEditor) {
+  // If in Lovable editor or free access mode, don't render the auth page at all
+  if (isEditor || isFreeAccess) {
     return null;
   }
   

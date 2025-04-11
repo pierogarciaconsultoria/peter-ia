@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { isLovableEditor } from "@/utils/lovableEditorDetection";
-import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { shouldGrantFreeAccess, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
 interface AuthGuardProps {
@@ -28,6 +27,9 @@ export const AuthGuard = ({
   // This check allows anyone editing in Lovable to bypass authentication entirely
   // AND automatically grants them super admin privileges
   const isEditorSuperAdmin = isSuperAdminInLovable();
+  
+  // Verifica se o acesso gratuito está habilitado
+  const isFreeAccessEnabled = shouldGrantFreeAccess();
 
   useEffect(() => {
     // Log access for debugging
@@ -41,13 +43,19 @@ export const AuthGuard = ({
       }
     }
     
+    // Special notification for free access mode
+    if (isFreeAccessEnabled && sessionStorage.getItem('freeAccessNotified') !== 'true') {
+      toast.success("Acesso gratuito para testes concedido automaticamente");
+      sessionStorage.setItem('freeAccessNotified', 'true');
+    }
+    
     // Short delay to prevent flash of redirect
     const timer = setTimeout(() => {
       setIsChecking(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [user, location.pathname, isEditorSuperAdmin]);
+  }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
 
   if (isLoading || isChecking) {
     return (
@@ -56,6 +64,12 @@ export const AuthGuard = ({
         <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
+  }
+
+  // Acesso gratuito para testes: sempre concede acesso
+  if (isFreeAccessEnabled) {
+    console.log("Acesso gratuito para testes concedido - autenticação ignorada");
+    return <>{children}</>;
   }
 
   // Special bypass for Lovable editing - always return children directly

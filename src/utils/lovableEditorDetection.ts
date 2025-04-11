@@ -1,35 +1,33 @@
 
 /**
- * Utilitários para detectar se o usuário está no Lovable Editor
- * e conceder privilégios específicos quando necessário
+ * Utilitário para detectar se o usuário está no editor Lovable
+ * e conceder acesso total automaticamente
  */
 
-// Verifica se o usuário está acessando o aplicativo pelo Lovable Editor
-export function isLovableEditor(): boolean {
-  // Verifica o URL para parâmetros específicos do ambiente Lovable
-  const url = new URL(window.location.href);
-  const hasLovableParam = url.searchParams.has('master_admin');
-  
-  // Verifica localStorage para persistência do status de editor
-  const storedEditorStatus = localStorage.getItem('lovableEditorAccess') === 'true';
-  
-  // Se detectado como editor pela primeira vez, salva no localStorage
-  if (hasLovableParam && !storedEditorStatus) {
-    localStorage.setItem('lovableEditorAccess', 'true');
-    console.log("Modo Lovable Editor detectado e armazenado");
-  }
-  
-  return hasLovableParam || storedEditorStatus;
-}
+/**
+ * Verifica se o usuário está acessando a aplicação pelo Lovable Editor
+ * @returns boolean True se estiver no ambiente do Lovable Editor
+ */
+export const isLovableEditor = (): boolean => {
+  // Detecção se está no editor Lovable (via iframe)
+  const isInIframe = window !== window.parent;
+  const hasLovableHostname = window.location.hostname.includes('lovable');
+  return isInIframe || hasLovableHostname;
+};
 
-// Verifica se o usuário deve ter privilégios de super admin no Lovable Editor
-export function isSuperAdminInLovable(): boolean {
-  const isEditor = isLovableEditor();
-  
-  if (isEditor) {
-    // Registra no console para debugging
-    console.log("Acesso de super administrador concedido via Lovable Editor");
-  }
-  
-  return isEditor;
-}
+/**
+ * Verifica se deve conceder permissões de super admin devido ao ambiente Lovable
+ * @returns boolean True se estiver no ambiente Lovable e deva receber permissões de super admin
+ */
+export const isSuperAdminInLovable = (): boolean => {
+  return isLovableEditor();
+};
+
+/**
+ * Verifica se deve conceder acesso livre devido ao ambiente de teste/demo
+ * @returns boolean True se deve conceder acesso livre
+ */
+export const shouldGrantFreeAccess = (): boolean => {
+  // Sempre conceder acesso livre - requisito do cliente
+  return true;
+};

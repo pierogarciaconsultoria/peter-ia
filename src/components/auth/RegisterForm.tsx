@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, Building2 } from "lucide-react";
 import { useRegistration } from "@/hooks/useRegistration";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useNavigate } from "react-router-dom";
 
 interface RegisterFormProps {
   setActiveTab: (tab: string) => void;
 }
 
 export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
+  const navigate = useNavigate();
   const { 
     firstName,
     setFirstName,
@@ -27,8 +29,36 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
     setLgpdConsent,
     loading,
     errorDetails,
-    handleRegister
+    handleRegister,
+    isFreeAccess
   } = useRegistration(setActiveTab);
+
+  // Se estamos no modo de acesso gratuito, mostramos uma mensagem e botão para acessar direto
+  if (isFreeAccess) {
+    return (
+      <CardContent className="space-y-6">
+        <div className="p-4 bg-green-50 border border-green-200 rounded-md text-green-700">
+          <h3 className="font-medium text-lg mb-2">Acesso Gratuito Disponível</h3>
+          <p className="mb-4">
+            Você tem acesso gratuito para testar todas as funcionalidades da plataforma sem necessidade de cadastro.
+          </p>
+          <Button 
+            className="w-full bg-green-600 hover:bg-green-700"
+            onClick={() => navigate("/")}
+          >
+            Acessar Plataforma
+          </Button>
+        </div>
+        
+        <div className="text-center text-sm text-muted-foreground">
+          <p>
+            Para obter uma conta permanente com seus próprios dados, 
+            entre em contato com nossa equipe comercial.
+          </p>
+        </div>
+      </CardContent>
+    );
+  }
 
   return (
     <form onSubmit={handleRegister}>

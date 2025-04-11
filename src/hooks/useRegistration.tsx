@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 export const useRegistration = (setActiveTab: (tab: string) => void) => {
   const [loading, setLoading] = useState(false);
@@ -14,8 +15,19 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
   const [companyName, setCompanyName] = useState("");
   const [lgpdConsent, setLgpdConsent] = useState(false);
 
+  // Verifica se é modo de acesso gratuito
+  const isFreeAccess = shouldGrantFreeAccess();
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Se o acesso livre está habilitado, concede acesso imediatamente
+    if (isFreeAccess) {
+      toast.success("Acesso concedido automaticamente no modo demonstração");
+      setActiveTab("login");
+      return;
+    }
+    
     setLoading(true);
     setErrorDetails(null);
     
@@ -106,6 +118,7 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
     setLgpdConsent,
     loading,
     errorDetails,
-    handleRegister
+    handleRegister,
+    isFreeAccess
   };
 };

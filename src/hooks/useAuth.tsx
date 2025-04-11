@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { isLovableEditor, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { isSuperAdminInLovable, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 interface CompanyProfile {
   id: string;
@@ -41,25 +41,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isCompanyAdmin, setIsCompanyAdmin] = useState<boolean>(false);
   const [userCompany, setUserCompany] = useState<CompanyProfile | null>(null);
 
-  const isEditorAdmin = isSuperAdminInLovable();
+  const isMasterLovable = isSuperAdminInLovable();
+  const isFreeAccessEnabled = shouldGrantFreeAccess();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    if (isFreeAccessEnabled) {
+      console.log("Acesso gratuito habilitado - concedendo acesso automático");
+      setIsAdmin(true);
+      setIsSuperAdmin(true);
+      setIsCompanyAdmin(true);
+      setIsLoading(false);
+      
+      const demoCompany = {
+        id: "demo-company-id",
+        name: "Empresa Demo",
+        slug: "empresa-demo"
+      };
+      setUserCompany(demoCompany);
+      
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check admin status when auth state changes
         if (session?.user) {
           fetchUserProfile(session.user.id);
         } else {
-          // Check if user is in Lovable editor and grant super admin privileges
-          setIsAdmin(isEditorAdmin);
-          setIsSuperAdmin(isEditorAdmin);
-          setIsCompanyAdmin(isEditorAdmin);
+          setIsAdmin(isMasterLovable);
+          setIsSuperAdmin(isMasterLovable);
+          setIsCompanyAdmin(isMasterLovable);
           
-          if (!isEditorAdmin) {
+          if (!isMasterLovable) {
             setUserCompany(null);
           }
         }
@@ -68,7 +83,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -76,21 +90,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user) {
         fetchUserProfile(session.user.id);
       } else {
-        // Check if user is in Lovable editor and grant super admin privileges
-        setIsAdmin(isEditorAdmin);
-        setIsSuperAdmin(isEditorAdmin);
-        setIsCompanyAdmin(isEditorAdmin);
+        setIsAdmin(isMasterLovable);
+        setIsSuperAdmin(isMasterLovable);
+        setIsCompanyAdmin(isMasterLovable);
       }
       
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [isEditorAdmin]);
+  }, [isMasterLovable, isFreeAccessEnabled]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      // Buscar perfil do usuário
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('*, companies:company_id(*)')
@@ -103,12 +115,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (profileData) {
-        // Definir status de admin
         setIsSuperAdmin(profileData.is_super_admin || false);
         setIsCompanyAdmin(profileData.is_company_admin || false);
         setIsAdmin(profileData.is_super_admin || profileData.is_company_admin || false);
         
-        // Definir empresa do usuário
         if (profileData.companies) {
           setUserCompany({
             id: profileData.companies.id,
@@ -123,6 +133,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (isFreeAccessEnabled) {
+      toast.success("Acesso concedido automaticamente");
+      return { user: null, session: null };
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
@@ -138,6 +153,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    if (isFreeAccessEnabled) {
+      toast.success("Acesso concedido automaticamente");
+      return { user: null, session: null };
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -159,6 +179,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    if (isFreeAccessEnabled) {
+      toast.success("Logout simulado no modo de acesso gratuito");
+      return;
+    }
+
     try {
       await supabase.auth.signOut();
       toast.success("Logout realizado com sucesso");

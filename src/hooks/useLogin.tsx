@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 export const useLogin = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -16,19 +16,21 @@ export const useLogin = () => {
   
   // Use the centralized Lovable editor detection
   const isEditor = isLovableEditor();
+  // Verifica se o acesso gratuito está habilitado
+  const isFreeAccessEnabled = shouldGrantFreeAccess();
     
-  // Automatically redirect to dashboard if in Lovable editor
+  // Automatically redirect to dashboard if in Lovable editor or free access mode
   useEffect(() => {
-    if (isEditor) {
-      console.log("Acesso total concedido via Lovable editor - redirecionando para dashboard");
+    if (isEditor || isFreeAccessEnabled) {
+      console.log("Acesso total concedido - redirecionando para dashboard");
       navigate("/");
     }
-  }, [isEditor, navigate]);
+  }, [isEditor, isFreeAccessEnabled, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isEditor) {
+    if (isEditor || isFreeAccessEnabled) {
       navigate("/");
       return;
     }
@@ -52,7 +54,7 @@ export const useLogin = () => {
   };
 
   const handleDirectAdminLogin = () => {
-    if (isEditor) {
+    if (isEditor || isFreeAccessEnabled) {
       navigate("/admin");
     } else {
       console.log("Direct admin login requires master admin access");
@@ -69,6 +71,7 @@ export const useLogin = () => {
     errorDetails,
     handleLogin,
     handleDirectAdminLogin,
-    isEditor
+    isEditor,
+    isFreeAccessEnabled
   };
 };
