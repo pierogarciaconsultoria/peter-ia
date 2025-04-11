@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,14 +76,12 @@ export default function CompanyManagement() {
         
       if (companiesError) throw companiesError;
       
-      // Fetch user counts per company - Using the correct aggregate method for Supabase
-      // We need to use a raw SQL query because the JavaScript client doesn't support groupBy directly
+      // Fetch user counts per company using a simpler query approach
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
-        .select('company_id, count')
-        .select('company_id')
-        .select('count(*)', { count: 'exact', head: false })
-        .not('company_id', 'is', null);
+        .select('company_id, count(*)')
+        .is('company_id', 'not.null')
+        .group('company_id');
         
       if (userCountsError) throw userCountsError;
       
