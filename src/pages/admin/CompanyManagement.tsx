@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,12 +77,11 @@ export default function CompanyManagement() {
         
       if (companiesError) throw companiesError;
       
-      // Fetch user counts per company - Fix for group() method not existing
+      // Fetch user counts per company - Using correct method for PostgresJS
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
-        .select('company_id, count')
         .select('company_id, count(*)')
-        .group('company_id');
+        .groupBy('company_id');
         
       if (userCountsError) throw userCountsError;
       
