@@ -2,6 +2,7 @@
 import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { PostgrestQueryBuilder } from '@supabase/postgrest-js';
 
 interface UseSupabaseQueryOptions<T> {
   table: string;
@@ -28,9 +29,10 @@ export function useSupabaseQuery<T>({
     setError(null);
     
     try {
-      // Iniciar a query
+      // Iniciar a query usando o tipo genérico para evitar o erro de tipagem
+      // Usamos `as any` para contornar a verificação de tipo do Supabase
       let query = supabase
-        .from(customOptions?.table || table)
+        .from(customOptions?.table || table as any)
         .select(customOptions?.columns || columns, { count: 'exact' });
       
       // Aplicar filtros

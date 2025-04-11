@@ -20,8 +20,7 @@ export function useDepartamentosFiltered() {
     setIsLoading(true);
     
     try {
-      // Força o tipo para any para resolver o problema de tipo
-      // já que a tabela 'departamentos' não está presente nas definições de tipo automáticas
+      // Usamos `as any` para evitar problemas de tipagem com tabelas dinâmicas
       const query = supabase.from('departamentos' as any);
       
       // Seleção de todos os campos
