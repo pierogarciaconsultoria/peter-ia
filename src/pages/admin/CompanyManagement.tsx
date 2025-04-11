@@ -77,11 +77,14 @@ export default function CompanyManagement() {
         
       if (companiesError) throw companiesError;
       
-      // Fetch user counts per company - Using correct method for PostgresJS
+      // Fetch user counts per company - Using the correct aggregate method for Supabase
+      // We need to use a raw SQL query because the JavaScript client doesn't support groupBy directly
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
-        .select('company_id, count(*)')
-        .groupBy('company_id');
+        .select('company_id, count')
+        .select('company_id')
+        .select('count(*)', { count: 'exact', head: false })
+        .not('company_id', 'is', null);
         
       if (userCountsError) throw userCountsError;
       
