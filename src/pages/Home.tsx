@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { Dashboard } from "@/components/Dashboard";
 import { DatabaseConnectionTest } from "@/components/DatabaseConnectionTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isoRequirements } from "@/utils/isoRequirements";
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
             </TabsList>
             
             <TabsContent value="dashboard">
-              <Dashboard />
+              <Dashboard requirements={isoRequirements} />
             </TabsContent>
             
             <TabsContent value="connection">
