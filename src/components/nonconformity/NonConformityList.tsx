@@ -6,37 +6,50 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { CalendarIcon, FileText, AlertCircle, CheckCircle, Trash2, PenSquare, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-const mockData = [
-  {
-    id: 1,
-    title: "Falha no processo de embalagem",
-    date: "2025-03-15",
-    department: "Produção",
-    status: "Em análise",
-    description: "Produtos sendo embalados com defeitos visíveis na linha de produção 2."
-  },
-  {
-    id: 2,
-    title: "Desvio de temperatura no armazenamento",
-    date: "2025-03-10",
-    department: "Logística",
-    status: "Em tratamento",
-    description: "Temperatura fora dos limites aceitáveis no armazém de produtos perecíveis."
-  },
-  {
-    id: 3,
-    title: "Reclamação de cliente - produto defeituoso",
-    date: "2025-03-05",
-    department: "Qualidade",
-    status: "Concluído",
-    description: "Cliente relatou falha no funcionamento do produto após primeira utilização."
-  },
-];
+type NonConformityItem = {
+  id: number;
+  title: string;
+  date: string;
+  department: string;
+  status: string;
+  description: string;
+};
 
-export function NonConformityList({ onView, onEdit, onDelete }) {
-  const [nonConformities, setNonConformities] = useState(mockData);
+interface NonConformityListProps {
+  onView?: (item: NonConformityItem) => void;
+  onEdit?: (item: NonConformityItem) => void;
+  onDelete?: (item: NonConformityItem) => void;
+}
 
-  const getStatusBadge = (status) => {
+export function NonConformityList({ onView, onEdit, onDelete }: NonConformityListProps) {
+  const [nonConformities, setNonConformities] = useState<NonConformityItem[]>([
+    {
+      id: 1,
+      title: "Falha no processo de embalagem",
+      date: "2025-03-15",
+      department: "Produção",
+      status: "Em análise",
+      description: "Produtos sendo embalados com defeitos visíveis na linha de produção 2."
+    },
+    {
+      id: 2,
+      title: "Desvio de temperatura no armazenamento",
+      date: "2025-03-10",
+      department: "Logística",
+      status: "Em tratamento",
+      description: "Temperatura fora dos limites aceitáveis no armazém de produtos perecíveis."
+    },
+    {
+      id: 3,
+      title: "Reclamação de cliente - produto defeituoso",
+      date: "2025-03-05",
+      department: "Qualidade",
+      status: "Concluído",
+      description: "Cliente relatou falha no funcionamento do produto após primeira utilização."
+    },
+  ]);
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "Em análise":
         return (
