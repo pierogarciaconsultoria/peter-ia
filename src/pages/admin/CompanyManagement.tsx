@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,19 +79,26 @@ export default function CompanyManagement() {
       // Fetch user counts per company - fixed query approach
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
-        .select('company_id, count')
-        .not('company_id', 'is', null)
-        .count()
-        .groupBy('company_id');
-        
+        .select('company_id')
+        .is('company_id', 'not.null');
+      
+      let countsByCompany: Record<string, number> = {};
+      
+      if (userCounts) {
+        userCounts.forEach(profile => {
+          if (profile.company_id) {
+            countsByCompany[profile.company_id] = (countsByCompany[profile.company_id] || 0) + 1;
+          }
+        });
+      }
+      
       if (userCountsError) throw userCountsError;
       
       // Combine the data
       const companiesWithCounts = companiesData.map(company => {
-        const userCount = userCounts.find(uc => uc.company_id === company.id);
         return {
           ...company,
-          user_count: userCount ? parseInt(userCount.count) : 0
+          user_count: countsByCompany[company.id] || 0
         };
       });
       

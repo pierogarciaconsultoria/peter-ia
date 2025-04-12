@@ -7,12 +7,13 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ImplementationSchedule } from "@/components/dashboard/ImplementationSchedule";
 import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CalendarDays } from "lucide-react";
+import { Calendar, CalendarDays, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAudits } from "@/services/auditService";
 import { getExternalAudits } from "@/services/externalAuditService";
 import { formatDistanceToNow, format, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { RequirementsList } from "@/components/RequirementsList";
 
 interface DashboardProps {
   requirements: ISORequirement[];
@@ -20,6 +21,7 @@ interface DashboardProps {
 
 export function Dashboard({ requirements }: DashboardProps) {
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRequirement, setSelectedRequirement] = useState<ISORequirement | null>(null);
 
   const handleNewDocument = () => {
     setOpenDialog(true);
@@ -27,6 +29,10 @@ export function Dashboard({ requirements }: DashboardProps) {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleSelectRequirement = (requirement: ISORequirement) => {
+    setSelectedRequirement(requirement);
   };
 
   // Fetch internal and external audits
@@ -85,6 +91,27 @@ export function Dashboard({ requirements }: DashboardProps) {
             Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
             e melhoria contínua do Sistema de Gestão da Qualidade.
           </p>
+        </CardContent>
+      </Card>
+      
+      {/* ISO Requirements Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="mr-2 h-5 w-5 text-primary" />
+            Requisitos da ISO 9001:2015
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RequirementsList 
+            requirements={requirements.slice(0, 6)} 
+            onSelectRequirement={handleSelectRequirement} 
+          />
+          <div className="mt-4 text-center">
+            <a href="/dashboard" className="text-primary hover:underline">
+              Ver todos os requisitos
+            </a>
+          </div>
         </CardContent>
       </Card>
       
