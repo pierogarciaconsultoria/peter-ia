@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,11 +77,11 @@ export default function CompanyManagement() {
         
       if (companiesError) throw companiesError;
       
-      // Fetch user counts per company - fixed query approach
+      // Fetch user counts per company - corrected approach
       const { data: userCounts, error: userCountsError } = await supabase
         .from('user_profiles')
         .select('company_id')
-        .is('company_id', 'not.null');
+        .not('company_id', 'is', null);
       
       let countsByCompany: Record<string, number> = {};
       
@@ -454,3 +455,4 @@ export default function CompanyManagement() {
     </div>
   );
 }
+
