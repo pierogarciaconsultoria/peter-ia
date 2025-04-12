@@ -1574,63 +1574,6 @@ export type Database = {
           },
         ]
       }
-      lodges: {
-        Row: {
-          address: string
-          city: string
-          created_at: string | null
-          description: string | null
-          email: string
-          founded_date: string | null
-          id: string
-          is_active: boolean | null
-          logo: string | null
-          name: string
-          number: string
-          phone_number: string
-          president: string
-          state: string
-          updated_at: string | null
-          zipcode: string
-        }
-        Insert: {
-          address: string
-          city: string
-          created_at?: string | null
-          description?: string | null
-          email: string
-          founded_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          logo?: string | null
-          name: string
-          number: string
-          phone_number: string
-          president: string
-          state: string
-          updated_at?: string | null
-          zipcode: string
-        }
-        Update: {
-          address?: string
-          city?: string
-          created_at?: string | null
-          description?: string | null
-          email?: string
-          founded_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          logo?: string | null
-          name?: string
-          number?: string
-          phone_number?: string
-          president?: string
-          state?: string
-          updated_at?: string | null
-          zipcode?: string
-        }
-        Relationships: []
-      }
       meetings: {
         Row: {
           attendance_count: number | null
@@ -3109,48 +3052,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      units: {
-        Row: {
-          address: string
-          city: string
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          is_rentable: boolean | null
-          name: string
-          rental_base_price: string | null
-          state: string
-          updated_at: string | null
-          zipcode: string
-        }
-        Insert: {
-          address: string
-          city: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_rentable?: boolean | null
-          name: string
-          rental_base_price?: string | null
-          state: string
-          updated_at?: string | null
-          zipcode: string
-        }
-        Update: {
-          address?: string
-          city?: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_rentable?: boolean | null
-          name?: string
-          rental_base_price?: string | null
-          state?: string
-          updated_at?: string | null
-          zipcode?: string
-        }
-        Relationships: []
       }
       user_audit_logs: {
         Row: {

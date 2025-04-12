@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, XCircle, Database, RefreshCw } from "lucide-react";
 import { testSupabaseConnection } from "@/utils/supabaseConnectionTest";
 import { toast } from "sonner";
-import { getEnvironmentInfo } from "@/utils/lovableEditorDetection";
 
 export function DatabaseConnectionTest() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -83,10 +82,6 @@ export function DatabaseConnectionTest() {
                     {JSON.stringify(result.details, null, 2)}
                   </pre>
                 )}
-                <div className="text-xs mt-2 bg-gray-50 p-2 rounded-md">
-                  <p>Ambiente atual: {getEnvironmentInfo()}</p>
-                  <p>Isto pode afetar como a conexão com o banco de dados é estabelecida.</p>
-                </div>
               </div>
             </div>
           </div>
@@ -106,10 +101,6 @@ export function DatabaseConnectionTest() {
                     Última conexão: {new Date(result.lastConnection.connection_time).toLocaleString()}
                   </p>
                 )}
-                <div className="text-xs mt-2 bg-gray-50 p-2 rounded-md">
-                  <p>Ambiente atual: {getEnvironmentInfo()}</p>
-                  <p>Sistema multi-empresa ativo. Filtragem por empresa aplicada conforme permissões.</p>
-                </div>
               </div>
             </div>
           </div>

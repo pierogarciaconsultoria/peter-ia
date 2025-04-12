@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { menuItems } from "./MenuItems";
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -25,7 +25,6 @@ export function Sidebar({
   const isEditor = isLovableEditor();
   const { temPermissao } = useUserPermissions();
   const { isMaster, isAdmin } = useCurrentUser();
-  const location = useLocation();
 
   // Filtra os itens de menu com base nas permissões do usuário
   const filteredMenuItems = menuItems.filter(item => {
@@ -96,45 +95,31 @@ export function Sidebar({
         
         <nav className={cn("flex-1 overflow-y-auto", isCollapsed && !isHovered ? "px-2" : "px-4")}>
           <ul className="space-y-1">
-            {filteredMenuItems.map(item => {
-              const isActive = location.pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Button 
-                    variant={isActive ? "secondary" : "ghost"}
-                    className={cn(
-                      "w-full", 
-                      isCollapsed && !isHovered ? "justify-center px-2" : "justify-start",
-                      isActive && "bg-secondary text-secondary-foreground font-medium"
-                    )} 
-                    asChild
-                  >
-                    <Link to={item.href} title={isCollapsed && !isHovered ? item.title : undefined}>
-                      <item.icon size={16} className={isCollapsed && !isHovered ? "mr-0" : "mr-2"} />
-                      <span className={isCollapsed && !isHovered ? "sr-only" : ""}>
-                        {item.title}
-                      </span>
-                    </Link>
-                  </Button>
-                </li>
-              );
-            })}
+            {filteredMenuItems.map(item => (
+              <li key={item.href}>
+                <Button 
+                  variant="ghost" 
+                  className={cn("w-full", isCollapsed && !isHovered ? "justify-center px-2" : "justify-start")} 
+                  asChild
+                >
+                  <Link to={item.href} title={isCollapsed && !isHovered ? item.title : undefined}>
+                    <item.icon size={16} className={isCollapsed && !isHovered ? "mr-0" : "mr-2"} />
+                    <span className={isCollapsed && !isHovered ? "sr-only" : ""}>
+                      {item.title}
+                    </span>
+                  </Link>
+                </Button>
+              </li>
+            ))}
           </ul>
         </nav>
         
         <div className={cn("p-4 mt-auto border-t border-border/30", isCollapsed && !isHovered && "flex justify-center")}>
-          <Button 
-            variant="outline" 
-            className={cn(isCollapsed && !isHovered ? "w-10 h-10 p-0 justify-center" : "w-full justify-start")} 
-            title={isCollapsed && !isHovered ? "Exportar Relatório" : undefined}
-            asChild
-          >
-            <Link to="/documents">
-              <FileText size={16} className={isCollapsed && !isHovered ? "mr-0" : "mr-2"} />
-              <span className={isCollapsed && !isHovered ? "sr-only" : ""}>
-                Exportar Relatório
-              </span>
-            </Link>
+          <Button variant="outline" className={cn(isCollapsed && !isHovered ? "w-10 h-10 p-0 justify-center" : "w-full justify-start")} title={isCollapsed && !isHovered ? "Exportar Relatório" : undefined}>
+            <FileText size={16} className={isCollapsed && !isHovered ? "mr-0" : "mr-2"} />
+            <span className={isCollapsed && !isHovered ? "sr-only" : ""}>
+              Exportar Relatório
+            </span>
           </Button>
         </div>
       </div>

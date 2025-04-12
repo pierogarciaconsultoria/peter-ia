@@ -25,37 +25,9 @@ export const isSuperAdminInLovable = (): boolean => {
 
 /**
  * Verifica se deve conceder acesso livre devido ao ambiente de teste/demo
- * Este modo é útil para demonstrações e testes, mas deve ser desativado em produção
- * para ambientes multi-empresa
  * @returns boolean True se deve conceder acesso livre
  */
 export const shouldGrantFreeAccess = (): boolean => {
-  // Para ambiente multi-empresa em produção, você deve modificar esta função
-  // para retornar false ou verificar uma variável de ambiente específica
-  
-  // Exemplo de como implementar um controle mais fino:
-  // const isProduction = process.env.NODE_ENV === 'production';
-  // const hasFreeAccessOverride = localStorage.getItem('enable_free_access') === 'true';
-  // return !isProduction || hasFreeAccessOverride || isLovableEditor();
-  
-  // Por enquanto, mantém o comportamento atual conforme requisito do cliente
+  // Sempre conceder acesso livre - requisito do cliente
   return true;
-};
-
-/**
- * Verifica o tipo de ambiente para debug e diagnóstico
- * Útil para depuração em ambientes multi-empresa
- * @returns string Descrição do ambiente atual
- */
-export const getEnvironmentInfo = (): string => {
-  const isEditor = isLovableEditor();
-  const isFreeAccess = shouldGrantFreeAccess();
-  
-  if (isEditor) {
-    return "Ambiente Lovable Editor (acesso total)";
-  } else if (isFreeAccess) {
-    return "Modo de acesso livre (demo/teste)";
-  } else {
-    return "Ambiente de produção (acesso controlado)";
-  }
 };

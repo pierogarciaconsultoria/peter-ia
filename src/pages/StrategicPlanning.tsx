@@ -1,13 +1,143 @@
 
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StrategicIdentityForm } from "@/components/strategic-planning/StrategicIdentityForm";
+import { SwotAnalysis } from "@/components/strategic-planning/SwotAnalysis";
+import { BalancedScorecard } from "@/components/strategic-planning/BalancedScorecard";
+import { BusinessModelCanvas } from "@/components/strategic-planning/BusinessModelCanvas";
+import { StrategicActionPlan } from "@/components/strategic-planning/StrategicActionPlan";
+import { getStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
+import { getSwotItems } from "@/services/strategic-planning/swotService";
+import { getBscPerspectives } from "@/services/strategic-planning/bscService";
+import { getBusinessModelCanvas } from "@/services/strategicPlanningService";
+import { exportStrategicPlanningToPDF } from "@/components/strategic-planning/utils/pdf-export";
+import { StrategicIdentity } from "@/types/strategic-planning";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
-export default function StrategicPlanning() {
+const StrategicPlanning = () => {
+  const [activeTab, setActiveTab] = useState("identity");
+  const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const fetchIdentity = async () => {
+    setLoading(true);
+    try {
+      const data = await getStrategicIdentity();
+      setIdentity(data);
+    } catch (error) {
+      console.error("Error fetching strategic identity:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Detect if sidebar is collapsed
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const sidebar = document.querySelector('[class*="md:w-20"]');
+      setSidebarCollapsed(!!sidebar);
+    };
+    
+    // Check sidebar state periodically
+    const interval = setInterval(checkSidebarState, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetchIdentity();
+  }, []);
+
+  const handleExportPDF = async () => {
+    setExportLoading(true);
+    try {
+      const [identityData, swotData, bscData, canvasData] = await Promise.all([
+        getStrategicIdentity(),
+        getSwotItems(),
+        getBscPerspectives(),
+        getBusinessModelCanvas()
+      ]);
+      
+      await exportStrategicPlanningToPDF(identityData, swotData, bscData, canvasData);
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
-    <PlaceholderPage 
-      title="Planejamento Estratégico" 
-      icon={<TrendingUp className="mr-2 h-6 w-6 text-primary" />}
-      description="Defina e acompanhe os objetivos estratégicos da organização." 
-    />
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navigation />
+      
+      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>
+              <p className="text-muted-foreground mt-1">
+                Defina e acompanhe a estratégia da sua organização
+              </p>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleExportPDF} 
+              disabled={exportLoading}
+              className="flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              {exportLoading ? "Gerando..." : "Exportar Relatório"}
+            </Button>
+          </div>
+          
+          <Tabs defaultValue="identity" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="identity">Identidade Estratégica</TabsTrigger>
+              <TabsTrigger value="swot">Análise SWOT</TabsTrigger>
+              <TabsTrigger value="bsc">Balanced Scorecard</TabsTrigger>
+              <TabsTrigger value="canvas">Business Model Canvas</TabsTrigger>
+              <TabsTrigger value="action_plan">Plano de Ação</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="identity">
+              {loading ? (
+                <p className="text-center text-muted-foreground py-12">Carregando...</p>
+              ) : (
+                <StrategicIdentityForm
+                  identity={identity}
+                  onUpdate={fetchIdentity}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="swot">
+              <SwotAnalysis />
+            </TabsContent>
+            
+            <TabsContent value="bsc">
+              <BalancedScorecard />
+            </TabsContent>
+            
+            <TabsContent value="canvas">
+              <BusinessModelCanvas />
+            </TabsContent>
+            
+            <TabsContent value="action_plan">
+              <StrategicActionPlan />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
   );
-}
+};
+
+export default StrategicPlanning;

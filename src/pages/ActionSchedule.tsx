@@ -1,30 +1,26 @@
 
-import { useState } from "react";
-import { ClipboardList, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Import the useActionSchedule hook
-import { useActionSchedule } from "@/hooks/useActionSchedule";
-
-// Import components for action plan
-import { ActionHeader } from "@/components/actions/ActionHeader";
-import { ActionStatusCards } from "@/components/actions/ActionStatusCards";
+import { Dialog } from "@/components/ui/dialog";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import { AlertCircle, Download } from "lucide-react";
 import { ActionTable } from "@/components/actions/ActionTable";
 import { ActionForm } from "@/components/actions/ActionForm";
-import { ActionViewToggle } from "@/components/actions/ActionViewToggle";
+import { ActionDetails } from "@/components/actions/ActionDetails";
+import { ActionHeader } from "@/components/actions/ActionHeader";
+import { ActionStatusCards } from "@/components/actions/ActionStatusCards";
 import { ActionFilters } from "@/components/actions/ActionFilters";
+import { ActionViewToggle } from "@/components/actions/ActionViewToggle";
 import { ActionKanban } from "@/components/actions/kanban/ActionKanban";
 import { ActionGantt } from "@/components/actions/gantt/ActionGantt";
 import { ActionsByResponsible } from "@/components/actions/responsible/ActionsByResponsible";
+import { Button } from "@/components/ui/button";
+import { useActionSchedule } from "@/hooks/useActionSchedule";
 
-export default function ActionSchedule() {
-  // Use the hook to get all the actions data and functions
-  const { 
-    actions,
+const ActionSchedule = () => {
+  const {
     filteredActions,
     isLoading,
+    error,
     statusFilter,
     setStatusFilter,
     processFilter,
@@ -36,6 +32,10 @@ export default function ActionSchedule() {
     handleDelete,
     isAddDialogOpen, 
     setIsAddDialogOpen,
+    isEditDialogOpen, 
+    setIsEditDialogOpen,
+    isViewDialogOpen, 
+    setIsViewDialogOpen,
     selectedAction,
     statusCounts,
     invalidateActions,
@@ -43,232 +43,130 @@ export default function ActionSchedule() {
     setViewFormat,
     handleExportToPDF
   } = useActionSchedule();
-  
-  const totalCount = actions.length;
-  
+
   return (
-    <div className="container py-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <ClipboardList className="mr-2 h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold tracking-tight">Plano de Ação</h1>
-        </div>
-        
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Ação
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navigation />
+      
+      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
+        <div className="max-w-7xl mx-auto">
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <ActionHeader onAddAction={() => setIsAddDialogOpen(true)} title="Plano de Ação" />
             <ActionForm 
-              onClose={() => setIsAddDialogOpen(false)}
+              onClose={() => setIsAddDialogOpen(false)} 
               afterSubmit={invalidateActions}
             />
-          </DialogContent>
-        </Dialog>
-      </div>
+          </Dialog>
+          
+          {/* Status Cards */}
+          <ActionStatusCards
+            totalCount={filteredActions.length}
+            counts={statusCounts}
+            currentFilter={statusFilter}
+            onFilterChange={setStatusFilter}
+          />
+          
+          {/* Filters and View Controls */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <ActionFilters
+              processFilter={processFilter}
+              onProcessFilterChange={setProcessFilter}
+              sourceFilter={sourceFilter}
+              onSourceFilterChange={setSourceFilter}
+              filteredCount={filteredActions.length}
+            />
+            
+            <div className="flex items-center gap-4">
+              <ActionViewToggle
+                viewFormat={viewFormat}
+                onViewFormatChange={setViewFormat}
+              />
+              
+              <Button variant="outline" onClick={handleExportToPDF}>
+                <Download className="mr-2 h-4 w-4" />
+                Exportar PDF
+              </Button>
+            </div>
+          </div>
+          
+          {/* Actions Content Based on View Format */}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p>Carregando ações...</p>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center h-64 text-destructive">
+              <AlertCircle className="mr-2" />
+              <p>Erro ao carregar as ações</p>
+            </div>
+          ) : (
+            <>
+              {viewFormat === 'table' && (
+                <ActionTable 
+                  actions={filteredActions} 
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+              
+              {viewFormat === 'kanban' && (
+                <ActionKanban 
+                  actions={filteredActions}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+              
+              {viewFormat === 'gantt' && (
+                <ActionGantt 
+                  actions={filteredActions}
+                  onAction={handleView}
+                />
+              )}
+              
+              {viewFormat === 'responsible' && (
+                <ActionsByResponsible 
+                  actions={filteredActions}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </main>
       
-      <ActionHeader 
-        onAddAction={() => setIsAddDialogOpen(true)}
-      />
+      <Footer />
       
-      <ActionStatusCards 
-        totalCount={totalCount}
-        counts={statusCounts}
-        currentFilter={statusFilter}
-        onFilterChange={setStatusFilter}
-      />
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        {selectedAction && (
+          <ActionForm 
+            action={selectedAction}
+            onClose={() => setIsEditDialogOpen(false)}
+            afterSubmit={invalidateActions}
+          />
+        )}
+      </Dialog>
       
-      <div className="flex flex-col sm:flex-row justify-between gap-4 items-center">
-        <ActionFilters 
-          processFilter={processFilter}
-          sourceFilter={sourceFilter}
-          onProcessFilterChange={setProcessFilter}
-          onSourceFilterChange={setSourceFilter}
-          filteredCount={filteredActions.length}
-        />
-        <ActionViewToggle 
-          viewFormat={viewFormat} 
-          onViewFormatChange={setViewFormat}
-        />
-      </div>
-      
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="open">Em Aberto</TabsTrigger>
-          <TabsTrigger value="progress">Em Andamento</TabsTrigger>
-          <TabsTrigger value="delayed">Atrasadas</TabsTrigger>
-          <TabsTrigger value="completed">Concluídas</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="pt-4">
-          {viewFormat === "table" && (
-            <ActionTable 
-              actions={filteredActions}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "kanban" && (
-            <ActionKanban 
-              actions={filteredActions}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "gantt" && (
-            <ActionGantt 
-              actions={filteredActions}
-              onAction={handleView}
-            />
-          )}
-          {viewFormat === "responsible" && (
-            <ActionsByResponsible 
-              actions={filteredActions}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="open" className="pt-4">
-          {viewFormat === "table" && (
-            <ActionTable 
-              actions={filteredActions.filter(a => a.status === 'planned')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "kanban" && (
-            <ActionKanban 
-              actions={filteredActions.filter(a => a.status === 'planned')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "gantt" && (
-            <ActionGantt 
-              actions={filteredActions.filter(a => a.status === 'planned')}
-              onAction={handleView}
-            />
-          )}
-          {viewFormat === "responsible" && (
-            <ActionsByResponsible 
-              actions={filteredActions.filter(a => a.status === 'planned')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="progress" className="pt-4">
-          {viewFormat === "table" && (
-            <ActionTable 
-              actions={filteredActions.filter(a => a.status === 'in_progress')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "kanban" && (
-            <ActionKanban 
-              actions={filteredActions.filter(a => a.status === 'in_progress')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "gantt" && (
-            <ActionGantt 
-              actions={filteredActions.filter(a => a.status === 'in_progress')}
-              onAction={handleView}
-            />
-          )}
-          {viewFormat === "responsible" && (
-            <ActionsByResponsible 
-              actions={filteredActions.filter(a => a.status === 'in_progress')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="delayed" className="pt-4">
-          {viewFormat === "table" && (
-            <ActionTable 
-              actions={filteredActions.filter(a => a.status === 'delayed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "kanban" && (
-            <ActionKanban 
-              actions={filteredActions.filter(a => a.status === 'delayed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "gantt" && (
-            <ActionGantt 
-              actions={filteredActions.filter(a => a.status === 'delayed')}
-              onAction={handleView}
-            />
-          )}
-          {viewFormat === "responsible" && (
-            <ActionsByResponsible 
-              actions={filteredActions.filter(a => a.status === 'delayed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="completed" className="pt-4">
-          {viewFormat === "table" && (
-            <ActionTable 
-              actions={filteredActions.filter(a => a.status === 'completed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "kanban" && (
-            <ActionKanban 
-              actions={filteredActions.filter(a => a.status === 'completed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-          {viewFormat === "gantt" && (
-            <ActionGantt 
-              actions={filteredActions.filter(a => a.status === 'completed')}
-              onAction={handleView}
-            />
-          )}
-          {viewFormat === "responsible" && (
-            <ActionsByResponsible 
-              actions={filteredActions.filter(a => a.status === 'completed')}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        {selectedAction && (
+          <ActionDetails 
+            action={selectedAction}
+            onClose={() => setIsViewDialogOpen(false)}
+            onEdit={() => {
+              setIsViewDialogOpen(false);
+              setIsEditDialogOpen(true);
+            }}
+          />
+        )}
+      </Dialog>
     </div>
   );
-}
+};
+
+export default ActionSchedule;

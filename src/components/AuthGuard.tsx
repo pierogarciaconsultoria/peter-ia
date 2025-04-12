@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { shouldGrantFreeAccess, isSuperAdminInLovable, getEnvironmentInfo } from "@/utils/lovableEditorDetection";
+import { shouldGrantFreeAccess, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
 interface AuthGuardProps {
@@ -30,25 +30,22 @@ export const AuthGuard = ({
   
   // Verifica se o acesso gratuito está habilitado
   const isFreeAccessEnabled = shouldGrantFreeAccess();
-  
-  // Obtém informações do ambiente atual para logging
-  const environmentInfo = getEnvironmentInfo();
 
   useEffect(() => {
     // Log access for debugging
     if (isEditorSuperAdmin) {
-      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor com privilégios de super admin (${environmentInfo})`);
+      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor com privilégios de super admin`);
       
       // Show toast for first access only
       if (sessionStorage.getItem('lovableEditorAccessNotified') !== 'true') {
-        toast.success(`Acesso total como super administrador concedido via ${environmentInfo}`);
+        toast.success("Acesso total como super administrador concedido via Lovable Editor");
         sessionStorage.setItem('lovableEditorAccessNotified', 'true');
       }
     }
     
     // Special notification for free access mode
     if (isFreeAccessEnabled && sessionStorage.getItem('freeAccessNotified') !== 'true') {
-      toast.success(`Acesso gratuito para testes concedido automaticamente (${environmentInfo})`);
+      toast.success("Acesso gratuito para testes concedido automaticamente");
       sessionStorage.setItem('freeAccessNotified', 'true');
     }
     
@@ -71,7 +68,7 @@ export const AuthGuard = ({
 
   // Acesso gratuito para testes: sempre concede acesso
   if (isFreeAccessEnabled) {
-    console.log(`Acesso gratuito para testes concedido - autenticação ignorada (${environmentInfo})`);
+    console.log("Acesso gratuito para testes concedido - autenticação ignorada");
     return <>{children}</>;
   }
 
@@ -79,7 +76,7 @@ export const AuthGuard = ({
   // This completely bypasses all authentication for Lovable editors
   // and grants them super admin privileges
   if (isEditorSuperAdmin) {
-    console.log(`Acesso total como super administrador concedido via ${environmentInfo} - autenticação ignorada`);
+    console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
     return <>{children}</>;
   }
 

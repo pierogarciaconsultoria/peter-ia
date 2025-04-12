@@ -4,7 +4,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { useLogin } from "@/hooks/useLogin";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { isLovableEditor, shouldGrantFreeAccess, getEnvironmentInfo } from "@/utils/lovableEditorDetection";
+import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 export const LoginForm = () => {
   const { loading, handleDirectAdminLogin, isFreeAccessEnabled } = useLogin();
@@ -14,13 +14,11 @@ export const LoginForm = () => {
   const isEditor = isLovableEditor();
   // Verifica se é modo de acesso gratuito
   const isFreeAccess = shouldGrantFreeAccess();
-  // Obtém informações sobre o ambiente atual
-  const environmentInfo = getEnvironmentInfo();
 
   // If in Lovable editor or free access mode, automatically redirect to dashboard
   useEffect(() => {
     if (isEditor || isFreeAccess) {
-      console.log(`Acesso total concedido - redirecionando para dashboard (${environmentInfo})`);
+      console.log("Acesso total concedido - redirecionando para dashboard");
       navigate("/");
     }
   }, [isEditor, isFreeAccess, navigate]);
@@ -71,7 +69,7 @@ export const LoginForm = () => {
         )}
         <p className="text-xs text-muted-foreground text-center pt-2">
           {isEditor ? 
-            `Você está usando o acesso total via Lovable Editor (${environmentInfo}).` : 
+            "Você está usando o acesso total via Lovable Editor." : 
             "Entre em contato com o suporte para mais informações."}
         </p>
       </CardFooter>

@@ -1,7 +1,8 @@
 
 import { Kanban, ChartGantt, User } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ViewFormat } from "@/hooks/useActionSchedule";
+
+type ViewFormat = 'table' | 'kanban' | 'gantt' | 'responsible';
 
 interface ActionViewToggleProps {
   viewFormat: ViewFormat;
