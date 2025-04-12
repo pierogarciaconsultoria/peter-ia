@@ -2,7 +2,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Dashboard } from "@/components/Dashboard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { isoRequirements } from "@/utils/isoRequirements";
 
 export default function Home() {
@@ -15,9 +15,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold">Dashboard</h1>
           
           <Tabs defaultValue="dashboard">
-            <TabsList>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            </TabsList>
+            {/* Dashboard button removed */}
             
             <TabsContent value="dashboard">
               <Dashboard requirements={isoRequirements} />

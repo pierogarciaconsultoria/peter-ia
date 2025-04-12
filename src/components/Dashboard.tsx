@@ -23,10 +23,6 @@ export function Dashboard({ requirements }: DashboardProps) {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRequirement, setSelectedRequirement] = useState<ISORequirement | null>(null);
 
-  const handleNewDocument = () => {
-    setOpenDialog(true);
-  };
-
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
@@ -82,7 +78,7 @@ export function Dashboard({ requirements }: DashboardProps) {
 
   return (
     <div className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
-      <DashboardHeader onNewDocument={handleNewDocument} />
+      <DashboardHeader />
       
       <Card className="mb-6">
         <CardContent className="p-6">

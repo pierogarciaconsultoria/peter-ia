@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Dashboard as DashboardComponent } from "@/components/Dashboard";

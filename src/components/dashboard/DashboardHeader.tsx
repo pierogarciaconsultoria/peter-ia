@@ -1,8 +1,10 @@
-import { Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+
 interface DashboardHeaderProps {
-  onNewDocument: () => void;
+  onNewDocument?: () => void; // Making this optional since we're removing the button
 }
+
 export function DashboardHeader({
   onNewDocument
 }: DashboardHeaderProps) {
@@ -11,9 +13,6 @@ export function DashboardHeader({
         <span className="text-sm font-medium text-muted-foreground"></span>
         <h1 className="text-3xl font-bold mt-1">Sistema de Gestão da Qualidade</h1>
       </div>
-      <Button className="self-start" onClick={onNewDocument}>
-        <Plus size={16} className="mr-2" />
-        New Document
-      </Button>
+      {/* New Document button removed */}
     </div>;
 }
