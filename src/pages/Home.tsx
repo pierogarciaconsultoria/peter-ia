@@ -12,7 +12,7 @@ export default function Home() {
       
       <main className="flex-1 p-8 pt-24 md:pt-16 md:pl-64">
         <div className="max-w-7xl mx-auto space-y-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          {/* Dashboard title removed */}
           
           <Tabs defaultValue="dashboard">
             {/* Dashboard button removed */}
