@@ -14,6 +14,11 @@ export default function Reunioes() {
   const [activeTab, setActiveTab] = useState("agendadas");
   const [isNovaReuniaoOpen, setIsNovaReuniaoOpen] = useState(false);
   
+  // Handler for dialog close on success
+  const handleDialogSuccess = () => {
+    setIsNovaReuniaoOpen(false);
+  };
+  
   return (
     <div className="container py-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
@@ -30,7 +35,7 @@ export default function Reunioes() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl">
-            <NovaReuniaoDialog onSuccess={() => setIsNovaReuniaoOpen(false)} />
+            <NovaReuniaoDialog onSuccess={handleDialogSuccess} />
           </DialogContent>
         </Dialog>
       </div>

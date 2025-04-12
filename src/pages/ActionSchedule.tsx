@@ -1,11 +1,14 @@
 
 import { useState } from "react";
-import { ClipboardList, Plus, ListFilter, ViewIcon } from "lucide-react";
+import { ClipboardList, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Importar componentes de plano de ação
+// Import the useActionSchedule hook
+import { useActionSchedule } from "@/hooks/useActionSchedule";
+
+// Import components for action plan
 import { ActionHeader } from "@/components/actions/ActionHeader";
 import { ActionStatusCards } from "@/components/actions/ActionStatusCards";
 import { ActionTable } from "@/components/actions/ActionTable";
@@ -17,8 +20,31 @@ import { ActionGantt } from "@/components/actions/gantt/ActionGantt";
 import { ActionsByResponsible } from "@/components/actions/responsible/ActionsByResponsible";
 
 export default function ActionSchedule() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState("table");
+  // Use the hook to get all the actions data and functions
+  const { 
+    actions,
+    filteredActions,
+    isLoading,
+    statusFilter,
+    setStatusFilter,
+    processFilter,
+    setProcessFilter,
+    sourceFilter,
+    setSourceFilter,
+    handleEdit,
+    handleView,
+    handleDelete,
+    isAddDialogOpen, 
+    setIsAddDialogOpen,
+    selectedAction,
+    statusCounts,
+    invalidateActions,
+    viewFormat,
+    setViewFormat,
+    handleExportToPDF
+  } = useActionSchedule();
+  
+  const totalCount = actions.length;
   
   return (
     <div className="container py-6 space-y-6 max-w-7xl mx-auto">
@@ -28,7 +54,7 @@ export default function ActionSchedule() {
           <h1 className="text-2xl font-bold tracking-tight">Plano de Ação</h1>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -36,18 +62,37 @@ export default function ActionSchedule() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl">
-            <ActionForm onSuccess={() => setIsDialogOpen(false)} />
+            <ActionForm 
+              onClose={() => setIsAddDialogOpen(false)}
+              afterSubmit={invalidateActions}
+            />
           </DialogContent>
         </Dialog>
       </div>
       
-      <ActionHeader />
+      <ActionHeader 
+        onAddAction={() => setIsAddDialogOpen(true)}
+      />
       
-      <ActionStatusCards />
+      <ActionStatusCards 
+        totalCount={totalCount}
+        counts={statusCounts}
+        currentFilter={statusFilter}
+        onFilterChange={setStatusFilter}
+      />
       
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-center">
-        <ActionFilters />
-        <ActionViewToggle activeView={viewMode} onViewChange={setViewMode} />
+        <ActionFilters 
+          processFilter={processFilter}
+          sourceFilter={sourceFilter}
+          onProcessFilterChange={setProcessFilter}
+          onSourceFilterChange={setSourceFilter}
+          filteredCount={filteredActions.length}
+        />
+        <ActionViewToggle 
+          viewFormat={viewFormat} 
+          onViewFormatChange={setViewFormat}
+        />
       </div>
       
       <Tabs defaultValue="all" className="w-full">
@@ -60,38 +105,168 @@ export default function ActionSchedule() {
         </TabsList>
         
         <TabsContent value="all" className="pt-4">
-          {viewMode === "table" && <ActionTable />}
-          {viewMode === "kanban" && <ActionKanban />}
-          {viewMode === "gantt" && <ActionGantt />}
-          {viewMode === "responsible" && <ActionsByResponsible />}
+          {viewFormat === "table" && (
+            <ActionTable 
+              actions={filteredActions}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "kanban" && (
+            <ActionKanban 
+              actions={filteredActions}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "gantt" && (
+            <ActionGantt 
+              actions={filteredActions}
+              onAction={handleView}
+            />
+          )}
+          {viewFormat === "responsible" && (
+            <ActionsByResponsible 
+              actions={filteredActions}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="open" className="pt-4">
-          {viewMode === "table" && <ActionTable status="open" />}
-          {viewMode === "kanban" && <ActionKanban status="open" />}
-          {viewMode === "gantt" && <ActionGantt status="open" />}
-          {viewMode === "responsible" && <ActionsByResponsible status="open" />}
+          {viewFormat === "table" && (
+            <ActionTable 
+              actions={filteredActions.filter(a => a.status === 'planned')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "kanban" && (
+            <ActionKanban 
+              actions={filteredActions.filter(a => a.status === 'planned')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "gantt" && (
+            <ActionGantt 
+              actions={filteredActions.filter(a => a.status === 'planned')}
+              onAction={handleView}
+            />
+          )}
+          {viewFormat === "responsible" && (
+            <ActionsByResponsible 
+              actions={filteredActions.filter(a => a.status === 'planned')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="progress" className="pt-4">
-          {viewMode === "table" && <ActionTable status="progress" />}
-          {viewMode === "kanban" && <ActionKanban status="progress" />}
-          {viewMode === "gantt" && <ActionGantt status="progress" />}
-          {viewMode === "responsible" && <ActionsByResponsible status="progress" />}
+          {viewFormat === "table" && (
+            <ActionTable 
+              actions={filteredActions.filter(a => a.status === 'in_progress')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "kanban" && (
+            <ActionKanban 
+              actions={filteredActions.filter(a => a.status === 'in_progress')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "gantt" && (
+            <ActionGantt 
+              actions={filteredActions.filter(a => a.status === 'in_progress')}
+              onAction={handleView}
+            />
+          )}
+          {viewFormat === "responsible" && (
+            <ActionsByResponsible 
+              actions={filteredActions.filter(a => a.status === 'in_progress')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="delayed" className="pt-4">
-          {viewMode === "table" && <ActionTable status="delayed" />}
-          {viewMode === "kanban" && <ActionKanban status="delayed" />}
-          {viewMode === "gantt" && <ActionGantt status="delayed" />}
-          {viewMode === "responsible" && <ActionsByResponsible status="delayed" />}
+          {viewFormat === "table" && (
+            <ActionTable 
+              actions={filteredActions.filter(a => a.status === 'delayed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "kanban" && (
+            <ActionKanban 
+              actions={filteredActions.filter(a => a.status === 'delayed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "gantt" && (
+            <ActionGantt 
+              actions={filteredActions.filter(a => a.status === 'delayed')}
+              onAction={handleView}
+            />
+          )}
+          {viewFormat === "responsible" && (
+            <ActionsByResponsible 
+              actions={filteredActions.filter(a => a.status === 'delayed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="completed" className="pt-4">
-          {viewMode === "table" && <ActionTable status="completed" />}
-          {viewMode === "kanban" && <ActionKanban status="completed" />}
-          {viewMode === "gantt" && <ActionGantt status="completed" />}
-          {viewMode === "responsible" && <ActionsByResponsible status="completed" />}
+          {viewFormat === "table" && (
+            <ActionTable 
+              actions={filteredActions.filter(a => a.status === 'completed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "kanban" && (
+            <ActionKanban 
+              actions={filteredActions.filter(a => a.status === 'completed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
+          {viewFormat === "gantt" && (
+            <ActionGantt 
+              actions={filteredActions.filter(a => a.status === 'completed')}
+              onAction={handleView}
+            />
+          )}
+          {viewFormat === "responsible" && (
+            <ActionsByResponsible 
+              actions={filteredActions.filter(a => a.status === 'completed')}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>
