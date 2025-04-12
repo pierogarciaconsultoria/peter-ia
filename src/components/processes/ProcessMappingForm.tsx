@@ -31,13 +31,20 @@ import { useProcesses } from "@/hooks/useProcesses";
 import { ProcessActorSelector } from "./ProcessActorSelector";
 import { DocumentSelector } from "./DocumentSelector";
 
-interface ProcessIndicator {
+export interface ProcessIndicator {
   name: string;
   goal: string;
   current: string;
+  generatedId?: number;
 }
 
-const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
+export interface ProcessMappingFormProps {
+  onSubmit: (data: any) => void;
+  initialData: any;
+  isEditing: boolean;
+}
+
+const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({ onSubmit, initialData, isEditing }) => {
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [owner, setOwner] = useState(initialData?.owner || "");
@@ -205,7 +212,7 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
     setIndicators(updatedIndicators);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name || !description || !owner) {
