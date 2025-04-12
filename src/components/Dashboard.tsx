@@ -86,9 +86,9 @@ export function Dashboard({ requirements }: DashboardProps) {
       
       <Card className="mb-6">
         <CardContent className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Requisitos ISO 9001:2015</h2>
+          <h2 className="text-xl font-semibold mb-4">Requisitos</h2>
           <p className="text-muted-foreground">
-            Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
+            Monitoramento e controle dos requisitos da norma, com foco na implementação
             e melhoria contínua do Sistema de Gestão da Qualidade.
           </p>
         </CardContent>
@@ -99,7 +99,7 @@ export function Dashboard({ requirements }: DashboardProps) {
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileText className="mr-2 h-5 w-5 text-primary" />
-            Requisitos da ISO 9001:2015
+            Requisitos
           </CardTitle>
         </CardHeader>
         <CardContent>

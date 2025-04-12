@@ -2,7 +2,6 @@
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Dashboard } from "@/components/Dashboard";
-import { DatabaseConnectionTest } from "@/components/DatabaseConnectionTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isoRequirements } from "@/utils/isoRequirements";
 
@@ -18,17 +17,10 @@ export default function Home() {
           <Tabs defaultValue="dashboard">
             <TabsList>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="connection">Status da Conexão</TabsTrigger>
             </TabsList>
             
             <TabsContent value="dashboard">
               <Dashboard requirements={isoRequirements} />
-            </TabsContent>
-            
-            <TabsContent value="connection">
-              <div className="max-w-3xl mx-auto py-4">
-                <DatabaseConnectionTest />
-              </div>
             </TabsContent>
           </Tabs>
         </div>
