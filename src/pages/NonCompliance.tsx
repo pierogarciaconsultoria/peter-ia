@@ -1,100 +1,179 @@
 
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
+import { Plus, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-
-// Importar componentes de não conformidade
-import { NonConformityList } from "@/components/nonconformity/NonConformityList";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NonConformityForm } from "@/components/nonconformity/NonConformityForm";
+import { NonConformityList } from "@/components/nonconformity/NonConformityList";
 import { NonConformityStats } from "@/components/nonconformity/NonConformityStats";
 import { NonConformityChart } from "@/components/nonconformity/NonConformityChart";
 
 export default function NonCompliance() {
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTab, setSelectedTab] = useState("todas");
   
-  const handleNonConformityCreated = () => {
-    setIsDialogOpen(false);
-    toast({
-      title: "Não conformidade registrada",
-      description: "A não conformidade foi registrada com sucesso.",
-      variant: "success",
-    });
+  const handleNewNC = () => {
+    setIsDialogOpen(true);
   };
-
+  
+  const handleView = (item) => {
+    console.log("Visualizando:", item);
+    // Navegação para detalhes
+  };
+  
+  const handleEdit = (item) => {
+    console.log("Editando:", item);
+    // Abrir formulário de edição
+  };
+  
+  const handleDelete = (item) => {
+    console.log("Excluindo:", item);
+    // Confirmar e excluir
+  };
+  
+  const handleSubmitSuccess = () => {
+    setIsDialogOpen(false);
+    // Atualizar lista de não conformidades
+    // toast.success("Não conformidade registrada com sucesso!");
+  };
+  
   return (
     <div className="container py-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div className="flex items-center">
-          <AlertTriangle className="mr-2 h-6 w-6 text-primary" />
+          <Badge variant="outline" className="mr-2 text-primary border-primary">
+            ISO 9001:2015
+          </Badge>
           <h1 className="text-2xl font-bold tracking-tight">Não Conformidades</h1>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Registrar Não Conformidade</Button>
+            <Button onClick={handleNewNC}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Não Conformidade
+            </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <NonConformityForm onSuccess={handleNonConformityCreated} />
+          <DialogContent className="max-w-4xl">
+            <NonConformityForm onSuccess={handleSubmitSuccess} />
           </DialogContent>
         </Dialog>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <NonConformityStats />
       </div>
       
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="open">
-            Em Aberto <Badge variant="secondary" className="ml-2">12</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="analysis">Em Análise</TabsTrigger>
-          <TabsTrigger value="actions">Com Ação Definida</TabsTrigger>
-          <TabsTrigger value="closed">Encerradas</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Evolução de Não Conformidades</CardTitle>
+          </CardHeader>
+          <CardContent className="h-80">
+            <NonConformityChart />
+          </CardContent>
+        </Card>
         
-        <TabsContent value="all" className="pt-4">
-          <NonConformityList />
-        </TabsContent>
-        
-        <TabsContent value="open" className="pt-4">
-          <NonConformityList status="open" />
-        </TabsContent>
-        
-        <TabsContent value="analysis" className="pt-4">
-          <NonConformityList status="analysis" />
-        </TabsContent>
-        
-        <TabsContent value="actions" className="pt-4">
-          <NonConformityList status="action" />
-        </TabsContent>
-        
-        <TabsContent value="closed" className="pt-4">
-          <NonConformityList status="closed" />
-        </TabsContent>
-      </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribuição por Departamento</CardTitle>
+          </CardHeader>
+          <CardContent className="h-80">
+            {/* Outro gráfico pode ser adicionado aqui */}
+          </CardContent>
+        </Card>
+      </div>
       
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Análise de Tendências</h2>
-        <div className="h-80 bg-card rounded-lg p-4 border">
-          <NonConformityChart />
+      <div className="flex flex-col sm:flex-row justify-between gap-4 items-center">
+        <div className="relative w-full sm:w-auto flex-grow">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar não conformidades..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="flex gap-2 w-full sm:w-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                Filtrar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSelectedTab("todas")}>
+                Todas
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedTab("em-analise")}>
+                Em Análise
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedTab("em-tratamento")}>
+                Em Tratamento
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedTab("concluidas")}>
+                Concluídas
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+      
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="todas">Todas</TabsTrigger>
+          <TabsTrigger value="em-analise">Em Análise</TabsTrigger>
+          <TabsTrigger value="em-tratamento">Em Tratamento</TabsTrigger>
+          <TabsTrigger value="concluidas">Concluídas</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="todas" className="pt-4">
+          <NonConformityList 
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+        
+        <TabsContent value="em-analise" className="pt-4">
+          <NonConformityList 
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+        
+        <TabsContent value="em-tratamento" className="pt-4">
+          <NonConformityList 
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+        
+        <TabsContent value="concluidas" className="pt-4">
+          <NonConformityList 
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

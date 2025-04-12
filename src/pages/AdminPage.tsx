@@ -4,9 +4,9 @@ import { Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Importar componentes administrativos
-import { UserManagement } from "@/components/admin/UserManagement";
-import { RoleManagement } from "@/components/admin/RoleManagement";
-import { CompanyManagement } from "@/components/admin/CompanyManagement";
+import UserManagement from "@/components/admin/UserManagement";
+import RoleManagement from "@/components/admin/RoleManagement";
+import CompanyManagement from "@/components/admin/CompanyManagement";
 import { PermissoesUsuarios } from "@/components/admin/PermissoesUsuarios";
 import { DatabaseConnectionStatus } from "@/components/admin/DatabaseConnectionStatus";
 

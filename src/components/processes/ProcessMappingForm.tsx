@@ -37,7 +37,14 @@ interface ProcessIndicator {
   current: string;
 }
 
-const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
+interface ProcessMappingFormProps {
+  onSubmit?: (data: any) => void;
+  initialData?: any;
+  isEditing?: boolean;
+  onSuccess?: () => void;
+}
+
+const ProcessMappingForm = ({ onSubmit, initialData, isEditing, onSuccess }: ProcessMappingFormProps) => {
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [owner, setOwner] = useState(initialData?.owner || "");
@@ -205,7 +212,7 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
     setIndicators(updatedIndicators);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name || !description || !owner) {
@@ -233,7 +240,13 @@ const ProcessMappingForm = ({ onSubmit, initialData, isEditing }) => {
       type: processType
     };
 
-    onSubmit(processData);
+    if (onSubmit) {
+      onSubmit(processData);
+    }
+    
+    if (onSuccess) {
+      onSuccess();
+    }
   };
 
   return (

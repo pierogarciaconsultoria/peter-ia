@@ -1,123 +1,146 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Calendar, User, MessageSquare, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarIcon, FileText, AlertCircle, CheckCircle, Trash2, PenSquare, Eye } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-interface NonConformityListProps {
-  status?: string;
-}
+const mockData = [
+  {
+    id: 1,
+    title: "Falha no processo de embalagem",
+    date: "2025-03-15",
+    department: "Produção",
+    status: "Em análise",
+    description: "Produtos sendo embalados com defeitos visíveis na linha de produção 2."
+  },
+  {
+    id: 2,
+    title: "Desvio de temperatura no armazenamento",
+    date: "2025-03-10",
+    department: "Logística",
+    status: "Em tratamento",
+    description: "Temperatura fora dos limites aceitáveis no armazém de produtos perecíveis."
+  },
+  {
+    id: 3,
+    title: "Reclamação de cliente - produto defeituoso",
+    date: "2025-03-05",
+    department: "Qualidade",
+    status: "Concluído",
+    description: "Cliente relatou falha no funcionamento do produto após primeira utilização."
+  },
+];
 
-export function NonConformityList({ status }: NonConformityListProps) {
-  // Dados mockados de não conformidades
-  const mockData = [
-    {
-      id: "NC-2025-001",
-      title: "Falha no processo de embalagem",
-      description: "Produtos sendo embalados com materiais inadequados",
-      status: "open",
-      date: "10/04/2025",
-      department: "Produção",
-      severity: "Alta",
-      responsible: "Carlos Santos"
-    },
-    {
-      id: "NC-2025-002",
-      title: "Documentação desatualizada",
-      description: "Procedimento operacional não está conforme versão atual",
-      status: "analysis",
-      date: "05/04/2025",
-      department: "Qualidade",
-      severity: "Média",
-      responsible: "Ana Silva"
-    },
-    {
-      id: "NC-2025-003",
-      title: "Material fora das especificações",
-      description: "Matéria-prima recebida com características fora do padrão",
-      status: "action",
-      date: "01/04/2025",
-      department: "Almoxarifado",
-      severity: "Alta",
-      responsible: "Pedro Oliveira"
-    },
-    {
-      id: "NC-2025-004",
-      title: "Falha no treinamento de colaboradores",
-      description: "Colaboradores sem treinamento adequado operando equipamentos",
-      status: "closed",
-      date: "15/03/2025",
-      department: "RH",
-      severity: "Média",
-      responsible: "Mariana Costa"
-    }
-  ];
-  
-  // Filtra as não conformidades com base no status, se fornecido
-  const filteredData = status 
-    ? mockData.filter(item => item.status === status) 
-    : mockData;
-  
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case "open":
-        return <Badge variant="destructive">Em Aberto</Badge>;
-      case "analysis":
-        return <Badge variant="warning">Em Análise</Badge>;
-      case "action":
-        return <Badge variant="outline">Com Ação</Badge>;
-      case "closed":
-        return <Badge variant="success">Encerrada</Badge>;
+export function NonConformityList({ onView, onEdit, onDelete }) {
+  const [nonConformities, setNonConformities] = useState(mockData);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Em análise":
+        return (
+          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">
+            {status}
+          </Badge>
+        );
+      case "Em tratamento":
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+            {status}
+          </Badge>
+        );
+      case "Concluído":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+            {status}
+          </Badge>
+        );
       default:
-        return <Badge>Indefinido</Badge>;
+        return (
+          <Badge variant="outline">
+            {status}
+          </Badge>
+        );
     }
   };
-  
+
   return (
-    <div className="space-y-4">
-      {filteredData.length === 0 ? (
-        <div className="text-center p-8 bg-muted/20 rounded-lg">
-          <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-2 text-lg font-medium">Nenhuma não conformidade encontrada</h3>
-          <p className="text-sm text-muted-foreground">
-            Não existem registros de não conformidades para os filtros selecionados.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredData.map(item => (
-            <Card key={item.id}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                  {getStatusBadge(item.status)}
-                </div>
-                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  <span>{item.date}</span>
-                  <span className="mx-2">•</span>
-                  <User className="h-3.5 w-3.5 mr-1" />
-                  <span>{item.responsible}</span>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <Badge variant="outline">{item.department}</Badge>
-                  <Badge variant="outline">Severidade: {item.severity}</Badge>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="ghost" size="sm" className="ml-auto">
-                  <span>Detalhes</span>
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      )}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {nonConformities.map((item) => (
+        <Card key={item.id} className="h-full">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-lg">{item.title}</CardTitle>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <span className="sr-only">Abrir menu</span>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 15 15"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        d="M3.625 7.5C3.625 8.12132 3.12132 8.625 2.5 8.625C1.87868 8.625 1.375 8.12132 1.375 7.5C1.375 6.87868 1.87868 6.375 2.5 6.375C3.12132 6.375 3.625 6.87868 3.625 7.5ZM8.625 7.5C8.625 8.12132 8.12132 8.625 7.5 8.625C6.87868 8.625 6.375 8.12132 6.375 7.5C6.375 6.87868 6.87868 6.375 7.5 6.375C8.12132 6.375 8.625 6.87868 8.625 7.5ZM13.625 7.5C13.625 8.12132 13.1213 8.625 12.5 8.625C11.8787 8.625 11.375 8.12132 11.375 7.5C11.375 6.87868 11.8787 6.375 12.5 6.375C13.1213 6.375 13.625 6.87868 13.625 7.5Z"
+                        fill="currentColor"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onView && onView(item)}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Visualizar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit && onEdit(item)}>
+                    <PenSquare className="mr-2 h-4 w-4" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete && onDelete(item)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            {getStatusBadge(item.status)}
+          </CardHeader>
+          <CardContent className="pb-2">
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <FileText className="mr-1 h-4 w-4" />
+                <span>Departamento: {item.department}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <CalendarIcon className="mr-1 h-4 w-4" />
+                <span>Data: {new Date(item.date).toLocaleDateString('pt-BR')}</span>
+              </div>
+              <p className="text-sm line-clamp-2">{item.description}</p>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="flex space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => onView && onView(item)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Detalhes
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   );
 }

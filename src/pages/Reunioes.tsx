@@ -37,9 +37,9 @@ export default function Reunioes() {
       
       <ReunioesHeader activeTab={activeTab} />
       
-      <ReunioesTabSelect activeTab={activeTab} onTabChange={setActiveTab} />
+      <ReunioesTabSelect activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <ReunioesTabContent activeTab={activeTab} onTabChange={setActiveTab} />
+      <ReunioesTabContent activeTab={activeTab} />
     </div>
   );
 }

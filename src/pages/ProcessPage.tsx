@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ProcessHeader } from "@/components/processes/ProcessHeader";
 import { ProcessList } from "@/components/processes/ProcessList";
 import { ProcessEmptyState } from "@/components/processes/ProcessEmptyState";
-import { ProcessMappingForm } from "@/components/processes/ProcessMappingForm";
+import ProcessMappingForm from "@/components/processes/ProcessMappingForm";
 import { MacroProcessDiagram } from "@/components/processes/MacroProcessDiagram";
 import { ProcessAnalysis } from "@/components/processes/ProcessAnalysis";
 import { ProcessSearchFilter } from "@/components/processes/ProcessSearchFilter";
