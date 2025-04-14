@@ -7,13 +7,14 @@ export interface Training {
   description?: string;
   trainer: string;
   training_date: string;
-  start_time?: string;  // Added for start time
-  end_time?: string;    // Added for end time
+  start_time?: string;
+  end_time?: string;
   duration: number;
   department: string;
   participants?: any;
   status: 'planned' | 'in_progress' | 'completed' | 'canceled';
-  procedure_id?: string; // Added for procedure_id
+  procedure_id?: string;
+  evaluation_method?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -22,7 +23,7 @@ export interface TrainingParticipant {
   id: string;
   name: string;
   status: 'confirmed' | 'in_progress' | 'completed' | 'failed';
-  attended?: boolean; // Added for attended status
+  attended?: boolean;
 }
 
 export async function getTrainings(): Promise<Training[]> {
@@ -112,7 +113,6 @@ export async function deleteTraining(id: string): Promise<void> {
   }
 }
 
-// New function to generate trainings for a new employee based on job position
 export async function generateTrainingsForEmployee(
   employeeId: string, 
   jobPositionId: string, 
@@ -120,7 +120,6 @@ export async function generateTrainingsForEmployee(
   departmentName: string
 ): Promise<Training[]> {
   try {
-    // 1. Get the job position details to find required procedures
     const { data: jobPosition, error: jobError } = await supabase
       .from('job_positions')
       .select('*')
@@ -131,7 +130,6 @@ export async function generateTrainingsForEmployee(
     
     console.log("Job position data:", jobPosition);
     
-    // Safely access required_procedures, ensuring it's an array
     const requiredProcedures = Array.isArray((jobPosition as any).required_procedures) 
       ? (jobPosition as any).required_procedures 
       : [];
@@ -141,7 +139,6 @@ export async function generateTrainingsForEmployee(
       return [];
     }
 
-    // 2. Get the documents for each required procedure
     const { data: documents, error: docError } = await supabase
       .from('iso_documents')
       .select('*')
@@ -154,22 +151,21 @@ export async function generateTrainingsForEmployee(
       return [];
     }
     
-    // 3. Create training records for each document
     const trainings: Training[] = [];
     
     for (const doc of documents) {
-      // Create a new training record
       const newTraining: Omit<Training, 'id' | 'created_at' | 'updated_at'> = {
         title: `Treinamento: ${doc.title}`,
         description: `Treinamento baseado no documento ${doc.document_code || doc.title}`,
         trainer: "A definir",
-        training_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
-        start_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
-        end_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now + 2 hours
-        duration: 2, // Default 2 hours
+        training_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        start_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        end_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        duration: 2,
         department: departmentName,
         status: 'planned',
         procedure_id: doc.id,
+        evaluation_method: "A definir",
         participants: [
           {
             id: employeeId,
@@ -187,7 +183,7 @@ export async function generateTrainingsForEmployee(
         
       if (error) {
         console.error("Error creating training for document:", doc.title, error);
-        continue; // Skip this one but continue with others
+        continue;
       }
       
       trainings.push({

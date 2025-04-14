@@ -30,7 +30,6 @@ export function TrainingDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Load data
   useEffect(() => {
     fetchTrainings();
     fetchDepartments();
@@ -42,7 +41,6 @@ export function TrainingDashboard() {
   const fetchTrainings = async () => {
     setIsLoading(true);
     try {
-      // In a real scenario, this would be fetched from Supabase
       const mockTrainings: Training[] = [
         {
           id: "1",
@@ -105,7 +103,6 @@ export function TrainingDashboard() {
 
   const fetchDepartments = async () => {
     try {
-      // Mock departments
       setDepartments([
         "Recursos Humanos",
         "TI",
@@ -121,7 +118,6 @@ export function TrainingDashboard() {
 
   const fetchEmployees = async () => {
     try {
-      // Mock employees
       setEmployees([
         { id: "1", name: "Ana Costa", department: "Recursos Humanos" },
         { id: "2", name: "Carlos Eduardo", department: "Recursos Humanos" },
@@ -137,7 +133,6 @@ export function TrainingDashboard() {
 
   const fetchProcedures = async () => {
     try {
-      // Mock procedures with proper type structure
       setProcedures([
         {
           id: "1",
@@ -187,7 +182,6 @@ export function TrainingDashboard() {
 
   const fetchJobPositions = async () => {
     try {
-      // Mock job positions
       setJobPositions([
         {
           id: "1",
@@ -275,7 +269,6 @@ export function TrainingDashboard() {
         </div>
       </div>
       
-      {/* Filters */}
       <TrainingFilterBar 
         departments={departments}
         employees={employees}
@@ -283,7 +276,6 @@ export function TrainingDashboard() {
         onFilterChange={handleFilterChange}
       />
       
-      {/* Toggle between dashboard and list */}
       <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'dashboard' | 'list')}>
         <TabsList className="mb-6">
           <TabsTrigger value="dashboard">
@@ -296,12 +288,10 @@ export function TrainingDashboard() {
           </TabsTrigger>
         </TabsList>
         
-        {/* Dashboard */}
         <TabsContent value="dashboard">
           <TrainingStats trainings={filteredTrainings} />
         </TabsContent>
         
-        {/* List of Trainings */}
         <TabsContent value="list">
           <TrainingTable 
             trainings={filteredTrainings} 
@@ -310,7 +300,6 @@ export function TrainingDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* New Training Dialog */}
       <NewTrainingDialog 
         open={isNewTrainingDialogOpen}
         onOpenChange={setIsNewTrainingDialogOpen}
