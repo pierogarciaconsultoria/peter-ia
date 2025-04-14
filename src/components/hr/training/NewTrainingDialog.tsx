@@ -16,13 +16,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Training } from "@/services/trainingService";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ISODocument } from "@/utils/isoTypes";
 
 interface NewTrainingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   departments: string[];
   employees: { id: string; name: string; department: string }[];
-  procedures: { id: string; title: string }[];
+  procedures: { id: string; title: string; document_type: string; associated_requirement: string; created_at: string; updated_at: string }[];
   onTrainingCreated: (training: Training) => void;
 }
 
@@ -153,6 +154,16 @@ export function NewTrainingDialog({
       participants: []
     });
   };
+
+  // Convert procedures array to ISODocument format
+  const proceduresAsISODocuments: ISODocument[] = procedures.map(proc => ({
+    id: proc.id,
+    title: proc.title,
+    document_type: proc.document_type || "procedure",
+    associated_requirement: proc.associated_requirement || "",
+    created_at: proc.created_at || new Date().toISOString(),
+    updated_at: proc.updated_at || new Date().toISOString()
+  }));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -289,7 +300,7 @@ export function NewTrainingDialog({
           <div className="space-y-2">
             <Label>Procedimento</Label>
             <DocumentSelector
-              documents={procedures}
+              documents={proceduresAsISODocuments}
               selectedDocuments={formData.procedure_id ? [formData.procedure_id] : []}
               onSelectionChange={(docId) => handleChange("procedure_id", docId)}
               onRemove={() => handleChange("procedure_id", "")}
@@ -340,4 +351,3 @@ export function NewTrainingDialog({
     </Dialog>
   );
 }
-

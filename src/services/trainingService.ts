@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -8,11 +7,13 @@ export interface Training {
   description?: string;
   trainer: string;
   training_date: string;
+  start_time?: string;  // Added for start time
+  end_time?: string;    // Added for end time
   duration: number;
   department: string;
   participants?: any;
   status: 'planned' | 'in_progress' | 'completed' | 'canceled';
-  evaluation_method?: string;
+  procedure_id?: string; // Added for procedure_id
   created_at?: string;
   updated_at?: string;
 }
@@ -21,6 +22,7 @@ export interface TrainingParticipant {
   id: string;
   name: string;
   status: 'confirmed' | 'in_progress' | 'completed' | 'failed';
+  attended?: boolean; // Added for attended status
 }
 
 export async function getTrainings(): Promise<Training[]> {
@@ -162,9 +164,12 @@ export async function generateTrainingsForEmployee(
         description: `Treinamento baseado no documento ${doc.document_code || doc.title}`,
         trainer: "A definir",
         training_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
+        start_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
+        end_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now + 2 hours
         duration: 2, // Default 2 hours
         department: departmentName,
         status: 'planned',
+        procedure_id: doc.id,
         participants: [
           {
             id: employeeId,

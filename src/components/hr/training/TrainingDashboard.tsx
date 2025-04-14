@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import { NewTrainingDialog } from "./NewTrainingDialog";
 import { useNavigate } from "react-router-dom";
 import { Training } from "@/services/trainingService";
 import { JobPosition } from "../types";
+import { ISODocument } from "@/utils/isoTypes";
 
 export function TrainingDashboard() {
   const [trainings, setTrainings] = useState<Training[]>([]);
@@ -23,7 +23,7 @@ export function TrainingDashboard() {
   const [activeView, setActiveView] = useState<'dashboard' | 'list'>('dashboard');
   const [departments, setDepartments] = useState<string[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
-  const [procedures, setProcedures] = useState<string[]>([]);
+  const [procedures, setProcedures] = useState<{id: string; title: string; document_type: string; associated_requirement: string; created_at: string; updated_at: string}[]>([]);
   const [isNewTrainingDialogOpen, setIsNewTrainingDialogOpen] = useState(false);
   const [jobPositions, setJobPositions] = useState<JobPosition[]>([]);
   
@@ -137,13 +137,48 @@ export function TrainingDashboard() {
 
   const fetchProcedures = async () => {
     try {
-      // Mock procedures
+      // Mock procedures with proper type structure
       setProcedures([
-        "ISO 9001",
-        "ISO 14001",
-        "Segurança do Trabalho",
-        "Controle de Qualidade",
-        "Onboarding"
+        {
+          id: "1",
+          title: "ISO 9001",
+          document_type: "procedure",
+          associated_requirement: "4.1",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: "2",
+          title: "ISO 14001",
+          document_type: "procedure",
+          associated_requirement: "4.2",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: "3",
+          title: "Segurança do Trabalho",
+          document_type: "procedure",
+          associated_requirement: "4.3",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: "4",
+          title: "Controle de Qualidade",
+          document_type: "procedure",
+          associated_requirement: "4.4",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: "5",
+          title: "Onboarding",
+          document_type: "procedure",
+          associated_requirement: "4.5",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
       ]);
     } catch (error) {
       console.error("Erro ao buscar procedimentos:", error);
@@ -174,7 +209,6 @@ export function TrainingDashboard() {
     }
   };
 
-  // Apply filters
   const handleFilterChange = (filters: any) => {
     let filtered = [...trainings];
 
