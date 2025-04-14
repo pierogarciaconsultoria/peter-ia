@@ -19,7 +19,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { PlusCircle, X } from "lucide-react";
+import { PlusCircle, X, Loader2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -42,9 +42,15 @@ export interface ProcessMappingFormProps {
   onSubmit: (data: any) => void;
   initialData: any;
   isEditing: boolean;
+  isSubmitting?: boolean;
 }
 
-const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({ onSubmit, initialData, isEditing }) => {
+const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({ 
+  onSubmit, 
+  initialData, 
+  isEditing, 
+  isSubmitting = false 
+}) => {
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [owner, setOwner] = useState(initialData?.owner || "");
@@ -760,8 +766,15 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({ onSubmit, initi
       </Card>
 
       <div className="flex justify-end gap-2">
-        <Button type="submit">
-          {isEditing ? "Salvar Alterações" : "Criar Processo"}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? "Salvando..." : "Criando..."}
+            </>
+          ) : (
+            isEditing ? "Salvar Alterações" : "Criar Processo"
+          )}
         </Button>
       </div>
     </form>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -18,14 +17,12 @@ import { Navigation } from "@/components/Navigation";
 import { EmployeeOnboarding } from "@/components/hr/EmployeeOnboarding";
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
-// Adicione as novas importações para as páginas de privacidade e perfil
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Profile from "./pages/Profile";
 import ExternalAudit from "./pages/ExternalAudit";
 import { CookieConsent } from "./components/CookieConsent";
 import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
 
-// Routes for all menu items
 import HumanResources from "./pages/HumanResources";
 import ActionSchedule from "./pages/ActionSchedule";
 import NonCompliance from "./pages/NonCompliance";
@@ -36,6 +33,7 @@ import RiskManagement from "./pages/RiskManagement";
 import SatisfactionSurvey from "./pages/SatisfactionSurvey";
 import Documents from "./pages/Documents";
 import ProcessoPage from "./pages/ProcessoPage";
+import ProcessFormPage from "./pages/ProcessFormPage";
 import OrganizationContext from "./pages/OrganizationContext";
 import StrategicPlanning from "./pages/StrategicPlanning";
 import AuditSchedule from "./pages/AuditSchedule";
@@ -97,7 +95,6 @@ function App() {
             }
           />
 
-          {/* Rota para a página de auditoria externa */}
           <Route
             path="/external-audit"
             element={
@@ -107,10 +104,8 @@ function App() {
             }
           />
 
-          {/* Rota para a página de política de privacidade */}
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-          {/* Rota para a página de perfil protegida por autenticação */}
           <Route
             path="/profile"
             element={
@@ -120,12 +115,19 @@ function App() {
             }
           />
 
-          {/* Rotas para os itens do menu */}
           <Route
             path="/processo"
             element={
               <AuthGuard>
                 <ProcessoPage />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="/processo/:id"
+            element={
+              <AuthGuard>
+                <ProcessFormPage />
               </AuthGuard>
             }
           />
@@ -290,7 +292,6 @@ function App() {
             }
           />
           
-          {/* Rota padrão para redirecionar páginas não encontradas */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         {isDesktop && <Navigation />}

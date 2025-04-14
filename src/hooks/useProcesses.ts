@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Process, Indicator } from "@/types/processes";
+import { toast } from "sonner";
 
 // Mock data for processes
 const processesData: Process[] = [
@@ -108,6 +109,49 @@ export function useProcesses() {
     return processes.find(process => process.id === id);
   };
 
+  // Add a new process
+  const addProcess = (processData: any) => {
+    // Generate a new ID (in a real app, this would come from the backend)
+    const newId = Math.max(...processes.map(p => p.id), 0) + 1;
+    
+    const newProcess: Process = {
+      id: newId,
+      name: processData.name,
+      description: processData.description,
+      owner: processData.owner,
+      status: "active",
+      lastUpdated: new Date().toISOString().split("T")[0],
+      indicators: processData.indicators || [],
+      documents: Array.isArray(processData.documents) ? processData.documents.length : 0,
+      risks: Array.isArray(processData.risks) ? processData.risks.length : 0,
+      type: processData.type
+    };
+
+    setProcesses(prevProcesses => [...prevProcesses, newProcess]);
+    return newProcess;
+  };
+
+  // Update an existing process
+  const updateProcess = (id: number, processData: any) => {
+    setProcesses(prevProcesses => 
+      prevProcesses.map(process => 
+        process.id === id 
+          ? {
+              ...process,
+              name: processData.name,
+              description: processData.description,
+              owner: processData.owner,
+              lastUpdated: new Date().toISOString().split("T")[0],
+              indicators: processData.indicators || process.indicators,
+              documents: Array.isArray(processData.documents) ? processData.documents.length : process.documents,
+              risks: Array.isArray(processData.risks) ? processData.risks.length : process.risks,
+              type: processData.type || process.type
+            }
+          : process
+      )
+    );
+  };
+
   // Clear filters
   const clearFilters = () => {
     setSearchTerm("");
@@ -124,6 +168,8 @@ export function useProcesses() {
     isLoading,
     clearFilters,
     getProcessById,
+    addProcess,
+    updateProcess,
     processTypes
   };
 }
