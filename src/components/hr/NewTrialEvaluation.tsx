@@ -7,19 +7,17 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { createTrialEvaluation, getTrialEvaluations } from "@/services/trialEvaluationService";
+import { createTrialEvaluation } from "@/services/trialEvaluationService";
 import { Employee } from "@/services/employee/types";
 import { supabase } from "@/integrations/supabase/client";
 import { EmployeeSelector } from "./departments/EmployeeSelector";
@@ -40,7 +38,7 @@ interface NewTrialEvaluationFormValues {
   evaluation_type: '30_dias' | '45_dias' | '90_dias';
 }
 
-export default function NewTrialEvaluation() {
+export function NewTrialEvaluation() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<NewTrialEvaluationFormValues>({
@@ -66,7 +64,6 @@ export default function NewTrialEvaluation() {
         throw error;
       }
 
-      // Cast the raw data to the Employee type
       const typedEmployees = (data || []).map(emp => ({
         ...emp,
         status: emp.status as "active" | "inactive" | "on_leave"
@@ -91,7 +88,24 @@ export default function NewTrialEvaluation() {
 
   async function onSubmit(data: NewTrialEvaluationFormValues) {
     try {
-      const success = await createTrialEvaluation(data);
+      const evaluationData = {
+        employee_id: data.employee_id,
+        evaluation_date: data.evaluation_date,
+        evaluation_type: data.evaluation_type,
+        evaluator_id: null,
+        performance_score: null,
+        adaptation_score: null,
+        behavior_score: null,
+        approved: null,
+        company_id: "default-company-id",
+        comments: null,
+        hr_approved: null,
+        hr_approved_at: null,
+        hr_approver_id: null,
+        notification_sent: false
+      };
+      
+      const success = await createTrialEvaluation(evaluationData);
       if (success) {
         toast({
           title: "Success",
@@ -141,10 +155,10 @@ export default function NewTrialEvaluation() {
                     <FormLabel>Employee</FormLabel>
                     <FormControl>
                       <EmployeeSelector
-                        employeeId={formData.employee_id} 
-                        setEmployeeId={handleEmployeeChange}
+                        employeeId={field.value} 
+                        setEmployeeId={field.onChange}
                         employees={employees}
-                        placeholder="Selecione um colaborador"
+                        error={form.formState.errors.employee_id?.message}
                       />
                     </FormControl>
                     <FormMessage />
@@ -197,3 +211,5 @@ export default function NewTrialEvaluation() {
     </div>
   );
 }
+
+export default NewTrialEvaluation;

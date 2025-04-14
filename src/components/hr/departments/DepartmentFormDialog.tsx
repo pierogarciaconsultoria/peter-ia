@@ -24,7 +24,6 @@ import { Department } from "@/hooks/useDepartments";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Define form schema
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
@@ -61,7 +60,6 @@ export function DepartmentFormDialog({
     },
   });
 
-  // Reset form when department changes
   useEffect(() => {
     if (department) {
       form.reset({
@@ -178,6 +176,7 @@ export function DepartmentFormDialog({
                       employeeId={field.value} 
                       setEmployeeId={field.onChange}
                       employees={employees} 
+                      error={form.formState.errors.responsible_employee_id?.message}
                     />
                   </FormControl>
                   <FormMessage />

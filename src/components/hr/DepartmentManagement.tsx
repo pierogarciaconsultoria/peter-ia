@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Department, useDepartments } from "@/hooks/useDepartments";
@@ -15,6 +15,22 @@ export function DepartmentManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [employees, setEmployees] = useState([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id, name, department')
+        .eq('status', 'active');
+        
+      if (!error && data) {
+        setEmployees(data);
+      }
+    };
+    
+    fetchEmployees();
+  }, []);
 
   const handleOpenForm = (department?: Department) => {
     setSelectedDepartment(department || null);
@@ -173,6 +189,7 @@ export function DepartmentManagement() {
         onOpenChange={setIsFormOpen}
         onSave={handleSaveDepartment}
         department={selectedDepartment}
+        employees={employees}
       />
 
       <DeleteConfirmDialog

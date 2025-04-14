@@ -3,7 +3,7 @@ import { HRDashboard } from "./HRDashboard";
 import { EmployeeDirectory } from "./EmployeeDirectory";
 import { EmployeeOnboarding } from "./EmployeeOnboarding";
 import { TrialEvaluation } from "./TrialEvaluation";
-import { NewTrialEvaluation } from "./NewTrialEvaluation";
+import NewTrialEvaluation from "./NewTrialEvaluation"; // Fixed import
 import { PerformanceEvaluation } from "./PerformanceEvaluation";
 import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";

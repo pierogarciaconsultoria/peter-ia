@@ -8,6 +8,7 @@ interface EmployeeSelectorProps {
   error?: string;
   employees: Array<{ id: string; name: string; department: string }>;
   isLoading?: boolean;
+  placeholder?: string;
 }
 
 export function EmployeeSelector({ 
@@ -15,7 +16,8 @@ export function EmployeeSelector({
   setEmployeeId, 
   error, 
   employees,
-  isLoading = false
+  isLoading = false,
+  placeholder = "Selecione um colaborador"
 }: EmployeeSelectorProps) {
   if (isLoading) {
     return <Skeleton className="h-10 w-full" />;
@@ -33,7 +35,7 @@ export function EmployeeSelector({
       label="Colaborador"
       value={employeeId}
       onValueChange={setEmployeeId}
-      placeholder="Selecione um colaborador"
+      placeholder={placeholder}
       options={employeeOptions}
       error={error}
       className="w-full"

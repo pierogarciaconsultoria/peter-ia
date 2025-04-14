@@ -57,12 +57,21 @@ const formSchema = z.object({
 
 interface NewTrainingDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
-  employees: Employee[];
+  onOpenChange: (open: boolean) => void;
+  departments: string[];
+  employees: any[];
+  procedures: any[];
+  onTrainingCreated: (newTraining: any) => void;
 }
 
-export function NewTrainingDialog({ isOpen, onClose, onSubmit, employees }: NewTrainingDialogProps) {
+export function NewTrainingDialog({
+  isOpen,
+  onOpenChange,
+  departments,
+  employees,
+  procedures,
+  onTrainingCreated
+}: NewTrainingDialogProps) {
   const [trainerType, setTrainerType] = useState<"internal" | "external">("internal");
   const [trainerEmployeeId, setTrainerEmployeeId] = useState<string | null>(null);
 
@@ -106,7 +115,7 @@ export function NewTrainingDialog({ isOpen, onClose, onSubmit, employees }: NewT
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[825px]">
         <DialogHeader>
           <DialogTitle>New Training</DialogTitle>
@@ -306,10 +315,10 @@ export function NewTrainingDialog({ isOpen, onClose, onSubmit, employees }: NewT
                     <FormLabel>Internal Trainer</FormLabel>
                     <FormControl>
                       <EmployeeSelector
-                        employeeId={trainerEmployeeId || ""} 
-                        setEmployeeId={handleTrainerEmployeeChange}
+                        employeeId={field.value} 
+                        setEmployeeId={field.onChange}
                         employees={employees}
-                        placeholder="Selecione um instrutor interno"
+                        error={form.formState.errors.instructor_id?.message}
                       />
                     </FormControl>
                     <FormDescription>Select the internal trainer for the training.</FormDescription>

@@ -1,4 +1,3 @@
-
 import { Form } from "@/components/ui/form";
 import {
   DialogContent,
@@ -10,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { OccurrenceFormFields } from "./OccurrenceFormFields";
 import { useOccurrenceForm } from "./hooks/useOccurrenceForm";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OccurrenceDialogContentProps {
   onClose: () => void;
@@ -18,6 +19,23 @@ interface OccurrenceDialogContentProps {
 
 export function OccurrenceDialogContent({ onClose, employeeId }: OccurrenceDialogContentProps) {
   const { form, isSubmitting, handleSubmit } = useOccurrenceForm(onClose, employeeId);
+
+  const [employees, setEmployees] = useState([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id, name, department')
+        .eq('status', 'active');
+        
+      if (!error && data) {
+        setEmployees(data);
+      }
+    };
+    
+    fetchEmployees();
+  }, []);
 
   return (
     <DialogContent className="sm:max-w-[600px]">
@@ -30,7 +48,7 @@ export function OccurrenceDialogContent({ onClose, employeeId }: OccurrenceDialo
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <OccurrenceFormFields form={form} />
+          <OccurrenceFormFields form={form} employees={employees} />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

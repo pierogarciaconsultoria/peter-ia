@@ -56,7 +56,7 @@ export function OccurrenceFormFields({ form, employees }: OccurrenceFormFieldsPr
                 employeeId={field.value} 
                 setEmployeeId={field.onChange}
                 employees={employees}
-                placeholder="Selecione um colaborador" 
+                error={form.formState.errors.employee_id?.message}
               />
             </FormControl>
             <FormMessage />
