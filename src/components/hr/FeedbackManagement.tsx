@@ -32,9 +32,10 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NewFeedbackDialog } from "./feedback/NewFeedbackDialog";
+import { FeedbackFormData } from "./feedback/types";
 
 export function FeedbackManagement() {
-  const [feedbacks] = useState([
+  const [feedbacks, setFeedbacks] = useState([
     {
       id: "f1",
       sender: {
@@ -93,6 +94,14 @@ export function FeedbackManagement() {
       status: "draft"
     }
   ]);
+
+  const employees = [
+    { id: "emp1", name: "João Silva" },
+    { id: "emp2", name: "Ana Oliveira" },
+    { id: "emp3", name: "Pedro Souza" },
+    { id: "emp4", name: "Maria Santos" },
+    { id: "emp5", name: "Carlos Mendes" }
+  ];
 
   const [isNewFeedbackOpen, setIsNewFeedbackOpen] = useState(false);
 
