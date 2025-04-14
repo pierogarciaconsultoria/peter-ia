@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,18 +7,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+  Calendar,
+  Input,
+  Badge,
+} from "@/components/ui";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MessageSquare, Plus, X } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { FeedbackFormData, FeedbackType, FeedbackVisibility } from "./types";
 import { toast } from "sonner";
 
@@ -28,9 +33,16 @@ interface NewFeedbackDialogProps {
   onClose: () => void;
   onSubmit: (data: FeedbackFormData) => void;
   employees: Array<{ id: string; name: string }>;
+  isLoading?: boolean;
 }
 
-export function NewFeedbackDialog({ isOpen, onClose, onSubmit, employees }: NewFeedbackDialogProps) {
+export function NewFeedbackDialog({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  employees,
+  isLoading = false 
+}: NewFeedbackDialogProps) {
   const [formData, setFormData] = useState<FeedbackFormData>({
     type: "recognition",
     title: "",
@@ -135,9 +147,10 @@ export function NewFeedbackDialog({ isOpen, onClose, onSubmit, employees }: NewF
               onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, receiver_id: value }))
               }
+              disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o destinatário" />
+                <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione o destinatário"} />
               </SelectTrigger>
               <SelectContent>
                 {employees.map((emp) => (

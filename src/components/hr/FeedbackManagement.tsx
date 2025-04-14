@@ -22,7 +22,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -33,6 +33,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NewFeedbackDialog } from "./feedback/NewFeedbackDialog";
 import { FeedbackFormData } from "./feedback/types";
+import { supabase } from "@/integrations/supabase/client";
+import { Employee } from "@/services/employee/types";
 
 export function FeedbackManagement() {
   const [feedbacks, setFeedbacks] = useState([
@@ -95,17 +97,40 @@ export function FeedbackManagement() {
     }
   ]);
 
-  const employees = [
-    { id: "emp1", name: "João Silva" },
-    { id: "emp2", name: "Ana Oliveira" },
-    { id: "emp3", name: "Pedro Souza" },
-    { id: "emp4", name: "Maria Santos" },
-    { id: "emp5", name: "Carlos Mendes" }
-  ];
-
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [isNewFeedbackOpen, setIsNewFeedbackOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('status', 'active');
+      
+      if (error) {
+        throw error;
+      }
+
+      setEmployees(data || []);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFeedbackSubmit = (data: FeedbackFormData) => {
+    const selectedEmployee = employees.find(emp => emp.id === data.receiver_id);
+    
+    if (!selectedEmployee) {
+      return;
+    }
+
     const newFeedback = {
       id: `f${feedbacks.length + 1}`,
       sender: {
@@ -114,9 +139,9 @@ export function FeedbackManagement() {
         avatar: ""
       },
       receiver: {
-        name: employees.find(emp => emp.id === data.receiver_id)?.name || "",
-        position: "Cargo do Receptor",
-        avatar: ""
+        name: selectedEmployee.name,
+        position: selectedEmployee.position || "Cargo do Receptor",
+        avatar: selectedEmployee.avatar_url || ""
       },
       type: data.type,
       title: data.title,

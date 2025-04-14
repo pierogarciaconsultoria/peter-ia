@@ -1,107 +1,42 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-}
+import { SelectGroup } from "./SelectGroup";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EmployeeSelectorProps {
-  value: string | null;
-  onChange: (value: string | null) => void;
-  placeholder?: string;
+  employeeId: string;
+  setEmployeeId: (value: string) => void;
+  error?: string;
+  employees: Array<{ id: string; name: string; department: string }>;
+  isLoading?: boolean;
 }
 
-export function EmployeeSelector({ value, onChange, placeholder = "Selecionar funcionário..." }: EmployeeSelectorProps) {
-  const [open, setOpen] = useState(false);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
+export function EmployeeSelector({ 
+  employeeId, 
+  setEmployeeId, 
+  error, 
+  employees,
+  isLoading = false
+}: EmployeeSelectorProps) {
+  if (isLoading) {
+    return <Skeleton className="h-10 w-full" />;
+  }
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('employees')
-          .select('*')
-          .eq('status', 'active');
-        
-        if (error) {
-          throw error;
-        }
-        
-        setEmployees(data || []);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-        setEmployees([]); // Ensure employees is always an array
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEmployees();
-  }, []);
-
-  const selectedEmployee = employees.find(emp => emp.id === value);
-
-  // Ensure we always have an array to iterate over
-  const safeEmployees = Array.isArray(employees) ? employees : [];
+  // Transform employees list into dropdown options
+  const employeeOptions = employees.map(emp => ({
+    value: emp.id,
+    label: `${emp.name} - ${emp.department}`
+  }));
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-          disabled={loading}
-        >
-          {value && selectedEmployee
-            ? selectedEmployee.name
-            : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Buscar funcionário..." />
-          <CommandEmpty>Nenhum funcionário encontrado.</CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {safeEmployees.map((employee) => (
-              <CommandItem
-                key={employee.id}
-                value={employee.name}
-                onSelect={() => {
-                  onChange(employee.id === value ? null : employee.id);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === employee.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <div className="flex flex-col">
-                  <span>{employee.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {employee.position} • {employee.department}
-                  </span>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <SelectGroup
+      id="employee"
+      label="Colaborador"
+      value={employeeId}
+      onValueChange={setEmployeeId}
+      placeholder="Selecione um colaborador"
+      options={employeeOptions}
+      error={error}
+      className="w-full"
+    />
   );
 }
