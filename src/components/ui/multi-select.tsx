@@ -22,8 +22,8 @@ type MultiSelectProps = {
 };
 
 export function MultiSelect({
-  options,
-  value,
+  options = [], // Garante que options é ao menos um array vazio
+  value = [], // Garante que value é ao menos um array vazio
   onChange,
   placeholder = "Selecione as opções",
   className,
@@ -34,16 +34,20 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
+  // Garantir que value e options são arrays
+  const safeValue = Array.isArray(value) ? value : [];
+  const safeOptions = Array.isArray(options) ? options : [];
+
   const handleUnselect = (option: Option) => {
-    onChange(value.filter((item) => item.value !== option.value));
+    onChange(safeValue.filter((item) => item.value !== option.value));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current;
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (input.value === "" && value.length > 0) {
-          onChange(value.slice(0, -1));
+        if (input.value === "" && safeValue.length > 0) {
+          onChange(safeValue.slice(0, -1));
         }
       }
       if (e.key === "Escape") {
@@ -52,8 +56,8 @@ export function MultiSelect({
     }
   };
 
-  const selectables = options.filter(
-    (option) => !value.some((item) => item.value === option.value)
+  const selectables = safeOptions.filter(
+    (option) => !safeValue.some((item) => item.value === option.value)
   );
 
   return (
@@ -69,7 +73,7 @@ export function MultiSelect({
         )}
       >
         <div className="flex gap-1 flex-wrap">
-          {value.map((option) => (
+          {safeValue.map((option) => (
             <Badge
               key={option.value}
               variant="secondary"
@@ -100,7 +104,7 @@ export function MultiSelect({
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
-            placeholder={value.length === 0 ? placeholder : undefined}
+            placeholder={safeValue.length === 0 ? placeholder : undefined}
             disabled={disabled}
             className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1"
           />
@@ -119,7 +123,7 @@ export function MultiSelect({
                   }}
                   onSelect={() => {
                     setInputValue("");
-                    onChange([...value, option]);
+                    onChange([...safeValue, option]);
                   }}
                   className={cn(
                     "cursor-pointer",
