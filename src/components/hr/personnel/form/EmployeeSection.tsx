@@ -36,9 +36,12 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
         
         if (data) {
           setEmployees(data);
+        } else {
+          setEmployees([]); // Ensure employees is always an array
         }
       } catch (error) {
         console.error('Error in employees fetch:', error);
+        setEmployees([]); // Ensure employees is always an array
       } finally {
         setIsLoading(false);
       }
@@ -47,9 +50,12 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
     fetchEmployees();
   }, []);
 
+  // Make sure employees is always an array
+  const safeEmployees = Array.isArray(employees) ? employees : [];
+
   // Update employee info when employee is selected
   const handleEmployeeChange = (employeeId: string) => {
-    const selectedEmployee = employees.find(emp => emp.id === employeeId);
+    const selectedEmployee = safeEmployees.find(emp => emp.id === employeeId);
     
     if (selectedEmployee) {
       form.setValue('employeeId', selectedEmployee.id);
@@ -61,7 +67,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
 
   // Update requester info when requester is selected
   const handleRequesterChange = (requesterId: string) => {
-    const selectedRequester = employees.find(emp => emp.id === requesterId);
+    const selectedRequester = safeEmployees.find(emp => emp.id === requesterId);
     
     if (selectedRequester) {
       setRequester(selectedRequester);
@@ -88,7 +94,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {employees.map((employee) => (
+                {safeEmployees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.name} - {employee.position}
                   </SelectItem>
@@ -125,7 +131,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {employees.map((employee) => (
+                {safeEmployees.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.name}
                   </SelectItem>

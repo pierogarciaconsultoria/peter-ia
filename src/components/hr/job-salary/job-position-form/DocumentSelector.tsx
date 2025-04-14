@@ -37,8 +37,12 @@ export function DocumentSelector({
   onRemove,
   isLoading,
 }: DocumentSelectorProps) {
+  // Ensure we're working with arrays even if undefined is passed
+  const safeDocuments = Array.isArray(documents) ? documents : [];
+  const safeSelectedDocuments = Array.isArray(selectedDocuments) ? selectedDocuments : [];
+
   const getDocumentTitleById = (id: string) => {
-    const document = documents.find(doc => doc.id === id);
+    const document = safeDocuments.find(doc => doc.id === id);
     return document ? document.title : id;
   };
 
@@ -66,7 +70,7 @@ export function DocumentSelector({
               <CommandList>
                 <CommandGroup>
                   <ScrollArea className="h-72">
-                    {documents.map((document) => (
+                    {safeDocuments.map((document) => (
                       <CommandItem
                         key={document.id}
                         value={document.id}
@@ -77,7 +81,7 @@ export function DocumentSelector({
                           <CheckIcon
                             className={cn(
                               "ml-auto h-4 w-4",
-                              selectedDocuments.includes(document.id)
+                              safeSelectedDocuments.includes(document.id)
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
@@ -94,7 +98,7 @@ export function DocumentSelector({
 
         {/* Display selected documents as badges */}
         <div className="flex flex-wrap gap-2 mt-2">
-          {selectedDocuments.map((docId) => (
+          {safeSelectedDocuments.map((docId) => (
             <Badge key={docId} variant="secondary" className="flex items-center gap-1 px-3 py-1">
               {getDocumentTitleById(docId)}
               <X

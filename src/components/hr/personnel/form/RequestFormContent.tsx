@@ -31,11 +31,17 @@ export function RequestFormContent({
   onSubmit,
   selectedPosition 
 }: RequestFormContentProps) {
+  // Ensure jobPositions is always an array
+  const safeJobPositions = Array.isArray(jobPositions) ? jobPositions : [];
+  
   // Selected type category
   const selectedType = movementTypes.find(type => type.id === form.watch("type"))?.label || "";
   
   const [requester, setRequester] = useState<Employee | null>(null);
   const { employees, isLoading } = useEmployees();
+  
+  // Ensure employees is always an array
+  const safeEmployees = Array.isArray(employees) ? employees : [];
   
   // Set default request date to today
   useEffect(() => {
@@ -45,7 +51,7 @@ export function RequestFormContent({
 
   // Update requester info when requester is selected
   const handleRequesterChange = (requesterId: string) => {
-    const selectedRequester = employees.find(emp => emp.id === requesterId);
+    const selectedRequester = safeEmployees.find(emp => emp.id === requesterId);
     
     if (selectedRequester) {
       setRequester(selectedRequester);
@@ -56,7 +62,7 @@ export function RequestFormContent({
   
   // Update employee info when employee is selected
   const handleEmployeeChange = (employeeId: string) => {
-    const selectedEmployee = employees.find(emp => emp.id === employeeId);
+    const selectedEmployee = safeEmployees.find(emp => emp.id === employeeId);
     
     if (selectedEmployee) {
       form.setValue('employeeId', selectedEmployee.id);
@@ -70,7 +76,7 @@ export function RequestFormContent({
       {/* Request Date and Requester Section */}
       <RequestDateSection 
         form={form} 
-        employees={employees} 
+        employees={safeEmployees} 
         isLoading={isLoading} 
         requester={requester} 
         onRequesterChange={handleRequesterChange} 
@@ -82,7 +88,7 @@ export function RequestFormContent({
       {/* Employee Selection Section */}
       <EmployeeSelectionSection 
         form={form} 
-        employees={employees} 
+        employees={safeEmployees} 
         onEmployeeChange={handleEmployeeChange} 
       />
 
@@ -90,7 +96,7 @@ export function RequestFormContent({
       <ConditionalSections 
         form={form} 
         selectedType={selectedType} 
-        jobPositions={jobPositions} 
+        jobPositions={safeJobPositions} 
         selectedPosition={selectedPosition} 
       />
 

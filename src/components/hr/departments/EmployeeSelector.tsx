@@ -41,6 +41,7 @@ export function EmployeeSelector({ value, onChange, placeholder = "Selecionar fu
         setEmployees(data || []);
       } catch (error) {
         console.error("Error fetching employees:", error);
+        setEmployees([]); // Ensure employees is always an array
       } finally {
         setLoading(false);
       }
@@ -50,6 +51,9 @@ export function EmployeeSelector({ value, onChange, placeholder = "Selecionar fu
   }, []);
 
   const selectedEmployee = employees.find(emp => emp.id === value);
+
+  // Ensure we always have an array to iterate over
+  const safeEmployees = Array.isArray(employees) ? employees : [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -72,7 +76,7 @@ export function EmployeeSelector({ value, onChange, placeholder = "Selecionar fu
           <CommandInput placeholder="Buscar funcionário..." />
           <CommandEmpty>Nenhum funcionário encontrado.</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-y-auto">
-            {employees.map((employee) => (
+            {safeEmployees.map((employee) => (
               <CommandItem
                 key={employee.id}
                 value={employee.name}
