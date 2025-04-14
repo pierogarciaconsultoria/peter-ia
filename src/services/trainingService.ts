@@ -130,8 +130,8 @@ export async function generateTrainingsForEmployee(
     console.log("Job position data:", jobPosition);
     
     // Safely access required_procedures, ensuring it's an array
-    const requiredProcedures = Array.isArray(jobPosition.required_procedures) 
-      ? jobPosition.required_procedures 
+    const requiredProcedures = Array.isArray((jobPosition as any).required_procedures) 
+      ? (jobPosition as any).required_procedures 
       : [];
       
     if (requiredProcedures.length === 0) {
