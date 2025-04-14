@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,7 +35,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import { EmployeeSelector } from "../departments/EmployeeSelector";
-import { Employee } from "@/services/employee/types";
+import { createTraining } from "@/services/trainingService";
 
 const formSchema = z.object({
   trainingName: z.string().min(2, {
@@ -73,7 +74,7 @@ export function NewTrainingDialog({
   onTrainingCreated
 }: NewTrainingDialogProps) {
   const [trainerType, setTrainerType] = useState<"internal" | "external">("internal");
-  const [trainerEmployeeId, setTrainerEmployeeId] = useState<string | null>(null);
+  const [trainerEmployeeId, setTrainerEmployeeId] = useState<string>("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -84,7 +85,7 @@ export function NewTrainingDialog({
       endDate: new Date(),
       location: "",
       trainerType: "internal",
-      internalTrainerEmployeeId: null,
+      internalTrainerEmployeeId: "",
       externalTrainerName: "",
       externalTrainerContact: "",
       trainingCost: 0,
@@ -106,21 +107,55 @@ export function NewTrainingDialog({
   }
 
   async function onSubmitForm(values: z.infer<typeof formSchema>) {
-    onSubmit(values);
-    toast({
-      title: "Success!",
-      description: "Your training has been registered.",
-    });
-    onClose();
+    try {
+      // Transform form data to match the training service format
+      const trainingData = {
+        title: values.trainingName,
+        description: values.description || "",
+        trainer: trainerType === "internal" 
+          ? employees.find(e => e.id === values.internalTrainerEmployeeId)?.name || "Não definido"
+          : values.externalTrainerName || "Treinador externo",
+        training_date: values.startDate.toISOString().split('T')[0],
+        start_time: values.startDate.toISOString(),
+        end_time: values.endDate.toISOString(),
+        duration: Math.ceil((values.endDate.getTime() - values.startDate.getTime()) / (1000 * 60 * 60)), // Duration in hours
+        department: values.targetAudience || "Todos",
+        participants: [],
+        status: values.status,
+        evaluation_method: values.trainingCategory || "Não definido"
+      };
+      
+      // Call the API to create the training
+      const newTraining = await createTraining(trainingData);
+      
+      // Call the callback function with the new training
+      onTrainingCreated(newTraining);
+      
+      // Show a success toast
+      toast({
+        title: "Sucesso!",
+        description: "Treinamento registrado com sucesso.",
+      });
+      
+      // Close the dialog
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating training:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao criar o treinamento.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[825px]">
         <DialogHeader>
-          <DialogTitle>New Training</DialogTitle>
+          <DialogTitle>Novo Treinamento</DialogTitle>
           <DialogDescription>
-            Create a new training for your company.
+            Crie um novo treinamento para sua empresa.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -131,11 +166,11 @@ export function NewTrainingDialog({
                 name="trainingName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Training Name</FormLabel>
+                    <FormLabel>Nome do Treinamento</FormLabel>
                     <FormControl>
-                      <Input placeholder="Training name" {...field} />
+                      <Input placeholder="Nome do treinamento" {...field} />
                     </FormControl>
-                    <FormDescription>This is the name of the training.</FormDescription>
+                    <FormDescription>Este é o nome do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -145,15 +180,15 @@ export function NewTrainingDialog({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Training description"
+                        placeholder="Descrição do treinamento"
                         className="resize-none"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Write a brief description of the training.</FormDescription>
+                    <FormDescription>Escreva uma breve descrição do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -165,7 +200,7 @@ export function NewTrainingDialog({
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col space-y-3">
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>Data de Início</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -179,7 +214,7 @@ export function NewTrainingDialog({
                             {field.value ? (
                               format(field.value, "PPP", { locale: ptBR })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Selecione uma data</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -191,14 +226,11 @@ export function NewTrainingDialog({
                           locale={ptBR}
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date()
-                          }
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription>Select the start date for the training.</FormDescription>
+                    <FormDescription>Selecione a data de início do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -208,7 +240,7 @@ export function NewTrainingDialog({
                 name="endDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col space-y-3">
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>Data de Término</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -222,7 +254,7 @@ export function NewTrainingDialog({
                             {field.value ? (
                               format(field.value, "PPP", { locale: ptBR })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Selecione uma data</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -241,7 +273,7 @@ export function NewTrainingDialog({
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription>Select the end date for the training.</FormDescription>
+                    <FormDescription>Selecione a data de término do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -253,11 +285,11 @@ export function NewTrainingDialog({
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Local</FormLabel>
                     <FormControl>
-                      <Input placeholder="Training location" {...field} />
+                      <Input placeholder="Local do treinamento" {...field} />
                     </FormControl>
-                    <FormDescription>Enter the location where the training will take place.</FormDescription>
+                    <FormDescription>Informe o local onde o treinamento será realizado.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -267,18 +299,18 @@ export function NewTrainingDialog({
                 name="trainingCost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Training Cost</FormLabel>
+                    <FormLabel>Custo do Treinamento</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="0.00" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
                     </FormControl>
-                    <FormDescription>Enter the cost of the training.</FormDescription>
+                    <FormDescription>Informe o custo do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
             <div>
-              <Label htmlFor="trainerType">Trainer Type</Label>
+              <Label htmlFor="trainerType">Tipo de Instrutor</Label>
               <div className="flex items-center space-x-2 mt-2">
                 <SelectItem
                   value="internal"
@@ -290,7 +322,7 @@ export function NewTrainingDialog({
                       : "hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  Internal
+                  Interno
                 </SelectItem>
                 <SelectItem
                   value="external"
@@ -302,7 +334,7 @@ export function NewTrainingDialog({
                       : "hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  External
+                  Externo
                 </SelectItem>
               </div>
             </div>
@@ -310,18 +342,18 @@ export function NewTrainingDialog({
               <FormField
                 control={form.control}
                 name="internalTrainerEmployeeId"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Internal Trainer</FormLabel>
+                    <FormLabel>Instrutor Interno</FormLabel>
                     <FormControl>
                       <EmployeeSelector
-                        employeeId={field.value} 
+                        employeeId={field.value}
                         setEmployeeId={field.onChange}
                         employees={employees}
-                        error={form.formState.errors.instructor_id?.message}
+                        error={form.formState.errors.internalTrainerEmployeeId?.message}
                       />
                     </FormControl>
-                    <FormDescription>Select the internal trainer for the training.</FormDescription>
+                    <FormDescription>Selecione o instrutor interno para o treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -333,11 +365,11 @@ export function NewTrainingDialog({
                   name="externalTrainerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>External Trainer Name</FormLabel>
+                      <FormLabel>Nome do Instrutor Externo</FormLabel>
                       <FormControl>
-                        <Input placeholder="External trainer name" {...field} />
+                        <Input placeholder="Nome do instrutor externo" {...field} />
                       </FormControl>
-                      <FormDescription>Enter the name of the external trainer.</FormDescription>
+                      <FormDescription>Informe o nome do instrutor externo.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -347,11 +379,11 @@ export function NewTrainingDialog({
                   name="externalTrainerContact"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>External Trainer Contact</FormLabel>
+                      <FormLabel>Contato do Instrutor Externo</FormLabel>
                       <FormControl>
-                        <Input placeholder="External trainer contact" {...field} />
+                        <Input placeholder="Contato do instrutor externo" {...field} />
                       </FormControl>
-                      <FormDescription>Enter the contact information for the external trainer.</FormDescription>
+                      <FormDescription>Informe as informações de contato do instrutor externo.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -364,11 +396,11 @@ export function NewTrainingDialog({
                 name="targetAudience"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Audience</FormLabel>
+                    <FormLabel>Público-Alvo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Target audience" {...field} />
+                      <Input placeholder="Público-alvo" {...field} />
                     </FormControl>
-                    <FormDescription>Specify the target audience for the training.</FormDescription>
+                    <FormDescription>Especifique o público-alvo do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -378,11 +410,11 @@ export function NewTrainingDialog({
                 name="trainingCategory"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Training Category</FormLabel>
+                    <FormLabel>Categoria de Treinamento</FormLabel>
                     <FormControl>
-                      <Input placeholder="Training category" {...field} />
+                      <Input placeholder="Categoria de treinamento" {...field} />
                     </FormControl>
-                    <FormDescription>Enter the category for the training.</FormDescription>
+                    <FormDescription>Informe a categoria do treinamento.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -400,8 +432,8 @@ export function NewTrainingDialog({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Is Mandatory</FormLabel>
-                    <FormDescription>Check if the training is mandatory for all employees.</FormDescription>
+                    <FormLabel>É Obrigatório</FormLabel>
+                    <FormDescription>Marque se o treinamento é obrigatório para todos os funcionários.</FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -415,26 +447,26 @@ export function NewTrainingDialog({
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a status" />
+                        <SelectValue placeholder="Selecione um status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="planned">Planned</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectItem value="planned">Planejado</SelectItem>
+                      <SelectItem value="in_progress">Em Andamento</SelectItem>
+                      <SelectItem value="completed">Concluído</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>Select the status of the training.</FormDescription>
+                  <FormDescription>Selecione o status do treinamento.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
               </Button>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Criar</Button>
             </DialogFooter>
           </form>
         </Form>
