@@ -1,4 +1,3 @@
-
 import {
   BarChart3,
   Building2,
@@ -26,7 +25,8 @@ import {
   ClipboardList,
   Shield,
   Video,
-  Users2
+  Users2,
+  Package
 } from "lucide-react";
 
 export interface MenuItem {
@@ -141,7 +141,7 @@ export const menuItems: MenuItem[] = [
   {
     title: "Inspeção de Matéria Prima",
     href: "/raw-material-inspection",
-    icon: CheckSquare,
+    icon: Package,
     modulo: "inspecao_materia_prima",
   },
   {
