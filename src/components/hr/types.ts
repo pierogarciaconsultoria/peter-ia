@@ -52,4 +52,12 @@ export interface JobPosition {
   required_procedures?: string[];
   required_resources?: string[];
   required_ppe?: string[];
+
+  // These are the original fields that might be coming from the database
+  // We'll keep them for backward compatibility
+  requirements?: string;
+  responsibilities?: string;
+  company_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
