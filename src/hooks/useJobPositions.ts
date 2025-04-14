@@ -24,8 +24,8 @@ export function useJobPositions() {
         const transformedData = (data || []).map(job => ({
           ...job,
           // Ensure required_procedures is always an array
-          required_procedures: Array.isArray(job.required_procedures) 
-            ? job.required_procedures 
+          required_procedures: Array.isArray((job as any).required_procedures) 
+            ? (job as any).required_procedures 
             : []
         })) as JobPosition[];
         
