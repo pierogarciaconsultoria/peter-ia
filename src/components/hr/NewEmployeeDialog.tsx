@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { NewEmployeeForm } from "./NewEmployeeForm";
+import { EmployeeForm } from "./EmployeeForm";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -40,7 +40,7 @@ export function NewEmployeeDialog({ triggerButton }: NewEmployeeDialogProps) {
             Preencha os dados do novo colaborador para cadastro no sistema.
           </DialogDescription>
         </DialogHeader>
-        <NewEmployeeForm onCancel={handleClose} />
+        <EmployeeForm onCancel={handleClose} />
       </DialogContent>
     </Dialog>
   );
