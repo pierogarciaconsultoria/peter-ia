@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +31,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NewFeedbackDialog } from "./feedback/NewFeedbackDialog";
 
 export function FeedbackManagement() {
-  // Mock data for feedback
   const [feedbacks] = useState([
     {
       id: "f1",
@@ -95,6 +94,32 @@ export function FeedbackManagement() {
     }
   ]);
 
+  const [isNewFeedbackOpen, setIsNewFeedbackOpen] = useState(false);
+
+  const handleFeedbackSubmit = (data: FeedbackFormData) => {
+    const newFeedback = {
+      id: `f${feedbacks.length + 1}`,
+      sender: {
+        name: "Usuário Atual",
+        position: "Cargo Atual",
+        avatar: ""
+      },
+      receiver: {
+        name: employees.find(emp => emp.id === data.receiver_id)?.name || "",
+        position: "Cargo do Receptor",
+        avatar: ""
+      },
+      type: data.type,
+      title: data.title,
+      content: data.content,
+      visibility: data.visibility,
+      createdAt: new Date().toISOString(),
+      status: "sent"
+    };
+
+    setFeedbacks([...feedbacks, newFeedback]);
+  };
+
   const sentFeedbacks = feedbacks.filter(f => f.status === "sent");
   const draftFeedbacks = feedbacks.filter(f => f.status === "draft");
   const receivedFeedbacks = feedbacks.filter(f => f.receiver.name === "Maria Santos");
@@ -127,7 +152,7 @@ export function FeedbackManagement() {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Gestão de Feedbacks</h2>
-        <Button>
+        <Button onClick={() => setIsNewFeedbackOpen(true)}>
           <MessageSquarePlus className="h-4 w-4 mr-2" />
           Novo Feedback
         </Button>
@@ -380,6 +405,13 @@ export function FeedbackManagement() {
             ))}
         </div>
       </div>
+
+      <NewFeedbackDialog
+        isOpen={isNewFeedbackOpen}
+        onClose={() => setIsNewFeedbackOpen(false)}
+        onSubmit={handleFeedbackSubmit}
+        employees={employees}
+      />
     </div>
   );
 }
