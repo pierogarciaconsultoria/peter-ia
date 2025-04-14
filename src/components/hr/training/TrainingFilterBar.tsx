@@ -98,7 +98,7 @@ export function TrainingFilterBar({
                   <SelectValue placeholder="Todos os departamentos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os departamentos</SelectItem>
+                  <SelectItem value="all">Todos os departamentos</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                   ))}
@@ -116,7 +116,7 @@ export function TrainingFilterBar({
                   <SelectValue placeholder="Todos os participantes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os participantes</SelectItem>
+                  <SelectItem value="all">Todos os participantes</SelectItem>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>{emp.name}</SelectItem>
                   ))}
@@ -134,9 +134,9 @@ export function TrainingFilterBar({
                   <SelectValue placeholder="Todos os procedimentos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os procedimentos</SelectItem>
+                  <SelectItem value="all">Todos os procedimentos</SelectItem>
                   {procedures.map((proc) => (
-                    <SelectItem key={proc.id} value={proc.title}>{proc.title}</SelectItem>
+                    <SelectItem key={proc.id} value={proc.title || "proc-" + proc.id}>{proc.title}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -169,6 +169,7 @@ export function TrainingFilterBar({
                       onSelect={(date) => handleFilterChange("startDate", date)}
                       initialFocus
                       locale={ptBR}
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -197,6 +198,7 @@ export function TrainingFilterBar({
                       onSelect={(date) => handleFilterChange("endDate", date)}
                       initialFocus
                       locale={ptBR}
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>

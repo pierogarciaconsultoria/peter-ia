@@ -126,7 +126,8 @@ export function NewTrainingDialog({
         duration: formData.duration,
         status: formData.status as "planned" | "in_progress" | "completed" | "canceled",
         procedure_id: formData.procedure_id,
-        participants: formData.participants
+        participants: formData.participants,
+        evaluation_method: ""
       };
 
       onTrainingCreated(newTraining);
@@ -198,7 +199,7 @@ export function NewTrainingDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((dept) => (
-                    <SelectItem key={dept} value={dept}>
+                    <SelectItem key={dept} value={dept || `dept-${dept.toLowerCase().replace(/\s+/g, '-')}`}>
                       {dept}
                     </SelectItem>
                   ))}
@@ -255,6 +256,7 @@ export function NewTrainingDialog({
                     onSelect={(date) => handleChange("training_date", date)}
                     initialFocus
                     locale={ptBR}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
