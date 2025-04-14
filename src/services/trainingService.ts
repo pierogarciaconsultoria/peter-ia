@@ -127,8 +127,12 @@ export async function generateTrainingsForEmployee(
     
     if (jobError) throw jobError;
     
-    // If there are no required procedures, return empty array
-    if (!jobPosition.required_procedures || jobPosition.required_procedures.length === 0) {
+    console.log("Job position data:", jobPosition);
+    
+    // Check if required_procedures exists, if not, log and return empty array
+    const requiredProcedures = jobPosition.required_procedures || [];
+    if (!Array.isArray(requiredProcedures) || requiredProcedures.length === 0) {
+      console.log("No required procedures found for this position:", jobPositionId);
       return [];
     }
 
@@ -136,9 +140,14 @@ export async function generateTrainingsForEmployee(
     const { data: documents, error: docError } = await supabase
       .from('iso_documents')
       .select('*')
-      .in('id', jobPosition.required_procedures);
+      .in('id', requiredProcedures);
       
     if (docError) throw docError;
+    
+    if (!documents || documents.length === 0) {
+      console.log("No documents found for the required procedures:", requiredProcedures);
+      return [];
+    }
     
     // 3. Create training records for each document
     const trainings: Training[] = [];

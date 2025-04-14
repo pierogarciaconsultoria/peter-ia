@@ -20,7 +20,13 @@ export function useJobPositions() {
         
         if (error) throw error;
         
-        setJobPositions(data || []);
+        // Transform the data to include required_procedures if it doesn't exist
+        const transformedData = (data || []).map(job => ({
+          ...job,
+          required_procedures: job.required_procedures || []
+        })) as JobPosition[];
+        
+        setJobPositions(transformedData);
       } catch (error) {
         console.error("Error loading job positions:", error);
         toast({
