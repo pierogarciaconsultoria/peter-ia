@@ -46,7 +46,7 @@ export function FamilyInfoTab({ formData, setFormData }: FamilyInfoTabProps) {
     setFormData((prev: any) => ({
       ...prev,
       dependents: [
-        ...prev.dependents, 
+        ...(prev.dependents || []), 
         { 
           name: "", 
           relationship: "", 
@@ -59,7 +59,7 @@ export function FamilyInfoTab({ formData, setFormData }: FamilyInfoTabProps) {
 
   const handleRemoveDependent = (index: number) => {
     setFormData((prev: any) => {
-      const newDependents = [...prev.dependents];
+      const newDependents = [...(prev.dependents || [])];
       newDependents.splice(index, 1);
       return { ...prev, dependents: newDependents };
     });
@@ -67,8 +67,10 @@ export function FamilyInfoTab({ formData, setFormData }: FamilyInfoTabProps) {
 
   const handleDependentChange = (index: number, field: string, value: string | Date | null) => {
     setFormData((prev: any) => {
-      const newDependents = [...prev.dependents];
-      newDependents[index] = { ...newDependents[index], [field]: value };
+      const newDependents = [...(prev.dependents || [])];
+      if (newDependents[index]) {
+        newDependents[index] = { ...newDependents[index], [field]: value };
+      }
       return { ...prev, dependents: newDependents };
     });
   };
@@ -88,7 +90,7 @@ export function FamilyInfoTab({ formData, setFormData }: FamilyInfoTabProps) {
           </Button>
         </div>
 
-        {formData.dependents.length === 0 ? (
+        {(!formData.dependents || formData.dependents.length === 0) ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhum dependente ou familiar cadastrado
           </div>

@@ -10,6 +10,7 @@ import { AdditionalInfoTab } from "./employee-form/AdditionalInfoTab";
 import { FamilyInfoTab } from "./employee-form/FamilyInfoTab";
 import { generateTrainingsForEmployee } from "@/services/trainingService";
 import { useJobPositions } from "@/hooks/useJobPositions";
+import { JobPosition } from "./types";
 
 interface EmployeeFormProps {
   onCancel: () => void;
@@ -20,6 +21,7 @@ export function EmployeeForm({ onCancel }: EmployeeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { jobPositions } = useJobPositions();
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedJobPosition, setSelectedJobPosition] = useState<JobPosition | null>(null);
   
   // Default form data
   const [formData, setFormData] = useState({
@@ -41,9 +43,13 @@ export function EmployeeForm({ onCancel }: EmployeeFormProps) {
     workSchedule: "",
     carteiraDigitalLink: "",
     emergencyContact: "",
+    emergencyPhone: "",
     bloodType: "",
     allergies: "",
-    disabilities: ""
+    disabilities: "",
+    spouse: "",
+    notes: "",
+    dependents: [] // Initialize empty dependents array
   });
   
   // Required documents list
@@ -152,7 +158,9 @@ export function EmployeeForm({ onCancel }: EmployeeFormProps) {
         <TabsContent value="job" className="pt-4">
           <JobInfoTab 
             formData={formData} 
-            setFormData={setFormData} 
+            setFormData={setFormData}
+            selectedJobPosition={selectedJobPosition}
+            setSelectedJobPosition={setSelectedJobPosition}
           />
         </TabsContent>
         

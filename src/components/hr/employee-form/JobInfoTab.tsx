@@ -39,7 +39,7 @@ export function JobInfoTab({
     if (position) {
       setFormData((prev: any) => ({
         ...prev,
-        jobTitle: position.title,
+        position: position.title,
         department: position.department,
       }));
     }
@@ -84,16 +84,16 @@ export function JobInfoTab({
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="jobTitle">Cargo</Label>
+          <Label htmlFor="position">Cargo</Label>
           <JobPositionSelector
             onSelect={handleJobPositionSelect}
             selectedPosition={selectedJobPosition}
           />
         </div>
         <Input
-          id="jobTitle"
-          name="jobTitle"
-          value={formData.jobTitle}
+          id="position"
+          name="position"
+          value={formData.position}
           onChange={handleInputChange}
         />
       </div>
@@ -116,7 +116,7 @@ export function JobInfoTab({
               employeeId={formData.id} 
               employeeName={`${formData.firstName} ${formData.lastName}`.trim()}
               currentSalary={parseFloat(formData.salary) || 0}
-              currentPosition={formData.jobTitle}
+              currentPosition={formData.position}
             />
           )}
         </div>
