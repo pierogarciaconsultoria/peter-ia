@@ -43,6 +43,7 @@ import EquipmentCalibration from "./pages/EquipmentCalibration";
 import RawMaterialInspection from "./pages/RawMaterialInspection";
 import TrainingControl from "./pages/TrainingControl";
 import Reunioes from "./pages/Reunioes";
+import ExternalDiscAssessment from "./pages/ExternalDiscAssessment";
 
 function App() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -291,7 +292,10 @@ function App() {
               </AuthGuard>
             }
           />
-          
+          <Route
+            path="/disc-assessment/:token"
+            element={<ExternalDiscAssessment />}
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         {isDesktop && <Navigation />}

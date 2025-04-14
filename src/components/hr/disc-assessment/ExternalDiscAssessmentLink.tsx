@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { EmployeeSelector } from "../departments/EmployeeSelector";
 import { 
   Dialog,
   DialogContent, 
@@ -14,30 +15,46 @@ import {
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
+import { generateAssessmentLink } from "@/services/discAssessmentService";
 import { Card, CardContent } from "@/components/ui/card";
-import { generateAssessmentLink } from "@/services/disc-assessment-service";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ExternalDiscAssessmentLink() {
   const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
+  const [employeeData, setEmployeeData] = useState<any>(null);
   const { toast } = useToast();
 
+  const handleEmployeeSelect = async (employeeId: string) => {
+    setSelectedEmployeeId(employeeId);
+    if (employeeId) {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+
+      if (!error && data) {
+        setEmployeeData(data);
+      }
+    } else {
+      setEmployeeData(null);
+    }
+  };
+
   const generateLink = async () => {
-    if (!name || !email) {
+    if (!employeeData) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Nome e e-mail são campos obrigatórios",
+        title: "Erro",
+        description: "Por favor, selecione um colaborador",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // Na implementação real, isso geraria um token único
-      // e salvaria no banco de dados associado ao e-mail
-      const link = await generateAssessmentLink(name, email);
+      const link = await generateAssessmentLink(employeeData.name, employeeData.email);
       setGeneratedLink(link);
 
       toast({
@@ -62,8 +79,14 @@ export function ExternalDiscAssessmentLink() {
   };
 
   const sendByEmail = () => {
-    // Implementação real enviaria um e-mail usando uma API
-    window.open(`mailto:${email}?subject=Avaliação DISC&body=Olá ${name}, acesse o link para realizar sua avaliação DISC: ${generatedLink}`);
+    if (!employeeData) return;
+    
+    const emailSubject = encodeURIComponent("Avaliação DISC");
+    const emailBody = encodeURIComponent(
+      `Olá ${employeeData.name},\n\nAcesse o link para realizar sua avaliação DISC: ${generatedLink}`
+    );
+    
+    window.open(`mailto:${employeeData.email}?subject=${emailSubject}&body=${emailBody}`);
     
     toast({
       title: "E-mail preparado",
@@ -83,31 +106,30 @@ export function ExternalDiscAssessmentLink() {
         <DialogHeader>
           <DialogTitle>Gerar link para avaliação externa</DialogTitle>
           <DialogDescription>
-            Crie um link para que pessoas externas possam realizar a avaliação DISC
+            Crie um link para que o colaborador possa realizar a avaliação DISC
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome do participante</Label>
-            <Input 
-              id="name" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="Digite o nome completo" 
+            <Label>Selecione o Colaborador</Label>
+            <EmployeeSelector
+              employeeId={selectedEmployeeId}
+              setEmployeeId={handleEmployeeSelect}
+              employees={[]}
+              error=""
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail do participante</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="Digite o e-mail" 
-            />
-          </div>
+
+          {employeeData && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Dados do Colaborador</Label>
+              <div className="text-sm">
+                <p><strong>Nome:</strong> {employeeData.name}</p>
+                <p><strong>E-mail:</strong> {employeeData.email}</p>
+              </div>
+            </div>
+          )}
 
           {generatedLink && (
             <Card>
