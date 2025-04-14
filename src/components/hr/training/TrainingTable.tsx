@@ -32,8 +32,10 @@ export function TrainingTable({ trainings, isLoading }: TrainingTableProps) {
         return 'Em Andamento';
       case 'completed':
         return 'Concluído';
-      default:
+      case 'canceled':
         return 'Cancelado';
+      default:
+        return 'Desconhecido';
     }
   };
 
@@ -99,15 +101,19 @@ export function TrainingTable({ trainings, isLoading }: TrainingTableProps) {
                 <div>
                   <span className="text-sm text-muted-foreground">Participantes:</span>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {training.participants.map((participant, idx) => (
-                      <Badge 
-                        key={idx} 
-                        variant="outline"
-                        className="px-2 py-1 text-xs"
-                      >
-                        {participant.name}
-                      </Badge>
-                    ))}
+                    {training.participants && Array.isArray(training.participants) ? (
+                      training.participants.map((participant, idx) => (
+                        <Badge 
+                          key={idx} 
+                          variant="outline"
+                          className="px-2 py-1 text-xs"
+                        >
+                          {participant.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Nenhum participante</p>
+                    )}
                   </div>
                 </div>
                 {training.evaluation_method && (

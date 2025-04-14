@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,7 +52,7 @@ const formSchema = z.object({
   isMandatory: z.boolean().default(false),
   targetAudience: z.string().optional(),
   trainingCategory: z.string().optional(),
-  status: z.enum(["planned", "in_progress", "completed", "cancelled"]).default("planned"),
+  status: z.enum(["planned", "in_progress", "completed", "canceled"]).default("planned"),
 });
 
 interface NewTrainingDialogProps {
@@ -347,7 +346,7 @@ export function NewTrainingDialog({
                     <FormLabel>Instrutor Interno</FormLabel>
                     <FormControl>
                       <EmployeeSelector
-                        employeeId={field.value}
+                        employeeId={field.value || ""}
                         setEmployeeId={field.onChange}
                         employees={employees}
                         error={form.formState.errors.internalTrainerEmployeeId?.message}
@@ -454,7 +453,7 @@ export function NewTrainingDialog({
                       <SelectItem value="planned">Planejado</SelectItem>
                       <SelectItem value="in_progress">Em Andamento</SelectItem>
                       <SelectItem value="completed">Concluído</SelectItem>
-                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                      <SelectItem value="canceled">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>Selecione o status do treinamento.</FormDescription>
