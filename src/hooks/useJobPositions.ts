@@ -20,10 +20,13 @@ export function useJobPositions() {
         
         if (error) throw error;
         
-        // Transform the data to include required_procedures if it doesn't exist
+        // Transform the data to ensure required_procedures exists
         const transformedData = (data || []).map(job => ({
           ...job,
-          required_procedures: job.required_procedures || []
+          // Ensure required_procedures is always an array
+          required_procedures: Array.isArray(job.required_procedures) 
+            ? job.required_procedures 
+            : []
         })) as JobPosition[];
         
         setJobPositions(transformedData);

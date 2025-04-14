@@ -129,9 +129,12 @@ export async function generateTrainingsForEmployee(
     
     console.log("Job position data:", jobPosition);
     
-    // Check if required_procedures exists, if not, log and return empty array
-    const requiredProcedures = jobPosition.required_procedures || [];
-    if (!Array.isArray(requiredProcedures) || requiredProcedures.length === 0) {
+    // Safely access required_procedures, ensuring it's an array
+    const requiredProcedures = Array.isArray(jobPosition.required_procedures) 
+      ? jobPosition.required_procedures 
+      : [];
+      
+    if (requiredProcedures.length === 0) {
       console.log("No required procedures found for this position:", jobPositionId);
       return [];
     }
