@@ -1,27 +1,35 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { CalendarIcon } from "lucide-react";
+import { EmployeeSelector } from "@/components/hr/departments/EmployeeSelector";
+import { DocumentSelector } from "@/components/hr/job-salary/job-position-form/DocumentSelector";
+import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Training } from "@/services/trainingService";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface NewTrainingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   departments: string[];
   employees: { id: string; name: string; department: string }[];
-  procedures: string[];
+  procedures: { id: string; title: string }[];
   onTrainingCreated: (training: Training) => void;
+}
+
+interface Participant {
+  id: string;
+  name: string;
+  attended: boolean;
 }
 
 export function NewTrainingDialog({
@@ -38,17 +46,62 @@ export function NewTrainingDialog({
     department: "",
     trainer: "",
     training_date: new Date(),
-    duration: 1,
+    start_time: "",
+    end_time: "",
+    duration: 0,
     status: "planned",
-    evaluation_method: "",
-    participants: [] as string[]
+    procedure_id: "",
+    participants: [] as Participant[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Calculate duration whenever start or end time changes
+  useEffect(() => {
+    if (formData.start_time && formData.end_time) {
+      const start = new Date(`1970-01-01T${formData.start_time}`);
+      const end = new Date(`1970-01-01T${formData.end_time}`);
+      const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      setFormData(prev => ({
+        ...prev,
+        duration: diffHours > 0 ? diffHours : 0
+      }));
+    }
+  }, [formData.start_time, formData.end_time]);
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleParticipantAdd = (employeeId: string) => {
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (employee && !formData.participants.some(p => p.id === employeeId)) {
+      setFormData(prev => ({
+        ...prev,
+        participants: [...prev.participants, {
+          id: employeeId,
+          name: employee.name,
+          attended: false
+        }]
+      }));
+    }
+  };
+
+  const handleParticipantRemove = (employeeId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      participants: prev.participants.filter(p => p.id !== employeeId)
+    }));
+  };
+
+  const toggleAttendance = (employeeId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      participants: prev.participants.map(p => 
+        p.id === employeeId ? { ...p, attended: !p.attended } : p
+      )
     }));
   };
 
@@ -67,17 +120,12 @@ export function NewTrainingDialog({
         department: formData.department,
         trainer: formData.trainer,
         training_date: format(formData.training_date, 'yyyy-MM-dd'),
-        duration: Number(formData.duration),
+        start_time: formData.start_time,
+        end_time: formData.end_time,
+        duration: formData.duration,
         status: formData.status as "planned" | "in_progress" | "completed" | "canceled",
-        evaluation_method: formData.evaluation_method,
-        participants: formData.participants.map(id => {
-          const employee = employees.find(e => e.id === id);
-          return {
-            id,
-            name: employee?.name || "Desconhecido",
-            status: "confirmed"
-          };
-        })
+        procedure_id: formData.procedure_id,
+        participants: formData.participants
       };
 
       onTrainingCreated(newTraining);
@@ -97,9 +145,11 @@ export function NewTrainingDialog({
       department: "",
       trainer: "",
       training_date: new Date(),
-      duration: 1,
+      start_time: "",
+      end_time: "",
+      duration: 0,
       status: "planned",
-      evaluation_method: "",
+      procedure_id: "",
       participants: []
     });
   };
@@ -200,56 +250,81 @@ export function NewTrainingDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="duration">Duração (horas)</Label>
-              <Input
-                id="duration"
-                type="number"
-                min="1"
-                placeholder="Ex: 4"
-                value={formData.duration}
-                onChange={(e) => handleChange("duration", Number(e.target.value))}
-              />
+              <Label htmlFor="start_time">Hora Início</Label>
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="start_time"
+                  type="time"
+                  value={formData.start_time}
+                  onChange={(e) => handleChange("start_time", e.target.value)}
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleChange("status", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="planned">Planejado</SelectItem>
-                  <SelectItem value="in_progress">Em Andamento</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                  <SelectItem value="canceled">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="end_time">Hora Fim</Label>
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="end_time"
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => handleChange("end_time", e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Duração (horas)</Label>
+              <Input
+                value={formData.duration}
+                disabled
+              />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="evaluation_method">Método de Avaliação</Label>
-            <Input
-              id="evaluation_method"
-              placeholder="Ex: Prova teórica, avaliação prática, etc."
-              value={formData.evaluation_method}
-              onChange={(e) => handleChange("evaluation_method", e.target.value)}
+            <Label>Procedimento</Label>
+            <DocumentSelector
+              documents={procedures}
+              selectedDocuments={formData.procedure_id ? [formData.procedure_id] : []}
+              onSelectionChange={(docId) => handleChange("procedure_id", docId)}
+              onRemove={() => handleChange("procedure_id", "")}
+              isLoading={false}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="participants">Participantes</Label>
-            <MultiSelect
-              options={employees.map(emp => ({ value: emp.id, label: `${emp.name} (${emp.department})` }))}
-              value={formData.participants.map(id => ({ value: id, label: employees.find(e => e.id === id)?.name || id }))}
-              onChange={(selected) => handleChange("participants", selected.map(item => item.value))}
-              placeholder="Selecione os participantes"
+          <div className="space-y-4">
+            <Label>Participantes</Label>
+            <EmployeeSelector
+              value={null}
+              onChange={handleParticipantAdd}
+              placeholder="Adicionar participante..."
             />
+            
+            <div className="space-y-2">
+              {formData.participants.map((participant) => (
+                <div key={participant.id} className="flex items-center justify-between p-2 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={participant.attended}
+                      onCheckedChange={() => toggleAttendance(participant.id)}
+                    />
+                    <span>{participant.name}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleParticipantRemove(participant.id)}
+                  >
+                    Remover
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -265,3 +340,4 @@ export function NewTrainingDialog({
     </Dialog>
   );
 }
+
