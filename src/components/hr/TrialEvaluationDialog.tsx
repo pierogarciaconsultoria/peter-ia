@@ -180,7 +180,11 @@ export function TrialEvaluationDialog({
                   <FormItem>
                     <FormLabel>Employee</FormLabel>
                     <FormControl>
-                      <EmployeeSelector value={field.value} onChange={field.onChange} />
+                      <EmployeeSelector 
+                        employeeId={field.value} 
+                        setEmployeeId={field.onChange}
+                        employees={[]} // This would need to be populated with actual employees
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

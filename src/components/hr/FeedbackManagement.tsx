@@ -116,7 +116,12 @@ export function FeedbackManagement() {
         throw error;
       }
 
-      setEmployees(data || []);
+      const typedEmployees = (data || []).map(emp => ({
+        ...emp,
+        status: emp.status as "active" | "inactive" | "on_leave"
+      }));
+
+      setEmployees(typedEmployees);
     } catch (error) {
       console.error('Error fetching employees:', error);
     } finally {
@@ -445,6 +450,7 @@ export function FeedbackManagement() {
         onClose={() => setIsNewFeedbackOpen(false)}
         onSubmit={handleFeedbackSubmit}
         employees={employees}
+        isLoading={isLoading}
       />
     </div>
   );

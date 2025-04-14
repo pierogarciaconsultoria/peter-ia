@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,7 @@ interface DepartmentFormDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   onSave: (data: FormValues) => void;
   department: Department | null;
+  employees: any[];
 }
 
 export function DepartmentFormDialog({
@@ -48,6 +48,7 @@ export function DepartmentFormDialog({
   onOpenChange,
   onSave,
   department,
+  employees,
 }: DepartmentFormDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -173,9 +174,10 @@ export function DepartmentFormDialog({
                 <FormItem>
                   <FormLabel>Responsável</FormLabel>
                   <FormControl>
-                    <EmployeeSelector
-                      value={field.value}
-                      onChange={field.onChange}
+                    <EmployeeSelector 
+                      employeeId={field.value} 
+                      setEmployeeId={field.onChange}
+                      employees={employees} 
                     />
                   </FormControl>
                   <FormMessage />

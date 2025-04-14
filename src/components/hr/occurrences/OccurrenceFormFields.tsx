@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { CalendarIcon, AlertTriangle, AlertOctagon, Info } from "lucide-react";
 import { format } from "date-fns";
@@ -28,9 +27,10 @@ import { OccurrenceFormValues } from "./occurrenceTypes";
 
 interface OccurrenceFormFieldsProps {
   form: ReturnType<typeof useForm<OccurrenceFormValues>>;
+  employees: any[];
 }
 
-export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
+export function OccurrenceFormFields({ form, employees }: OccurrenceFormFieldsProps) {
   const typeIcons = {
     warning: <AlertTriangle className="h-5 w-5 text-amber-500" />,
     disciplinary: <AlertOctagon className="h-5 w-5 text-red-500" />,
@@ -48,15 +48,15 @@ export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
       <FormField
         control={form.control}
         name="employee_id"
-        rules={{ required: "Selecione um colaborador" }}
         render={({ field }) => (
-          <FormItem className="flex flex-col">
+          <FormItem>
             <FormLabel>Colaborador</FormLabel>
             <FormControl>
               <EmployeeSelector 
-                value={field.value} 
-                onChange={field.onChange} 
-                placeholder="Selecione um colaborador"
+                employeeId={field.value} 
+                setEmployeeId={field.onChange}
+                employees={employees}
+                placeholder="Selecione um colaborador" 
               />
             </FormControl>
             <FormMessage />

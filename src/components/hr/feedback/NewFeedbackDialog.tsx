@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,19 +8,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
-  Calendar,
-  Input,
-  Badge,
-} from "@/components/ui";
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -27,12 +32,14 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MessageSquare, Plus, X } from "lucide-react";
 import { FeedbackFormData, FeedbackType, FeedbackVisibility } from "./types";
 import { toast } from "sonner";
+import { Employee } from "@/services/employee/types";
+import { EmployeeSelector } from "../departments/EmployeeSelector";
 
 interface NewFeedbackDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: FeedbackFormData) => void;
-  employees: Array<{ id: string; name: string }>;
+  employees: Employee[];
   isLoading?: boolean;
 }
 
@@ -142,24 +149,12 @@ export function NewFeedbackDialog({
 
           <div className="space-y-2">
             <Label htmlFor="receiver">Destinatário</Label>
-            <Select
-              value={formData.receiver_id}
-              onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, receiver_id: value }))
-              }
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione o destinatário"} />
-              </SelectTrigger>
-              <SelectContent>
-                {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {emp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EmployeeSelector
+              employeeId={formData.receiver_id}
+              setEmployeeId={(value) => setFormData(prev => ({ ...prev, receiver_id: value }))}
+              employees={employees}
+              isLoading={isLoading}
+            />
           </div>
 
           <div className="space-y-2">

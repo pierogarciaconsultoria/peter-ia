@@ -1,5 +1,5 @@
 
-import { SelectGroup } from "./SelectGroup";
+import { SelectGroup } from "@/components/hr/employee-costs/components/SelectGroup";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface EmployeeSelectorProps {
