@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBscObjective } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
+import { EmployeeSelector } from "@/components/hr/shared/EmployeeSelector";
 
 interface BscObjectiveFormProps {
   perspective: 'financial' | 'customer' | 'internal_process' | 'learning_growth';
@@ -17,6 +19,10 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [targetValue, setTargetValue] = useState("");
+  const [targetUnit, setTargetUnit] = useState("");
+  const [measurementFrequency, setMeasurementFrequency] = useState("monthly");
+  const [responsibleId, setResponsibleId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +33,11 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
       await createBscObjective({
         perspective_id: perspective,
         title,
-        description
+        description,
+        target_value: parseFloat(targetValue),
+        target_unit: targetUnit,
+        measurement_frequency: measurementFrequency,
+        responsible_id: responsibleId
       });
       
       toast({
@@ -69,6 +79,57 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="target-value">Meta</Label>
+          <Input
+            id="target-value"
+            type="number"
+            placeholder="Valor da meta"
+            value={targetValue}
+            onChange={(e) => setTargetValue(e.target.value)}
+            required
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="target-unit">Unidade</Label>
+          <Input
+            id="target-unit"
+            placeholder="Ex: %, R$, unidades"
+            value={targetUnit}
+            onChange={(e) => setTargetUnit(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="measurement-frequency">Frequência de Medição</Label>
+        <Select value={measurementFrequency} onValueChange={setMeasurementFrequency}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a frequência" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Diária</SelectItem>
+            <SelectItem value="weekly">Semanal</SelectItem>
+            <SelectItem value="monthly">Mensal</SelectItem>
+            <SelectItem value="quarterly">Trimestral</SelectItem>
+            <SelectItem value="yearly">Anual</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Responsável</Label>
+        <EmployeeSelector
+          employeeId={responsibleId}
+          setEmployeeId={setResponsibleId}
+          placeholder="Selecione o responsável"
           required
         />
       </div>
