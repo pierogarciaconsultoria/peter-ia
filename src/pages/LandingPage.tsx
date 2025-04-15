@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +38,7 @@ export default function LandingPage() {
             Gestão Inteligente Impulsionada por <span className="text-primary">IA</span>
           </h1>
           <p className="text-xl text-muted-foreground md:text-2xl max-w-[85%] mx-auto">
-            Transforme sua empresa com a plataforma integrada inspirada em Peter Drucker 
-            e potencializada por inteligência artificial avançada.
+            Transforme sua empresa com plataforma integrada e potencializada por IA.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
