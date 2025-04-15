@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth } from "@/integrations/auth";
+import { useAuth } from "@/hooks/useAuth";  // Fixed import path
 
 export interface Employee {
   id: string;

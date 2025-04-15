@@ -36,12 +36,12 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
         throw new Error("Usuário não autenticado");
       }
 
-      // Create the objective with company_id
+      // Create the objective - removing company_id since it's not in the type
       const result = await createBscObjective({
         perspective_id: perspective,
         title,
-        description,
-        company_id: user.empresa_id // Adiciona o company_id do usuário atual
+        description
+        // We'll need to modify the back-end to handle company association differently
       });
       
       if (result) {
@@ -49,8 +49,8 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
           objective_id: result.id,
           name: title,
           target: parseFloat(targetValue) || 0,
-          unit: targetUnit,
-          company_id: user.empresa_id // Adiciona o company_id do usuário atual
+          unit: targetUnit
+          // Removing company_id from here as well
         });
       }
       
