@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { validateAssessmentLink, submitAssessmentResponse } from "@/services/candidateAssessmentService";
 import { toast } from "sonner";
 import { Check, XCircle } from "lucide-react";
+import { AssessmentQuestion } from "@/types/recruitment";
 
 export function ExternalAssessment() {
   const { token } = useParams();
@@ -92,6 +93,8 @@ export function ExternalAssessment() {
     );
   }
 
+  const questions: AssessmentQuestion[] = assessment.candidate_assessments.questions;
+
   return (
     <div className="container mx-auto py-8 max-w-2xl">
       <Card>
@@ -103,7 +106,7 @@ export function ExternalAssessment() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {assessment.candidate_assessments.questions.map((question: any) => (
+            {questions.map((question: AssessmentQuestion) => (
               <div key={question.id} className="space-y-2">
                 <Label>{question.text}</Label>
                 
@@ -119,7 +122,7 @@ export function ExternalAssessment() {
                     required={question.required}
                     onValueChange={(value) => setAnswers({ ...answers, [question.id]: value })}
                   >
-                    {question.options.map((option: string, index: number) => (
+                    {question.options?.map((option: string, index: number) => (
                       <div key={index} className="flex items-center space-x-2">
                         <RadioGroupItem value={option} id={`${question.id}-${index}`} />
                         <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
