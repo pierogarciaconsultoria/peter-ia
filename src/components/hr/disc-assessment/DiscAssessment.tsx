@@ -9,17 +9,41 @@ import { DiscAssessmentTable } from "./DiscAssessmentTable";
 import { DiscAssessmentStats } from "./DiscAssessmentStats";
 import { useDiscAssessments } from "@/hooks/useDiscAssessments";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export function DiscAssessment() {
   const { assessments, isLoading, fetchAssessments } = useDiscAssessments();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   
   useEffect(() => {
-    fetchAssessments();
+    const loadData = async () => {
+      try {
+        await fetchAssessments();
+      } catch (error) {
+        console.error("Failed to load assessments:", error);
+        toast.error("Erro ao carregar avaliações", {
+          description: "Não foi possível carregar as avaliações DISC"
+        });
+      }
+    };
+    
+    loadData();
   }, [fetchAssessments]);
   
-  const handleRefresh = () => {
-    fetchAssessments();
+  const handleRefresh = async () => {
+    setIsRetrying(true);
+    try {
+      await fetchAssessments();
+      toast.success("Dados atualizados");
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast.error("Erro ao atualizar dados", {
+        description: "Tente novamente mais tarde"
+      });
+    } finally {
+      setIsRetrying(false);
+    }
   };
 
   return (
@@ -36,10 +60,10 @@ export function DiscAssessment() {
           <Button 
             variant="outline" 
             onClick={handleRefresh}
-            disabled={isLoading}
+            disabled={isLoading || isRetrying}
           >
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Atualizar
+            <RefreshCcw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+            {isRetrying ? 'Atualizando...' : 'Atualizar'}
           </Button>
           
           <ExternalDiscAssessmentLink />

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 import { toast as sonnerToast } from "sonner";
@@ -40,7 +40,8 @@ export function useDiscAssessments() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchAssessments = async () => {
+  // Create a stable reference to the fetchAssessments function using useCallback
+  const fetchAssessments = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -133,7 +134,7 @@ export function useDiscAssessments() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const createAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
