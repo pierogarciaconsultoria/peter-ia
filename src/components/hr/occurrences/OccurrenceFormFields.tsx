@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { CalendarIcon, AlertTriangle, AlertOctagon, Info } from "lucide-react";
 import { format } from "date-fns";
@@ -52,7 +53,6 @@ export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
           <EmployeeSelector
             employeeId={field.value}
             setEmployeeId={field.onChange}
-            error={form.formState.errors.employee_id?.message}
             field={field}
             form={form}
             name="employee_id"

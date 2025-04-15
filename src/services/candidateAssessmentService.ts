@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CandidateAssessment, AssessmentLink, AssessmentResponse, AssessmentQuestion } from "@/types/recruitment";
 import { toast } from "sonner";
@@ -9,7 +10,9 @@ export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id
     // Convert the AssessmentQuestion[] to a JSON structure that Supabase can handle
     const assessmentData = {
       ...assessment,
-      questions: JSON.stringify(assessment.questions)
+      questions: Array.isArray(assessment.questions) 
+        ? JSON.stringify(assessment.questions) 
+        : assessment.questions
     };
 
     const { data, error } = await supabase

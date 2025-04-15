@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { SelectGroup } from "@/components/hr/employee-costs/components/SelectGroup";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -129,18 +128,30 @@ export function EmployeeSelector({
     );
   }
 
-  // Versão simplificada para uso direto sem react-hook-form
+  // Versão simplificada sem react-hook-form
   return (
-    <SelectGroup
-      id="employee"
-      label={label}
-      value={employeeId}
-      onValueChange={setEmployeeId}
-      placeholder={placeholder}
-      options={employeeOptions}
-      error={error}
-      className={className}
-      required={required}
-    />
+    <div className={className}>
+      {label && (
+        <div className="text-sm font-medium mb-2">
+          {label}{required && <span className="text-destructive"> *</span>}
+        </div>
+      )}
+      <Select 
+        value={employeeId} 
+        onValueChange={setEmployeeId}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {employeeOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {error && <p className="text-sm font-medium text-destructive mt-2">{error}</p>}
+    </div>
   );
 }
