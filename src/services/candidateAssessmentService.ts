@@ -28,9 +28,9 @@ export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id
     const parsedData = {
       ...data,
       questions: typeof data.questions === 'string' 
-        ? JSON.parse(data.questions) as AssessmentQuestion[]
+        ? JSON.parse(data.questions) as unknown as AssessmentQuestion[]
         : Array.isArray(data.questions) 
-          ? data.questions as AssessmentQuestion[]
+          ? (data.questions as unknown as AssessmentQuestion[])
           : []
     };
     
@@ -64,9 +64,9 @@ export const getAssessments = async (): Promise<CandidateAssessment[]> => {
       try {
         // Handle both string and direct JSON object cases
         if (typeof item.questions === 'string') {
-          questions = JSON.parse(item.questions) as AssessmentQuestion[];
+          questions = JSON.parse(item.questions) as unknown as AssessmentQuestion[];
         } else if (Array.isArray(item.questions)) {
-          questions = item.questions as AssessmentQuestion[];
+          questions = item.questions as unknown as AssessmentQuestion[];
         }
       } catch (e) {
         console.error("Error parsing questions:", e);
@@ -149,12 +149,16 @@ export const validateAssessmentLink = async (token: string): Promise<AssessmentL
       try {
         // Handle both string and direct JSON object cases
         if (typeof data.candidate_assessments.questions === 'string') {
-          parsedQuestions = JSON.parse(data.candidate_assessments.questions) as AssessmentQuestion[];
+          parsedQuestions = JSON.parse(data.candidate_assessments.questions) as unknown as AssessmentQuestion[];
         } else if (Array.isArray(data.candidate_assessments.questions)) {
-          parsedQuestions = data.candidate_assessments.questions as AssessmentQuestion[];
+          parsedQuestions = data.candidate_assessments.questions as unknown as AssessmentQuestion[];
         }
         
-        data.candidate_assessments.questions = parsedQuestions;
+        // We need to assign back in a way that TypeScript accepts
+        data.candidate_assessments = {
+          ...data.candidate_assessments,
+          questions: parsedQuestions
+        };
       } catch (e) {
         console.error("Error parsing nested questions:", e);
         data.candidate_assessments.questions = [];
