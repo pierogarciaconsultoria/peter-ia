@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertTriangle } from "lucide-react";
 import { validateAssessmentLink, createAssessment, markAssessmentLinkAsUsed } from "@/services/discAssessmentService";
 import { useToast } from "@/hooks/use-toast";
+import { DiscScore } from "@/hooks/useDiscAssessments";
 
 export function ExternalDiscAssessment() {
   const { token } = useParams();
@@ -29,14 +30,15 @@ export function ExternalDiscAssessment() {
     validateToken();
   }, [token]);
 
-  const handleAssessmentComplete = async (scores: any) => {
+  const handleAssessmentComplete = async (scores: DiscScore) => {
     if (!assessmentData) return;
 
     try {
       // Calculate primary type based on highest score
-      const primaryType = Object.entries(scores).reduce(
-        (max, [type, score]) => score > max.score ? { type, score } : max,
-        { type: 'D', score: -1 }
+      const scoreEntries = Object.entries(scores) as [keyof DiscScore, number][];
+      const primaryType = scoreEntries.reduce(
+        (max, [type, score]) => (score as number) > max.score ? { type, score } : max,
+        { type: 'D' as keyof DiscScore, score: -1 }
       ).type as 'D' | 'I' | 'S' | 'C';
 
       await createAssessment({
@@ -97,7 +99,10 @@ export function ExternalDiscAssessment() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DiscQuestionnaireForm onComplete={handleAssessmentComplete} />
+          <DiscQuestionnaireForm 
+            onComplete={handleAssessmentComplete} 
+            onCancel={() => {}} // Providing empty function for required prop
+          />
         </CardContent>
       </Card>
     </div>

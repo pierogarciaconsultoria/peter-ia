@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,31 @@ export function ExternalDiscAssessmentLink() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [employeeData, setEmployeeData] = useState<any>(null);
+  const [employees, setEmployees] = useState<any[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*');
+      
+      if (error) throw error;
+      
+      setEmployees(data || []);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast({
+        title: "Erro ao carregar colaboradores",
+        description: "Não foi possível carregar a lista de colaboradores.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleEmployeeSelect = async (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
@@ -37,6 +61,8 @@ export function ExternalDiscAssessmentLink() {
 
       if (!error && data) {
         setEmployeeData(data);
+      } else {
+        setEmployeeData(null);
       }
     } else {
       setEmployeeData(null);
@@ -116,7 +142,7 @@ export function ExternalDiscAssessmentLink() {
             <EmployeeSelector
               employeeId={selectedEmployeeId}
               setEmployeeId={handleEmployeeSelect}
-              employees={[]}
+              employees={employees}
               error=""
             />
           </div>
