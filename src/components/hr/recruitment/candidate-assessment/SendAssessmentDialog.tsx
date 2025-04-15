@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Form, 
   FormControl, 
+  FormDescription, 
   FormField, 
   FormItem, 
   FormLabel, 
@@ -21,10 +22,19 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Send, Copy } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { generateAssessmentLink } from "@/services/candidateAssessmentService";
 import { CandidateAssessment } from "@/types/recruitment";
+
+const formSchema = z.object({
+  candidateName: z.string().min(2, {
+    message: "Nome deve ter pelo menos 2 caracteres.",
+  }),
+  candidateEmail: z.string().email({
+    message: "Por favor, insira um email válido.",
+  }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface SendAssessmentDialogProps {
   open: boolean;
@@ -32,52 +42,43 @@ interface SendAssessmentDialogProps {
   assessment: CandidateAssessment;
 }
 
-const formSchema = z.object({
-  candidate_name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  candidate_email: z.string().email("Email inválido"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
 export function SendAssessmentDialog({ 
   open, 
   onOpenChange,
   assessment
 }: SendAssessmentDialogProps) {
-  const [generatedLink, setGeneratedLink] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      candidate_name: "",
-      candidate_email: "",
+      candidateName: "",
+      candidateEmail: "",
     },
   });
 
   const onSubmit = async (values: FormValues) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
       const link = await generateAssessmentLink(
         assessment.id,
-        values.candidate_name,
-        values.candidate_email
+        values.candidateName,
+        values.candidateEmail
       );
       
-      if (link) {
-        setGeneratedLink(link);
-        toast({
-          title: "Link gerado com sucesso",
-          description: "Agora você pode enviar o link para o candidato"
-        });
-      }
+      // Open the link in a new tab
+      window.open(link, '_blank');
+      
+      toast({
+        title: "Link gerado!",
+        description: "O link da avaliação foi gerado com sucesso e aberto em uma nova aba.",
+      });
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error generating assessment link:", error);
       toast({
         title: "Erro ao gerar link",
-        description: "Ocorreu um erro ao gerar o link para o candidato",
+        description: "Ocorreu um erro ao gerar o link da avaliação.",
         variant: "destructive",
       });
     } finally {
@@ -85,103 +86,50 @@ export function SendAssessmentDialog({
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedLink);
-    toast({
-      title: "Link copiado!",
-      description: "O link foi copiado para a área de transferência",
-    });
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Enviar Avaliação para Candidato</DialogTitle>
+          <DialogTitle>Enviar Avaliação</DialogTitle>
           <DialogDescription>
-            Gere um link de avaliação para enviar ao candidato
+            Preencha os dados do candidato para gerar o link da avaliação.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="candidate_name"
+              name="candidateName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome do Candidato</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome completo" {...field} />
+                    <Input placeholder="João da Silva" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
-              name="candidate_email"
+              name="candidateEmail"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email do Candidato</FormLabel>
                   <FormControl>
-                    <Input placeholder="email@exemplo.com" {...field} />
+                    <Input placeholder="joao@email.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {generatedLink && (
-              <Alert>
-                <AlertTitle>Link gerado com sucesso!</AlertTitle>
-                <AlertDescription className="mt-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Input 
-                      value={generatedLink} 
-                      readOnly
-                      className="text-xs"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={copyToClipboard}
-                      type="button"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Este link é válido por 7 dias e pode ser usado apenas uma vez.
-                  </p>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Fechar
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+                Cancelar
               </Button>
-              
-              {!generatedLink ? (
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Gerando..." : "Gerar Link"}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={copyToClipboard}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copiar Link
-                </Button>
-              )}
+              <Button type="submit" disabled={loading}>
+                Gerar Link
+              </Button>
             </DialogFooter>
           </form>
         </Form>
