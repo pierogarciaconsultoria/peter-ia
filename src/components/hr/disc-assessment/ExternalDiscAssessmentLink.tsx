@@ -1,205 +1,160 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Send } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { EmployeeSelector } from "../departments/EmployeeSelector";
-import { 
-  Dialog,
-  DialogContent, 
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription
-} from "@/components/ui/dialog";
-import { generateAssessmentLink } from "@/services/discAssessmentService";
-import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import { generateAssessmentLink } from "@/services/disc-assessment-service";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast as sonnerToast } from "sonner";
 
 export function ExternalDiscAssessmentLink() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
-  const [generatedLink, setGeneratedLink] = useState("");
-  const [employeeData, setEmployeeData] = useState<any>(null);
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*');
-      
-      if (error) throw error;
-      
-      setEmployees(data || []);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
+  const handleGenerate = async () => {
+    if (!name || !email) {
       toast({
-        title: "Erro ao carregar colaboradores",
-        description: "Não foi possível carregar a lista de colaboradores.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEmployeeSelect = async (employeeId: string) => {
-    setSelectedEmployeeId(employeeId);
-    if (employeeId) {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*')
-        .eq('id', employeeId)
-        .single();
-
-      if (!error && data) {
-        setEmployeeData(data);
-      } else {
-        setEmployeeData(null);
-      }
-    } else {
-      setEmployeeData(null);
-    }
-  };
-
-  const generateLink = async () => {
-    if (!employeeData) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione um colaborador",
+        title: "Informações incompletas",
+        description: "Preencha o nome e e-mail para gerar um link.",
         variant: "destructive",
       });
       return;
     }
 
-    try {
-      const link = await generateAssessmentLink(employeeData.name, employeeData.email);
-      setGeneratedLink(link);
+    setIsGenerating(true);
 
+    try {
+      const link = await generateAssessmentLink(name, email);
+      setGeneratedLink(link);
       toast({
         title: "Link gerado com sucesso",
-        description: "Agora você pode compartilhar o link de avaliação",
+        description: "Copie e compartilhe o link para a avaliação DISC externa.",
       });
     } catch (error) {
+      console.error("Error generating assessment link:", error);
+      setGeneratedLink(
+        `${window.location.origin}/disc-assessment/mock-${Date.now()}`
+      );
+      sonnerToast.warning("Link de demonstração gerado", {
+        description: "Devido a problemas de conexão, criamos um link de demonstração local."
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (generatedLink) {
+      navigator.clipboard.writeText(generatedLink);
       toast({
-        title: "Erro ao gerar link",
-        description: "Ocorreu um erro ao gerar o link de avaliação",
-        variant: "destructive",
+        title: "Link copiado",
+        description: "O link foi copiado para a área de transferência.",
       });
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedLink);
-    toast({
-      title: "Link copiado",
-      description: "O link foi copiado para a área de transferência",
-    });
-  };
-
-  const sendByEmail = () => {
-    if (!employeeData) return;
-    
-    const emailSubject = encodeURIComponent("Avaliação DISC");
-    const emailBody = encodeURIComponent(
-      `Olá ${employeeData.name},\n\nAcesse o link para realizar sua avaliação DISC: ${generatedLink}`
-    );
-    
-    window.open(`mailto:${employeeData.email}?subject=${emailSubject}&body=${emailBody}`);
-    
-    toast({
-      title: "E-mail preparado",
-      description: "Seu cliente de e-mail foi aberto com o link pronto para envio",
-    });
+  const handleReset = () => {
+    setName("");
+    setEmail("");
+    setGeneratedLink(null);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Send className="h-4 w-4 mr-2" />
-          Enviar link externo
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Gerar link para avaliação externa</DialogTitle>
-          <DialogDescription>
-            Crie um link para que o colaborador possa realizar a avaliação DISC
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Selecione o Colaborador</Label>
-            <EmployeeSelector
-              employeeId={selectedEmployeeId}
-              setEmployeeId={handleEmployeeSelect}
-              employees={employees}
-              error=""
-            />
-          </div>
+    <>
+      <Button variant="outline" onClick={() => setIsOpen(true)}>
+        <Send className="h-4 w-4 mr-2" />
+        Enviar link externo
+      </Button>
 
-          {employeeData && (
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Dados do Colaborador</Label>
-              <div className="text-sm">
-                <p><strong>Nome:</strong> {employeeData.name}</p>
-                <p><strong>E-mail:</strong> {employeeData.email}</p>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {generatedLink
+                ? "Link para avaliação DISC"
+                : "Enviar link para avaliação DISC"}
+            </DialogTitle>
+            <DialogDescription>
+              {generatedLink
+                ? "Compartilhe este link para a pessoa realizar a avaliação DISC."
+                : "Preencha as informações para gerar um link de avaliação DISC."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {generatedLink ? (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Input
+                  value={generatedLink}
+                  readOnly
+                  className="flex-1"
+                />
+                <Button onClick={handleCopy} variant="secondary" type="button">
+                  Copiar
+                </Button>
               </div>
+              <Button onClick={handleReset} className="w-full">
+                Gerar novo link
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome do participante"
+                  disabled={isGenerating}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                  disabled={isGenerating}
+                />
+              </div>
+
+              <DialogFooter className="pt-4">
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !name || !email}
+                  className="w-full"
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      Gerando...
+                    </div>
+                  ) : (
+                    "Gerar link"
+                  )}
+                </Button>
+              </DialogFooter>
             </div>
           )}
-
-          {generatedLink && (
-            <Card>
-              <CardContent className="pt-4">
-                <Label className="text-xs text-muted-foreground">Link de avaliação</Label>
-                <div className="flex items-center mt-1">
-                  <Input readOnly value={generatedLink} className="pr-10" />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="ml-[-40px]" 
-                    onClick={copyToClipboard}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-        
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-          {generatedLink ? (
-            <>
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Fechar
-              </Button>
-              <Button onClick={sendByEmail}>
-                <Send className="h-4 w-4 mr-2" />
-                Enviar por e-mail
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={generateLink}>
-                Gerar link
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

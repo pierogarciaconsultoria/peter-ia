@@ -8,6 +8,7 @@ import { ExternalDiscAssessmentLink } from "./ExternalDiscAssessmentLink";
 import { DiscAssessmentTable } from "./DiscAssessmentTable";
 import { DiscAssessmentStats } from "./DiscAssessmentStats";
 import { useDiscAssessments } from "@/hooks/useDiscAssessments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DiscAssessment() {
   const { assessments, isLoading, fetchAssessments } = useDiscAssessments();
@@ -50,7 +51,16 @@ export function DiscAssessment() {
         </div>
       </div>
       
-      {assessments.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-[300px] w-full" />
+          </div>
+          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-[400px] w-full" />
+        </div>
+      ) : assessments.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>Nenhuma avaliação DISC encontrada</CardTitle>
@@ -72,14 +82,7 @@ export function DiscAssessment() {
       ) : (
         <>
           <DiscAssessmentStats assessments={assessments} />
-          
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <DiscAssessmentTable assessments={assessments} />
-          )}
+          <DiscAssessmentTable assessments={assessments} />
         </>
       )}
       
