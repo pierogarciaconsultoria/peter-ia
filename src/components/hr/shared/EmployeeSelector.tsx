@@ -107,8 +107,7 @@ export function EmployeeSelector({
             if (field) field.onChange(value);
             if (setEmployeeId) setEmployeeId(value);
           }}
-          defaultValue={field?.value}
-          value={field?.value}
+          value={field?.value || ""}
         >
           <FormControl>
             <SelectTrigger className={className}>
@@ -137,7 +136,7 @@ export function EmployeeSelector({
         </div>
       )}
       <Select 
-        value={employeeId} 
+        value={employeeId || ""} 
         onValueChange={setEmployeeId}
       >
         <SelectTrigger>

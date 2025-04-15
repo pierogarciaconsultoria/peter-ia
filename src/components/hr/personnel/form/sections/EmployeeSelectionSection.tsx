@@ -30,10 +30,13 @@ export function EmployeeSelectionSection({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Colaborador</FormLabel>
-            <Select onValueChange={(value) => {
-              field.onChange(value);
-              onEmployeeChange(value);
-            }} value={field.value}>
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value);
+                onEmployeeChange(value);
+              }} 
+              value={field.value || ""}
+            >
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione um colaborador" />
