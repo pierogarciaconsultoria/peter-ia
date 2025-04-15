@@ -40,7 +40,7 @@ export function RequestDateSection({
                 <Select onValueChange={(value) => {
                   field.onChange(value);
                   onRequesterChange(value);
-                }} value={field.value}>
+                }} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o requisitante" />

@@ -87,7 +87,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
             <Select onValueChange={(value) => {
               field.onChange(value);
               handleRequesterChange(value);
-            }} value={field.value || "default"}>
+            }} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o requisitante" />
@@ -124,7 +124,7 @@ export function EmployeeSection({ form }: { form: UseFormReturn<RequestFormValue
             <Select onValueChange={(value) => {
               field.onChange(value);
               handleEmployeeChange(value);
-            }} value={field.value || "default"}>
+            }} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione um colaborador" />
