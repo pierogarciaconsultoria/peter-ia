@@ -63,9 +63,23 @@ export const generateAssessmentLink = async (name: string, email: string): Promi
         .select('id')
         .limit(1);
         
-      // If here, we have a working connection, but disc_assessment_links might not exist
-      // We'll use local storage for now as a fallback
-      console.log('Database connection working but skipping link creation in database');
+      // If here, we have a working connection
+      console.log('Database connection working for generating assessment link');
+      
+      // Store link information in localStorage as a fallback
+      const linkData = {
+        token,
+        name,
+        email,
+        expires_at: expiresAt.toISOString(),
+        used: false,
+        created_at: new Date().toISOString()
+      };
+      
+      // Save to localStorage for fallback
+      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
+      storedLinks.push(linkData);
+      localStorage.setItem('disc_assessment_links', JSON.stringify(storedLinks));
     } catch (error) {
       console.error('Error testing database connection:', error);
     }
@@ -88,7 +102,29 @@ export const validateAssessmentLink = async (token: string): Promise<AssessmentL
         .select('id')
         .limit(1);
         
-      // For now, we'll simulate link validation success with mock data
+      // Try to get the link from localStorage
+      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
+      const linkData = storedLinks.find((link: any) => link.token === token);
+      
+      if (linkData) {
+        // Check if the link is expired or used
+        const expires = new Date(linkData.expires_at);
+        const now = new Date();
+        
+        if (expires < now || linkData.used) {
+          console.log('Link is expired or already used');
+          return null;
+        }
+        
+        return {
+          token: linkData.token,
+          name: linkData.name,
+          email: linkData.email,
+          expires_at: new Date(linkData.expires_at),
+          used: linkData.used
+        };
+      }
+      
       console.log('Database connection working but using mock data for link validation');
     } catch (dbError) {
       console.error('Database validation failed:', dbError);
@@ -119,14 +155,24 @@ export const validateAssessmentLink = async (token: string): Promise<AssessmentL
 export const markAssessmentLinkAsUsed = async (token: string): Promise<boolean> => {
   try {
     try {
+      // Try to get the link from localStorage
+      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
+      const linkIndex = storedLinks.findIndex((link: any) => link.token === token);
+      
+      if (linkIndex >= 0) {
+        // Mark as used in localStorage
+        storedLinks[linkIndex].used = true;
+        localStorage.setItem('disc_assessment_links', JSON.stringify(storedLinks));
+        console.log('Marked link as used in localStorage');
+      }
+      
       // Try to access a known table that exists to test connection
       await supabase
         .from('disc_assessments')
         .select('id')
         .limit(1);
       
-      // For now, we'll simulate marking as used without accessing the non-existent table
-      console.log('Database connection working but skipping marking link as used in database');
+      console.log('Database connection working but not marking link as used in database');
     } catch (dbError) {
       console.error('Error checking database connection:', dbError);
     }

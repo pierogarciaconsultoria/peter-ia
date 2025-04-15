@@ -77,6 +77,10 @@ export function useDiscAssessments() {
         }
       ];
 
+      // Check if there are any local assessments stored
+      const localAssessments = localStorage.getItem('local_disc_assessments');
+      const localData = localAssessments ? JSON.parse(localAssessments) : [];
+
       try {
         const { data, error } = await supabase
           .from("disc_assessments")
@@ -108,17 +112,18 @@ export function useDiscAssessments() {
             };
           });
           
-          setAssessments(formattedData);
+          // Combine database assessments with local assessments
+          setAssessments([...formattedData, ...localData]);
         } else {
-          // If no data is returned from Supabase, use mock data
-          console.log("No data from Supabase, using mock data");
-          setAssessments(mockData);
+          // If no data is returned from Supabase, use local data + mock data
+          console.log("No data from Supabase, using local and mock data");
+          setAssessments([...localData, ...mockData]);
         }
       } catch (err) {
         console.error("Error fetching DISC assessments from Supabase:", err);
         // Fall back to mock data when Supabase fails
-        console.log("Falling back to mock data due to Supabase error");
-        setAssessments(mockData);
+        console.log("Falling back to local and mock data due to Supabase error");
+        setAssessments([...localData, ...mockData]);
         
         // Show a toast but continue with mock data
         sonnerToast.warning("Usando dados locais", {
@@ -181,6 +186,12 @@ export function useDiscAssessments() {
           invited_by: assessment.invited_by,
           date: new Date().toISOString()
         };
+        
+        // Store locally
+        const localAssessments = localStorage.getItem('local_disc_assessments');
+        const localData = localAssessments ? JSON.parse(localAssessments) : [];
+        localData.push(mockEntry);
+        localStorage.setItem('local_disc_assessments', JSON.stringify(localData));
         
         // Update local state
         setAssessments(prev => [mockEntry, ...prev]);
