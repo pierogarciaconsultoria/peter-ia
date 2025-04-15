@@ -24,6 +24,7 @@ export function ExternalAssessment() {
       
       const data = await validateAssessmentLink(token);
       if (data) {
+        console.log("Assessment link loaded:", data);
         setAssessment(data);
       }
       setLoading(false);
@@ -36,7 +37,10 @@ export function ExternalAssessment() {
     e.preventDefault();
     if (!assessment || !token) return;
 
-    // Get link ID from the assessment data structure
+    console.log("Submitting assessment response for link ID:", assessment.id);
+    console.log("Assessment ID:", assessment.candidate_assessments.id);
+    
+    // Use the link ID from assessment object
     const success = await submitAssessmentResponse(assessment.id, {
       assessment_id: assessment.candidate_assessments.id,
       link_id: assessment.id,
