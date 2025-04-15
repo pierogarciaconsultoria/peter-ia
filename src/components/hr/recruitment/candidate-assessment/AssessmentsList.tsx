@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CandidateAssessment } from "@/services/candidateAssessmentService";
+import { CandidateAssessment } from "@/types/recruitment";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

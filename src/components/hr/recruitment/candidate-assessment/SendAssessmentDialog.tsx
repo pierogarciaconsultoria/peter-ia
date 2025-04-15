@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Dialog, 
@@ -24,7 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Send, Copy } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { CandidateAssessment, generateAssessmentLink } from "@/services/candidateAssessmentService";
+import { generateAssessmentLink } from "@/services/candidateAssessmentService";
+import { CandidateAssessment } from "@/types/recruitment";
 
 interface SendAssessmentDialogProps {
   open: boolean;

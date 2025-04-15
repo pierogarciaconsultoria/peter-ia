@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -17,10 +16,8 @@ import { NewAssessmentDialog } from "./NewAssessmentDialog";
 import { AssessmentsList } from "./AssessmentsList";
 import { SendAssessmentDialog } from "./SendAssessmentDialog";
 import { AssessmentResultsList } from "./AssessmentResultsList";
-import { 
-  getAssessments, 
-  CandidateAssessment 
-} from "@/services/candidateAssessmentService";
+import { getAssessments } from "@/services/candidateAssessmentService";
+import { CandidateAssessment } from "@/types/recruitment";
 
 export function CandidateAssessmentManager() {
   const [assessments, setAssessments] = useState<CandidateAssessment[]>([]);
