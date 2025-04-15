@@ -25,6 +25,7 @@ import { MaturityThermometer } from "./MaturityThermometer";
 import { EmployeeBoard } from "./EmployeeBoard";
 import { AmbienteContent } from "./AmbienteContent";
 import { EmployeeCostManagement } from "./employee-costs/EmployeeCostManagement";
+import { ClimateSurvey } from "./climate-survey/ClimateSurvey";
 
 interface HRTabContentProps {
   activeTab: string;
@@ -91,7 +92,7 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
       case "training":
         return <TrainingControl />;
       case "climate":
-        return <ClimateResearch />;
+        return <ClimateSurvey />;
       case "feedback":
         return <FeedbackManagement />;
       case "disc-assessment":
