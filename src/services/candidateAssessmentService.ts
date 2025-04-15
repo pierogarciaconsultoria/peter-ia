@@ -8,7 +8,7 @@ export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id
     // Convert the AssessmentQuestion[] to a JSON structure that Supabase can handle
     const assessmentData = {
       ...assessment,
-      questions: JSON.parse(JSON.stringify(assessment.questions))
+      questions: JSON.stringify(assessment.questions)
     };
 
     const { data, error } = await supabase
@@ -18,7 +18,12 @@ export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id
       .single();
 
     if (error) throw error;
-    return data as CandidateAssessment;
+    
+    // Convert the returned data back to our typed structure
+    return {
+      ...data,
+      questions: JSON.parse(data.questions as string) as AssessmentQuestion[]
+    } as CandidateAssessment;
   } catch (error: any) {
     console.error("Error creating assessment:", error);
     toast.error("Erro ao criar avaliação");
@@ -34,10 +39,11 @@ export const getAssessments = async (): Promise<CandidateAssessment[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    // Convert the JSON data back to our typed structure
+    
+    // Convert the JSON string data back to our typed structure
     return (data || []).map(item => ({
       ...item,
-      questions: item.questions as AssessmentQuestion[]
+      questions: JSON.parse(item.questions as string) as AssessmentQuestion[]
     }));
   } catch (error: any) {
     console.error("Error fetching assessments:", error);
@@ -52,7 +58,7 @@ export const generateAssessmentLink = async (
   recruitment_process_id?: string
 ): Promise<AssessmentLink | null> => {
   try {
-    // We don't need to provide token explicitly as the database trigger will generate it
+    // We don't provide token explicitly as the database trigger will generate it
     const linkData = {
       assessment_id,
       candidate_name,
@@ -89,7 +95,7 @@ export const validateAssessmentLink = async (token: string): Promise<AssessmentL
     
     // Convert the nested questions JSON to our typed structure
     if (data && data.candidate_assessments) {
-      data.candidate_assessments.questions = data.candidate_assessments.questions as AssessmentQuestion[];
+      data.candidate_assessments.questions = JSON.parse(data.candidate_assessments.questions as string) as AssessmentQuestion[];
     }
     
     return data as unknown as AssessmentLink;

@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { validateAssessmentLink, submitAssessmentResponse } from "@/services/candidateAssessmentService";
 import { toast } from "sonner";
 import { Check, XCircle } from "lucide-react";
@@ -37,6 +36,7 @@ export function ExternalAssessment() {
     e.preventDefault();
     if (!assessment || !token) return;
 
+    // Get link ID from the assessment data structure
     const success = await submitAssessmentResponse(assessment.id, {
       assessment_id: assessment.candidate_assessments.id,
       link_id: assessment.id,
