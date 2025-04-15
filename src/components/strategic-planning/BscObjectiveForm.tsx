@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createBscObjective } from "@/services/strategicPlanningService";
+import { createBscObjective, createBscMeasure } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
 import { EmployeeSelector } from "@/components/hr/shared/EmployeeSelector";
 
@@ -30,26 +30,21 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
     setLoading(true);
     
     try {
-      // Looking at the error, the BscObjective type doesn't include target_value, etc.
-      // So we need to create the objective with just the properties it expects
+      // Create the objective with just the properties it expects
       const result = await createBscObjective({
         perspective_id: perspective,
         title,
         description
       });
       
-      // If we successfully created the objective, we can now try to create a measure
-      // for it that will contain the target value and other properties
+      // If we successfully created the objective, create a measure for it
       if (result) {
-        // Here we would typically create a measure associated with this objective
-        // This would require a separate function like createBscMeasure
-        console.log("Created objective:", result);
-        // For example: await createBscMeasure({ 
-        //   objective_id: result.id,
-        //   name: title,
-        //   target: parseFloat(targetValue),
-        //   unit: targetUnit,
-        // });
+        await createBscMeasure({ 
+          objective_id: result.id,
+          name: title,
+          target: parseFloat(targetValue) || 0,
+          unit: targetUnit
+        });
       }
       
       toast({
