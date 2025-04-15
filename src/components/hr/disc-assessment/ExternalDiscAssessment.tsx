@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { DiscQuestionnaireForm } from "./DiscQuestionnaireForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { AlertTriangle, Check } from "lucide-react";
-import { validateAssessmentToken, createAssessment, markAssessmentTokenAsUsed } from "@/services/discAssessmentService";
+import { validateAssessmentLink, createAssessment, markAssessmentLinkAsUsed } from "@/services/discAssessmentService";
 import { useToast } from "@/hooks/use-toast";
 import { DiscScore } from "@/hooks/useDiscAssessments";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export function ExternalDiscAssessment() {
       }
       
       try {
-        const linkData = await validateAssessmentToken(token);
+        const linkData = await validateAssessmentLink(token);
         if (linkData) {
           setIsValid(true);
           setAssessmentData(linkData);
@@ -77,7 +77,7 @@ export function ExternalDiscAssessment() {
           invited_by: null
         });
 
-        await markAssessmentTokenAsUsed(token!);
+        await markAssessmentLinkAsUsed(token!);
       } catch (error) {
         console.error("Error saving to database:", error);
         sonnerToast.warning("Avaliação salva localmente", {
