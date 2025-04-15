@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, FileText } from "lucide-react";
 import { NewEmployeeDialog } from "./NewEmployeeDialog";
 import { EmployeeDossierGenerator } from "./employee/EmployeeDossierGenerator";
+import { BatchEmployeeImport } from "./employee/BatchEmployeeImport";
 
 export function HRHeader() {
   return (
@@ -15,6 +16,7 @@ export function HRHeader() {
         </p>
       </div>
       <div className="flex space-x-2">
+        <BatchEmployeeImport />
         <EmployeeDossierGenerator />
         <NewEmployeeDialog />
       </div>
