@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { CalendarIcon, AlertTriangle, AlertOctagon, Info } from "lucide-react";
 import { format } from "date-fns";
@@ -25,6 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OccurrenceFormValues } from "./occurrenceTypes";
+import { useAuth } from "@/lib/auth";
+import { useEffect } from "react";
+import { AuthenticationRequired } from "@/components/ui/authentication-required";
 
 interface OccurrenceFormFieldsProps {
   form: ReturnType<typeof useForm<OccurrenceFormValues>>;
@@ -32,6 +34,15 @@ interface OccurrenceFormFieldsProps {
 }
 
 export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    if (user?.empresa_id) {
+      // Garante que apenas funcionários da mesma empresa possam ser selecionados
+      form.setValue('company_id', user.empresa_id);
+    }
+  }, [user, form]);
+
   const typeIcons = {
     warning: <AlertTriangle className="h-5 w-5 text-amber-500" />,
     disciplinary: <AlertOctagon className="h-5 w-5 text-red-500" />,
@@ -45,50 +56,105 @@ export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
   };
 
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="employee_id"
-        render={({ field }) => (
-          <EmployeeSelector
-            employeeId={field.value}
-            setEmployeeId={field.onChange}
-            field={field}
-            form={form}
-            name="employee_id"
-            required={true}
-          />
-        )}
-      />
-
-      <div className="grid grid-cols-2 gap-4">
+    <AuthenticationRequired>
+      <>
         <FormField
           control={form.control}
-          name="type"
-          rules={{ required: "Selecione um tipo" }}
+          name="employee_id"
+          render={({ field }) => (
+            <EmployeeSelector
+              employeeId={field.value}
+              setEmployeeId={field.onChange}
+              field={field}
+              form={form}
+              name="employee_id"
+              required={true}
+            />
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="type"
+            rules={{ required: "Selecione um tipo" }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Ocorrência</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value || "warning"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(Object.keys(typeLabels) as Array<keyof typeof typeLabels>).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        <div className="flex items-center">
+                          {typeIcons[type]}
+                          <span className="ml-2">{typeLabels[type]}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="date"
+            rules={{ required: "Data é obrigatória" }}
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Data da Ocorrência</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "dd/MM/yyyy") : "Selecione uma data"}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="title"
+          rules={{ required: "Título é obrigatório" }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo de Ocorrência</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value || "warning"}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {(Object.keys(typeLabels) as Array<keyof typeof typeLabels>).map((type) => (
-                    <SelectItem key={type} value={type}>
-                      <div className="flex items-center">
-                        {typeIcons[type]}
-                        <span className="ml-2">{typeLabels[type]}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Título</FormLabel>
+              <FormControl>
+                <Input placeholder="Título da ocorrência" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -96,91 +162,38 @@ export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
 
         <FormField
           control={form.control}
-          name="date"
-          rules={{ required: "Data é obrigatória" }}
+          name="description"
+          rules={{ required: "Descrição é obrigatória" }}
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data da Ocorrência</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "dd/MM/yyyy") : "Selecione uma data"}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date > new Date()}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Descreva detalhadamente a ocorrência" 
+                  className="min-h-[100px]" 
+                  {...field} 
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
 
-      <FormField
-        control={form.control}
-        name="title"
-        rules={{ required: "Título é obrigatório" }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Título</FormLabel>
-            <FormControl>
-              <Input placeholder="Título da ocorrência" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="description"
-        rules={{ required: "Descrição é obrigatória" }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Descrição</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Descreva detalhadamente a ocorrência" 
-                className="min-h-[100px]" 
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="reported_by"
-        rules={{ required: "Nome do relator é obrigatório" }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Reportado por</FormLabel>
-            <FormControl>
-              <Input placeholder="Nome de quem está reportando" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+        <FormField
+          control={form.control}
+          name="reported_by"
+          rules={{ required: "Nome do relator é obrigatório" }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reportado por</FormLabel>
+              <FormControl>
+                <Input placeholder="Nome de quem está reportando" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </>
+    </AuthenticationRequired>
   );
 }

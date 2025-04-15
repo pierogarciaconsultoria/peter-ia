@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/integrations/auth";
 
 export interface Employee {
   id: string;
@@ -50,6 +50,7 @@ export function EmployeeSelector({
 }: EmployeeSelectorProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -61,6 +62,10 @@ export function EmployeeSelector({
         
         if (filterActive) {
           query = query.eq('status', 'active');
+        }
+
+        if (user?.empresa_id) {
+          query = query.eq('company_id', user.empresa_id);
         }
           
         const { data, error } = await query.order('name');
@@ -81,13 +86,12 @@ export function EmployeeSelector({
     };
     
     fetchEmployees();
-  }, [filterActive]);
+  }, [filterActive, user?.empresa_id]);
   
   if (loading || externalLoading) {
     return <Skeleton className="h-10 w-full" />;
   }
 
-  // Transform employees list into dropdown options
   const employeeOptions = employees.map(emp => ({
     value: emp.id,
     label: showDepartment 
@@ -97,7 +101,6 @@ export function EmployeeSelector({
         : emp.name
   }));
   
-  // Se estiver usando react-hook-form
   if (form && name) {
     return (
       <FormItem>
@@ -127,7 +130,6 @@ export function EmployeeSelector({
     );
   }
 
-  // Versão simplificada sem react-hook-form
   return (
     <div className={className}>
       {label && (

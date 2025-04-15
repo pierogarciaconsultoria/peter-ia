@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createBscObjective, createBscMeasure } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
 import { EmployeeSelector } from "@/components/hr/shared/EmployeeSelector";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 interface BscObjectiveFormProps {
   perspective: 'financial' | 'customer' | 'internal_process' | 'learning_growth';
@@ -17,6 +18,7 @@ interface BscObjectiveFormProps {
 
 export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiveFormProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [targetValue, setTargetValue] = useState("");
@@ -30,20 +32,25 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
     setLoading(true);
     
     try {
-      // Create the objective with just the properties it expects
+      if (!user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Create the objective with company_id
       const result = await createBscObjective({
         perspective_id: perspective,
         title,
-        description
+        description,
+        company_id: user.empresa_id // Adiciona o company_id do usuário atual
       });
       
-      // If we successfully created the objective, create a measure for it
       if (result) {
         await createBscMeasure({ 
           objective_id: result.id,
           name: title,
           target: parseFloat(targetValue) || 0,
-          unit: targetUnit
+          unit: targetUnit,
+          company_id: user.empresa_id // Adiciona o company_id do usuário atual
         });
       }
       
@@ -66,89 +73,91 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
-      <div className="space-y-2">
-        <Label htmlFor="objective-title">Título do Objetivo</Label>
-        <Input
-          id="objective-title"
-          placeholder="Digite o título do objetivo estratégico"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="objective-description">Descrição</Label>
-        <Textarea
-          id="objective-description"
-          placeholder="Descreva o objetivo em detalhes..."
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+    <AuthenticationRequired>
+      <form onSubmit={handleSubmit} className="space-y-4 py-4">
         <div className="space-y-2">
-          <Label htmlFor="target-value">Meta</Label>
+          <Label htmlFor="objective-title">Título do Objetivo</Label>
           <Input
-            id="target-value"
-            type="number"
-            placeholder="Valor da meta"
-            value={targetValue}
-            onChange={(e) => setTargetValue(e.target.value)}
+            id="objective-title"
+            placeholder="Digite o título do objetivo estratégico"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="target-unit">Unidade</Label>
-          <Input
-            id="target-unit"
-            placeholder="Ex: %, R$, unidades"
-            value={targetUnit}
-            onChange={(e) => setTargetUnit(e.target.value)}
+          <Label htmlFor="objective-description">Descrição</Label>
+          <Textarea
+            id="objective-description"
+            placeholder="Descreva o objetivo em detalhes..."
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             required
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="measurement-frequency">Frequência de Medição</Label>
-        <Select value={measurementFrequency} onValueChange={setMeasurementFrequency}>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione a frequência" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="daily">Diária</SelectItem>
-            <SelectItem value="weekly">Semanal</SelectItem>
-            <SelectItem value="monthly">Mensal</SelectItem>
-            <SelectItem value="quarterly">Trimestral</SelectItem>
-            <SelectItem value="yearly">Anual</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="target-value">Meta</Label>
+            <Input
+              id="target-value"
+              type="number"
+              placeholder="Valor da meta"
+              value={targetValue}
+              onChange={(e) => setTargetValue(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="target-unit">Unidade</Label>
+            <Input
+              id="target-unit"
+              placeholder="Ex: %, R$, unidades"
+              value={targetUnit}
+              onChange={(e) => setTargetUnit(e.target.value)}
+              required
+            />
+          </div>
+        </div>
 
-      <div className="space-y-2">
-        <Label>Responsável</Label>
-        <EmployeeSelector
-          employeeId={responsibleId}
-          setEmployeeId={setResponsibleId}
-          placeholder="Selecione o responsável"
-          required
-        />
-      </div>
-      
-      <div className="flex justify-end gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? "Salvando..." : "Adicionar Objetivo"}
-        </Button>
-      </div>
-    </form>
+        <div className="space-y-2">
+          <Label htmlFor="measurement-frequency">Frequência de Medição</Label>
+          <Select value={measurementFrequency} onValueChange={setMeasurementFrequency}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione a frequência" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="daily">Diária</SelectItem>
+              <SelectItem value="weekly">Semanal</SelectItem>
+              <SelectItem value="monthly">Mensal</SelectItem>
+              <SelectItem value="quarterly">Trimestral</SelectItem>
+              <SelectItem value="yearly">Anual</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Responsável</Label>
+          <EmployeeSelector
+            employeeId={responsibleId}
+            setEmployeeId={setResponsibleId}
+            placeholder="Selecione o responsável"
+            required
+          />
+        </div>
+        
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Salvando..." : "Adicionar Objetivo"}
+          </Button>
+        </div>
+      </form>
+    </AuthenticationRequired>
   );
 }

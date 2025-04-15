@@ -3489,6 +3489,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      user_has_permission: {
+        Args: { modulo_chave: string; tipo_permissao: string }
+        Returns: boolean
+      }
       user_is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
