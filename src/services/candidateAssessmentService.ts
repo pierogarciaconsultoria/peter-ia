@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { CandidateAssessment, AssessmentLink, AssessmentResponse } from "@/types/recruitment";
+import { CandidateAssessment, AssessmentLink, AssessmentResponse, AssessmentQuestion } from "@/types/recruitment";
 import { toast } from "sonner";
 
 export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id' | 'created_at' | 'updated_at'>) => {
