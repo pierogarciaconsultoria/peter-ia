@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CandidateAssessment, AssessmentLink, AssessmentResponse, AssessmentQuestion } from "@/types/recruitment";
 import { toast } from "sonner";
@@ -28,9 +27,9 @@ export const createAssessment = async (assessment: Omit<CandidateAssessment, 'id
     const parsedData = {
       ...data,
       questions: typeof data.questions === 'string' 
-        ? JSON.parse(data.questions) as unknown as AssessmentQuestion[]
+        ? JSON.parse(data.questions) 
         : Array.isArray(data.questions) 
-          ? (data.questions as unknown as AssessmentQuestion[])
+          ? data.questions
           : []
     };
     
@@ -59,14 +58,14 @@ export const getAssessments = async (): Promise<CandidateAssessment[]> => {
     
     // Convert the JSON string data back to our typed structure
     const parsedAssessments = (data || []).map(item => {
-      let questions: AssessmentQuestion[] = [];
+      let questions = [];
       
       try {
         // Handle both string and direct JSON object cases
         if (typeof item.questions === 'string') {
-          questions = JSON.parse(item.questions) as unknown as AssessmentQuestion[];
+          questions = JSON.parse(item.questions);
         } else if (Array.isArray(item.questions)) {
-          questions = item.questions as unknown as AssessmentQuestion[];
+          questions = item.questions;
         }
       } catch (e) {
         console.error("Error parsing questions:", e);
@@ -144,14 +143,14 @@ export const validateAssessmentLink = async (token: string): Promise<AssessmentL
     
     // Convert the nested questions JSON to our typed structure
     if (data?.candidate_assessments) {
-      let parsedQuestions: AssessmentQuestion[] = [];
+      let parsedQuestions = [];
       
       try {
         // Handle both string and direct JSON object cases
         if (typeof data.candidate_assessments.questions === 'string') {
-          parsedQuestions = JSON.parse(data.candidate_assessments.questions) as unknown as AssessmentQuestion[];
+          parsedQuestions = JSON.parse(data.candidate_assessments.questions);
         } else if (Array.isArray(data.candidate_assessments.questions)) {
-          parsedQuestions = data.candidate_assessments.questions as unknown as AssessmentQuestion[];
+          parsedQuestions = data.candidate_assessments.questions;
         }
         
         // We need to assign back in a way that TypeScript accepts

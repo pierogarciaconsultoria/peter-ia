@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { EmployeeSelector } from "../departments/EmployeeSelector";
+import { EmployeeSelector } from "../shared/EmployeeSelector";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -27,10 +27,10 @@ import { OccurrenceFormValues } from "./occurrenceTypes";
 
 interface OccurrenceFormFieldsProps {
   form: ReturnType<typeof useForm<OccurrenceFormValues>>;
-  employees: any[];
+  employees?: any[];
 }
 
-export function OccurrenceFormFields({ form, employees }: OccurrenceFormFieldsProps) {
+export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
   const typeIcons = {
     warning: <AlertTriangle className="h-5 w-5 text-amber-500" />,
     disciplinary: <AlertOctagon className="h-5 w-5 text-red-500" />,
@@ -49,18 +49,15 @@ export function OccurrenceFormFields({ form, employees }: OccurrenceFormFieldsPr
         control={form.control}
         name="employee_id"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Colaborador</FormLabel>
-            <FormControl>
-              <EmployeeSelector 
-                employeeId={field.value} 
-                setEmployeeId={field.onChange}
-                employees={employees}
-                error={form.formState.errors.employee_id?.message}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+          <EmployeeSelector
+            employeeId={field.value}
+            setEmployeeId={field.onChange}
+            error={form.formState.errors.employee_id?.message}
+            field={field}
+            form={form}
+            name="employee_id"
+            required={true}
+          />
         )}
       />
 
