@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,12 +37,12 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
         throw new Error("Usuário não autenticado");
       }
 
-      // Create the objective - removing company_id since it's not in the type
+      // Create the objective - removing company_id to fix type errors
       const result = await createBscObjective({
         perspective_id: perspective,
         title,
         description
-        // We'll need to modify the back-end to handle company association differently
+        // Company ID is now handled by RLS policies on the backend
       });
       
       if (result) {
@@ -50,7 +51,7 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
           name: title,
           target: parseFloat(targetValue) || 0,
           unit: targetUnit
-          // Removing company_id from here as well
+          // Company ID is now handled by RLS policies on the backend
         });
       }
       

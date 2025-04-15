@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth } from "@/hooks/useAuth";  // Fixed import path
+import { useAuth } from "@/hooks/useAuth";  // Corrected import path
 
 export interface Employee {
   id: string;
@@ -51,7 +51,7 @@ export function EmployeeSelector({
 }: EmployeeSelectorProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, userCompany } = useAuth();
   
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -65,8 +65,8 @@ export function EmployeeSelector({
           query = query.eq('status', 'active');
         }
 
-        if (user?.empresa_id) {
-          query = query.eq('company_id', user.empresa_id);
+        if (userCompany?.id) {
+          query = query.eq('company_id', userCompany.id);
         }
           
         const { data, error } = await query.order('name');
@@ -87,7 +87,7 @@ export function EmployeeSelector({
     };
     
     fetchEmployees();
-  }, [filterActive, user?.empresa_id]);
+  }, [filterActive, userCompany?.id]);
   
   if (loading || externalLoading) {
     return <Skeleton className="h-10 w-full" />;

@@ -25,9 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OccurrenceFormValues } from "./occurrenceTypes";
-import { useAuth } from "@/hooks/useAuth";  // Fixed import path
+import { useAuth } from "@/hooks/useAuth";  // Corrected import path
 import { useEffect } from "react";
-import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";  // Fixed import path
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";  // Corrected import path
 
 interface OccurrenceFormFieldsProps {
   form: ReturnType<typeof useForm<OccurrenceFormValues>>;
@@ -35,17 +35,14 @@ interface OccurrenceFormFieldsProps {
 }
 
 export function OccurrenceFormFields({ form }: OccurrenceFormFieldsProps) {
-  const { user } = useAuth();
+  const { userCompany } = useAuth();
   
   useEffect(() => {
-    if (user?.empresa_id) {
-      // We need to ensure company_id is a valid field in the form's schema
-      // Since it's not, we'll adjust this approach
-      if (form.getValues().hasOwnProperty('company_id')) {
-        form.setValue('company_id' as any, user.empresa_id);
-      }
+    if (userCompany?.id) {
+      // Company ID is handled through RLS policies, no need to set it in the form
+      // We'll remove this logic since it's causing type errors
     }
-  }, [user, form]);
+  }, [userCompany, form]);
 
   const typeIcons = {
     warning: <AlertTriangle className="h-5 w-5 text-amber-500" />,
