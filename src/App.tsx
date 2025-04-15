@@ -44,6 +44,7 @@ import RawMaterialInspection from "./pages/RawMaterialInspection";
 import TrainingControl from "./pages/TrainingControl";
 import Reunioes from "./pages/Reunioes";
 import ExternalDiscAssessment from "./pages/ExternalDiscAssessment";
+import { ExternalAssessment } from "@/components/hr/recruitment/ExternalAssessment";
 
 function App() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -296,6 +297,7 @@ function App() {
             path="/disc-assessment/:token"
             element={<ExternalDiscAssessment />}
           />
+          <Route path="/assessments/:token" element={<ExternalAssessment />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         {isDesktop && <Navigation />}

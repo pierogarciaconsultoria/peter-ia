@@ -273,6 +273,148 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_assessment_links: {
+        Row: {
+          assessment_id: string
+          candidate_email: string
+          candidate_name: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          recruitment_process_id: string | null
+          token: string
+          used: boolean
+        }
+        Insert: {
+          assessment_id: string
+          candidate_email: string
+          candidate_name: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          recruitment_process_id?: string | null
+          token: string
+          used?: boolean
+        }
+        Update: {
+          assessment_id?: string
+          candidate_email?: string
+          candidate_name?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          recruitment_process_id?: string | null
+          token?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_assessment_links_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assessment_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assessment_links_recruitment_process_id_fkey"
+            columns: ["recruitment_process_id"]
+            isOneToOne: false
+            referencedRelation: "recruitment_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_assessment_responses: {
+        Row: {
+          answers: Json
+          assessment_id: string
+          candidate_email: string
+          candidate_name: string
+          id: string
+          link_id: string
+          score: number | null
+          submitted_at: string
+        }
+        Insert: {
+          answers: Json
+          assessment_id: string
+          candidate_email: string
+          candidate_name: string
+          id?: string
+          link_id: string
+          score?: number | null
+          submitted_at?: string
+        }
+        Update: {
+          answers?: Json
+          assessment_id?: string
+          candidate_email?: string
+          candidate_name?: string
+          id?: string
+          link_id?: string
+          score?: number | null
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_assessment_responses_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assessment_responses_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessment_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_assessments: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          questions: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          questions?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          questions?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidates: {
         Row: {
           company_id: string
@@ -3318,6 +3460,10 @@ export type Database = {
       add_updated_at_trigger: {
         Args: { table_name: string }
         Returns: undefined
+      }
+      generate_unique_assessment_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_user_company_id: {
         Args: Record<PropertyKey, never>
