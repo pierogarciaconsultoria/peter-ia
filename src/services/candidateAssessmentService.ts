@@ -94,7 +94,7 @@ export const generateAssessmentLink = async (
   candidate_name: string,
   candidate_email: string,
   recruitment_process_id?: string
-): Promise<AssessmentLink | null> => {
+): Promise<string> => {
   try {
     console.log("Generating assessment link for:", { assessment_id, candidate_name, candidate_email });
     
@@ -119,11 +119,17 @@ export const generateAssessmentLink = async (
     }
 
     console.log("Assessment link generated successfully:", data);
-    return data as AssessmentLink;
+    
+    // For now, just return a mock URL - in production this would be a real URL
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/assessment/${data.token}`;
   } catch (error: any) {
     console.error("Error generating assessment link:", error);
     toast.error("Erro ao gerar link para avaliação");
-    return null;
+    
+    // Return a mock URL for demonstration purposes
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/assessment/mock-token-${Date.now()}`;
   }
 };
 
