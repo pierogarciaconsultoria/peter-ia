@@ -47,7 +47,11 @@ export const getClimateSurveys = async (): Promise<ClimateSurvey[]> => {
 
     if (error) throw error;
     
-    return data || [];
+    // Validate and cast the status to ensure it matches the expected type
+    return (data || []).map(survey => ({
+      ...survey,
+      status: validateSurveyStatus(survey.status)
+    })) as ClimateSurvey[];
   } catch (error: any) {
     console.error("Erro ao buscar pesquisas de clima:", error);
     
@@ -90,7 +94,14 @@ export const getClimateSurvey = async (id: string): Promise<ClimateSurvey | null
 
     if (error) throw error;
     
-    return data;
+    if (data) {
+      return {
+        ...data,
+        status: validateSurveyStatus(data.status)
+      } as ClimateSurvey;
+    }
+    
+    return null;
   } catch (error: any) {
     console.error(`Erro ao buscar pesquisa de clima ${id}:`, error);
     return null;
@@ -108,7 +119,10 @@ export const createClimateSurvey = async (survey: Omit<ClimateSurvey, 'id' | 'cr
 
     if (error) throw error;
     
-    return data;
+    return {
+      ...data,
+      status: validateSurveyStatus(data.status)
+    } as ClimateSurvey;
   } catch (error: any) {
     console.error("Erro ao criar pesquisa de clima:", error);
     toast.error("Erro ao criar pesquisa de clima", { 
@@ -130,7 +144,10 @@ export const updateClimateSurvey = async (id: string, survey: Partial<ClimateSur
 
     if (error) throw error;
     
-    return data;
+    return {
+      ...data,
+      status: validateSurveyStatus(data.status)
+    } as ClimateSurvey;
   } catch (error: any) {
     console.error(`Erro ao atualizar pesquisa de clima ${id}:`, error);
     toast.error("Erro ao atualizar pesquisa de clima", { 
@@ -173,7 +190,11 @@ export const getSurveyQuestions = async (surveyId: string): Promise<ClimateSurve
 
     if (error) throw error;
     
-    return data || [];
+    // Validate question types
+    return (data || []).map(question => ({
+      ...question,
+      question_type: validateQuestionType(question.question_type)
+    })) as ClimateSurveyQuestion[];
   } catch (error: any) {
     console.error(`Erro ao buscar perguntas da pesquisa ${surveyId}:`, error);
     return [];
@@ -191,7 +212,10 @@ export const createSurveyQuestion = async (question: Omit<ClimateSurveyQuestion,
 
     if (error) throw error;
     
-    return data;
+    return {
+      ...data,
+      question_type: validateQuestionType(data.question_type)
+    } as ClimateSurveyQuestion;
   } catch (error: any) {
     console.error("Erro ao criar pergunta:", error);
     toast.error("Erro ao criar pergunta", { 
@@ -213,7 +237,10 @@ export const updateSurveyQuestion = async (id: string, question: Partial<Climate
 
     if (error) throw error;
     
-    return data;
+    return {
+      ...data,
+      question_type: validateQuestionType(data.question_type)
+    } as ClimateSurveyQuestion;
   } catch (error: any) {
     console.error(`Erro ao atualizar pergunta ${id}:`, error);
     toast.error("Erro ao atualizar pergunta", { 
@@ -308,4 +335,19 @@ export const submitSurveyResponse = async (response: Omit<ClimateSurveyResponse,
     });
     return null;
   }
+};
+
+// Helper functions to validate types
+const validateSurveyStatus = (status: string): 'draft' | 'active' | 'completed' | 'archived' => {
+  const validStatuses = ['draft', 'active', 'completed', 'archived'];
+  return validStatuses.includes(status) 
+    ? status as 'draft' | 'active' | 'completed' | 'archived'
+    : 'draft'; // Default to draft if invalid
+};
+
+const validateQuestionType = (type: string): 'scale' | 'text' | 'multiple_choice' | 'boolean' => {
+  const validTypes = ['scale', 'text', 'multiple_choice', 'boolean'];
+  return validTypes.includes(type)
+    ? type as 'scale' | 'text' | 'multiple_choice' | 'boolean'
+    : 'text'; // Default to text if invalid
 };
