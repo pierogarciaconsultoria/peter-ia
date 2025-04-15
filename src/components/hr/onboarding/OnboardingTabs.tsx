@@ -16,22 +16,28 @@ export function OnboardingTabs({ onboardingProcesses }: OnboardingTabsProps) {
         <TabsTrigger value="completed">Concluídos</TabsTrigger>
       </TabsList>
       
-      <OnboardingTabContent 
-        tabValue="all" 
-        onboardingProcesses={onboardingProcesses} 
-      />
+      <TabsContent value="all">
+        <OnboardingTabContent 
+          tabValue="all" 
+          onboardingProcesses={onboardingProcesses} 
+        />
+      </TabsContent>
       
-      <OnboardingTabContent 
-        tabValue="active" 
-        onboardingProcesses={onboardingProcesses.filter(p => p.status === "em_andamento")} 
-        simpleView={true}
-      />
+      <TabsContent value="active">
+        <OnboardingTabContent 
+          tabValue="active" 
+          onboardingProcesses={onboardingProcesses.filter(p => p.status === "em_andamento")} 
+          simpleView={true}
+        />
+      </TabsContent>
       
-      <OnboardingTabContent 
-        tabValue="completed" 
-        onboardingProcesses={onboardingProcesses.filter(p => p.status === "concluido")} 
-        simpleView={true}
-      />
+      <TabsContent value="completed">
+        <OnboardingTabContent 
+          tabValue="completed" 
+          onboardingProcesses={onboardingProcesses.filter(p => p.status === "concluido")} 
+          simpleView={true}
+        />
+      </TabsContent>
     </Tabs>
   );
 }
