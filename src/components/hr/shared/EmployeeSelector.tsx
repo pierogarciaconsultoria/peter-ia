@@ -101,7 +101,7 @@ export function EmployeeSelector({
   if (form && name) {
     return (
       <FormItem>
-        <FormLabel>{label}{required && <span className="text-destructive"> *</span>}</FormLabel>
+        {label && <FormLabel>{label}{required && <span className="text-destructive"> *</span>}</FormLabel>}
         <Select
           onValueChange={(value) => {
             if (field) field.onChange(value);

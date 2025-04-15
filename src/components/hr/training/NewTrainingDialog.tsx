@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +34,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
-import { EmployeeSelector } from "../departments/EmployeeSelector";
+import { EmployeeSelector } from "../shared/EmployeeSelector";
 import { createTraining } from "@/services/trainingService";
 
 const formSchema = z.object({
@@ -73,7 +74,6 @@ export function NewTrainingDialog({
   onTrainingCreated
 }: NewTrainingDialogProps) {
   const [trainerType, setTrainerType] = useState<"internal" | "external">("internal");
-  const [trainerEmployeeId, setTrainerEmployeeId] = useState<string>("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,11 +98,6 @@ export function NewTrainingDialog({
   function handleTrainerTypeChange(value: "internal" | "external") {
     setTrainerType(value);
     form.setValue("trainerType", value);
-  }
-
-  function handleTrainerEmployeeChange(employeeId: string) {
-    setTrainerEmployeeId(employeeId);
-    form.setValue("internalTrainerEmployeeId", employeeId);
   }
 
   async function onSubmitForm(values: z.infer<typeof formSchema>) {
@@ -311,30 +306,22 @@ export function NewTrainingDialog({
             <div>
               <Label htmlFor="trainerType">Tipo de Instrutor</Label>
               <div className="flex items-center space-x-2 mt-2">
-                <SelectItem
-                  value="internal"
+                <Button
+                  type="button"
+                  variant={trainerType === "internal" ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 rounded-md"
                   onClick={() => handleTrainerTypeChange("internal")}
-                  className={cn(
-                    "cursor-pointer px-4 py-2 rounded-md",
-                    trainerType === "internal"
-                      ? "bg-secondary text-secondary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
-                  )}
                 >
                   Interno
-                </SelectItem>
-                <SelectItem
-                  value="external"
+                </Button>
+                <Button
+                  type="button"
+                  variant={trainerType === "external" ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 rounded-md"
                   onClick={() => handleTrainerTypeChange("external")}
-                  className={cn(
-                    "cursor-pointer px-4 py-2 rounded-md",
-                    trainerType === "external"
-                      ? "bg-secondary text-secondary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground"
-                  )}
                 >
                   Externo
-                </SelectItem>
+                </Button>
               </div>
             </div>
             {trainerType === "internal" ? (
@@ -345,12 +332,21 @@ export function NewTrainingDialog({
                   <FormItem>
                     <FormLabel>Instrutor Interno</FormLabel>
                     <FormControl>
-                      <EmployeeSelector
-                        employeeId={field.value || ""}
-                        setEmployeeId={field.onChange}
-                        employees={employees}
-                        error={form.formState.errors.internalTrainerEmployeeId?.message}
-                      />
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o instrutor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {employees.map((employee) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                              {employee.name} - {employee.position}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormDescription>Selecione o instrutor interno para o treinamento.</FormDescription>
                     <FormMessage />
@@ -397,7 +393,22 @@ export function NewTrainingDialog({
                   <FormItem>
                     <FormLabel>Público-Alvo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Público-alvo" {...field} />
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o departamento alvo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Todos">Todos os Departamentos</SelectItem>
+                          {departments.map((department) => (
+                            <SelectItem key={department} value={department}>
+                              {department}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormDescription>Especifique o público-alvo do treinamento.</FormDescription>
                     <FormMessage />
