@@ -1,45 +1,96 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { PersonnelRequest } from "../types";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { createNotification } from "@/services/notificationService";
 import { supabase } from "@/integrations/supabase/client";
+import { movementTypes } from "../form/MovementTypeSelector";
 
 export function useRequestActions(requests: PersonnelRequest[], setRequests: React.Dispatch<React.SetStateAction<PersonnelRequest[]>>) {
   const { toast } = useToast();
   
+  const createTaskInModule = async (request: PersonnelRequest) => {
+    const movementType = movementTypes.find(type => type.id === request.type);
+    if (!movementType) return;
+
+    try {
+      // Criar tarefa no módulo correspondente
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert({
+          title: `${movementType.label} - ${request.employeeName}`,
+          description: request.justification,
+          module: movementType.targetModule,
+          status: 'pending',
+          employee_id: request.employee_id,
+          requester_id: request.requester_id,
+          personnel_request_id: request.id
+        });
+
+      if (error) throw error;
+
+      // Notificar responsável do módulo
+      const moduleManagers = await getModuleManagers(movementType.targetModule);
+      for (const manager of moduleManagers) {
+        await createNotification(
+          manager.id,
+          `Nova tarefa de ${movementType.label}`,
+          `Uma nova tarefa foi criada para ${request.employeeName}`,
+          "task",
+          data[0].id
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao criar tarefa:', error);
+      throw error;
+    }
+  };
+
+  const getModuleManagers = async (module: string) => {
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('role', 'manager')
+      .eq('module', module);
+    
+    return data || [];
+  };
+
   // Handle approval of a request
   const handleApproval = async (id: string) => {
-    // Find the current request to get employee information
-    const request = requests.find(req => req.id === id);
-    
-    setRequests(prevRequests => 
-      prevRequests.map(req => 
-        req.id === id 
-          ? { 
-              ...req, 
-              status: "approved", 
-              approved_by: "Gestor",
-              approval_date: new Date().toISOString().split('T')[0]
-            } 
-          : req
-      )
-    );
-    
-    toast({
-      title: "Solicitação aprovada",
-      description: "A solicitação foi aprovada com sucesso.",
-      action: (
-        <div className="bg-green-50 border border-green-100 px-2 py-1 rounded-md flex items-center gap-2 text-green-700">
-          <CheckCircle className="h-4 w-4" />
-          <span className="text-xs">Aprovado</span>
-        </div>
-      )
-    });
-    
-    // Send notification to the employee about the approved request
-    if (request && request.employee_id) {
-      try {
+    try {
+      const request = requests.find(req => req.id === id);
+      if (!request) throw new Error('Request not found');
+
+      // Criar tarefa no módulo correspondente
+      await createTaskInModule(request);
+      
+      // Atualizar status da requisição
+      setRequests(prevRequests => 
+        prevRequests.map(req => 
+          req.id === id 
+            ? { 
+                ...req, 
+                status: "approved", 
+                approved_by: "Gestor",
+                approval_date: new Date().toISOString().split('T')[0]
+              } 
+            : req
+        )
+      );
+      
+      toast({
+        title: "Solicitação aprovada",
+        description: "A solicitação foi aprovada e as tarefas foram criadas com sucesso.",
+        action: (
+          <div className="bg-green-50 border border-green-100 px-2 py-1 rounded-md flex items-center gap-2 text-green-700">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-xs">Aprovado</span>
+          </div>
+        )
+      });
+      
+      // Notificar o colaborador
+      if (request.employee_id) {
         await createNotification(
           request.employee_id,
           "Solicitação Aprovada",
@@ -47,9 +98,14 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
           "personnel_request",
           id
         );
-      } catch (error) {
-        console.error("Error sending notification:", error);
       }
+    } catch (error) {
+      console.error('Erro ao aprovar solicitação:', error);
+      toast({
+        title: "Erro ao aprovar solicitação",
+        description: "Ocorreu um erro ao processar a aprovação. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 

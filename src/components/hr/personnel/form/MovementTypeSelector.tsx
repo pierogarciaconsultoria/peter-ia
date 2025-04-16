@@ -1,47 +1,45 @@
 
-import { Checkbox } from "@/components/ui/checkbox";
 import { FormSectionProps } from "./types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
-// List of movement types
+// Lista de tipos de movimentação com informações sobre o módulo destino
 export const movementTypes = [
-  { id: "hiring", label: "Admissão" },
-  { id: "termination", label: "Demissão" },
-  { id: "salaryChange", label: "Aumento salarial" },
-  { id: "positionChange", label: "Mudança de cargo" },
-  { id: "vacation", label: "Férias" },
-  { id: "scheduleChange", label: "Mudança de horário" },
-  { id: "absence", label: "Falta ao trabalho" },
-  { id: "late", label: "Chegou atrasado" },
-  { id: "medicalCertificate", label: "Atestado" },
-  { id: "cardPunchForgot", label: "Esqueceu de bater cartão" },
-  { id: "departmentChange", label: "Mudança de setor" },
-  { id: "shiftChange", label: "Troca de turno" },
-  { id: "factoryLeave", label: "Autorização saída da fábrica" },
-  { id: "writtenWarning", label: "Advertência por escrito" },
-  { id: "verbalWarning", label: "Advertência verbal" },
-  { id: "overtimeAuth", label: "Autorizado a fazer hora extra" },
-  { id: "dayExchange", label: "Troca de dia" },
-  { id: "hourCredit", label: "Abono de hora" }
+  { id: "hiring", label: "Admissão", targetModule: "admission" },
+  { id: "termination", label: "Demissão", targetModule: "termination" },
+  { id: "salaryChange", label: "Aumento salarial", targetModule: "hr" },
+  { id: "positionChange", label: "Mudança de cargo", targetModule: "hr" },
+  { id: "vacation", label: "Férias", targetModule: "vacation" },
+  { id: "scheduleChange", label: "Mudança de horário", targetModule: "hr" },
+  { id: "absence", label: "Falta ao trabalho", targetModule: "attendance" },
+  { id: "late", label: "Chegou atrasado", targetModule: "attendance" },
+  { id: "medicalCertificate", label: "Atestado", targetModule: "medical" },
+  { id: "cardPunchForgot", label: "Esqueceu de bater cartão", targetModule: "attendance" },
+  { id: "departmentChange", label: "Mudança de setor", targetModule: "hr" },
+  { id: "shiftChange", label: "Troca de turno", targetModule: "hr" },
+  { id: "factoryLeave", label: "Autorização saída da fábrica", targetModule: "hr" },
+  { id: "writtenWarning", label: "Advertência por escrito", targetModule: "feedback" },
+  { id: "verbalWarning", label: "Advertência verbal", targetModule: "feedback" },
+  { id: "overtimeAuth", label: "Autorizado a fazer hora extra", targetModule: "hr" },
+  { id: "dayExchange", label: "Troca de dia", targetModule: "hr" },
+  { id: "hourCredit", label: "Abono de hora", targetModule: "hr" }
 ];
 
 export function MovementTypeSelector({ form }: FormSectionProps) {
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {movementTypes.map((type) => (
-        <div key={type.id} className="flex items-center space-x-2">
-          <Checkbox 
-            id={type.id}
-            checked={form.watch("type") === type.id}
-            onCheckedChange={() => form.setValue("type", type.id)}
-          />
-          <label 
-            htmlFor={type.id}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            {type.label}
-          </label>
-        </div>
-      ))}
+    <div className="grid grid-cols-3 gap-4">
+      <RadioGroup
+        onValueChange={(value) => form.setValue("type", value)}
+        value={form.watch("type")}
+        className="grid grid-cols-3 gap-4"
+      >
+        {movementTypes.map((type) => (
+          <div key={type.id} className="flex items-center space-x-2">
+            <RadioGroupItem value={type.id} id={type.id} />
+            <Label htmlFor={type.id}>{type.label}</Label>
+          </div>
+        ))}
+      </RadioGroup>
     </div>
   );
 }
