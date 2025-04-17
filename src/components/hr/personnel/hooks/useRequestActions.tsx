@@ -42,8 +42,15 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       //   })
       //   .select();
 
-      // Simulate success response for now
-      const simulatedResponseData = [{
+      // Define type for simulated response data
+      type SimulatedTask = {
+        id: string;
+        title: string;
+        status: string;
+      };
+
+      // Simulate success response with proper typing
+      const simulatedResponseData: SimulatedTask[] = [{
         id: crypto.randomUUID(),
         title: `${movementType.label} - ${request.employeeName}`,
         status: 'pending'
@@ -85,9 +92,10 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       // Criar tarefa no módulo correspondente
       await createTaskInModule(request);
       
-      // Atualizar status da requisição
+      // Create a new array with the updated request
       const updatedRequests = requests.map(req => {
         if (req.id === id) {
+          // Use type assertion to ensure correct typing
           return {
             ...req,
             status: "approved" as const,
@@ -98,6 +106,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         return req;
       });
       
+      // Update state with new array
       setRequests(updatedRequests);
       
       toast({
@@ -136,6 +145,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
+    // Create a new array with the updated request
     const updatedRequests = requests.map(req => {
       if (req.id === id) {
         return {
@@ -147,6 +157,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       return req;
     });
     
+    // Update state with new array
     setRequests(updatedRequests);
     
     toast({
@@ -176,6 +187,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
+    // Create a new array with the updated request
     const updatedRequests = requests.map(req => {
       if (req.id === id) {
         return {
@@ -187,6 +199,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       return req;
     });
     
+    // Update state with new array
     setRequests(updatedRequests);
     
     toast({
