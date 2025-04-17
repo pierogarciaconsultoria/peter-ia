@@ -86,18 +86,18 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       await createTaskInModule(request);
       
       // Atualizar status da requisição
-      setRequests(prevRequests => 
-        prevRequests.map(req => 
-          req.id === id 
-            ? { 
-                ...req, 
-                status: "approved", 
-                approved_by: "Gestor",
-                approval_date: new Date().toISOString().split('T')[0]
-              } 
-            : req
-        )
+      const updatedRequests = requests.map(req => 
+        req.id === id 
+          ? { 
+              ...req, 
+              status: "approved", 
+              approved_by: "Gestor",
+              approval_date: new Date().toISOString().split('T')[0]
+            } 
+          : req
       );
+      
+      setRequests(updatedRequests);
       
       toast({
         title: "Solicitação aprovada",
