@@ -31,12 +31,14 @@ export function MovementTypeSelector({ form }: FormSectionProps) {
       <RadioGroup
         onValueChange={(value) => form.setValue("type", value)}
         value={form.watch("type")}
-        className="grid grid-cols-3 gap-4"
+        className="grid grid-cols-3 gap-4 col-span-3"
       >
         {movementTypes.map((type) => (
           <div key={type.id} className="flex items-center space-x-2">
             <RadioGroupItem value={type.id} id={type.id} />
-            <Label htmlFor={type.id}>{type.label}</Label>
+            <Label htmlFor={type.id} className="cursor-pointer">
+              {type.label}
+            </Label>
           </div>
         ))}
       </RadioGroup>
