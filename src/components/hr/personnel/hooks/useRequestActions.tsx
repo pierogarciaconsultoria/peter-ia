@@ -86,16 +86,17 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       await createTaskInModule(request);
       
       // Atualizar status da requisição
-      const updatedRequests = requests.map(req => 
-        req.id === id 
-          ? { 
-              ...req, 
-              status: "approved", 
-              approved_by: "Gestor",
-              approval_date: new Date().toISOString().split('T')[0]
-            } 
-          : req
-      );
+      const updatedRequests = requests.map(req => {
+        if (req.id === id) {
+          return {
+            ...req,
+            status: "approved" as const,
+            approved_by: "Gestor",
+            approval_date: new Date().toISOString().split('T')[0]
+          };
+        }
+        return req;
+      });
       
       setRequests(updatedRequests);
       
@@ -135,15 +136,18 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
-    setRequests(prevRequests => 
-      prevRequests.map(req => 
-        req.id === id ? { 
-          ...req, 
-          status: "rejected",
+    const updatedRequests = requests.map(req => {
+      if (req.id === id) {
+        return {
+          ...req,
+          status: "rejected" as const,
           rejection_reason: reason || "Solicitação rejeitada pelo gestor."
-        } : req
-      )
-    );
+        };
+      }
+      return req;
+    });
+    
+    setRequests(updatedRequests);
     
     toast({
       title: "Solicitação rejeitada",
@@ -172,15 +176,18 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
-    setRequests(prevRequests => 
-      prevRequests.map(req => 
-        req.id === id ? { 
-          ...req, 
-          status: "canceled",
+    const updatedRequests = requests.map(req => {
+      if (req.id === id) {
+        return {
+          ...req,
+          status: "canceled" as const,
           rejection_reason: reason || "Solicitação cancelada pelo solicitante."
-        } : req
-      )
-    );
+        };
+      }
+      return req;
+    });
+    
+    setRequests(updatedRequests);
     
     toast({
       title: "Solicitação cancelada",
