@@ -1,7 +1,8 @@
 
-import { FormSectionProps } from "./types";
+import { FormSectionProps } from "../types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { RequestStatus } from "../types";
 
 // Lista de tipos de movimentação com informações sobre o módulo destino
 export const movementTypes = [
@@ -26,11 +27,11 @@ export const movementTypes = [
 ] as const;
 
 export const requestStatus = [
-  { id: "new", label: "Nova Solicitação" },
-  { id: "in_analysis", label: "Em Análise" },
-  { id: "in_approval", label: "Em aprovação" },
-  { id: "rejected", label: "Reprovado" },
-  { id: "approved", label: "Aprovado" }
+  { id: "new" as RequestStatus, label: "Nova Solicitação" },
+  { id: "in_analysis" as RequestStatus, label: "Em Análise" },
+  { id: "in_approval" as RequestStatus, label: "Em aprovação" },
+  { id: "rejected" as RequestStatus, label: "Reprovado" },
+  { id: "approved" as RequestStatus, label: "Aprovado" }
 ] as const;
 
 export function MovementTypeSelector({ form }: FormSectionProps) {
@@ -60,7 +61,7 @@ export function MovementTypeSelector({ form }: FormSectionProps) {
         <h3 className="mb-4 text-sm font-medium">Status da Solicitação</h3>
         <div className="grid grid-cols-3 gap-4">
           <RadioGroup
-            onValueChange={(value) => form.setValue("status", value)}
+            onValueChange={(value) => form.setValue("status", value as RequestStatus)}
             value={form.watch("status")}
             className="grid grid-cols-3 gap-4 col-span-3"
             defaultValue="new"

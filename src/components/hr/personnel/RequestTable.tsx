@@ -30,6 +30,12 @@ export function RequestTable({ requests, onApprove, onReject }: RequestTableProp
         return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Cancelado</Badge>;
       case "manager_approval":
         return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Aguardando gestor</Badge>;
+      case "in_analysis":
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Em análise</Badge>;
+      case "in_approval":
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Em aprovação</Badge>;
+      case "new":
+        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">Nova</Badge>;
       case "pending":
       default:
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Pendente</Badge>;
@@ -72,7 +78,7 @@ export function RequestTable({ requests, onApprove, onReject }: RequestTableProp
                 <TableCell>{request.requestDate}</TableCell>
                 <TableCell>{getStatusBadge(request.status)}</TableCell>
                 <TableCell className="text-right">
-                  {request.status === "manager_approval" && (
+                  {(request.status === "manager_approval" || request.status === "in_approval") && (
                     <div className="flex justify-end space-x-2">
                       <Button 
                         size="sm" 

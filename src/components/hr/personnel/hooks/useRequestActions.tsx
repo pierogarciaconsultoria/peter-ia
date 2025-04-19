@@ -1,6 +1,6 @@
 
 import { useToast } from "@/hooks/use-toast";
-import { PersonnelRequest } from "../types";
+import { PersonnelRequest, RequestStatus } from "../types";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { createNotification } from "@/services/notificationService";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,10 +95,9 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       // Create a new array with the updated request
       const updatedRequests = requests.map(req => {
         if (req.id === id) {
-          // Use type assertion to ensure correct typing
           return {
             ...req,
-            status: "approved" as const,
+            status: "approved" as RequestStatus,
             approved_by: "Gestor",
             approval_date: new Date().toISOString().split('T')[0]
           };
@@ -150,7 +149,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       if (req.id === id) {
         return {
           ...req,
-          status: "rejected" as const,
+          status: "rejected" as RequestStatus,
           rejection_reason: reason || "Solicitação rejeitada pelo gestor."
         };
       }
@@ -192,7 +191,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       if (req.id === id) {
         return {
           ...req,
-          status: "canceled" as const,
+          status: "canceled" as RequestStatus,
           rejection_reason: reason || "Solicitação cancelada pelo solicitante."
         };
       }

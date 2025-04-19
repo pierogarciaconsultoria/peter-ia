@@ -1,9 +1,12 @@
+
 import { UseFormReturn } from "react-hook-form";
 import { JobPosition } from "../types";
 
+export type RequestStatus = "new" | "in_analysis" | "in_approval" | "rejected" | "approved" | "pending" | "canceled" | "manager_approval";
+
 export interface RequestFormValues {
   type: string;
-  status: "new" | "in_analysis" | "in_approval" | "rejected" | "approved";
+  status: RequestStatus;
   department: string;
   position_id?: string;
   requestDate?: string;
@@ -46,7 +49,7 @@ export interface PersonnelRequest {
   position: string;
   position_id: string;
   requestDate: string;
-  status: "pending" | "approved" | "rejected" | "canceled" | "manager_approval";
+  status: RequestStatus;
   requester: string;
   requester_id: string;
   employeeName: string;

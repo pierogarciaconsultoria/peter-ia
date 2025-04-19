@@ -2,7 +2,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
-import { RequestFormValues } from "../types";
+import { RequestFormValues, RequestStatus } from "../types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import React from "react";
@@ -13,7 +13,7 @@ interface SignatureSectionProps {
 
 export function SignatureSection({ form }: SignatureSectionProps) {
   // Create a hardcoded value for display only
-  const statusValue = form.getValues("status") || "pending";
+  const statusValue = form.getValues("status") || "new";
 
   return (
     <>
@@ -39,6 +39,9 @@ export function SignatureSection({ form }: SignatureSectionProps) {
               case "rejected": return "Reprovado";
               case "canceled": return "Cancelado";
               case "manager_approval": return "Aguardando aprovação do gestor";
+              case "in_analysis": return "Em análise";
+              case "in_approval": return "Em aprovação";
+              case "new": return "Nova solicitação";
               case "pending":
               default:
                 return "Pendente";
@@ -71,7 +74,7 @@ export function SignatureSection({ form }: SignatureSectionProps) {
       )}
 
       {/* HR Observation Field (only visible when approved or in review) */}
-      {(statusValue === "approved" || statusValue === "pending") && (
+      {(statusValue === "approved" || statusValue === "new" || statusValue === "in_analysis" || statusValue === "in_approval" || statusValue === "pending") && (
         <FormField
           control={form.control}
           name="hr_observation"
