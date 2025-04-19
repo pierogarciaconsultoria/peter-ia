@@ -8,6 +8,7 @@ import { OccurrenceFilters } from "./occurrences/OccurrenceFilters";
 import { OccurrenceTable } from "./occurrences/OccurrenceTable";
 import { RecentOccurrences } from "./occurrences/RecentOccurrences";
 import { filterOccurrences } from "./occurrences/utils";
+import { OccurrenceFormDialog } from "./occurrences/OccurrenceFormDialog";
 
 export function OccurrenceManagement() {
   const { occurrences, isLoading } = useOccurrences();
@@ -51,9 +52,9 @@ export function OccurrenceManagement() {
       
       <RecentOccurrences occurrences={occurrences} />
 
-      <NewOccurrenceDialog 
-        isOpen={showNewDialog}
-        onClose={() => setShowNewDialog(false)}
+      <OccurrenceFormDialog 
+        open={showNewDialog}
+        onOpenChange={setShowNewDialog}
       />
     </div>
   );
