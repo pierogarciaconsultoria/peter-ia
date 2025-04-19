@@ -7,9 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { FormField, FormItem } from "@/components/ui/form";
 
 // Lista de tipos de movimentação com informações sobre o módulo destino
 export const movementTypes = [
@@ -45,22 +43,29 @@ export function MovementTypeSelector({ form }: FormSectionProps) {
     <div className="space-y-6">
       <div>
         <h3 className="mb-4 text-sm font-medium">Tipo de Movimentação</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <RadioGroup
-            onValueChange={(value) => form.setValue("type", value)}
-            value={form.watch("type")}
-            className="grid grid-cols-3 gap-4 col-span-3"
-          >
-            {movementTypes.map((type) => (
-              <div key={type.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={type.id} id={type.id} />
-                <Label htmlFor={type.id} className="cursor-pointer">
-                  {type.label}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o tipo de movimentação" />
+                </SelectTrigger>
+                <SelectContent>
+                  {movementTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
       </div>
 
       <div>
