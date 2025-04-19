@@ -1,8 +1,15 @@
 
-import { FormSectionProps } from "../types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { FormSectionProps, RequestStatus } from "../types";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { RequestStatus } from "../types";
+import { FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Lista de tipos de movimentação com informações sobre o módulo destino
 export const movementTypes = [
@@ -10,7 +17,6 @@ export const movementTypes = [
   { id: "termination", label: "Demissão", targetModule: "termination" },
   { id: "salaryChange", label: "Aumento salarial", targetModule: "hr" },
   { id: "positionChange", label: "Mudança de cargo", targetModule: "hr" },
-  { id: "vacation", label: "Férias", targetModule: "vacation" },
   { id: "scheduleChange", label: "Mudança de horário", targetModule: "hr" },
   { id: "absence", label: "Falta ao trabalho", targetModule: "attendance" },
   { id: "late", label: "Chegou atrasado", targetModule: "attendance" },
@@ -59,23 +65,29 @@ export function MovementTypeSelector({ form }: FormSectionProps) {
 
       <div>
         <h3 className="mb-4 text-sm font-medium">Status da Solicitação</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <RadioGroup
-            onValueChange={(value) => form.setValue("status", value as RequestStatus)}
-            value={form.watch("status")}
-            className="grid grid-cols-3 gap-4 col-span-3"
-            defaultValue="new"
-          >
-            {requestStatus.map((status) => (
-              <div key={status.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={status.id} id={status.id} />
-                <Label htmlFor={status.id} className="cursor-pointer">
-                  {status.label}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <Select
+                onValueChange={(value: RequestStatus) => field.onChange(value)}
+                defaultValue={field.value}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {requestStatus.map((status) => (
+                    <SelectItem key={status.id} value={status.id}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );
