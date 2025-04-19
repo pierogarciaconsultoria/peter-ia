@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,10 @@ import {
   Clock,
   Plus,
   User,
-  AlertTriangle
+  AlertTriangle,
+  FileText,
+  Check,
+  X
 } from "lucide-react";
 
 import {
@@ -76,7 +80,32 @@ export function VacationManagement() {
         description: "A solicitação de férias foi enviada com sucesso.",
       });
 
-      fetchEmployees();
+      // Call the fetchEmployees function to refresh the data
+      const fetchEmployeesData = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('employees')
+            .select('*')
+            .eq('status', 'active');
+            
+          if (error) throw error;
+          
+          const employeesWithVacations = data.map(employee => {
+            const hireDate = new Date(employee.hire_date);
+            const vacationPeriods = calculateVacationPeriods(hireDate);
+            return {
+              ...employee,
+              vacationPeriods
+            };
+          });
+          
+          setEmployees(employeesWithVacations);
+        } catch (error) {
+          console.error('Error fetching employees:', error);
+        }
+      };
+      
+      fetchEmployeesData();
     } catch (error) {
       console.error("Error submitting vacation request:", error);
       toast({

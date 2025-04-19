@@ -27,12 +27,12 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         personnel_request_id: request.id
       });
       
-      // Define type for simulated response data
-      type SimulatedTask = {
+      // Define a specific type for simulated task to avoid excessive type instantiation
+      interface SimulatedTask {
         id: string;
         title: string;
         status: string;
-      };
+      }
 
       // Simulate success response with proper typing
       const simulatedResponseData: SimulatedTask[] = [{
