@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Plus,
   User,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react";
 
 import {
@@ -21,68 +22,79 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { calculateVacationPeriods, formatVacationDate } from "@/utils/vacationCalculations";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function VacationManagement() {
-  // Mock data for vacation requests
-  const [vacationRequests] = useState([
-    {
-      id: "vac1",
-      employeeName: "Ricardo Ferreira",
-      position: "Analista de Sistemas",
-      startDate: "2023-11-15",
-      endDate: "2023-11-30",
-      days: 15,
-      status: "aprovado",
-      department: "Tecnologia"
-    },
-    {
-      id: "vac2",
-      employeeName: "Camila Rocha",
-      position: "Designer Gráfico",
-      startDate: "2023-12-20",
-      endDate: "2024-01-10",
-      days: 22,
-      status: "pendente",
-      department: "Marketing"
-    },
-    {
-      id: "vac3",
-      employeeName: "Luciana Alves",
-      position: "Analista Financeiro",
-      startDate: "2024-02-01",
-      endDate: "2024-02-15",
-      days: 15,
-      status: "pendente",
-      department: "Financeiro"
-    },
-    {
-      id: "vac4",
-      employeeName: "Bruno Costa",
-      position: "Gerente de Projetos",
-      startDate: "2023-10-05",
-      endDate: "2023-10-25",
-      days: 20,
-      status: "concluido",
-      department: "Operações"
-    }
-  ]);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .select('*')
+          .eq('status', 'active');
+          
+        if (error) throw error;
+        
+        const employeesWithVacations = data.map(employee => {
+          const hireDate = new Date(employee.hire_date);
+          const vacationPeriods = calculateVacationPeriods(hireDate);
+          return {
+            ...employee,
+            vacationPeriods
+          };
+        });
+        
+        setEmployees(employeesWithVacations);
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        toast({
+          title: "Erro ao carregar funcionários",
+          description: "Não foi possível carregar os dados dos funcionários.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEmployees();
+  }, []);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, isExpiring: boolean = false) => {
+    if (isExpiring) {
+      return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1">
+        <AlertTriangle className="h-3 w-3" />
+        Vencendo
+      </Badge>;
+    }
+    
     switch (status) {
-      case "pendente":
+      case "pending":
         return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pendente</Badge>;
-      case "aprovado":
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Aprovado</Badge>;
-      case "concluido":
+      case "expired":
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Vencido</Badge>;
+      case "scheduled":
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Agendado</Badge>;
+      case "completed":
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Concluído</Badge>;
-      case "reprovado":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Reprovado</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-48">
+      <p>Carregando dados de férias...</p>
+    </div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -100,12 +112,16 @@ export function VacationManagement() {
             <CardTitle className="text-sm font-medium">
               <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
-                Solicitações Pendentes
+                Férias Vencendo
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{vacationRequests.filter(r => r.status === "pendente").length}</div>
+            <div className="text-2xl font-bold">
+              {employees.filter(emp => 
+                emp.vacationPeriods.some(period => period.isExpiring)
+              ).length}
+            </div>
           </CardContent>
         </Card>
         
@@ -113,13 +129,17 @@ export function VacationManagement() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
               <div className="flex items-center">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Em Férias Atualmente
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Férias Vencidas
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">
+              {employees.filter(emp => 
+                emp.vacationPeriods.some(period => period.status === 'expired')
+              ).length}
+            </div>
           </CardContent>
         </Card>
         
@@ -128,12 +148,16 @@ export function VacationManagement() {
             <CardTitle className="text-sm font-medium">
               <div className="flex items-center">
                 <User className="h-4 w-4 mr-2" />
-                Próximas Férias
+                Em Férias
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{vacationRequests.filter(r => r.status === "aprovado").length}</div>
+            <div className="text-2xl font-bold">
+              {employees.filter(emp => 
+                emp.vacationPeriods.some(period => period.status === 'scheduled')
+              ).length}
+            </div>
           </CardContent>
         </Card>
         
@@ -141,168 +165,63 @@ export function VacationManagement() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
               <div className="flex items-center">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Solicitações (Mês)
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Total de Colaboradores
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold">{employees.length}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="pending">Pendentes</TabsTrigger>
-          <TabsTrigger value="approved">Aprovadas</TabsTrigger>
-          <TabsTrigger value="completed">Concluídas</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
-          <div className="rounded-md border mt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Funcionário</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Dias</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[160px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {vacationRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell className="font-medium">{request.employeeName}</TableCell>
-                    <TableCell>{request.department}</TableCell>
-                    <TableCell>
-                      {new Date(request.startDate).toLocaleDateString('pt-BR')} a {new Date(request.endDate).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell>{request.days}</TableCell>
-                    <TableCell>{getStatusBadge(request.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="icon">
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        {request.status === "pendente" && (
-                          <>
-                            <Button variant="outline" size="icon" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="pending" className="pt-4">
-          <div className="rounded-md border mt-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Funcionário</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {vacationRequests
-                  .filter(r => r.status === "pendente")
-                  .map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.employeeName}</TableCell>
-                      <TableCell>
-                        {new Date(request.startDate).toLocaleDateString('pt-BR')} a {new Date(request.endDate).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>{request.department}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                            <Check className="h-4 w-4 mr-1" /> Aprovar
+      <div className="rounded-md border mt-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Funcionário</TableHead>
+              <TableHead>Data de Admissão</TableHead>
+              <TableHead>Período Aquisitivo</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Dias Disponíveis</TableHead>
+              <TableHead className="w-[160px]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {employees.map((employee) => (
+              employee.vacationPeriods.map((period, index) => (
+                <TableRow key={`${employee.id}-${index}`}>
+                  <TableCell className="font-medium">{employee.name}</TableCell>
+                  <TableCell>{formatVacationDate(new Date(employee.hire_date))}</TableCell>
+                  <TableCell>
+                    {formatVacationDate(period.startDate)} - {formatVacationDate(period.endDate)}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(period.status, period.isExpiring)}</TableCell>
+                  <TableCell>{period.daysAvailable}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="icon">
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                      {period.status === "pending" && (
+                        <>
+                          <Button variant="outline" size="icon" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+                            <Check className="h-4 w-4" />
                           </Button>
-                          <Button variant="destructive" size="sm">
-                            <X className="h-4 w-4 mr-1" /> Reprovar
+                          <Button variant="outline" size="icon" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
+                            <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="approved" className="pt-4">
-          <div className="rounded-md border mt-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Funcionário</TableHead>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Dias</TableHead>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {vacationRequests
-                  .filter(r => r.status === "aprovado")
-                  .map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.employeeName}</TableCell>
-                      <TableCell>{request.position}</TableCell>
-                      <TableCell>
-                        {new Date(request.startDate).toLocaleDateString('pt-BR')} a {new Date(request.endDate).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>{request.days}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="completed" className="pt-4">
-          <div className="rounded-md border mt-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Funcionário</TableHead>
-                  <TableHead>Cargo</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Dias</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {vacationRequests
-                  .filter(r => r.status === "concluido")
-                  .map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.employeeName}</TableCell>
-                      <TableCell>{request.position}</TableCell>
-                      <TableCell>
-                        {new Date(request.startDate).toLocaleDateString('pt-BR')} a {new Date(request.endDate).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>{request.days}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-      </Tabs>
+              ))
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
