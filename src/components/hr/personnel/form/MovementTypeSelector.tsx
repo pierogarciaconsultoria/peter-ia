@@ -1,4 +1,3 @@
-
 import { FormSectionProps, RequestStatus } from "../types";
 import { 
   Select,
@@ -27,7 +26,8 @@ export const movementTypes = [
   { id: "verbalWarning", label: "Advertência verbal", targetModule: "feedback" },
   { id: "overtimeAuth", label: "Autorizado a fazer hora extra", targetModule: "hr" },
   { id: "dayExchange", label: "Troca de dia", targetModule: "hr" },
-  { id: "hourCredit", label: "Abono de hora", targetModule: "hr" }
+  { id: "hourCredit", label: "Abono de hora", targetModule: "hr" },
+  { id: "vacation", label: "Férias", targetModule: "vacation" }
 ] as const;
 
 export const requestStatus = [

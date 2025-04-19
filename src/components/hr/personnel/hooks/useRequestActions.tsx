@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { PersonnelRequest, RequestStatus } from "../types";
 import { CheckCircle, AlertCircle } from "lucide-react";
@@ -14,8 +13,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     if (!movementType) return;
 
     try {
-      // Instead of trying to create a task directly in a "tasks" table (which doesn't exist),
-      // we'll create a record in a table that does exist, or simply log the information for now
       console.log(`Creating task in module: ${movementType.targetModule}`);
       console.log({
         title: `${movementType.label} - ${request.employeeName}`,
@@ -27,21 +24,18 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         personnel_request_id: request.id
       });
       
-      // Define a specific type for simulated task to avoid excessive type instantiation
       interface SimulatedTask {
         id: string;
         title: string;
         status: string;
       }
 
-      // Simulate success response with proper typing
       const simulatedResponseData: SimulatedTask[] = [{
         id: crypto.randomUUID(),
         title: `${movementType.label} - ${request.employeeName}`,
         status: 'pending'
       }];
 
-      // Notificar responsável do módulo
       const moduleManagers = await getModuleManagers(movementType.targetModule);
       for (const manager of moduleManagers) {
         await createNotification(
@@ -68,16 +62,13 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     return data || [];
   };
 
-  // Handle approval of a request
   const handleApproval = async (id: string) => {
     try {
       const request = requests.find(req => req.id === id);
       if (!request) throw new Error('Request not found');
 
-      // Criar tarefa no módulo correspondente
       await createTaskInModule(request);
       
-      // Create a new array with the updated request
       const updatedRequests = requests.map(req => {
         if (req.id === id) {
           return {
@@ -90,7 +81,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         return req;
       });
       
-      // Update state with new array
       setRequests(updatedRequests);
       
       toast({
@@ -104,7 +94,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         )
       });
       
-      // Notificar o colaborador
       if (request.employee_id) {
         await createNotification(
           request.employee_id,
@@ -124,12 +113,9 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     }
   };
 
-  // Handle rejection of a request
   const handleRejection = async (id: string, reason?: string) => {
-    // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
-    // Create a new array with the updated request
     const updatedRequests = requests.map(req => {
       if (req.id === id) {
         return {
@@ -141,7 +127,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       return req;
     });
     
-    // Update state with new array
     setRequests(updatedRequests);
     
     toast({
@@ -150,7 +135,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       variant: "destructive"
     });
     
-    // Send notification to the employee about the rejected request
     if (request && request.employee_id) {
       try {
         await createNotification(
@@ -166,12 +150,9 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
     }
   };
 
-  // Handle cancellation of a request
   const handleCancellation = async (id: string, reason?: string) => {
-    // Find the current request to get employee information
     const request = requests.find(req => req.id === id);
     
-    // Create a new array with the updated request
     const updatedRequests = requests.map(req => {
       if (req.id === id) {
         return {
@@ -183,7 +164,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       return req;
     });
     
-    // Update state with new array
     setRequests(updatedRequests);
     
     toast({
@@ -192,10 +172,8 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       variant: "destructive"
     });
     
-    // Send notification to relevant parties about the cancelled request
     if (request) {
       try {
-        // Notify HR manager about the cancellation
         const { data: hrManagers } = await supabase
           .from('employees')
           .select('id')

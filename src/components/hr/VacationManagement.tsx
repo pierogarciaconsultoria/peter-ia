@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +7,7 @@ import {
   Plus,
   User,
   AlertTriangle,
-  FileText,
-  Check,
-  X
+  FileText
 } from "lucide-react";
 
 import {
@@ -25,13 +22,13 @@ import { useState, useEffect } from "react";
 import { calculateVacationPeriods, formatVacationDate } from "@/utils/vacationCalculations";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { VacationRequestDialog } from "./vacation/VacationRequestDialog";
+import { RequestFormDialog } from "../hr/personnel/RequestFormDialog";
+import { movementTypes } from "./personnel/form/MovementTypeSelector";
 
 export function VacationManagement() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -75,12 +72,13 @@ export function VacationManagement() {
 
   const handleVacationRequest = async (data: any) => {
     try {
+      data.type = "vacation";
+      
       toast({
         title: "Solicitação enviada",
         description: "A solicitação de férias foi enviada com sucesso.",
       });
 
-      // Call the fetchEmployees function to refresh the data
       const fetchEmployeesData = async () => {
         try {
           const { data, error } = await supabase
@@ -224,58 +222,72 @@ export function VacationManagement() {
         </Card>
       </div>
 
-      <div className="rounded-md border mt-6">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Funcionário</TableHead>
-              <TableHead>Data de Admissão</TableHead>
-              <TableHead>Período Aquisitivo</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Dias Disponíveis</TableHead>
-              <TableHead className="w-[160px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {employees.map((employee) => (
-              employee.vacationPeriods.map((period, index) => (
-                <TableRow key={`${employee.id}-${index}`}>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
-                  <TableCell>{formatVacationDate(new Date(employee.hire_date))}</TableCell>
-                  <TableCell>
-                    {formatVacationDate(period.startDate)} - {formatVacationDate(period.endDate)}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(period.status, period.isExpiring)}</TableCell>
-                  <TableCell>{period.daysAvailable}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      {period.status === "pending" && (
-                        <>
-                          <Button variant="outline" size="icon" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="icon" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Solicitações Recentes</CardTitle>
+          <CardDescription>
+            Gerenciamento de solicitações de férias
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Funcionário</TableHead>
+                <TableHead>Data de Admissão</TableHead>
+                <TableHead>Período Aquisitivo</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Dias Disponíveis</TableHead>
+                <TableHead className="w-[160px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.map((employee) => (
+                employee.vacationPeriods.map((period, index) => (
+                  <TableRow key={`${employee.id}-${index}`}>
+                    <TableCell className="font-medium">{employee.name}</TableCell>
+                    <TableCell>{formatVacationDate(new Date(employee.hire_date))}</TableCell>
+                    <TableCell>
+                      {formatVacationDate(period.startDate)} - {formatVacationDate(period.endDate)}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(period.status, period.isExpiring)}</TableCell>
+                    <TableCell>{period.daysAvailable}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon">
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        {period.status === "pending" && (
+                          <>
+                            <Button variant="outline" size="icon" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="flex justify-center border-t pt-6">
+          <Button variant="outline">
+            <FileText className="h-4 w-4 mr-2" />
+            Exportar Relatório
+          </Button>
+        </CardFooter>
+      </Card>
 
-      <VacationRequestDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        employee={selectedEmployee}
+      <RequestFormDialog 
+        isOpen={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
         onSubmit={handleVacationRequest}
+        jobPositions={[]}
       />
     </div>
   );
