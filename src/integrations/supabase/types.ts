@@ -2445,6 +2445,7 @@ export type Database = {
       process_mappings: {
         Row: {
           activities: Json | null
+          company_id: string | null
           created_at: string | null
           date: string
           entry_requirements: string | null
@@ -2462,6 +2463,7 @@ export type Database = {
         }
         Insert: {
           activities?: Json | null
+          company_id?: string | null
           created_at?: string | null
           date: string
           entry_requirements?: string | null
@@ -2479,6 +2481,7 @@ export type Database = {
         }
         Update: {
           activities?: Json | null
+          company_id?: string | null
           created_at?: string | null
           date?: string
           entry_requirements?: string | null
@@ -2494,7 +2497,15 @@ export type Database = {
           risks?: string | null
           status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "process_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quality_actions: {
         Row: {
