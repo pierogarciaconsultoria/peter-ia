@@ -42,17 +42,15 @@ export function OccurrenceFormDialog({ open, onOpenChange }: OccurrenceFormDialo
 
   const handleSubmit = async (data: OccurrenceFormValues) => {
     try {
-      const { error } = await supabase.from('occurrences').insert([{
+      const { error } = await supabase.from('occurrences').insert({
         employee_id: data.employeeId,
         date: data.occurrenceDate,
         type: data.type,
         title: `Ocorrência ${data.type}`,
         description: data.description,
-        treatment: data.treatment,
-        treatment_deadline: data.treatmentDeadline,
-        responsible: data.responsible,
+        reported_by: data.responsible,
         status: 'pending'
-      }]);
+      });
 
       if (error) throw error;
 
