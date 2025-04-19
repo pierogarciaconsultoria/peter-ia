@@ -1,16 +1,11 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   CalendarDays, 
-  Check,
   Clock,
-  FileText,
-  MessageSquare,
   Plus,
   User,
-  X,
   AlertTriangle
 } from "lucide-react";
 
@@ -23,14 +18,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { calculateVacationPeriods, formatVacationDate } from "@/utils/vacationCalculations";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { VacationRequestDialog } from "./vacation/VacationRequestDialog";
 
 export function VacationManagement() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -68,6 +65,28 @@ export function VacationManagement() {
     fetchEmployees();
   }, []);
 
+  const handleNewRequest = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleVacationRequest = async (data: any) => {
+    try {
+      toast({
+        title: "Solicitação enviada",
+        description: "A solicitação de férias foi enviada com sucesso.",
+      });
+
+      fetchEmployees();
+    } catch (error) {
+      console.error("Error submitting vacation request:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar a solicitação de férias.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadge = (status: string, isExpiring: boolean = false) => {
     if (isExpiring) {
       return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1">
@@ -100,7 +119,7 @@ export function VacationManagement() {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-bold">Gestão de Férias</h2>
-        <Button>
+        <Button onClick={handleNewRequest}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Solicitação
         </Button>
@@ -222,6 +241,13 @@ export function VacationManagement() {
           </TableBody>
         </Table>
       </div>
+
+      <VacationRequestDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        employee={selectedEmployee}
+        onSubmit={handleVacationRequest}
+      />
     </div>
   );
 }
