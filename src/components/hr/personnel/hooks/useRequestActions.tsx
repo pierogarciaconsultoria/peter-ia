@@ -27,21 +27,6 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
         personnel_request_id: request.id
       });
       
-      // If we needed to create an actual record, we would use an existing table:
-      // For example, creating an occurrence for this request
-      // const { data: taskData, error } = await supabase
-      //   .from('occurrences')
-      //   .insert({
-      //     title: `${movementType.label} - ${request.employeeName}`,
-      //     description: request.justification || 'Request from personnel movement',
-      //     type: movementType.targetModule,
-      //     employee_id: request.employee_id,
-      //     date: new Date().toISOString().split('T')[0],
-      //     reported_by: request.requester_id,
-      //     status: 'pending'
-      //   })
-      //   .select();
-
       // Define type for simulated response data
       type SimulatedTask = {
         id: string;
