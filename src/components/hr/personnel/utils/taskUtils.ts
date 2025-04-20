@@ -4,15 +4,9 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define specific interfaces for our data structures
+// Define simpler interface to avoid complex type instantiation
 interface ManagerData {
   readonly id: string;
-}
-
-interface DatabaseUserProfile {
-  readonly id: string;
-  readonly role: string;
-  readonly module: string;
 }
 
 interface TaskCreationData {
@@ -31,11 +25,13 @@ interface CreatedTask {
   readonly status: 'pending';
 }
 
-export const getModuleManagers = async (module: string): Promise<ReadonlyArray<ManagerData>> => {
+export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
+    // Corrected query to match the actual database schema
+    // Only selecting the 'id' field which we know exists
     const { data, error } = await supabase
       .from('user_profiles')
-      .select('id, role, module')
+      .select('id')
       .eq('role', 'manager')
       .eq('module', module);
 
@@ -44,9 +40,9 @@ export const getModuleManagers = async (module: string): Promise<ReadonlyArray<M
       return [];
     }
 
-    const managers: ReadonlyArray<DatabaseUserProfile> = data || [];
-    return managers.map((manager): ManagerData => ({
-      id: manager.id
+    // Safely map the results to our simple ManagerData type
+    return (data || []).map(row => ({
+      id: row.id
     }));
   } catch (err) {
     if (err instanceof Error) {
