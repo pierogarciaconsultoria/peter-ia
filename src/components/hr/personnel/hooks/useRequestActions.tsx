@@ -1,67 +1,15 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { PersonnelRequest, RequestStatus } from "../types";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { createNotification } from "@/services/notificationService";
-import { supabase } from "@/integrations/supabase/client";
-import { movementTypes } from "../form/MovementTypeSelector";
+import { createTaskInModule } from "../utils/taskUtils";
+import { updateRequestStatus, createStatusUpdate } from "../utils/requestStatusUtils";
 
-export function useRequestActions(requests: PersonnelRequest[], setRequests: React.Dispatch<React.SetStateAction<PersonnelRequest[]>>) {
+export function useRequestActions(
+  requests: PersonnelRequest[], 
+  setRequests: React.Dispatch<React.SetStateAction<PersonnelRequest[]>>
+) {
   const { toast } = useToast();
-  
-  const createTaskInModule = async (request: PersonnelRequest) => {
-    const movementType = movementTypes.find(type => type.id === request.type);
-    if (!movementType) return;
-
-    try {
-      console.log(`Creating task in module: ${movementType.targetModule}`);
-      console.log({
-        title: `${movementType.label} - ${request.employeeName}`,
-        description: request.justification,
-        module: movementType.targetModule,
-        status: 'pending',
-        employee_id: request.employee_id,
-        requester_id: request.requester_id,
-        personnel_request_id: request.id
-      });
-      
-      interface SimulatedTask {
-        id: string;
-        title: string;
-        status: string;
-      }
-
-      const simulatedResponseData: SimulatedTask[] = [{
-        id: crypto.randomUUID(),
-        title: `${movementType.label} - ${request.employeeName}`,
-        status: 'pending'
-      }];
-
-      const moduleManagers = await getModuleManagers(movementType.targetModule);
-      for (const manager of moduleManagers) {
-        await createNotification(
-          manager.id,
-          `Nova tarefa de ${movementType.label}`,
-          `Uma nova tarefa foi criada para ${request.employeeName}`,
-          "task",
-          simulatedResponseData[0].id
-        );
-      }
-    } catch (error) {
-      console.error('Erro ao criar tarefa:', error);
-      throw error;
-    }
-  };
-
-  const getModuleManagers = async (module: string) => {
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('role', 'manager')
-      .eq('module', module);
-    
-    return data || [];
-  };
 
   const handleApproval = async (id: string) => {
     try {
@@ -70,17 +18,11 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
 
       await createTaskInModule(request);
       
-      const updatedRequests = requests.map(req => {
-        if (req.id === id) {
-          return {
-            ...req,
-            status: "approved" as RequestStatus,
-            approved_by: "Gestor",
-            approval_date: new Date().toISOString().split('T')[0]
-          };
-        }
-        return req;
-      });
+      const updatedRequests = updateRequestStatus(
+        requests, 
+        id, 
+        createStatusUpdate('approved' as RequestStatus)
+      );
       
       setRequests(updatedRequests);
       
@@ -117,16 +59,11 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
   const handleRejection = async (id: string, reason?: string) => {
     const request = requests.find(req => req.id === id);
     
-    const updatedRequests = requests.map(req => {
-      if (req.id === id) {
-        return {
-          ...req,
-          status: "rejected" as RequestStatus,
-          rejection_reason: reason || "Solicitação rejeitada pelo gestor."
-        };
-      }
-      return req;
-    });
+    const updatedRequests = updateRequestStatus(
+      requests,
+      id,
+      createStatusUpdate('rejected' as RequestStatus, { rejection_reason: reason || "Solicitação rejeitada pelo gestor." })
+    );
     
     setRequests(updatedRequests);
     
@@ -136,7 +73,7 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
       variant: "destructive"
     });
     
-    if (request && request.employee_id) {
+    if (request?.employee_id) {
       try {
         await createNotification(
           request.employee_id,
@@ -154,16 +91,11 @@ export function useRequestActions(requests: PersonnelRequest[], setRequests: Rea
   const handleCancellation = async (id: string, reason?: string) => {
     const request = requests.find(req => req.id === id);
     
-    const updatedRequests = requests.map(req => {
-      if (req.id === id) {
-        return {
-          ...req,
-          status: "canceled" as RequestStatus,
-          rejection_reason: reason || "Solicitação cancelada pelo solicitante."
-        };
-      }
-      return req;
-    });
+    const updatedRequests = updateRequestStatus(
+      requests,
+      id,
+      createStatusUpdate('canceled' as RequestStatus, { rejection_reason: reason || "Solicitação cancelada pelo solicitante." })
+    );
     
     setRequests(updatedRequests);
     
