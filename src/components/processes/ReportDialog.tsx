@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReportHeader } from "@/components/processes/report/ReportHeader";
@@ -9,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
-import { Eye, FileText, Import, FileExport, Brain, Turtle, Layers } from "lucide-react";
+import { Eye, FileText, Download, FileUp, Brain, Turtle, Layers } from "lucide-react";
 
 interface ReportDialogProps {
   processData: any;
@@ -142,7 +141,7 @@ export function ReportDialog({
   const handleImport = () => {
     toast({
       title: "Importando processo",
-      description: "Esta funcionalidade será implementada em breve."
+      description: "Esta funcionalidade será implementada em breve"
     });
   };
 
@@ -180,11 +179,11 @@ export function ReportDialog({
               Relatório
             </Button>
             <Button size="sm" variant="outline" onClick={handleExport}>
-              <FileExport className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4 mr-1" />
               Exportar
             </Button>
             <Button size="sm" variant="outline" onClick={handleImport}>
-              <Import className="h-4 w-4 mr-1" />
+              <FileUp className="h-4 w-4 mr-1" />
               Importar
             </Button>
           </div>
