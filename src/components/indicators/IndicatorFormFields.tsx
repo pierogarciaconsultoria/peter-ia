@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,7 +25,7 @@ interface IndicatorFormFieldsProps {
   setCalculationType: (value: "sum" | "average") => void;
   unit: string;
   setUnit: (value: string) => void;
-  errors: { [key: string]: string[] };
+  errors: { [key: string]: string[] };  // Update error type
   processes: string[];
 }
 
@@ -45,7 +44,7 @@ export function IndicatorFormFields({
   setCalculationType,
   unit,
   setUnit,
-  errors,
+  errors,  // Now correctly typed
   processes
 }: IndicatorFormFieldsProps) {
   return (
@@ -58,7 +57,7 @@ export function IndicatorFormFields({
           onChange={(e) => setName(e.target.value)}
           placeholder="Ex: Taxa de Satisfação do Cliente"
         />
-        {errors.name && <FormError errors={errors.name} />}
+        {errors.name && <FormError error={new Error(errors.name[0])} />}
       </div>
       
       <div className="space-y-2">
@@ -70,7 +69,7 @@ export function IndicatorFormFields({
           placeholder="Descreva o que este indicador mede e por que é importante"
           rows={3}
         />
-        {errors.description && <FormError errors={errors.description} />}
+        {errors.description && <FormError error={new Error(errors.description[0])} />}
       </div>
       
       <div className="space-y-2">
@@ -87,7 +86,7 @@ export function IndicatorFormFields({
             ))}
           </SelectContent>
         </Select>
-        {errors.process && <FormError errors={errors.process} />}
+        {errors.process && <FormError error={new Error(errors.process[0])} />}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,7 +102,7 @@ export function IndicatorFormFields({
               <SelectItem value="target">Valor específico (alvo)</SelectItem>
             </SelectContent>
           </Select>
-          {errors.goalType && <FormError errors={errors.goalType} />}
+          {errors.goalType && <FormError error={new Error(errors.goalType[0])} />}
         </div>
         
         <div className="space-y-2">
@@ -117,7 +116,7 @@ export function IndicatorFormFields({
               <SelectItem value="sum">Somatório</SelectItem>
             </SelectContent>
           </Select>
-          {errors.calculationType && <FormError errors={errors.calculationType} />}
+          {errors.calculationType && <FormError error={new Error(errors.calculationType[0])} />}
         </div>
       </div>
       
@@ -132,7 +131,7 @@ export function IndicatorFormFields({
             onChange={(e) => setGoalValue(e.target.value)}
             placeholder="Ex: 95"
           />
-          {errors.goalValue && <FormError errors={errors.goalValue} />}
+          {errors.goalValue && <FormError error={new Error(errors.goalValue[0])} />}
         </div>
         
         <div className="space-y-2">
@@ -143,7 +142,7 @@ export function IndicatorFormFields({
             onChange={(e) => setUnit(e.target.value)}
             placeholder="Ex: %, dias, R$"
           />
-          {errors.unit && <FormError errors={errors.unit} />}
+          {errors.unit && <FormError error={new Error(errors.unit[0])} />}
         </div>
       </div>
     </>

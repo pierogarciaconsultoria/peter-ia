@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,7 @@ import {
 import { FormError } from "./FormError";
 import { useProcesses } from "@/hooks/useProcesses";
 import { IndicatorType } from "@/types/indicators";
-import { IndicatorFormSchema } from "./IndicatorFormSchema";
+import { indicatorSchema } from "./IndicatorFormSchema";
 import { z } from "zod";
 import { IndicatorFormActions } from "./IndicatorFormActions";
 import { IndicatorFormFields } from "./IndicatorFormFields";
@@ -49,6 +48,7 @@ export function IndicatorForm({
   const [unit, setUnit] = useState(indicator?.unit || "%");
   
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // When the defaultProcess changes and it's not already set, update the process state
@@ -59,7 +59,7 @@ export function IndicatorForm({
 
   const validate = (): boolean => {
     try {
-      IndicatorFormSchema.parse({
+      indicatorSchema.parse({
         name,
         description,
         process,
@@ -137,8 +137,11 @@ export function IndicatorForm({
       />
       
       <IndicatorFormActions 
-        onCancel={onClose} 
-        isEdit={!!indicator}
+        onClose={onClose} 
+        isEditing={!!indicator}
+        isSubmitting={loading}
+        isDeleting={false}
+        onDelete={() => {}} 
       />
     </form>
   );
