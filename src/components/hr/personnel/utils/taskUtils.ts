@@ -4,75 +4,102 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define a simple interface for manager data
+// Define specific interfaces for our data structures
 interface ManagerData {
-  id: string;
+  readonly id: string;
 }
 
-// Define the expected database row type
-interface UserProfileRow {
-  id: string;
-  role: string;
-  module: string;
+interface DatabaseUserProfile {
+  readonly id: string;
+  readonly role: string;
+  readonly module: string;
 }
 
-export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
+interface TaskCreationData {
+  readonly title: string;
+  readonly description: string;
+  readonly module: string;
+  readonly status: 'pending';
+  readonly employee_id: string;
+  readonly requester_id: string;
+  readonly personnel_request_id: string;
+}
+
+interface CreatedTask {
+  readonly id: string;
+  readonly title: string;
+  readonly status: 'pending';
+}
+
+export const getModuleManagers = async (module: string): Promise<ReadonlyArray<ManagerData>> => {
   try {
     const { data, error } = await supabase
       .from('user_profiles')
-      .select<'user_profiles', UserProfileRow>('id')
+      .select('id, role, module')
       .eq('role', 'manager')
       .eq('module', module);
-    
+
     if (error) {
       console.error('Error fetching module managers:', error);
       return [];
     }
-    
-    return (data || []).map(row => ({
-      id: row.id
+
+    const managers: ReadonlyArray<DatabaseUserProfile> = data || [];
+    return managers.map((manager): ManagerData => ({
+      id: manager.id
     }));
   } catch (err) {
-    console.error('Exception when fetching module managers:', err);
+    if (err instanceof Error) {
+      console.error('Exception when fetching module managers:', err.message);
+    }
     return [];
   }
 };
 
-export const createTaskInModule = async (request: PersonnelRequest): Promise<void> => {
+export const createTaskInModule = async (request: Readonly<PersonnelRequest>): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
   try {
     console.log(`Creating task in module: ${movementType.targetModule}`);
-    console.log({
+    
+    const taskData: TaskCreationData = {
       title: `${movementType.label} - ${request.employeeName}`,
-      description: request.justification,
+      description: request.justification || '',
       module: movementType.targetModule,
       status: 'pending',
       employee_id: request.employee_id,
       requester_id: request.requester_id,
       personnel_request_id: request.id
-    });
+    };
+
+    console.log(taskData);
     
-    // Create a simulated response for demonstration purposes
-    const simulatedResponseData = [{
+    // Create a simulated response with explicit typing
+    const simulatedTask: CreatedTask = {
       id: crypto.randomUUID(),
-      title: `${movementType.label} - ${request.employeeName}`,
+      title: taskData.title,
       status: 'pending'
-    }];
+    };
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
-    for (const manager of moduleManagers) {
-      await createNotification(
-        manager.id,
-        `Nova tarefa de ${movementType.label}`,
-        `Uma nova tarefa foi criada para ${request.employeeName}`,
-        "task",
-        simulatedResponseData[0].id
-      );
-    }
+    
+    // Use Promise.all for parallel notification creation
+    await Promise.all(
+      moduleManagers.map((manager) => 
+        createNotification(
+          manager.id,
+          `Nova tarefa de ${movementType.label}`,
+          `Uma nova tarefa foi criada para ${request.employeeName}`,
+          "task",
+          simulatedTask.id
+        )
+      )
+    );
   } catch (error) {
-    console.error('Erro ao criar tarefa:', error);
+    if (error instanceof Error) {
+      console.error('Erro ao criar tarefa:', error.message);
+    }
     throw error;
   }
 };
