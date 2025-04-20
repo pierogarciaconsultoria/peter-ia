@@ -4,7 +4,7 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-export const getModuleManagers = async (module: string) => {
+export const getModuleManagers = async (module: string): Promise<Array<{id: string}>> => {
   const { data } = await supabase
     .from('user_profiles')
     .select('id')
@@ -14,7 +14,7 @@ export const getModuleManagers = async (module: string) => {
   return data || [];
 };
 
-export const createTaskInModule = async (request: PersonnelRequest) => {
+export const createTaskInModule = async (request: PersonnelRequest): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
@@ -30,6 +30,7 @@ export const createTaskInModule = async (request: PersonnelRequest) => {
       personnel_request_id: request.id
     });
     
+    // Create a simulated response for demonstration purposes
     const simulatedResponseData = [{
       id: crypto.randomUUID(),
       title: `${movementType.label} - ${request.employeeName}`,
