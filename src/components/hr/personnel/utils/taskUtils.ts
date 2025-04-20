@@ -3,45 +3,26 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define a simple interface with only what we need
-type ManagerData = {
+interface SimpleManagerData {
   id: string;
 }
 
-interface TaskCreationData {
-  readonly title: string;
-  readonly description: string;
-  readonly module: string;
-  readonly status: 'pending';
-  readonly employee_id: string;
-  readonly requester_id: string;
-  readonly personnel_request_id: string;
-}
-
-interface CreatedTask {
-  readonly id: string;
-  readonly title: string;
-  readonly status: 'pending';
-}
-
-export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
+export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    const result = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
       .eq('module', module);
       
-    if (result.error) {
-      console.error('Error fetching module managers:', result.error);
+    if (error) {
+      console.error('Error fetching module managers:', error);
       return [];
     }
     
-    return (result.data || []).map(item => ({ id: item.id }));
+    return (data || []).map(manager => ({ id: manager.id }));
   } catch (err) {
-    if (err instanceof Error) {
-      console.error('Exception when fetching module managers:', err.message);
-    }
+    console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
   }
 };
@@ -65,7 +46,6 @@ export const createTaskInModule = async (request: Readonly<PersonnelRequest>): P
 
     console.log(taskData);
     
-    // Create a simulated response with explicit typing
     const simulatedTask: CreatedTask = {
       id: crypto.randomUUID(),
       title: taskData.title,
@@ -74,7 +54,6 @@ export const createTaskInModule = async (request: Readonly<PersonnelRequest>): P
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Use Promise.all for parallel notification creation
     await Promise.all(
       moduleManagers.map((manager) => 
         createNotification(

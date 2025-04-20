@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { ProcessDashboard } from '@/components/indicators/ProcessDashboard';
-import { IndicatorsTable } from '@/components/indicators/IndicatorsTable';
-import { IndicatorForm } from '@/components/indicators/IndicatorForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { IndicatorForm } from '@/components/indicators/IndicatorForm';
+import { IndicatorsTable } from '@/components/indicators/IndicatorsTable';
+import { ProcessDashboard } from '@/components/indicators/ProcessDashboard';
+import { IndicatorsHeader } from '@/components/indicators/IndicatorsHeader';
+import { ProcessSelector } from '@/components/indicators/ProcessSelector';
 import { useIndicators } from '@/hooks/useIndicators';
-import { useProcesses } from '@/hooks/useProcesses'; 
+import { useProcesses } from '@/hooks/useProcesses';
 import { IndicatorType } from '@/types/indicators';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-
-type IndicatorFormMode = 'create' | 'edit';
 
 const PerformanceIndicators = () => {
   const [showIndicatorForm, setShowIndicatorForm] = useState(false);
@@ -112,76 +109,29 @@ const PerformanceIndicators = () => {
 
   const isStrategicProcess = selectedProcess === "Estratégico";
 
+  const handleSelectProcess = (process: string) => {
+    setSelectedProcess(process);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
       
       <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Indicadores de Desempenho</h1>
-              <p className="text-muted-foreground mt-1">
-                Monitore e gerencie os indicadores de desempenho da organização
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {isStrategicProcess && (
-                <>
-                  <Link 
-                    to="/strategic-planning"
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Ver Planejamento Estratégico
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Button variant="outline" onClick={handleGenerateFromStrategy} className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Gerar com IA
-                  </Button>
-                </>
-              )}
-              <Button onClick={handleCreateIndicator}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Novo Indicador
-              </Button>
-            </div>
-          </div>
+          <IndicatorsHeader 
+            isStrategicProcess={isStrategicProcess}
+            onCreateIndicator={() => setShowIndicatorForm(true)}
+            onGenerateFromStrategy={handleGenerateFromStrategy}
+          />
 
-          {uniqueProcesses.length > 0 ? (
-            <div className="mb-6">
-              <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
-                <Button 
-                  variant="ghost" 
-                  onClick={selectPrevProcess}
-                  disabled={uniqueProcesses.length <= 1}
-                >
-                  &lt;
-                </Button>
-                
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold">{selectedProcess}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {processIndicators.length} indicadores
-                  </p>
-                </div>
-                
-                <Button 
-                  variant="ghost" 
-                  onClick={selectNextProcess}
-                  disabled={uniqueProcesses.length <= 1}
-                >
-                  &gt;
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-muted p-6 rounded-lg text-center mb-6">
-              <p className="text-muted-foreground">
-                Nenhum processo com indicadores encontrado. Crie um novo indicador ou adicione indicadores a um processo.
-              </p>
-            </div>
-          )}
+          <ProcessSelector
+            selectedProcess={selectedProcess}
+            uniqueProcesses={uniqueProcesses}
+            processIndicators={processIndicators}
+            onPrevProcess={selectPrevProcess}
+            onNextProcess={selectNextProcess}
+          />
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <TabsList className="grid grid-cols-2 w-[400px]">
