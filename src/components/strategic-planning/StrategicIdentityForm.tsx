@@ -122,6 +122,20 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
 
   const hasIdentityData = mission.trim() !== "" && vision.trim() !== "" && values.length > 0;
 
+  const createIndicator = async (name: string) => {
+    const indicatorData: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'> = {
+      name,
+      description: `Indicador estratégico para ${name}`,
+      process: "Estratégico",
+      goal_type: "higher_better",
+      goal_value: 100,
+      calculation_type: "average" as const,
+      unit: "%"
+    };
+
+    await addIndicator(indicatorData);
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">

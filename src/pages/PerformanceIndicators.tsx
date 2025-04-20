@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IndicatorForm } from '@/components/indicators/IndicatorForm';
-import { IndicatorsTable } from '@/components/indicators/IndicatorsTable';
-import { ProcessDashboard } from '@/components/indicators/ProcessDashboard';
+import { IndicatorDialog } from '@/components/indicators/IndicatorDialog';
+import { IndicatorContentTabs } from '@/components/indicators/IndicatorContentTabs';
 import { IndicatorsHeader } from '@/components/indicators/IndicatorsHeader';
 import { ProcessSelector } from '@/components/indicators/ProcessSelector';
 import { useIndicators } from '@/hooks/useIndicators';
@@ -16,7 +13,7 @@ import { IndicatorType } from '@/types/indicators';
 const PerformanceIndicators = () => {
   const [showIndicatorForm, setShowIndicatorForm] = useState(false);
   const [editingIndicator, setEditingIndicator] = useState<IndicatorType | null>(null);
-  const [formMode, setFormMode] = useState<IndicatorFormMode>('create');
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('table');
   const [uniqueProcesses, setUniqueProcesses] = useState<string[]>([]);
@@ -75,10 +72,6 @@ const PerformanceIndicators = () => {
     setShowIndicatorForm(false);
   };
 
-  const handleDeleteIndicator = (id: string) => {
-    deleteIndicator(id);
-  };
-
   const handleCloseDialog = () => {
     setShowIndicatorForm(false);
   };
@@ -109,10 +102,6 @@ const PerformanceIndicators = () => {
 
   const isStrategicProcess = selectedProcess === "Estratégico";
 
-  const handleSelectProcess = (process: string) => {
-    setSelectedProcess(process);
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
@@ -121,7 +110,7 @@ const PerformanceIndicators = () => {
         <div className="max-w-7xl mx-auto">
           <IndicatorsHeader 
             isStrategicProcess={isStrategicProcess}
-            onCreateIndicator={() => setShowIndicatorForm(true)}
+            onCreateIndicator={handleCreateIndicator}
             onGenerateFromStrategy={handleGenerateFromStrategy}
           />
 
@@ -133,51 +122,26 @@ const PerformanceIndicators = () => {
             onNextProcess={selectNextProcess}
           />
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="grid grid-cols-2 w-[400px]">
-              <TabsTrigger value="table">Tabela</TabsTrigger>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            </TabsList>
+          <IndicatorContentTabs 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            selectedProcess={selectedProcess}
+            processIndicators={processIndicators}
+            measurements={measurements}
+            onEditIndicator={handleEditIndicator}
+            onAddMeasurement={() => {}}
+            onDeleteIndicator={deleteIndicator}
+            processData={processData}
+          />
 
-            <TabsContent value="table" className="mt-4">
-              {selectedProcess && (
-                <IndicatorsTable 
-                  indicators={processIndicators}
-                  measurements={measurements}
-                  onEdit={handleEditIndicator}
-                  onAddMeasurement={() => {}}
-                  onDelete={handleDeleteIndicator}
-                />
-              )}
-            </TabsContent>
-            
-            <TabsContent value="dashboard" className="mt-4">
-              {selectedProcess && (
-                <ProcessDashboard 
-                  process={selectedProcess}
-                  indicators={processIndicators}
-                  measurements={measurements}
-                  processIndicators={processData?.indicators || []}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <Dialog open={showIndicatorForm} onOpenChange={handleCloseDialog}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {formMode === 'create' ? 'Novo Indicador' : 'Editar Indicador'}
-                </DialogTitle>
-              </DialogHeader>
-              <IndicatorForm 
-                indicator={editingIndicator}
-                onClose={handleCloseDialog}
-                afterSubmit={handleSubmitIndicator}
-                defaultProcess={selectedProcess || undefined}
-              />
-            </DialogContent>
-          </Dialog>
+          <IndicatorDialog
+            open={showIndicatorForm}
+            mode={formMode}
+            indicator={editingIndicator}
+            onClose={handleCloseDialog}
+            afterSubmit={handleSubmitIndicator}
+            defaultProcess={selectedProcess || undefined}
+          />
         </div>
       </main>
       

@@ -1,11 +1,9 @@
+
 import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-
-interface SimpleManagerData {
-  id: string;
-}
+import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
