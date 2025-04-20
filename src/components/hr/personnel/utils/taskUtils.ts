@@ -1,3 +1,4 @@
+
 import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
@@ -22,8 +23,8 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
     
-    // Explicitly type cast and provide fallback
-    return (data as ManagerData[]) || [];
+    // Explicitly specify the return type instead of using 'as'
+    return data ? data.map(item => ({ id: item.id })) : [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err);
     return [];
