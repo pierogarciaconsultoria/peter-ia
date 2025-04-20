@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { IndicatorFormFields } from './IndicatorFormFields';
 import { IndicatorFormActions } from './IndicatorFormActions';
+import { z } from "zod";
 import { indicatorSchema } from './IndicatorFormSchema';
 
 type CalculationType = "sum" | "average";
@@ -48,17 +49,21 @@ export function IndicatorForm({
     
     if (!validate()) return;
 
-    // Ensure calculation_type and goal_type are valid
-    const calculation_type = validCalculationTypes.includes(calculationType) ? calculationType : "average";
-    const goal_type = validGoalTypes.includes(goalType) ? goalType : "higher_better";
+    const safeCalculationType = validCalculationTypes.includes(calculationType) 
+      ? calculationType 
+      : "average";
+      
+    const safeGoalType = validGoalTypes.includes(goalType) 
+      ? goalType 
+      : "higher_better";
     
     const indicatorData = {
       name,
       description,
       process,
-      goal_type,
+      goal_type: safeGoalType,
       goal_value: parseFloat(goalValue),
-      calculation_type,
+      calculation_type: safeCalculationType,
       unit
     };
     
