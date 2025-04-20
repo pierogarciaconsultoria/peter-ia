@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useProcesses } from '@/hooks/useProcesses';
@@ -9,6 +8,7 @@ import { IndicatorFormFields } from './IndicatorFormFields';
 import { IndicatorFormActions } from './IndicatorFormActions';
 import { z } from "zod";
 import { indicatorSchema } from './IndicatorFormSchema';
+import { v4 as generateId } from 'uuid';
 
 type CalculationType = "sum" | "average";
 type GoalType = "higher_better" | "lower_better" | "target";
@@ -49,15 +49,17 @@ export function IndicatorForm({
     
     if (!validate()) return;
 
-    const safeCalculationType = validCalculationTypes.includes(calculationType) 
+    const safeCalculationType = validCalculationTypes.includes(calculationType as CalculationType) 
       ? calculationType 
-      : "average";
+      : "average" as const;
       
-    const safeGoalType = validGoalTypes.includes(goalType) 
+    const safeGoalType = validGoalTypes.includes(goalType as GoalType) 
       ? goalType 
-      : "higher_better";
+      : "higher_better" as const;
+
+    const now = new Date().toISOString();
     
-    const indicatorData = {
+    const indicatorData: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'> = {
       name,
       description,
       process,
