@@ -1,20 +1,14 @@
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBscObjective, createBscMeasure } from "@/services/strategicPlanningService";
 import { addIndicator } from "@/services/indicatorService";
 import { useToast } from "@/hooks/use-toast";
 import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
-
-interface BscObjectiveFormProps {
-  perspective: 'financial' | 'customer' | 'internal_process' | 'learning_growth';
-  onSaved: () => void;
-  onCancel: () => void;
-}
+import { BasicInfoSection } from "./bsc-form/BasicInfoSection";
+import { TargetSection } from "./bsc-form/TargetSection";
+import { BscFormProps } from "@/types/bsc-form";
 
 const perspectiveLabels = {
   financial: "Financeira",
@@ -23,7 +17,7 @@ const perspectiveLabels = {
   learning_growth: "Aprendizado e Crescimento"
 };
 
-export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiveFormProps) {
+export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscFormProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -85,53 +79,19 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
   return (
     <AuthenticationRequired>
       <form onSubmit={handleSubmit} className="space-y-4 py-4">
-        <div className="space-y-2">
-          <Label htmlFor="objective-title">Objetivo Estratégico</Label>
-          <Input
-            id="objective-title"
-            placeholder="Digite o título do objetivo estratégico"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
+        <BasicInfoSection
+          title={title}
+          description={description}
+          onTitleChange={setTitle}
+          onDescriptionChange={setDescription}
+        />
         
-        <div className="space-y-2">
-          <Label htmlFor="objective-description">Descrição</Label>
-          <Textarea
-            id="objective-description"
-            placeholder="Descreva o objetivo em detalhes..."
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="target-value">Meta</Label>
-            <Input
-              id="target-value"
-              type="number"
-              placeholder="Valor da meta"
-              value={targetValue}
-              onChange={(e) => setTargetValue(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="target-unit">Unidade</Label>
-            <Input
-              id="target-unit"
-              placeholder="Ex: %, R$, unidades"
-              value={targetUnit}
-              onChange={(e) => setTargetUnit(e.target.value)}
-              required
-            />
-          </div>
-        </div>
+        <TargetSection
+          targetValue={targetValue}
+          targetUnit={targetUnit}
+          onTargetValueChange={setTargetValue}
+          onTargetUnitChange={setTargetUnit}
+        />
 
         <div className="space-y-2">
           <Label>Perspectiva</Label>
