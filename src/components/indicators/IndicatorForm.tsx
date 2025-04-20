@@ -1,23 +1,19 @@
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { FormError } from "./FormError";
-import { useProcesses } from "@/hooks/useProcesses";
-import { IndicatorType } from "@/types/indicators";
-import { indicatorSchema } from "./IndicatorFormSchema";
-import { z } from "zod";
-import { IndicatorFormActions } from "./IndicatorFormActions";
-import { IndicatorFormFields } from "./IndicatorFormFields";
+import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useProcesses } from '@/hooks/useProcesses';
+import { IndicatorType } from '@/types/indicators';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { IndicatorFormFields } from './IndicatorFormFields';
+import { IndicatorFormActions } from './IndicatorFormActions';
+import { indicatorSchema } from './IndicatorFormSchema';
+
+type CalculationType = "sum" | "average";
+type GoalType = "higher_better" | "lower_better" | "target";
+
+const validCalculationTypes: readonly CalculationType[] = ["sum", "average"] as const;
+const validGoalTypes: readonly GoalType[] = ["higher_better", "lower_better", "target"] as const;
 
 interface IndicatorFormProps {
   indicator: IndicatorType | null;
@@ -33,29 +29,41 @@ export function IndicatorForm({
   defaultProcess 
 }: IndicatorFormProps) {
   const { processes } = useProcesses();
+  const { toast } = useToast();
   
   const [name, setName] = useState(indicator?.name || "");
   const [description, setDescription] = useState(indicator?.description || "");
   const [process, setProcess] = useState(indicator?.process || defaultProcess || "");
-  const [goalType, setGoalType] = useState<"higher_better" | "lower_better" | "target">(
-    indicator?.goal_type || "higher_better"
-  );
-  const [goalValue, setGoalValue] = useState<string>(
-    indicator?.goal_value?.toString() || ""
-  );
-  const [calculationType, setCalculationType] = useState<"sum" | "average">(
-    indicator?.calculation_type || "average"
-  );
+  const [goalType, setGoalType] = useState<GoalType>(indicator?.goal_type || "higher_better");
+  const [goalValue, setGoalValue] = useState<string>(indicator?.goal_value?.toString() || "");
+  const [calculationType, setCalculationType] = useState<CalculationType>(indicator?.calculation_type || "average");
   const [unit, setUnit] = useState(indicator?.unit || "%");
   
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    if (defaultProcess && !process) {
-      setProcess(defaultProcess);
-    }
-  }, [defaultProcess]);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validate()) return;
+
+    // Ensure calculation_type and goal_type are valid
+    const calculation_type = validCalculationTypes.includes(calculationType) ? calculationType : "average";
+    const goal_type = validGoalTypes.includes(goalType) ? goalType : "higher_better";
+    
+    const indicatorData = {
+      name,
+      description,
+      process,
+      goal_type,
+      goal_value: parseFloat(goalValue),
+      calculation_type,
+      unit
+    };
+    
+    afterSubmit(indicatorData);
+  };
 
   const validate = (): boolean => {
     try {
@@ -63,9 +71,9 @@ export function IndicatorForm({
         name,
         description,
         process,
-        goalType,
-        goalValue: parseFloat(goalValue),
-        calculationType,
+        goal_type: goalType,
+        goal_value: parseFloat(goalValue),
+        calculation_type: calculationType,
         unit
       });
       setErrors({});
@@ -73,7 +81,6 @@ export function IndicatorForm({
     } catch (err) {
       if (err instanceof z.ZodError) {
         const errorMap: { [key: string]: string[] } = {};
-        
         err.errors.forEach((error) => {
           const path = error.path[0] as string;
           if (!errorMap[path]) {
@@ -81,37 +88,11 @@ export function IndicatorForm({
           }
           errorMap[path].push(error.message);
         });
-        
         setErrors(errorMap);
       }
       return false;
     }
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validate()) return;
-    
-    const indicator: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'> = {
-      name,
-      description,
-      process,
-      goal_type: goalType,
-      goal_value: parseFloat(goalValue),
-      calculation_type: calculationType,
-      unit
-    };
-    
-    afterSubmit(indicator);
-  };
-
-  const availableProcesses = [
-    ...processes.map(p => p.name),
-    "Estratégico"
-  ];
-  
-  const uniqueProcesses = Array.from(new Set(availableProcesses));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,17 +112,16 @@ export function IndicatorForm({
         unit={unit}
         setUnit={setUnit}
         errors={errors}
-        processes={uniqueProcesses}
+        processes={processes.map(p => p.name)}
       />
       
-      <IndicatorFormActions 
-        onClose={onClose} 
+      <IndicatorFormActions
         isEditing={!!indicator}
         isSubmitting={loading}
-        isDeleting={false}
-        onDelete={() => {}} 
+        isDeleting={deleting}
+        onClose={onClose}
+        onDelete={() => {}}
       />
     </form>
   );
 }
-
