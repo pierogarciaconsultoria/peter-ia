@@ -4,9 +4,9 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define simpler interface to avoid complex type instantiation
+// Define simple, non-recursive interface to avoid excessive type instantiation
 interface ManagerData {
-  readonly id: string;
+  id: string;
 }
 
 interface TaskCreationData {
