@@ -21,7 +21,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Use type assertion to avoid recursive type inference
+    // Use explicit type assertion
     return (data as ManagerProfileResult || []).map(manager => ({ id: manager.id }));
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
