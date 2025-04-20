@@ -69,9 +69,9 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             name: `Aderência ao Valor: ${value}`,
             description: `Avaliação da aderência ao valor organizacional: ${value}`,
             process: "Estratégico",
-            goal_type: "higher_better",
+            goal_type: "higher_better" as const,
             goal_value: 100,
-            calculation_type: "average",
+            calculation_type: "average" as const,
             unit: "%"
           })).map(indicator => addIndicator(indicator))
         ]);

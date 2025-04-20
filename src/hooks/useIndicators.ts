@@ -5,7 +5,7 @@ import {
   getAllIndicators,
   getAllMeasurements,
   addIndicator as createIndicator,
-  updateIndicator,
+  updateIndicator as updateIndicatorService,
   deleteIndicator as deleteIndicatorService
 } from "@/services/indicatorService";
 import { toast } from "sonner";
@@ -59,7 +59,7 @@ export function useIndicators() {
   // Update an existing indicator
   const updateIndicator = async (id: string, data: Partial<IndicatorType>) => {
     try {
-      const updatedIndicator = await updateIndicator(id, data);
+      const updatedIndicator = await updateIndicatorService(id, data);
       
       setIndicators(prev => 
         prev.map(indicator => 
@@ -74,6 +74,7 @@ export function useIndicators() {
       );
       
       toast.success("Indicador atualizado com sucesso");
+      return updatedIndicator;
     } catch (err) {
       console.error("Error updating indicator:", err);
       toast.error("Erro ao atualizar indicador");

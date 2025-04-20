@@ -14,7 +14,7 @@ export async function getAllIndicators(): Promise<IndicatorType[]> {
     throw new Error(error.message);
   }
   
-  return data;
+  return data as IndicatorType[];
 }
 
 // Get measurements for an indicator
