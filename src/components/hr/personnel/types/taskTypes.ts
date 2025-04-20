@@ -1,4 +1,8 @@
 
+export interface SimpleManagerData {
+  id: string;
+}
+
 export interface TaskCreationData {
   title: string;
   description: string;
@@ -13,8 +17,4 @@ export interface CreatedTask {
   id: string;
   title: string;
   status: string;
-}
-
-export interface SimpleManagerData {
-  id: string;
 }
