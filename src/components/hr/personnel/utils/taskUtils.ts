@@ -4,11 +4,10 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define a simplified interface to avoid recursive type instantiation
-type ManagerData = {
+// Define a simple interface with only what we need
+interface ManagerData {
   id: string;
-  // Add other necessary properties, but avoid complex nested types
-};
+}
 
 interface TaskCreationData {
   readonly title: string;
@@ -28,7 +27,7 @@ interface CreatedTask {
 
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
-    // Corrected query to match the actual database schema
+    // Explicitly type the response to avoid deep inference
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -40,8 +39,8 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
 
-    // Return only the necessary data to avoid deep type instantiation
-    return data ? data.map(item => ({ id: item.id })) : [];
+    // Explicitly create new simple objects to avoid reference issues
+    return data ? data.map(item => ({ id: item.id as string })) : [];
   } catch (err) {
     if (err instanceof Error) {
       console.error('Exception when fetching module managers:', err.message);
