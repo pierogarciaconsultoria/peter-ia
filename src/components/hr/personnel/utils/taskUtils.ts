@@ -4,14 +4,30 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-export const getModuleManagers = async (module: string): Promise<Array<{id: string}>> => {
-  const { data } = await supabase
-    .from('user_profiles')
-    .select('id')
-    .eq('role', 'manager')
-    .eq('module', module);
-  
-  return data || [];
+// Define explicit interface for manager data
+interface ManagerData {
+  id: string;
+}
+
+// Explicit return type and restructuring to avoid deep type instantiation
+export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('role', 'manager')
+      .eq('module', module);
+    
+    if (error) {
+      console.error('Error fetching module managers:', error);
+      return [];
+    }
+    
+    return (data as ManagerData[]) || [];
+  } catch (err) {
+    console.error('Exception when fetching module managers:', err);
+    return [];
+  }
 };
 
 export const createTaskInModule = async (request: PersonnelRequest): Promise<void> => {
