@@ -4,12 +4,12 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Simplified interface to avoid deep type instantiation
+// Define a simple interface for manager data to avoid complex type inference
 interface ManagerData {
   id: string;
 }
 
-// Restructured function with explicit error handling
+// Restructured function with explicit type handling
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
     const { data, error } = await supabase
@@ -23,7 +23,7 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
     
-    // Explicitly specify the return type instead of using 'as'
+    // Explicitly map the data to our interface instead of using type assertion
     return data ? data.map(item => ({ id: item.id })) : [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err);
