@@ -19,13 +19,19 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { PlusCircle, X, Loader2 } from "lucide-react";
+import { PlusCircle, X, Loader2, HelpCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { useProcesses } from "@/hooks/useProcesses";
 import { ProcessActorSelector } from "./ProcessActorSelector";
@@ -53,6 +59,7 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
 }) => {
   const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
+  const [objective, setObjective] = useState(initialData?.objective || "");
   const [owner, setOwner] = useState(initialData?.owner || "");
   const [inputs, setInputs] = useState(initialData?.inputs || []);
   const [outputs, setOutputs] = useState(initialData?.outputs || []);
@@ -61,6 +68,11 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
   const [stakeholders, setStakeholders] = useState(initialData?.stakeholders || []);
   const [requirements, setRequirements] = useState(initialData?.requirements || []);
   const [risks, setRisks] = useState(initialData?.risks || []);
+  const [problems, setProblems] = useState(initialData?.problems || []);
+  const [entryRequirements, setEntryRequirements] = useState(initialData?.entryRequirements || []);
+  const [expectedResult, setExpectedResult] = useState(initialData?.expectedResult || "");
+  const [status, setStatus] = useState(initialData?.status || "draft");
+  const [version, setVersion] = useState(initialData?.version || "1.0");
   
   const [newInput, setNewInput] = useState("");
   const [newOutput, setNewOutput] = useState("");
@@ -69,6 +81,8 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
   const [newStakeholder, setNewStakeholder] = useState("");
   const [newRequirement, setNewRequirement] = useState("");
   const [newRisk, setNewRisk] = useState("");
+  const [newProblem, setNewProblem] = useState("");
+  const [newEntryRequirement, setNewEntryRequirement] = useState("");
   
   const [indicators, setIndicators] = useState<ProcessIndicator[]>(
     initialData?.indicators || []
@@ -85,6 +99,7 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
     if (initialData) {
       setName(initialData.name || "");
       setDescription(initialData.description || "");
+      setObjective(initialData.objective || "");
       setOwner(initialData.owner || "");
       setInputs(initialData.inputs || []);
       setOutputs(initialData.outputs || []);
@@ -93,8 +108,13 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
       setStakeholders(initialData.stakeholders || []);
       setRequirements(initialData.requirements || []);
       setRisks(initialData.risks || []);
+      setProblems(initialData.problems || []);
+      setEntryRequirements(initialData.entryRequirements || []);
+      setExpectedResult(initialData.expectedResult || "");
       setIndicators(initialData.indicators || []);
       setProcessType(initialData.type || "");
+      setStatus(initialData.status || "draft");
+      setVersion(initialData.version || "1.0");
     }
   }, [initialData]);
 
@@ -201,6 +221,32 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
     setRisks(updatedRisks);
   };
 
+  const handleAddProblem = () => {
+    if (newProblem) {
+      setProblems([...problems, { id: Date.now(), problem: newProblem }]);
+      setNewProblem("");
+    }
+  };
+
+  const handleRemoveProblem = (index: number) => {
+    const updatedProblems = [...problems];
+    updatedProblems.splice(index, 1);
+    setProblems(updatedProblems);
+  };
+
+  const handleAddEntryRequirement = () => {
+    if (newEntryRequirement) {
+      setEntryRequirements([...entryRequirements, { id: Date.now(), requirement: newEntryRequirement }]);
+      setNewEntryRequirement("");
+    }
+  };
+
+  const handleRemoveEntryRequirement = (index: number) => {
+    const updatedEntryRequirements = [...entryRequirements];
+    updatedEntryRequirements.splice(index, 1);
+    setEntryRequirements(updatedEntryRequirements);
+  };
+
   const handleAddIndicator = () => {
     if (newIndicator.name && newIndicator.goal) {
       const newIndicatorWithId = { 
@@ -221,18 +267,20 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !description || !owner) {
+    if (!name || !objective || !processType) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
-    // Criar objeto de processo com todos os dados
     const processData = {
       name,
       description,
+      objective,
       owner,
-      status: "active",
+      status,
+      version,
       lastUpdated: new Date().toISOString().split("T")[0],
+      createdAt: new Date().toISOString().split("T")[0],
       risksCount: risks.length,
       documentsCount: documents.length,
       inputs,
@@ -242,6 +290,9 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
       stakeholders,
       requirements,
       risks,
+      problems,
+      entryRequirements,
+      expectedResult,
       indicators,
       type: processType
     };
@@ -249,11 +300,26 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
     onSubmit(processData);
   };
 
+  const FieldTooltip = ({ content }: { content: string }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
+        </TooltipTrigger>
+        <TooltipContent className="bg-white p-2 shadow-lg rounded-md max-w-xs">
+          <p className="text-sm">{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>Informações Básicas do Processo</CardTitle>
+          <CardTitle className="flex items-center">
+            Informações Básicas do Processo
+          </CardTitle>
           <CardDescription>
             Forneça as informações principais do processo
           </CardDescription>
@@ -261,26 +327,111 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome do Processo</Label>
+              <div className="flex items-center">
+                <Label htmlFor="name">Nome do Processo</Label>
+                <FieldTooltip content="Nome que identifica o processo na organização" />
+              </div>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Gestão de Pedidos"
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="owner">Responsável</Label>
+              <div className="flex items-center">
+                <Label htmlFor="owner">Responsável</Label>
+                <FieldTooltip content="Pessoa ou departamento responsável pela execução do processo" />
+              </div>
               <Input
                 id="owner"
                 value={owner}
                 onChange={(e) => setOwner(e.target.value)}
                 placeholder="Ex: Departamento Comercial"
+                required
               />
             </div>
           </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Label htmlFor="processType">Tipo de Processo</Label>
+                <FieldTooltip content="Classifique o processo de acordo com sua função na organização" />
+              </div>
+              <Select
+                value={processType}
+                onValueChange={(value) => setProcessType(value)}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Gestão">Gestão</SelectItem>
+                  <SelectItem value="Negócio">Negócio</SelectItem>
+                  <SelectItem value="Apoio">Apoio</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Label htmlFor="status">Status do Processo</Label>
+                <FieldTooltip content="Estado atual do processo no ciclo de vida" />
+              </div>
+              <Select
+                value={status}
+                onValueChange={(value) => setStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Rascunho</SelectItem>
+                  <SelectItem value="pending">Pendente de Aprovação</SelectItem>
+                  <SelectItem value="approved">Aprovado</SelectItem>
+                  <SelectItem value="rejected">Rejeitado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Label htmlFor="version">Versão</Label>
+                <FieldTooltip content="Versão atual do documento de processo" />
+              </div>
+              <Input
+                id="version"
+                value={version}
+                onChange={(e) => setVersion(e.target.value)}
+                placeholder="Ex: 1.0"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+            <div className="flex items-center">
+              <Label htmlFor="objective">Objetivo do Processo</Label>
+              <FieldTooltip content="Descreva qual o propósito deste processo e o que ele visa alcançar" />
+            </div>
+            <Textarea
+              id="objective"
+              value={objective}
+              onChange={(e) => setObjective(e.target.value)}
+              placeholder="Descreva o objetivo principal deste processo..."
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center">
+              <Label htmlFor="description">Descrição</Label>
+              <FieldTooltip content="Forneça uma descrição detalhada do processo e seu escopo" />
+            </div>
             <Textarea
               id="description"
               value={description}
@@ -289,26 +440,195 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
               rows={3}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="processType">Tipo de Processo</Label>
-            <Select
-              value={processType}
-              onValueChange={(value) => setProcessType(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Gestão">Gestão</SelectItem>
-                <SelectItem value="Negócio">Negócio</SelectItem>
-                <SelectItem value="Apoio">Apoio</SelectItem>
-              </SelectContent>
-            </Select>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Análise de Cenário</CardTitle>
+          <CardDescription>
+            Identifique problemas e riscos associados ao processo
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <Label>Dores/Problemas do Processo</Label>
+              <FieldTooltip content="Liste os problemas ou dificuldades enfrentados no processo" />
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newProblem}
+                onChange={(e) => setNewProblem(e.target.value)}
+                placeholder="Novo problema"
+              />
+              <Button type="button" onClick={handleAddProblem} disabled={!newProblem}>
+                Adicionar
+              </Button>
+            </div>
+            {problems.length > 0 ? (
+              <div className="border rounded-md mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Problema</TableHead>
+                      <TableHead className="w-[100px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {problems.map((problem, index) => (
+                      <TableRow key={problem.id}>
+                        <TableCell className="font-medium">{problem.problem}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveProblem(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center p-4 text-muted-foreground">
+                Nenhum problema adicionado
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <Label>Riscos Associados ao Processo</Label>
+              <FieldTooltip content="Identifique os riscos potenciais que podem afetar o processo" />
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newRisk}
+                onChange={(e) => setNewRisk(e.target.value)}
+                placeholder="Novo risco"
+              />
+              <Button type="button" onClick={handleAddRisk} disabled={!newRisk}>
+                Adicionar
+              </Button>
+            </div>
+            {risks.length > 0 ? (
+              <div className="border rounded-md mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Risco</TableHead>
+                      <TableHead className="w-[100px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {risks.map((risk, index) => (
+                      <TableRow key={risk.id}>
+                        <TableCell className="font-medium">{risk.risk}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveRisk(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center p-4 text-muted-foreground">
+                Nenhum risco adicionado
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Accordion type="single" collapsible>
+      <Card>
+        <CardHeader>
+          <CardTitle>Requisitos e Resultados</CardTitle>
+          <CardDescription>
+            Defina os requisitos de entrada e resultados esperados
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <Label>Requisitos de Entrada</Label>
+              <FieldTooltip content="O que é necessário para que o processo inicie" />
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newEntryRequirement}
+                onChange={(e) => setNewEntryRequirement(e.target.value)}
+                placeholder="Novo requisito de entrada"
+              />
+              <Button 
+                type="button" 
+                onClick={handleAddEntryRequirement} 
+                disabled={!newEntryRequirement}
+              >
+                Adicionar
+              </Button>
+            </div>
+            {entryRequirements.length > 0 ? (
+              <div className="border rounded-md mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Requisito de Entrada</TableHead>
+                      <TableHead className="w-[100px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {entryRequirements.map((req, index) => (
+                      <TableRow key={req.id}>
+                        <TableCell className="font-medium">{req.requirement}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveEntryRequirement(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center p-4 text-muted-foreground">
+                Nenhum requisito de entrada adicionado
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center">
+              <Label htmlFor="expectedResult">Resultado Esperado</Label>
+              <FieldTooltip content="Qual é o resultado final que se espera deste processo" />
+            </div>
+            <Textarea
+              id="expectedResult"
+              value={expectedResult}
+              onChange={(e) => setExpectedResult(e.target.value)}
+              placeholder="Descreva o resultado esperado para este processo..."
+              rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Accordion type="single" collapsible defaultValue="none">
         <AccordionItem value="inputs">
           <AccordionTrigger>Entradas</AccordionTrigger>
           <AccordionContent>
@@ -685,7 +1005,10 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
           <div className="space-y-4">
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <Label>Nome do Indicador</Label>
+                <div className="flex items-center">
+                  <Label>Nome do Indicador</Label>
+                  <FieldTooltip content="Nome que identifica o indicador" />
+                </div>
                 <Input
                   value={newIndicator.name}
                   onChange={(e) =>
@@ -695,7 +1018,10 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
                 />
               </div>
               <div>
-                <Label>Meta</Label>
+                <div className="flex items-center">
+                  <Label>Meta</Label>
+                  <FieldTooltip content="Valor alvo que se deseja alcançar" />
+                </div>
                 <Input
                   value={newIndicator.goal}
                   onChange={(e) =>
@@ -705,7 +1031,10 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
                 />
               </div>
               <div>
-                <Label>Situação Atual</Label>
+                <div className="flex items-center">
+                  <Label>Situação Atual</Label>
+                  <FieldTooltip content="Valor atual do indicador" />
+                </div>
                 <div className="flex gap-2">
                   <Input
                     value={newIndicator.current}
@@ -770,7 +1099,7 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {isEditing ? "Salvando..." : "Criando..."}
+              {isEditing ? "Salvando..." : "Criar Processo"}
             </>
           ) : (
             isEditing ? "Salvar Alterações" : "Criar Processo"
