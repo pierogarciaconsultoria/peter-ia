@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Define a simplified interface to avoid recursive type instantiation
 type ManagerData = {
   id: string;
+  // Add other necessary properties, but avoid complex nested types
 };
 
 interface TaskCreationData {
@@ -40,7 +41,7 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
     }
 
     // Return only the necessary data to avoid deep type instantiation
-    return Array.isArray(data) ? data.map(item => ({ id: item.id })) : [];
+    return data ? data.map(item => ({ id: item.id })) : [];
   } catch (err) {
     if (err instanceof Error) {
       console.error('Exception when fetching module managers:', err.message);
