@@ -40,10 +40,8 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
 
-    // Safely map the results to our simple ManagerData type
-    return (data || []).map(row => ({
-      id: row.id
-    }));
+    // Explicitly type and transform the data to break any circular references
+    return Array.isArray(data) ? data.map(item => ({ id: item.id })) : [];
   } catch (err) {
     if (err instanceof Error) {
       console.error('Exception when fetching module managers:', err.message);
