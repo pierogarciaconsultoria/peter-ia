@@ -1,11 +1,10 @@
-
 import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
 // Define a simple interface with only what we need
-interface ManagerData {
+type ManagerData = {
   id: string;
 }
 
@@ -27,20 +26,18 @@ interface CreatedTask {
 
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
-    // Explicitly type the response to avoid deep inference
-    const { data, error } = await supabase
+    const result = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
       .eq('module', module);
-
-    if (error) {
-      console.error('Error fetching module managers:', error);
+      
+    if (result.error) {
+      console.error('Error fetching module managers:', result.error);
       return [];
     }
-
-    // Explicitly create new simple objects to avoid reference issues
-    return data ? data.map(item => ({ id: item.id as string })) : [];
+    
+    return (result.data || []).map(item => ({ id: item.id }));
   } catch (err) {
     if (err instanceof Error) {
       console.error('Exception when fetching module managers:', err.message);

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PenLine, Save, RotateCcw, Sparkles } from "lucide-react";
 import { StrategicIdentity } from "@/types/strategic-planning";
@@ -10,6 +9,7 @@ import { IdentityFormActions } from "./IdentityFormActions";
 import { Button } from "../ui/button";
 import { IdentitySuggestionDialog } from "./IdentitySuggestionDialog";
 import { IndicatorSuggestionDialog } from "./IndicatorSuggestionDialog";
+import { useIndicators } from "@/hooks/useIndicators";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -28,6 +28,8 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
   const [showAiSuggestions, setShowAiSuggestions] = useState(false);
   const [showIndicatorSuggestions, setShowIndicatorSuggestions] = useState(false);
 
+  const { addIndicator } = useIndicators();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -38,6 +40,40 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
         vision,
         values,
       });
+      
+      // Create corresponding performance indicators
+      const hasIdentityData = mission.trim() !== "" && vision.trim() !== "" && values.length > 0;
+      if (hasIdentityData) {
+        await Promise.all([
+          addIndicator({
+            name: "Cumprimento da Missão",
+            description: `Avaliação do cumprimento da missão: ${mission}`,
+            process: "Estratégico",
+            goal_type: "higher_better",
+            goal_value: 100,
+            calculation_type: "average",
+            unit: "%"
+          }),
+          addIndicator({
+            name: "Alcance da Visão",
+            description: `Progresso em direção à visão: ${vision}`,
+            process: "Estratégico",
+            goal_type: "higher_better",
+            goal_value: 100,
+            calculation_type: "average",
+            unit: "%"
+          }),
+          ...values.map(value => ({
+            name: `Aderência ao Valor: ${value}`,
+            description: `Avaliação da aderência ao valor organizacional: ${value}`,
+            process: "Estratégico",
+            goal_type: "higher_better",
+            goal_value: 100,
+            calculation_type: "average",
+            unit: "%"
+          })).map(indicator => addIndicator(indicator))
+        ]);
+      }
       
       toast({
         title: "Identidade Estratégica Atualizada",

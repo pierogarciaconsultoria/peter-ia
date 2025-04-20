@@ -7,11 +7,12 @@ import { IndicatorForm } from '@/components/indicators/IndicatorForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Sparkles } from 'lucide-react';
+import { PlusCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useIndicators } from '@/hooks/useIndicators';
 import { useProcesses } from '@/hooks/useProcesses'; 
 import { IndicatorType } from '@/types/indicators';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 type IndicatorFormMode = 'create' | 'edit';
 
@@ -37,25 +38,20 @@ const PerformanceIndicators = () => {
   const { processes } = useProcesses();
 
   useEffect(() => {
-    // Extract unique process names from indicators
     const processNames = Array.from(
       new Set(indicators.map(indicator => indicator.process))
     ).filter(Boolean) as string[];
     
-    // Also add processes from the processes list that have indicators
     const processesWithIndicators = processes
       .filter(process => process.indicators && process.indicators.length > 0)
       .map(process => process.name);
     
-    // Add a special "Estratégico" process for indicators from strategic planning
     const allProcesses = [...new Set([...processNames, ...processesWithIndicators, "Estratégico"])];
     setUniqueProcesses(allProcesses);
     
-    // Select "Estratégico" by default if it exists and nothing is currently selected
     if (allProcesses.includes("Estratégico") && !selectedProcess) {
       setSelectedProcess("Estratégico");
     } 
-    // Otherwise select the first one if we have processes but none selected
     else if (allProcesses.length > 0 && !selectedProcess) {
       setSelectedProcess(allProcesses[0]);
     }
@@ -106,12 +102,10 @@ const PerformanceIndicators = () => {
     navigate('/strategic-planning');
   };
 
-  // Filter indicators for the selected process
   const processIndicators = selectedProcess 
     ? indicators.filter(i => i.process === selectedProcess)
     : [];
 
-  // Find any process data from the processes array that matches the selected process
   const processData = selectedProcess 
     ? processes.find(p => p.name === selectedProcess)
     : null;
@@ -124,7 +118,6 @@ const PerformanceIndicators = () => {
       
       <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold">Indicadores de Desempenho</h1>
@@ -134,10 +127,19 @@ const PerformanceIndicators = () => {
             </div>
             <div className="flex gap-2">
               {isStrategicProcess && (
-                <Button variant="outline" onClick={handleGenerateFromStrategy} className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Gerar com IA
-                </Button>
+                <>
+                  <Link 
+                    to="/strategic-planning"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Ver Planejamento Estratégico
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Button variant="outline" onClick={handleGenerateFromStrategy} className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Gerar com IA
+                  </Button>
+                </>
               )}
               <Button onClick={handleCreateIndicator}>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -146,7 +148,6 @@ const PerformanceIndicators = () => {
             </div>
           </div>
 
-          {/* Process Selection */}
           {uniqueProcesses.length > 0 ? (
             <div className="mb-6">
               <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
@@ -182,7 +183,6 @@ const PerformanceIndicators = () => {
             </div>
           )}
 
-          {/* Tabs for different views */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
             <TabsList className="grid grid-cols-2 w-[400px]">
               <TabsTrigger value="table">Tabela</TabsTrigger>
@@ -213,7 +213,6 @@ const PerformanceIndicators = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Indicator Form Dialog */}
           <Dialog open={showIndicatorForm} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
