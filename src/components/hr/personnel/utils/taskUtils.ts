@@ -5,9 +5,9 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
 // Define a simplified interface to avoid recursive type instantiation
-interface ManagerData {
+type ManagerData = {
   id: string;
-}
+};
 
 interface TaskCreationData {
   readonly title: string;
