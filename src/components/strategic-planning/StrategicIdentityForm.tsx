@@ -1,12 +1,15 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { PenLine, Save, RotateCcw } from "lucide-react";
+import { PenLine, Save, RotateCcw, Sparkles } from "lucide-react";
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { updateStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { useToast } from "@/hooks/use-toast";
 import { ManualIdentityForm } from "./ManualIdentityForm";
 import { IdentityFormActions } from "./IdentityFormActions";
+import { Button } from "../ui/button";
+import { IdentitySuggestionDialog } from "./IdentitySuggestionDialog";
+import { IndicatorSuggestionDialog } from "./IndicatorSuggestionDialog";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -22,6 +25,8 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
   
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
+  const [showIndicatorSuggestions, setShowIndicatorSuggestions] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,13 +73,41 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
     setIsEditing(true);
   };
 
+  const handleApplySuggestions = (suggestions: Pick<StrategicIdentity, "mission" | "vision" | "values">) => {
+    setMission(suggestions.mission);
+    setVision(suggestions.vision);
+    setValues(suggestions.values);
+    
+    toast({
+      title: "Sugestões Aplicadas",
+      description: "As sugestões de IA foram aplicadas ao formulário",
+    });
+  };
+
+  const hasIdentityData = mission.trim() !== "" && vision.trim() !== "" && values.length > 0;
+
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-bold">Identidade Estratégica</CardTitle>
-        <CardDescription>
-          Defina a missão, visão e valores da sua organização
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-xl font-bold">Identidade Estratégica</CardTitle>
+            <CardDescription>
+              Defina a missão, visão e valores da sua organização
+            </CardDescription>
+          </div>
+          
+          {isEditing && (
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setShowAiSuggestions(true)}
+            >
+              <Sparkles className="h-4 w-4" />
+              Sugestões de IA
+            </Button>
+          )}
+        </div>
       </CardHeader>
       
       <CardContent>
@@ -96,19 +129,48 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
               isLoading={loading}
             />
           ) : (
-            <div className="flex justify-end mt-4">
-              <button 
+            <div className="flex justify-end gap-3 mt-4">
+              {hasIdentityData && (
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowIndicatorSuggestions(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Sugerir Indicadores
+                </Button>
+              )}
+              <Button 
                 type="button" 
                 onClick={enableEditing}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                className="flex items-center gap-2"
               >
-                <PenLine className="h-4 w-4 mr-2 inline" />
+                <PenLine className="h-4 w-4" />
                 Editar
-              </button>
+              </Button>
             </div>
           )}
         </form>
       </CardContent>
+
+      <IdentitySuggestionDialog
+        open={showAiSuggestions}
+        onClose={() => setShowAiSuggestions(false)}
+        onAccept={handleApplySuggestions}
+      />
+
+      {hasIdentityData && (
+        <IndicatorSuggestionDialog
+          open={showIndicatorSuggestions}
+          onClose={() => setShowIndicatorSuggestions(false)}
+          identity={{
+            mission,
+            vision,
+            values
+          }}
+        />
+      )}
     </Card>
   );
 }

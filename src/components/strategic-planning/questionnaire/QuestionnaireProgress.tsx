@@ -1,28 +1,18 @@
 
-import React from "react";
+import { Progress } from "@/components/ui/progress";
 
 interface QuestionnaireProgressProps {
-  currentQuestion: number;
-  totalQuestions: number;
-  progressPercentage: number;
+  progress: number;
 }
 
-export function QuestionnaireProgress({ 
-  currentQuestion, 
-  totalQuestions, 
-  progressPercentage 
-}: QuestionnaireProgressProps) {
+export function QuestionnaireProgress({ progress }: QuestionnaireProgressProps) {
   return (
-    <>
-      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-primary transition-all duration-300 ease-out"
-          style={{ width: `${progressPercentage}%` }}
-        />
+    <div className="space-y-2">
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>Progresso</span>
+        <span>{progress}%</span>
       </div>
-      <p className="text-xs text-muted-foreground mt-1">
-        Pergunta {currentQuestion + 1} de {totalQuestions}
-      </p>
-    </>
+      <Progress value={progress} className="h-2" />
+    </div>
   );
 }

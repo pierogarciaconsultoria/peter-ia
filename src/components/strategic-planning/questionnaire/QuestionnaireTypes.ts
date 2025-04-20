@@ -1,5 +1,12 @@
 
-export interface QuestionnaireResponse {
-  key: string;
-  value: string;
+export interface IdentityQuestionsType {
+  mission: string[];
+  vision: string[];
+  values: string[];
+}
+
+export interface QuestionnaireResponsesType {
+  mission: string[];
+  vision: string[];
+  values: string[];
 }

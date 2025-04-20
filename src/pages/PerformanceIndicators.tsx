@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
@@ -8,10 +7,11 @@ import { IndicatorForm } from '@/components/indicators/IndicatorForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Sparkles } from 'lucide-react';
 import { useIndicators } from '@/hooks/useIndicators';
 import { useProcesses } from '@/hooks/useProcesses'; 
 import { IndicatorType } from '@/types/indicators';
+import { useNavigate } from 'react-router-dom';
 
 type IndicatorFormMode = 'create' | 'edit';
 
@@ -22,6 +22,7 @@ const PerformanceIndicators = () => {
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('table');
   const [uniqueProcesses, setUniqueProcesses] = useState<string[]>([]);
+  const navigate = useNavigate();
   
   const { 
     indicators, 
@@ -46,13 +47,17 @@ const PerformanceIndicators = () => {
       .filter(process => process.indicators && process.indicators.length > 0)
       .map(process => process.name);
     
-    // Combine and deduplicate
-    const combined = [...new Set([...processNames, ...processesWithIndicators])];
-    setUniqueProcesses(combined);
+    // Add a special "Estratégico" process for indicators from strategic planning
+    const allProcesses = [...new Set([...processNames, ...processesWithIndicators, "Estratégico"])];
+    setUniqueProcesses(allProcesses);
     
-    // If we have processes but none selected, select the first one
-    if (combined.length > 0 && !selectedProcess) {
-      setSelectedProcess(combined[0]);
+    // Select "Estratégico" by default if it exists and nothing is currently selected
+    if (allProcesses.includes("Estratégico") && !selectedProcess) {
+      setSelectedProcess("Estratégico");
+    } 
+    // Otherwise select the first one if we have processes but none selected
+    else if (allProcesses.length > 0 && !selectedProcess) {
+      setSelectedProcess(allProcesses[0]);
     }
   }, [indicators, processes, selectedProcess]);
 
@@ -97,6 +102,10 @@ const PerformanceIndicators = () => {
     setSelectedProcess(uniqueProcesses[prevIndex]);
   };
 
+  const handleGenerateFromStrategy = () => {
+    navigate('/strategic-planning');
+  };
+
   // Filter indicators for the selected process
   const processIndicators = selectedProcess 
     ? indicators.filter(i => i.process === selectedProcess)
@@ -106,6 +115,8 @@ const PerformanceIndicators = () => {
   const processData = selectedProcess 
     ? processes.find(p => p.name === selectedProcess)
     : null;
+
+  const isStrategicProcess = selectedProcess === "Estratégico";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -121,10 +132,18 @@ const PerformanceIndicators = () => {
                 Monitore e gerencie os indicadores de desempenho da organização
               </p>
             </div>
-            <Button onClick={handleCreateIndicator}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Indicador
-            </Button>
+            <div className="flex gap-2">
+              {isStrategicProcess && (
+                <Button variant="outline" onClick={handleGenerateFromStrategy} className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Gerar com IA
+                </Button>
+              )}
+              <Button onClick={handleCreateIndicator}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Novo Indicador
+              </Button>
+            </div>
           </div>
 
           {/* Process Selection */}
@@ -206,6 +225,7 @@ const PerformanceIndicators = () => {
                 indicator={editingIndicator}
                 onClose={handleCloseDialog}
                 afterSubmit={handleSubmitIndicator}
+                defaultProcess={selectedProcess || undefined}
               />
             </DialogContent>
           </Dialog>
