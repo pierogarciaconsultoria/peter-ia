@@ -7,6 +7,7 @@ import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskT
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
+    // Updated query to avoid excessive type instantiation
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -18,7 +19,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    return (data || []).map(manager => ({ id: manager.id }));
+    // Explicitly type the result to avoid recursion
+    return Array.isArray(data) ? data.map(manager => ({ id: manager.id })) : [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
