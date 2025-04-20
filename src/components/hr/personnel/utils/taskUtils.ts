@@ -4,28 +4,34 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define a simple interface for manager data with only what we need
+// Define a simple interface for manager data
 interface ManagerData {
   id: string;
 }
 
-// Completely rewritten function to avoid type inference issues
+// Define the expected database row type
+interface UserProfileRow {
+  id: string;
+  role: string;
+  module: string;
+}
+
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
-    // Explicitly define the return type of the query
-    const result = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
-      .select('id')
+      .select<'user_profiles', UserProfileRow>('id')
       .eq('role', 'manager')
       .eq('module', module);
     
-    if (result.error) {
-      console.error('Error fetching module managers:', result.error);
+    if (error) {
+      console.error('Error fetching module managers:', error);
       return [];
     }
     
-    // Convert the data to our simple interface without complex type assertions
-    return (result.data || []).map(item => ({ id: item.id }));
+    return (data || []).map(row => ({
+      id: row.id
+    }));
   } catch (err) {
     console.error('Exception when fetching module managers:', err);
     return [];
