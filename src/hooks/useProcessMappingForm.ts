@@ -166,6 +166,7 @@ export const useProcessMappingForm = (initialData: any) => {
     setStatus,
     setVersion,
     setProcessType,
+    setExpectedResult,  // Making sure this is available in handlers
     handleAddProblem,
     handleRemoveProblem,
     handleAddRisk,
