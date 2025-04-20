@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +52,6 @@ export function IndicatorForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // When the defaultProcess changes and it's not already set, update the process state
     if (defaultProcess && !process) {
       setProcess(defaultProcess);
     }
@@ -93,7 +93,7 @@ export function IndicatorForm({
     
     if (!validate()) return;
     
-    const indicatorData: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'> = {
+    const indicator: Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'> = {
       name,
       description,
       process,
@@ -103,16 +103,14 @@ export function IndicatorForm({
       unit
     };
     
-    afterSubmit(indicatorData);
+    afterSubmit(indicator);
   };
 
-  // Adicionar "Estratégico" à lista de processos se não existir
   const availableProcesses = [
     ...processes.map(p => p.name),
-    "Estratégico" // Processo especial para indicadores estratégicos
+    "Estratégico"
   ];
   
-  // Remover duplicatas
   const uniqueProcesses = Array.from(new Set(availableProcesses));
 
   return (
@@ -146,3 +144,4 @@ export function IndicatorForm({
     </form>
   );
 }
+

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PenLine, Save, RotateCcw, Sparkles } from "lucide-react";
@@ -43,11 +42,10 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
         values,
       });
       
-      // Create corresponding performance indicators
       const hasIdentityData = mission.trim() !== "" && vision.trim() !== "" && values.length > 0;
       if (hasIdentityData) {
-        await Promise.all([
-          addIndicator({
+        const strategicIndicators: Array<Omit<IndicatorType, 'id' | 'created_at' | 'updated_at'>> = [
+          {
             name: "Cumprimento da Missão",
             description: `Avaliação do cumprimento da missão: ${mission}`,
             process: "Estratégico",
@@ -55,8 +53,8 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             goal_value: 100,
             calculation_type: "average",
             unit: "%"
-          }),
-          addIndicator({
+          },
+          {
             name: "Alcance da Visão",
             description: `Progresso em direção à visão: ${vision}`,
             process: "Estratégico",
@@ -64,7 +62,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             goal_value: 100,
             calculation_type: "average",
             unit: "%"
-          }),
+          },
           ...values.map(value => ({
             name: `Aderência ao Valor: ${value}`,
             description: `Avaliação da aderência ao valor organizacional: ${value}`,
@@ -73,8 +71,10 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             goal_value: 100,
             calculation_type: "average" as const,
             unit: "%"
-          })).map(indicator => addIndicator(indicator))
-        ]);
+          }))
+        ];
+
+        await Promise.all(strategicIndicators.map(indicator => addIndicator(indicator)));
       }
       
       toast({
