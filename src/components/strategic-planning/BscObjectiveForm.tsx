@@ -6,9 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBscObjective, createBscMeasure } from "@/services/strategicPlanningService";
+import { addIndicator } from "@/services/indicatorService";
 import { useToast } from "@/hooks/use-toast";
-import { EmployeeSelector } from "@/components/hr/shared/EmployeeSelector";
-import { useAuth } from "@/hooks/useAuth";
 import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 interface BscObjectiveFormProps {
@@ -17,50 +16,60 @@ interface BscObjectiveFormProps {
   onCancel: () => void;
 }
 
+const perspectiveLabels = {
+  financial: "Financeira",
+  customer: "Clientes",
+  internal_process: "Processos Internos",
+  learning_growth: "Aprendizado e Crescimento"
+};
+
 export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiveFormProps) {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [targetValue, setTargetValue] = useState("");
   const [targetUnit, setTargetUnit] = useState("");
-  const [measurementFrequency, setMeasurementFrequency] = useState("monthly");
-  const [responsibleId, setResponsibleId] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      if (!user?.id) {
-        throw new Error("Usuário não autenticado");
-      }
-
-      // Create the objective - removing company_id to fix type errors
-      const result = await createBscObjective({
+      // Create BSC objective
+      const objective = await createBscObjective({
         perspective_id: perspective,
         title,
         description
-        // Company ID is now handled by RLS policies on the backend
       });
       
-      if (result) {
-        await createBscMeasure({ 
-          objective_id: result.id,
+      if (objective) {
+        // Create BSC measure
+        await createBscMeasure({
+          objective_id: objective.id,
           name: title,
           target: parseFloat(targetValue) || 0,
           unit: targetUnit
-          // Company ID is now handled by RLS policies on the backend
         });
+
+        // Create corresponding performance indicator
+        await addIndicator({
+          name: title,
+          description: description,
+          process: "Estratégico",
+          goal_type: "higher_better",
+          goal_value: parseFloat(targetValue) || 0,
+          calculation_type: "average",
+          unit: targetUnit
+        });
+
+        toast({
+          title: "Objetivo criado",
+          description: "O objetivo foi adicionado com sucesso",
+        });
+        
+        onSaved();
       }
-      
-      toast({
-        title: "Objetivo criado",
-        description: "O objetivo foi adicionado com sucesso",
-      });
-      
-      onSaved();
     } catch (error) {
       console.error("Error creating BSC objective:", error);
       toast({
@@ -77,7 +86,7 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
     <AuthenticationRequired>
       <form onSubmit={handleSubmit} className="space-y-4 py-4">
         <div className="space-y-2">
-          <Label htmlFor="objective-title">Título do Objetivo</Label>
+          <Label htmlFor="objective-title">Objetivo Estratégico</Label>
           <Input
             id="objective-title"
             placeholder="Digite o título do objetivo estratégico"
@@ -125,29 +134,10 @@ export function BscObjectiveForm({ perspective, onSaved, onCancel }: BscObjectiv
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="measurement-frequency">Frequência de Medição</Label>
-          <Select value={measurementFrequency} onValueChange={setMeasurementFrequency}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione a frequência" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Diária</SelectItem>
-              <SelectItem value="weekly">Semanal</SelectItem>
-              <SelectItem value="monthly">Mensal</SelectItem>
-              <SelectItem value="quarterly">Trimestral</SelectItem>
-              <SelectItem value="yearly">Anual</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Responsável</Label>
-          <EmployeeSelector
-            employeeId={responsibleId}
-            setEmployeeId={setResponsibleId}
-            placeholder="Selecione o responsável"
-            required
-          />
+          <Label>Perspectiva</Label>
+          <div className="px-4 py-3 rounded-md bg-muted">
+            {perspectiveLabels[perspective]}
+          </div>
         </div>
         
         <div className="flex justify-end gap-3 pt-2">

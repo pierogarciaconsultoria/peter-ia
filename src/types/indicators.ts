@@ -1,4 +1,3 @@
-
 export interface IndicatorType {
   id: string;
   name: string;

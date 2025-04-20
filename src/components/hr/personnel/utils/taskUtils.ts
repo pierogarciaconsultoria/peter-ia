@@ -3,7 +3,26 @@ import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
+
+export interface SimpleManagerData {
+  id: string;
+}
+
+export interface TaskCreationData {
+  title: string;
+  description: string;
+  module: string;
+  status: string;
+  employee_id: string;
+  requester_id: string;
+  personnel_request_id: string;
+}
+
+export interface CreatedTask {
+  id: string;
+  title: string;
+  status: string;
+}
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
