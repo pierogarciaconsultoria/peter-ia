@@ -1,15 +1,14 @@
-
 import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define explicit interface for manager data
+// Simplified interface to avoid deep type instantiation
 interface ManagerData {
   id: string;
 }
 
-// Explicit return type and restructuring to avoid deep type instantiation
+// Restructured function with explicit error handling
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
     const { data, error } = await supabase
@@ -23,6 +22,7 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
     
+    // Explicitly type cast and provide fallback
     return (data as ManagerData[]) || [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err);
