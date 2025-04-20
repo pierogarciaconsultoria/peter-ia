@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -63,20 +64,14 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
       setDescription(initialData.description || "");
       setObjective(initialData.objective || "");
       setOwner(initialData.owner || "");
-      setInputs(initialData.inputs || []);
-      setOutputs(initialData.outputs || []);
-      setActivities(initialData.activities || []);
-      setDocuments(initialData.documents || []);
-      setStakeholders(initialData.stakeholders || []);
-      setRequirements(initialData.requirements || []);
-      setRisks(initialData.risks || []);
+      setStatus(initialData.status || "draft");
+      setVersion(initialData.version || "1.0");
       setProblems(initialData.problems || []);
+      setRisks(initialData.risks || []);
       setEntryRequirements(initialData.entryRequirements || []);
       setExpectedResult(initialData.expectedResult || "");
       setIndicators(initialData.indicators || []);
       setProcessType(initialData.type || "");
-      setStatus(initialData.status || "draft");
-      setVersion(initialData.version || "1.0");
     }
   }, [initialData]);
 
