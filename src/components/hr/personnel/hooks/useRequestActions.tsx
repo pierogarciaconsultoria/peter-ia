@@ -1,9 +1,11 @@
+
 import { useToast } from "@/hooks/use-toast";
 import { PersonnelRequest, RequestStatus } from "../types";
 import { CheckCircle } from "lucide-react";
 import { createNotification } from "@/services/notificationService";
 import { createTaskInModule } from "../utils/taskUtils";
 import { updateRequestStatus, createStatusUpdate } from "../utils/requestStatusUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRequestActions(
   requests: PersonnelRequest[], 
