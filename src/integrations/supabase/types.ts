@@ -628,6 +628,50 @@ export type Database = {
           },
         ]
       }
+      colaboradores: {
+        Row: {
+          cargo: string
+          company_id: string | null
+          created_at: string
+          departamento: string
+          email_corporativo: string
+          id: string
+          nome: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cargo: string
+          company_id?: string | null
+          created_at?: string
+          departamento: string
+          email_corporativo: string
+          id?: string
+          nome: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cargo?: string
+          company_id?: string | null
+          created_at?: string
+          departamento?: string
+          email_corporativo?: string
+          id?: string
+          nome?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           active: boolean
@@ -2058,6 +2102,45 @@ export type Database = {
         }
         Relationships: []
       }
+      objetivos_estrategicos: {
+        Row: {
+          created_at: string
+          data_fim: string
+          data_inicio: string
+          descricao: string | null
+          id: string
+          progresso: number
+          responsavel: string
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_fim: string
+          data_inicio: string
+          descricao?: string | null
+          id?: string
+          progresso?: number
+          responsavel: string
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_fim?: string
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          progresso?: number
+          responsavel?: string
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       occurrences: {
         Row: {
           created_at: string
@@ -2507,6 +2590,53 @@ export type Database = {
           },
         ]
       }
+      projetos_tap: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          cronograma_fim: string
+          cronograma_inicio: string
+          descricao_geral: string
+          id: string
+          nome_projeto: string
+          status_projeto: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          cronograma_fim: string
+          cronograma_inicio: string
+          descricao_geral: string
+          id?: string
+          nome_projeto: string
+          status_projeto?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          cronograma_fim?: string
+          cronograma_inicio?: string
+          descricao_geral?: string
+          id?: string
+          nome_projeto?: string
+          status_projeto?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projetos_tap_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quality_actions: {
         Row: {
           comments: string | null
@@ -2897,6 +3027,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      riscos: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          impacto: string
+          mitigacao: string | null
+          probabilidade: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          impacto: string
+          mitigacao?: string | null
+          probabilidade: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          impacto?: string
+          mitigacao?: string | null
+          probabilidade?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       risks: {
         Row: {
