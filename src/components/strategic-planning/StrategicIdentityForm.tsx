@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PenLine, Save, RotateCcw, Sparkles } from "lucide-react";
@@ -10,6 +11,7 @@ import { Button } from "../ui/button";
 import { IdentitySuggestionDialog } from "./IdentitySuggestionDialog";
 import { IndicatorSuggestionDialog } from "./IndicatorSuggestionDialog";
 import { useIndicators } from "@/hooks/useIndicators";
+import { IndicatorType } from "@/types/indicators";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -129,7 +131,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
       process: "Estratégico",
       goal_type: "higher_better",
       goal_value: 100,
-      calculation_type: "average" as const,
+      calculation_type: "average",
       unit: "%"
     };
 

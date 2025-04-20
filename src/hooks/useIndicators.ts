@@ -4,7 +4,7 @@ import { IndicatorType, MeasurementType } from "@/types/indicators";
 import {
   getAllIndicators,
   getAllMeasurements,
-  createIndicator,
+  addIndicator as createIndicator,
   updateIndicator,
   deleteIndicator as deleteIndicatorService
 } from "@/services/indicatorService";
