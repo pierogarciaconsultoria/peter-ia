@@ -4,7 +4,7 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define interface without readonly to avoid excessive type instantiation
+// Define a simplified interface to avoid recursive type instantiation
 interface ManagerData {
   id: string;
 }
@@ -28,7 +28,6 @@ interface CreatedTask {
 export const getModuleManagers = async (module: string): Promise<ManagerData[]> => {
   try {
     // Corrected query to match the actual database schema
-    // Only selecting the 'id' field which we know exists
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -40,7 +39,7 @@ export const getModuleManagers = async (module: string): Promise<ManagerData[]> 
       return [];
     }
 
-    // Explicitly type and transform the data to break any circular references
+    // Return only the necessary data to avoid deep type instantiation
     return Array.isArray(data) ? data.map(item => ({ id: item.id })) : [];
   } catch (err) {
     if (err instanceof Error) {
