@@ -7,8 +7,10 @@ import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskT
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Define explicit type for database query result
-    type ManagerProfileResult = { id: string }[];
+    // Explicitly define the return type for the database query
+    interface ManagerProfileResult {
+      id: string;
+    }
     
     const { data, error } = await supabase
       .from('user_profiles')
@@ -21,8 +23,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Use explicit type assertion
-    return (data as ManagerProfileResult || []).map(manager => ({ id: manager.id }));
+    // Use explicit type assertion with the interface
+    return ((data as ManagerProfileResult[]) || []).map(manager => ({ id: manager.id }));
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -61,7 +63,7 @@ export const createTaskInModule = async (request: Readonly<PersonnelRequest>): P
         createNotification(
           manager.id,
           `Nova tarefa de ${movementType.label}`,
-          `Uma nova tarefa foi criada para ${request.employeeName}`,
+          `Uma nova tarefa foi criada para ${request.employeeName || 'um colaborador'}`,
           "task",
           simulatedTask.id
         )
