@@ -21,14 +21,14 @@ export interface CreatedTask {
   status: TaskStatus;
 }
 
-// Break the recursive nesting by using simplified subtask representation
+// Using non-recursive type definitions to avoid circular references
 export interface Task {
   id: string;
   name: string;
-  subtasks?: SimpleSubtask[]; // Using non-recursive type
+  subtasks?: SimpleSubtask[];
 }
 
-// Simple, non-recursive type for subtasks
+// Simple type for subtasks without recursive nesting
 export interface SimpleSubtask {
   id: string;
   name: string;
