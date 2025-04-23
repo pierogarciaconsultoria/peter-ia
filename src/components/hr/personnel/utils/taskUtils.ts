@@ -18,7 +18,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    return (data ?? []).map((manager: { id: string }) => ({ id: manager.id }));
+    return data?.map(manager => ({ id: manager.id })) ?? [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -53,7 +53,7 @@ export const createTaskInModule = async (request: Readonly<PersonnelRequest>): P
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
     await Promise.all(
-      moduleManagers.map((manager) => 
+      moduleManagers.map(manager => 
         createNotification(
           manager.id,
           `Nova tarefa de ${movementType.label}`,
