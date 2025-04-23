@@ -5,6 +5,11 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
+// Utility type for shallow readonly
+type ShallowReadonly<T> = {
+  readonly [K in keyof T]: T[K];
+};
+
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
     const { data, error } = await supabase
@@ -25,7 +30,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-export const createTaskInModule = async (request: Readonly<PersonnelRequest>): Promise<void> => {
+export const createTaskInModule = async (request: ShallowReadonly<PersonnelRequest>): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
@@ -70,3 +75,4 @@ export const createTaskInModule = async (request: Readonly<PersonnelRequest>): P
     throw error;
   }
 };
+
