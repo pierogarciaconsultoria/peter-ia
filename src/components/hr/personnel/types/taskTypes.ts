@@ -21,14 +21,14 @@ export interface CreatedTask {
   status: TaskStatus;
 }
 
-// Using non-recursive type definitions to avoid circular references
+// Using flat type definitions without circular references
 export interface Task {
   id: string;
   name: string;
   subtasks?: SimpleSubtask[];
 }
 
-// Simple type for subtasks without recursive nesting
+// Simple subtask type definition
 export interface SimpleSubtask {
   id: string;
   name: string;
