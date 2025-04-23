@@ -21,7 +21,7 @@ export interface CreatedTask {
   status: TaskStatus;
 }
 
-// Using flat type definitions without circular references
+// Using simple flat types without any circular references
 export interface Task {
   id: string;
   name: string;
