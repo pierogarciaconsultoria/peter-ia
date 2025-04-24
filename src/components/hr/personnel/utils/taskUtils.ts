@@ -5,9 +5,8 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
-// Modificando o tipo ShallowReadonly para evitar recursão profunda
-// Em vez de aplicar readonly recursivamente, aplicamos apenas no nível superior
-type ShallowReadonlyRequest = {
+// Interface explícita para evitar recursão de tipos
+interface ReadonlyPersonnelRequest {
   readonly id: string;
   readonly type: string;
   readonly department: string;
@@ -41,7 +40,7 @@ type ShallowReadonlyRequest = {
     end2: string;
   };
   readonly hr_observation?: string;
-};
+}
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
@@ -63,8 +62,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Usando o tipo explícito ShallowReadonlyRequest em vez de ShallowReadonly<PersonnelRequest>
-export const createTaskInModule = async (request: ShallowReadonlyRequest): Promise<void> => {
+// Usando a interface dedicada para evitar recursão
+export const createTaskInModule = async (request: ReadonlyPersonnelRequest): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
