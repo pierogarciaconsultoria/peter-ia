@@ -5,9 +5,42 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
-// Utility type for shallow readonly
-type ShallowReadonly<T> = {
-  readonly [K in keyof T]: T[K];
+// Modificando o tipo ShallowReadonly para evitar recursão profunda
+// Em vez de aplicar readonly recursivamente, aplicamos apenas no nível superior
+type ShallowReadonlyRequest = {
+  readonly id: string;
+  readonly type: string;
+  readonly department: string;
+  readonly position: string;
+  readonly position_id: string;
+  readonly requestDate: string;
+  readonly status: string;
+  readonly requester: string;
+  readonly requester_id: string;
+  readonly employeeName: string;
+  readonly employee_id: string;
+  readonly justification?: string;
+  readonly currentSalary?: string;
+  readonly proposedSalary?: string;
+  readonly currentPosition?: string;
+  readonly proposedPosition?: string;
+  readonly approved_by?: string;
+  readonly approval_date?: string;
+  readonly rejection_reason?: string;
+  readonly targetDate?: string;
+  readonly currentSchedule?: {
+    start1: string;
+    end1: string;
+    start2: string;
+    end2: string;
+  };
+  readonly proposedSchedule?: {
+    start1: string;
+    end1: string;
+    start2: string;
+    end2: string;
+  };
+  readonly hr_observation?: string;
 };
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
@@ -30,7 +63,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-export const createTaskInModule = async (request: ShallowReadonly<PersonnelRequest>): Promise<void> => {
+// Usando o tipo explícito ShallowReadonlyRequest em vez de ShallowReadonly<PersonnelRequest>
+export const createTaskInModule = async (request: ShallowReadonlyRequest): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
@@ -75,4 +109,3 @@ export const createTaskInModule = async (request: ShallowReadonly<PersonnelReque
     throw error;
   }
 };
-
