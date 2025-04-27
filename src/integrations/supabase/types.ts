@@ -472,6 +472,30 @@ export type Database = {
           },
         ]
       }
+      clickup_integrations: {
+        Row: {
+          api_key: string | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       climate_survey_questions: {
         Row: {
           category: string
@@ -1718,6 +1742,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      jobs: {
+        Row: {
+          approval_url: string | null
+          clickup_task_id: string | null
+          clientname: string
+          clientphone: string
+          createdat: string | null
+          description: string | null
+          id: string
+          materiallink: string
+          title: string
+          updatedat: string | null
+        }
+        Insert: {
+          approval_url?: string | null
+          clickup_task_id?: string | null
+          clientname: string
+          clientphone: string
+          createdat?: string | null
+          description?: string | null
+          id?: string
+          materiallink: string
+          title: string
+          updatedat?: string | null
+        }
+        Update: {
+          approval_url?: string | null
+          clickup_task_id?: string | null
+          clientname?: string
+          clientphone?: string
+          createdat?: string | null
+          description?: string | null
+          id?: string
+          materiallink?: string
+          title?: string
+          updatedat?: string | null
+        }
+        Relationships: []
       }
       justifications: {
         Row: {

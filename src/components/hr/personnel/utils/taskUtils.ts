@@ -28,16 +28,16 @@ interface ReadonlyPersonnelRequest {
   readonly rejection_reason?: string;
   readonly targetDate?: string;
   readonly currentSchedule?: {
-    start1: string;
-    end1: string;
-    start2: string;
-    end2: string;
+    readonly start1: string;
+    readonly end1: string;
+    readonly start2: string;
+    readonly end2: string;
   };
   readonly proposedSchedule?: {
-    start1: string;
-    end1: string;
-    start2: string;
-    end2: string;
+    readonly start1: string;
+    readonly end1: string;
+    readonly start2: string;
+    readonly end2: string;
   };
   readonly hr_observation?: string;
 }
