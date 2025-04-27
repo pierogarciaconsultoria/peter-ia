@@ -62,7 +62,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Usando a interface dedicada para evitar recursão
+// Using a type assertion to break any potential circular reference
 export const createTaskInModule = async (request: ReadonlyPersonnelRequest): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
