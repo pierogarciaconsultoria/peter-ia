@@ -5,6 +5,14 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
+// Non-recursive interface for schedule types to break potential circular references
+interface ReadonlySchedule {
+  readonly start1: string;
+  readonly end1: string;
+  readonly start2: string;
+  readonly end2: string;
+}
+
 // Interface explícita para evitar recursão de tipos
 interface ReadonlyPersonnelRequest {
   readonly id: string;
@@ -27,18 +35,8 @@ interface ReadonlyPersonnelRequest {
   readonly approval_date?: string;
   readonly rejection_reason?: string;
   readonly targetDate?: string;
-  readonly currentSchedule?: {
-    readonly start1: string;
-    readonly end1: string;
-    readonly start2: string;
-    readonly end2: string;
-  };
-  readonly proposedSchedule?: {
-    readonly start1: string;
-    readonly end1: string;
-    readonly start2: string;
-    readonly end2: string;
-  };
+  readonly currentSchedule?: ReadonlySchedule;
+  readonly proposedSchedule?: ReadonlySchedule;
   readonly hr_observation?: string;
 }
 
