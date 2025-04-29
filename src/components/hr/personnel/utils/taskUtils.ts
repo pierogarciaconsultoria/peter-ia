@@ -1,5 +1,4 @@
 
-import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
