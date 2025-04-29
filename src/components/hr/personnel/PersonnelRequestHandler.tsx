@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/services/notificationService";
 import { useToast } from "@/hooks/use-toast";
 import { createTaskInModule } from "./utils/taskUtils";
-import { TaskRequestData } from "./types/taskTypes";
+import { TaskRequestDataLite } from "./types/taskTypes"; // Usando a versão simplificada
 
 interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;
@@ -55,9 +55,15 @@ export function PersonnelRequestHandler({
     
     // Criar uma tarefa associada à solicitação
     try {
-      // Criar a tarefa no módulo destino
-      const taskRequestData: TaskRequestData = {
-        ...newRequest
+      // Criar a tarefa no módulo destino usando a versão simplificada do tipo
+      const taskRequestData: TaskRequestDataLite = {
+        id: newRequest.id,
+        type: newRequest.type,
+        department: newRequest.department,
+        requester_id: newRequest.requester_id,
+        employee_id: newRequest.employee_id,
+        employeeName: newRequest.employeeName,
+        justification: newRequest.justification
       };
       
       await createTaskInModule(taskRequestData);

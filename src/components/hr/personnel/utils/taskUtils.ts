@@ -6,7 +6,7 @@ import {
   SimpleManagerData, 
   TaskCreationData, 
   CreatedTask,
-  TaskRequestData 
+  TaskRequestDataLite  // Usando a versão simplificada para evitar circular references
 } from "../types/taskTypes";
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
@@ -29,7 +29,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-export const createTaskInModule = async (request: TaskRequestData): Promise<void> => {
+// Usando TaskRequestDataLite para quebrar a dependência circular
+export const createTaskInModule = async (request: TaskRequestDataLite): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 

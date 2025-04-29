@@ -15,6 +15,17 @@ export interface ScheduleData {
   end2: string;
 }
 
+// Interface simplificada de solicitação para quebrar dependências circulares
+export interface TaskRequestDataLite {
+  id: string;
+  type: string;
+  department: string;
+  requester_id: string;
+  employee_id: string;
+  employeeName: string;
+  justification?: string;
+}
+
 // Interface de solicitação para uso em criação de tarefas
 export interface TaskRequestData {
   id: string;
