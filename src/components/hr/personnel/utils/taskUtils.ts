@@ -5,16 +5,16 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
-// Simple schedule interface without recursion
-interface BasicSchedule {
+// Define simple standalone interfaces to avoid type recursion
+interface ScheduleData {
   start1: string;
   end1: string;
   start2: string;
   end2: string;
 }
 
-// Base interface without circular references
-interface BasicPersonnelRequest {
+// Use interface instead of type to avoid TypeScript checking depth
+interface RequestData {
   id: string;
   type: string;
   department: string;
@@ -35,8 +35,8 @@ interface BasicPersonnelRequest {
   approval_date?: string;
   rejection_reason?: string;
   targetDate?: string;
-  currentSchedule?: BasicSchedule;
-  proposedSchedule?: BasicSchedule;
+  currentSchedule?: ScheduleData;
+  proposedSchedule?: ScheduleData;
   hr_observation?: string;
 }
 
@@ -60,8 +60,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Use the non-recursive interface for the parameter
-export const createTaskInModule = async (request: BasicPersonnelRequest): Promise<void> => {
+export const createTaskInModule = async (request: RequestData): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
