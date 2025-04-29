@@ -5,39 +5,39 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
 
-// Non-recursive interface for schedule types to break potential circular references
-interface ReadonlySchedule {
-  readonly start1: string;
-  readonly end1: string;
-  readonly start2: string;
-  readonly end2: string;
+// Simple schedule interface without recursion
+interface BasicSchedule {
+  start1: string;
+  end1: string;
+  start2: string;
+  end2: string;
 }
 
-// Interface explícita para evitar recursão de tipos
-interface ReadonlyPersonnelRequest {
-  readonly id: string;
-  readonly type: string;
-  readonly department: string;
-  readonly position: string;
-  readonly position_id: string;
-  readonly requestDate: string;
-  readonly status: string;
-  readonly requester: string;
-  readonly requester_id: string;
-  readonly employeeName: string;
-  readonly employee_id: string;
-  readonly justification?: string;
-  readonly currentSalary?: string;
-  readonly proposedSalary?: string;
-  readonly currentPosition?: string;
-  readonly proposedPosition?: string;
-  readonly approved_by?: string;
-  readonly approval_date?: string;
-  readonly rejection_reason?: string;
-  readonly targetDate?: string;
-  readonly currentSchedule?: ReadonlySchedule;
-  readonly proposedSchedule?: ReadonlySchedule;
-  readonly hr_observation?: string;
+// Base interface without circular references
+interface BasicPersonnelRequest {
+  id: string;
+  type: string;
+  department: string;
+  position: string;
+  position_id: string;
+  requestDate: string;
+  status: string;
+  requester: string;
+  requester_id: string;
+  employeeName: string;
+  employee_id: string;
+  justification?: string;
+  currentSalary?: string;
+  proposedSalary?: string;
+  currentPosition?: string;
+  proposedPosition?: string;
+  approved_by?: string;
+  approval_date?: string;
+  rejection_reason?: string;
+  targetDate?: string;
+  currentSchedule?: BasicSchedule;
+  proposedSchedule?: BasicSchedule;
+  hr_observation?: string;
 }
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
@@ -60,8 +60,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Using a type assertion to break any potential circular reference
-export const createTaskInModule = async (request: ReadonlyPersonnelRequest): Promise<void> => {
+// Use the non-recursive interface for the parameter
+export const createTaskInModule = async (request: BasicPersonnelRequest): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
