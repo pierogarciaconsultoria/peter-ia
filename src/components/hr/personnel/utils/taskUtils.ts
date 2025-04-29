@@ -5,9 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   SimpleManagerData, 
   TaskCreationData, 
-  CreatedTask
+  CreatedTask,
+  TaskRequestData 
 } from "../types/taskTypes";
-import { TaskRequestData } from "../types/taskTypes";
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
