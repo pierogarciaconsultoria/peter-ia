@@ -5,6 +5,8 @@ import { PersonnelRequest, RequestFormValues } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/services/notificationService";
 import { useToast } from "@/hooks/use-toast";
+import { createTaskInModule } from "./utils/taskUtils";
+import { TaskRequestData } from "./types/taskTypes";
 
 interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;
@@ -50,6 +52,18 @@ export function PersonnelRequestHandler({
     
     // Update the requests state with the new request
     setRequests(prevRequests => [newRequest, ...prevRequests]);
+    
+    // Criar uma tarefa associada à solicitação
+    try {
+      // Criar a tarefa no módulo destino
+      const taskRequestData: TaskRequestData = {
+        ...newRequest
+      };
+      
+      await createTaskInModule(taskRequestData);
+    } catch (error) {
+      console.error("Erro ao criar tarefa:", error);
+    }
     
     // Show a success toast
     toast({

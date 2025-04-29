@@ -3,42 +3,12 @@ import { PersonnelRequest } from "../types";
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { SimpleManagerData, TaskCreationData, CreatedTask } from "../types/taskTypes";
-
-// Define simple standalone interfaces to avoid type recursion
-interface ScheduleData {
-  start1: string;
-  end1: string;
-  start2: string;
-  end2: string;
-}
-
-// Use interface instead of type to avoid TypeScript checking depth
-interface RequestData {
-  id: string;
-  type: string;
-  department: string;
-  position: string;
-  position_id: string;
-  requestDate: string;
-  status: string;
-  requester: string;
-  requester_id: string;
-  employeeName: string;
-  employee_id: string;
-  justification?: string;
-  currentSalary?: string;
-  proposedSalary?: string;
-  currentPosition?: string;
-  proposedPosition?: string;
-  approved_by?: string;
-  approval_date?: string;
-  rejection_reason?: string;
-  targetDate?: string;
-  currentSchedule?: ScheduleData;
-  proposedSchedule?: ScheduleData;
-  hr_observation?: string;
-}
+import { 
+  SimpleManagerData, 
+  TaskCreationData, 
+  CreatedTask,
+  TaskRequestData
+} from "../types/taskTypes";
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
@@ -60,7 +30,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-export const createTaskInModule = async (request: RequestData): Promise<void> => {
+export const createTaskInModule = async (request: TaskRequestData): Promise<void> => {
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
