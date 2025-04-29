@@ -7,37 +7,6 @@ export interface SimpleManagerData {
   id: string;
 }
 
-// Dados para criação de tarefas (versão simplificada)
-export interface TaskCreationData {
-  title: string;
-  description: string;
-  module: string;
-  status: TaskStatus;
-  employee_id: string;
-  requester_id: string;
-  personnel_request_id: string;
-}
-
-// Resposta simplificada de tarefa criada
-export interface CreatedTask {
-  id: string;
-  title: string;
-  status: TaskStatus;
-}
-
-// Estrutura básica de tarefa
-export interface Task {
-  id: string;
-  name: string;
-  subtasks?: SimpleSubtask[];
-}
-
-// Estrutura simplificada de subtarefa
-export interface SimpleSubtask {
-  id: string;
-  name: string;
-}
-
 // Estrutura de horário para uso em solicitações
 export interface ScheduleData {
   start1: string;
@@ -71,4 +40,35 @@ export interface TaskRequestData {
   currentSchedule?: ScheduleData;
   proposedSchedule?: ScheduleData;
   hr_observation?: string;
+}
+
+// Dados para criação de tarefas (versão simplificada)
+export interface TaskCreationData {
+  title: string;
+  description: string;
+  module: string;
+  status: TaskStatus;
+  employee_id: string;
+  requester_id: string;
+  personnel_request_id: string;
+}
+
+// Resposta simplificada de tarefa criada
+export interface CreatedTask {
+  id: string;
+  title: string;
+  status: TaskStatus;
+}
+
+// Estrutura básica de tarefa
+export interface Task {
+  id: string;
+  name: string;
+  subtasks?: SimpleSubtask[];
+}
+
+// Estrutura simplificada de subtarefa
+export interface SimpleSubtask {
+  id: string;
+  name: string;
 }
