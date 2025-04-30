@@ -29,8 +29,11 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Usando TaskRequestDataLite para quebrar a dependência circular
-export const createTaskInModule = async (request: TaskRequestDataLite): Promise<void> => {
+// Usando tipagem explícita para evitar inferência excessiva
+export const createTaskInModule = async (requestData: TaskRequestDataLite): Promise<void> => {
+  // Criar uma variável intermediária com tipagem explícita para interromper a inferência em cadeia
+  const request: TaskRequestDataLite = requestData;
+  
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
 
@@ -57,8 +60,9 @@ export const createTaskInModule = async (request: TaskRequestDataLite): Promise<
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
+    // Utilizando tipagem explícita nos parâmetros para evitar inferência complexa
     await Promise.all(
-      moduleManagers.map(manager => 
+      moduleManagers.map((manager: SimpleManagerData) => 
         createNotification(
           manager.id,
           `Nova tarefa de ${movementType.label}`,
