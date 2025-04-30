@@ -15,7 +15,8 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
-      .eq('module', module);
+      .eq('module', module)
+      .returns<{ id: string }[]>();
       
     if (error) {
       console.error('Error fetching module managers:', error);
