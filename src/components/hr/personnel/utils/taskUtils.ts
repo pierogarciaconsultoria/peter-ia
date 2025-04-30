@@ -29,25 +29,32 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Create a separate notification function with explicit typing
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Use type assertion to break inference chain
-  const request = taskRequestData as TaskRequestDataLite;
+  // Break the type inference chain with an explicitly typed independent variable
+  const requestData: TaskRequestDataLite = {
+    id: taskRequestData.id,
+    type: taskRequestData.type,
+    department: taskRequestData.department,
+    requester_id: taskRequestData.requester_id,
+    employee_id: taskRequestData.employee_id,
+    employeeName: taskRequestData.employeeName,
+    justification: taskRequestData.justification
+  };
   
-  const movementType = movementTypes.find(type => type.id === request.type);
+  const movementType = movementTypes.find(type => type.id === requestData.type);
   if (!movementType) return;
 
   try {
     console.log(`Creating task in module: ${movementType.targetModule}`);
     
     const taskData: TaskCreationData = {
-      title: `${movementType.label} - ${request.employeeName}`,
-      description: request.justification || '',
+      title: `${movementType.label} - ${requestData.employeeName}`,
+      description: requestData.justification || '',
       module: movementType.targetModule,
       status: 'pending',
-      employee_id: request.employee_id,
-      requester_id: request.requester_id,
-      personnel_request_id: request.id
+      employee_id: requestData.employee_id,
+      requester_id: requestData.requester_id,
+      personnel_request_id: requestData.id
     };
 
     console.log(taskData);
@@ -60,20 +67,15 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Define a simple notification function with proper typing
-    const notifyManagerFn = (managerId: string) => {
-      return createNotification(
-        managerId,
+    // Process notifications sequentially with fully defined types
+    for (const manager of moduleManagers) {
+      await createNotification(
+        manager.id,
         `Nova tarefa de ${movementType.label}`,
-        `Uma nova tarefa foi criada para ${request.employeeName || 'um colaborador'}`,
+        `Uma nova tarefa foi criada para ${requestData.employeeName || 'um colaborador'}`,
         "task",
         simulatedTask.id
       );
-    };
-
-    // Process notifications sequentially to avoid type inference issues
-    for (const manager of moduleManagers) {
-      await notifyManagerFn(manager.id);
     }
   } catch (error) {
     if (error instanceof Error) {
