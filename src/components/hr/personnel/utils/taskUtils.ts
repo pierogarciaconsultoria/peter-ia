@@ -29,7 +29,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Criando uma função auxiliar separada para notificação para evitar inferência profunda de tipos
+// Função auxiliar separada para notificação com tipos explícitos
 const notifyManager = (
   managerId: string,
   title: string,
@@ -37,6 +37,7 @@ const notifyManager = (
   type: string, 
   referenceId: string
 ): Promise<{success: boolean; error?: any}> => {
+  // Chamada direta sem inferência de tipo
   return createNotification(
     managerId,
     title,
@@ -46,10 +47,18 @@ const notifyManager = (
   );
 };
 
-// Usando tipagem explícita para evitar inferência excessiva
-export const createTaskInModule = async (requestData: TaskRequestDataLite): Promise<void> => {
-  // Criar uma variável intermediária com tipagem explícita para interromper a inferência em cadeia
-  const request: TaskRequestDataLite = requestData;
+// Função principal com tipagem explícita
+export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
+  // Criando uma cópia explicitamente tipada para quebrar a inferência em cadeia
+  const request: TaskRequestDataLite = {
+    id: taskRequestData.id,
+    type: taskRequestData.type,
+    department: taskRequestData.department,
+    requester_id: taskRequestData.requester_id,
+    employee_id: taskRequestData.employee_id,
+    employeeName: taskRequestData.employeeName,
+    justification: taskRequestData.justification
+  };
   
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
@@ -57,6 +66,7 @@ export const createTaskInModule = async (requestData: TaskRequestDataLite): Prom
   try {
     console.log(`Creating task in module: ${movementType.targetModule}`);
     
+    // Criando objeto com tipagem explícita
     const taskData: TaskCreationData = {
       title: `${movementType.label} - ${request.employeeName}`,
       description: request.justification || '',
@@ -69,6 +79,7 @@ export const createTaskInModule = async (requestData: TaskRequestDataLite): Prom
 
     console.log(taskData);
     
+    // Criando simulação com tipagem explícita
     const simulatedTask: CreatedTask = {
       id: crypto.randomUUID(),
       title: taskData.title,
@@ -77,9 +88,10 @@ export const createTaskInModule = async (requestData: TaskRequestDataLite): Prom
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Utilizando uma abordagem mais explícita para evitar inferência complexa
-    const notificationPromises: Promise<{success: boolean; error?: any}>[] = [];
+    // Lista tipada explicitamente para armazenar promessas
+    const notificationPromises: Array<Promise<{success: boolean; error?: any}>> = [];
     
+    // Usando for-of em vez de map para maior clareza de tipos
     for (const manager of moduleManagers) {
       notificationPromises.push(
         notifyManager(

@@ -53,9 +53,9 @@ export function PersonnelRequestHandler({
     // Update the requests state with the new request
     setRequests(prevRequests => [newRequest, ...prevRequests]);
     
-    // Criar uma tarefa associada à solicitação usando tipagem explícita
+    // Criar uma tarefa associada à solicitação com tipagem explícita
     try {
-      // Criar objeto com tipagem explícita para evitar inferência excessiva
+      // Criar objeto de transferência explicitamente tipado
       const taskRequestData: TaskRequestDataLite = {
         id: newRequest.id,
         type: newRequest.type,
