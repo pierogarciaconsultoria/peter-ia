@@ -6,7 +6,7 @@ import {
   SimpleManagerData, 
   TaskCreationData, 
   CreatedTask,
-  TaskRequestDataLite  // Usando a versão simplificada para evitar circular references
+  TaskRequestDataLite
 } from "../types/taskTypes";
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
