@@ -29,15 +29,14 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Função auxiliar separada para notificação com tipos explícitos
+// Simplified notification helper with explicit return type
 const notifyManager = (
   managerId: string,
   title: string,
   message: string,
   type: string, 
   referenceId: string
-): Promise<{success: boolean; error?: any}> => {
-  // Chamada direta sem inferência de tipo
+) => {
   return createNotification(
     managerId,
     title,
@@ -47,9 +46,9 @@ const notifyManager = (
   );
 };
 
-// Função principal com tipagem explícita
+// Main function with explicit typing
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Criando uma cópia explicitamente tipada para quebrar a inferência em cadeia
+  // Create explicitly typed copy to break inference chain
   const request: TaskRequestDataLite = {
     id: taskRequestData.id,
     type: taskRequestData.type,
@@ -66,7 +65,6 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
   try {
     console.log(`Creating task in module: ${movementType.targetModule}`);
     
-    // Criando objeto com tipagem explícita
     const taskData: TaskCreationData = {
       title: `${movementType.label} - ${request.employeeName}`,
       description: request.justification || '',
@@ -79,7 +77,6 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
 
     console.log(taskData);
     
-    // Criando simulação com tipagem explícita
     const simulatedTask: CreatedTask = {
       id: crypto.randomUUID(),
       title: taskData.title,
@@ -88,23 +85,19 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Lista tipada explicitamente para armazenar promessas
-    const notificationPromises: Array<Promise<{success: boolean; error?: any}>> = [];
-    
-    // Usando for-of em vez de map para maior clareza de tipos
-    for (const manager of moduleManagers) {
-      notificationPromises.push(
-        notifyManager(
-          manager.id,
-          `Nova tarefa de ${movementType.label}`,
-          `Uma nova tarefa foi criada para ${request.employeeName || 'um colaborador'}`,
-          "task",
-          simulatedTask.id
-        )
+    // Using the suggested approach with a simplified notifyManager function
+    const notifyManager = (managerId: string) => {
+      return createNotification(
+        managerId,
+        `Nova tarefa de ${movementType.label}`,
+        `Uma nova tarefa foi criada para ${request.employeeName || 'um colaborador'}`,
+        "task",
+        simulatedTask.id
       );
-    }
-    
-    await Promise.all(notificationPromises);
+    };
+
+    // Using Promise.all with a simpler function reference
+    await Promise.all(moduleManagers.map(manager => notifyManager(manager.id)));
   } catch (error) {
     if (error instanceof Error) {
       console.error('Erro ao criar tarefa:', error.message);
