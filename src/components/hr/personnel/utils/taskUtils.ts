@@ -29,6 +29,23 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
+// Criando uma função auxiliar separada para notificação para evitar inferência profunda de tipos
+const notifyManager = (
+  managerId: string,
+  title: string,
+  message: string,
+  type: string, 
+  referenceId: string
+): Promise<{success: boolean; error?: any}> => {
+  return createNotification(
+    managerId,
+    title,
+    message,
+    type,
+    referenceId
+  );
+};
+
 // Usando tipagem explícita para evitar inferência excessiva
 export const createTaskInModule = async (requestData: TaskRequestDataLite): Promise<void> => {
   // Criar uma variável intermediária com tipagem explícita para interromper a inferência em cadeia
@@ -60,18 +77,22 @@ export const createTaskInModule = async (requestData: TaskRequestDataLite): Prom
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Utilizando tipagem explícita nos parâmetros para evitar inferência complexa
-    await Promise.all(
-      moduleManagers.map((manager: SimpleManagerData) => 
-        createNotification(
+    // Utilizando uma abordagem mais explícita para evitar inferência complexa
+    const notificationPromises: Promise<{success: boolean; error?: any}>[] = [];
+    
+    for (const manager of moduleManagers) {
+      notificationPromises.push(
+        notifyManager(
           manager.id,
           `Nova tarefa de ${movementType.label}`,
           `Uma nova tarefa foi criada para ${request.employeeName || 'um colaborador'}`,
           "task",
           simulatedTask.id
         )
-      )
-    );
+      );
+    }
+    
+    await Promise.all(notificationPromises);
   } catch (error) {
     if (error instanceof Error) {
       console.error('Erro ao criar tarefa:', error.message);
