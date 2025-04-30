@@ -30,58 +30,79 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
 };
 
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Create a completely separate object to break type inference chains
-  const requestId = taskRequestData.id;
-  const requestType = taskRequestData.type;
-  const requestDepartment = taskRequestData.department;
-  const requesterId = taskRequestData.requester_id;
-  const employeeId = taskRequestData.employee_id;
-  const employeeName = taskRequestData.employeeName;
-  const requestJustification = taskRequestData.justification;
+  // Extract primitive values immediately to avoid deep type inference
+  const requestId: string = String(taskRequestData.id);
+  const requestType: string = String(taskRequestData.type);
+  const requestDepartment: string = String(taskRequestData.department);
+  const requesterId: string = String(taskRequestData.requester_id);
+  const employeeId: string = String(taskRequestData.employee_id);
+  const employeeName: string = String(taskRequestData.employeeName || '');
+  const requestJustification: string = String(taskRequestData.justification || '');
   
-  const movementType = movementTypes.find(type => type.id === requestType);
-  if (!movementType) return;
+  // Find movement type using primitive string comparison
+  let targetModule: string = '';
+  let movementLabel: string = '';
+  
+  for (let i = 0; i < movementTypes.length; i++) {
+    const currentType = movementTypes[i];
+    if (currentType.id === requestType) {
+      targetModule = currentType.targetModule;
+      movementLabel = currentType.label;
+      break;
+    }
+  }
+  
+  if (!targetModule) return;
 
   try {
-    console.log(`Creating task in module: ${movementType.targetModule}`);
+    console.log(`Creating task in module: ${targetModule}`);
     
-    const taskData: TaskCreationData = {
-      title: `${movementType.label} - ${employeeName}`,
-      description: requestJustification || '',
-      module: movementType.targetModule,
-      status: 'pending',
+    const taskTitle: string = `${movementLabel} - ${employeeName}`;
+    const taskDescription: string = requestJustification;
+    const taskStatus: string = 'pending';
+    
+    // Create task ID upfront to avoid nested references
+    const taskId: string = crypto.randomUUID();
+    
+    // Log task data without complex object
+    console.log({
+      title: taskTitle,
+      description: taskDescription,
+      module: targetModule,
+      status: taskStatus,
       employee_id: employeeId,
       requester_id: requesterId,
       personnel_request_id: requestId
-    };
-
-    console.log(taskData);
+    });
     
-    // Create task ID upfront to avoid nested references
-    const taskId = crypto.randomUUID();
-    const taskTitle = taskData.title;
+    let managers: SimpleManagerData[] = [];
+    try {
+      managers = await getModuleManagers(targetModule);
+    } catch (err) {
+      console.error('Error fetching managers:', err);
+      managers = [];
+    }
     
-    const simulatedTask: CreatedTask = {
-      id: taskId,
-      title: taskTitle,
-      status: 'pending'
-    };
-
-    const moduleManagers = await getModuleManagers(movementType.targetModule);
-    
-    // Process each notification individually to avoid map/lambda issues
-    for (const manager of moduleManagers) {
-      const managerId = manager.id;
-      const notificationTitle = `Nova tarefa de ${movementType.label}`;
-      const notificationMessage = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
+    // Process each notification individually with explicit string types
+    for (let j = 0; j < managers.length; j++) {
+      const managerId: string = String(managers[j]?.id || '');
+      if (!managerId) continue;
       
-      await createNotification(
-        managerId,
-        notificationTitle,
-        notificationMessage,
-        "task",
-        taskId
-      );
+      const notificationTitle: string = `Nova tarefa de ${movementLabel}`;
+      const notificationMessage: string = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
+      const entityType: string = "task";
+      
+      try {
+        await createNotification(
+          managerId,
+          notificationTitle,
+          notificationMessage,
+          entityType,
+          taskId
+        );
+      } catch (notifError) {
+        console.error('Error sending notification:', notifError);
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
