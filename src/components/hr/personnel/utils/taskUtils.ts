@@ -11,6 +11,7 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
+    // Use explicit return type with .returns<T>() to avoid deep type inference
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -23,6 +24,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
+    // Map to the SimpleManagerData type explicitly
     return data?.map(manager => ({ id: manager.id })) ?? [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
