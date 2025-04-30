@@ -29,35 +29,10 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Simplified notification helper with explicit return type
-const notifyManager = (
-  managerId: string,
-  title: string,
-  message: string,
-  type: string, 
-  referenceId: string
-) => {
-  return createNotification(
-    managerId,
-    title,
-    message,
-    type,
-    referenceId
-  );
-};
-
-// Main function with explicit typing
+// Create a separate notification function with explicit typing
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Create explicitly typed copy to break inference chain
-  const request: TaskRequestDataLite = {
-    id: taskRequestData.id,
-    type: taskRequestData.type,
-    department: taskRequestData.department,
-    requester_id: taskRequestData.requester_id,
-    employee_id: taskRequestData.employee_id,
-    employeeName: taskRequestData.employeeName,
-    justification: taskRequestData.justification
-  };
+  // Use type assertion to break inference chain
+  const request = taskRequestData as TaskRequestDataLite;
   
   const movementType = movementTypes.find(type => type.id === request.type);
   if (!movementType) return;
@@ -85,8 +60,8 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
 
     const moduleManagers = await getModuleManagers(movementType.targetModule);
     
-    // Using the suggested approach with a simplified notifyManager function
-    const notifyManager = (managerId: string) => {
+    // Define a simple notification function with proper typing
+    const notifyManagerFn = (managerId: string) => {
       return createNotification(
         managerId,
         `Nova tarefa de ${movementType.label}`,
@@ -96,8 +71,10 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       );
     };
 
-    // Using Promise.all with a simpler function reference
-    await Promise.all(moduleManagers.map(manager => notifyManager(manager.id)));
+    // Process notifications sequentially to avoid type inference issues
+    for (const manager of moduleManagers) {
+      await notifyManagerFn(manager.id);
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error('Erro ao criar tarefa:', error.message);
