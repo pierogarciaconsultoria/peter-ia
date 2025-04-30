@@ -2,7 +2,7 @@
 // Status possíveis para tarefas
 export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
 
-// Dados básicos de gestor
+// Dados básicos de gestor - sem referências circulares
 export interface SimpleManagerData {
   id: string;
 }
@@ -71,14 +71,14 @@ export interface CreatedTask {
   status: TaskStatus;
 }
 
-// Estrutura básica de tarefa
+// Estrutura básica de tarefa - sem referências circulares
 export interface Task {
   id: string;
   name: string;
   subtasks?: SimpleSubtask[];
 }
 
-// Estrutura simplificada de subtarefa
+// Estrutura simplificada de subtarefa - sem referências circulares
 export interface SimpleSubtask {
   id: string;
   name: string;
