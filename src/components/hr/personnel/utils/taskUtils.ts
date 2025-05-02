@@ -11,10 +11,7 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Use an explicit type for the query result
-    type UserProfileRow = { id: string };
-    
-    // Perform the query with explicit type casting
+    // Simplify the query and type handling to avoid deep instantiation
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -30,11 +27,18 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Use a simple map operation with type safety
-    return data
-      .filter((item): item is UserProfileRow => 
-        item !== null && typeof item === 'object' && typeof item.id === 'string')
-      .map(manager => ({ id: manager.id }));
+    // Use explicitly typed intermediary variable to break potential type recursion
+    const result: SimpleManagerData[] = [];
+    
+    // Process each item individually with simple type checking
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (item && typeof item === 'object' && 'id' in item && typeof item.id === 'string') {
+        result.push({ id: item.id });
+      }
+    }
+    
+    return result;
       
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
@@ -88,13 +92,13 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       personnel_request_id: requestId
     });
     
-    // Get managers with simple type handling
+    // Get managers using our fixed function
     const managers = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
       return [] as SimpleManagerData[];
     });
     
-    // Process notifications
+    // Process notifications with explicit typing
     for (const manager of managers) {
       if (!manager || typeof manager.id !== 'string') continue;
       
