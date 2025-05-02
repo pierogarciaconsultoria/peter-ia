@@ -5689,6 +5689,10 @@ export type Database = {
         Args: { table_name: string }
         Returns: undefined
       }
+      check_user_access: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       generate_unique_assessment_token: {
         Args: Record<PropertyKey, never>
         Returns: string

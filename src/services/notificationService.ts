@@ -26,10 +26,10 @@ export async function createNotification(
   link: string = ""
 ): Promise<{ success: boolean; error?: any }> {
   try {
-    // Verifica se o userId é válido antes de prosseguir
-    if (!userId || userId === "current-user-id" || !isValidUUID(userId)) {
-      console.warn("ID de usuário inválido para notificação:", userId);
-      return { success: false, error: "ID de usuário inválido" };
+    // Enhanced validation to prevent security issues
+    if (!userId || !isValidUUID(userId)) {
+      console.warn("Invalid user ID for notification:", userId);
+      return { success: false, error: "Invalid user ID" };
     }
 
     const { error } = await supabase.from("notifications").insert({
@@ -58,8 +58,8 @@ export async function markNotificationAsRead(
 ): Promise<{ success: boolean; error?: any }> {
   try {
     if (!notificationId || !isValidUUID(notificationId)) {
-      console.warn("ID de notificação inválido:", notificationId);
-      return { success: false, error: "ID de notificação inválido" };
+      console.warn("Invalid notification ID:", notificationId);
+      return { success: false, error: "Invalid notification ID" };
     }
 
     const { error } = await supabase
@@ -82,9 +82,9 @@ export async function markAllNotificationsAsRead(
   userId: string
 ): Promise<{ success: boolean; error?: any }> {
   try {
-    if (!userId || userId === "current-user-id" || !isValidUUID(userId)) {
-      console.warn("ID de usuário inválido para marcar notificações:", userId);
-      return { success: false, error: "ID de usuário inválido" };
+    if (!userId || !isValidUUID(userId)) {
+      console.warn("Invalid user ID for marking notifications:", userId);
+      return { success: false, error: "Invalid user ID" };
     }
 
     const { error } = await supabase
@@ -108,10 +108,10 @@ export async function getNotifications(
   userId: string
 ): Promise<{ data: Notification[] | null; error?: any }> {
   try {
-    if (!userId || userId === "current-user-id" || !isValidUUID(userId)) {
-      console.warn("ID de usuário inválido para buscar notificações:", userId);
-      toast.error("Falha ao carregar notificações");
-      return { data: [], error: "ID de usuário inválido" };
+    if (!userId || !isValidUUID(userId)) {
+      console.warn("Invalid user ID for fetching notifications:", userId);
+      toast.error("Failed to load notifications");
+      return { data: [], error: "Invalid user ID" };
     }
 
     const { data, error } = await supabase
@@ -129,7 +129,7 @@ export async function getNotifications(
 }
 
 /**
- * Verifica se uma string é um UUID válido
+ * Validates if a string is a UUID
  */
 function isValidUUID(uuid: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
