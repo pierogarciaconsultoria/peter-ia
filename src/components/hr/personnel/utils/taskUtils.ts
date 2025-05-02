@@ -2,17 +2,33 @@
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-// Importando tipos simplificados do novo arquivo
-import { 
-  SimpleManagerData,
-  TaskRequestDataLite,
-  CreatedTask,
-  TaskCreationData
-} from '../types/safeTaskTypes'; // Importe do arquivo local
+
+// Define types locally to avoid deep type instantiation issues
+type SimpleManagerData = { id: string }; // Simplified version
+
+interface TaskRequestDataLite {
+  id?: string;
+  type?: string;
+  department?: string;
+  requester_id?: string;
+  employee_id?: string;
+  employeeName?: string;
+  justification?: string;
+}
+
+interface CreatedTask {
+  id: string;
+  title: string;
+  // Only essential fields
+}
+
+type TaskCreationData = Omit<TaskRequestDataLite, 'justification'> & {
+  status: string;
+};
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Usando any para quebrar a inferência de tipo profunda
+    // Using any to break deep type inference
     const result = await supabase
       .from('user_profiles')
       .select('id')
@@ -26,10 +42,10 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Criando um novo array explicitamente tipado
+    // Creating explicitly typed array
     const managers: SimpleManagerData[] = [];
     
-    // Usando um loop básico para evitar inferência de tipo complexa
+    // Using basic loop to avoid complex type inference
     if (data && Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
@@ -46,19 +62,19 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Função mais tipada para createNotification
+// More typed function for createNotification
 const safeCreateNotification = async (
   userId: string,
   title: string,
   message: string,
-  entityType: "task" | "other", // Tipos explícitos
+  entityType: "task" | "other", // Explicit types
   entityId: string
 ) => {
   await createNotification(userId, title, message, entityType, entityId);
 };
 
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Extraindo valores primitivos imediatamente para evitar inferência de tipo profunda
+  // Extracting primitive values immediately to avoid deep type inference
   const requestId = String(taskRequestData.id || '');
   const requestType = String(taskRequestData.type || '');
   const requestDepartment = String(taskRequestData.department || '');
@@ -67,7 +83,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
   const employeeName = String(taskRequestData.employeeName || '');
   const requestJustification = String(taskRequestData.justification || '');
   
-  // Encontrando o tipo de movimento usando comparação de string primitiva
+  // Finding movement type using primitive string comparison
   let targetModule = '';
   let movementLabel = '';
   
@@ -89,10 +105,10 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
     const taskDescription = requestJustification;
     const taskStatus = 'pending';
     
-    // Criando ID da tarefa antecipadamente para evitar referências aninhadas
+    // Creating task ID in advance to avoid nested references
     const taskId = crypto.randomUUID();
     
-    // Registrando dados da tarefa sem objeto complexo
+    // Logging task data without complex object
     console.log({
       title: taskTitle,
       description: taskDescription,
@@ -103,13 +119,13 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       personnel_request_id: requestId
     });
     
-    // Obtendo gerentes usando nossa função corrigida
+    // Getting managers using our fixed function
     const managers = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
       return [] as SimpleManagerData[];
     });
     
-    // Processando notificações com tipagem explícita
+    // Processing notifications with explicit typing
     for (const manager of managers) {
       if (!manager || typeof manager.id !== 'string') continue;
       
@@ -119,12 +135,12 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       const notificationMessage = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
       
       try {
-        // Usando a função safeCreateNotification em vez da createNotification direta
+        // Using safeCreateNotification instead of direct createNotification
         await safeCreateNotification(
           managerId,
           notificationTitle,
           notificationMessage,
-          "task",  // tipo explícito
+          "task",  // explicit type
           taskId
         );
       } catch (notifError) {

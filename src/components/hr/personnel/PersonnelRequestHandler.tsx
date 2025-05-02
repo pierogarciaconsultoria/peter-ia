@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { JobPosition } from "../types";
 import { PersonnelRequest, RequestFormValues } from "./types";
@@ -5,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/services/notificationService";
 import { useToast } from "@/hooks/use-toast";
 import { createTaskInModule } from "./utils/taskUtils";
-import { TaskRequestDataLite } from "./types/safeTaskTypes";
 
 interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;
@@ -52,10 +52,10 @@ export function PersonnelRequestHandler({
     // Update the requests state with the new request
     setRequests(prevRequests => [newRequest, ...prevRequests]);
     
-    // Criar uma tarefa associada à solicitação com tipagem explícita
+    // Creating a task associated with the request with explicit typing
     try {
-      // Criar objeto de transferência explicitamente tipado
-      const taskRequestData: TaskRequestDataLite = {
+      // Create explicitly typed transfer object
+      const taskRequestData = {
         id: newRequest.id,
         type: newRequest.type,
         department: newRequest.department,
