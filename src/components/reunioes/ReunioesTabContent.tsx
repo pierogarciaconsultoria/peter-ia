@@ -1,5 +1,5 @@
 
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ReunioesAgendadas } from "./tabs/ReunioesAgendadas";
 import { ReunioesRealizadas } from "./tabs/ReunioesRealizadas";
 import { MinhasAtividades } from "./tabs/MinhasAtividades";
@@ -12,21 +12,23 @@ interface ReunioesTabContentProps {
 export function ReunioesTabContent({ activeTab }: ReunioesTabContentProps) {
   return (
     <div className="mt-4">
-      <TabsContent value="agendadas" className={activeTab === "agendadas" ? "block" : "hidden"}>
-        <ReunioesAgendadas />
-      </TabsContent>
-      
-      <TabsContent value="realizadas" className={activeTab === "realizadas" ? "block" : "hidden"}>
-        <ReunioesRealizadas />
-      </TabsContent>
-      
-      <TabsContent value="minhas" className={activeTab === "minhas" ? "block" : "hidden"}>
-        <MinhasAtividades />
-      </TabsContent>
-      
-      <TabsContent value="acoes" className={activeTab === "acoes" ? "block" : "hidden"}>
-        <ReunioesPlanosAcao />
-      </TabsContent>
+      <Tabs defaultValue={activeTab} value={activeTab}>
+        <TabsContent value="agendadas">
+          <ReunioesAgendadas />
+        </TabsContent>
+        
+        <TabsContent value="realizadas">
+          <ReunioesRealizadas />
+        </TabsContent>
+        
+        <TabsContent value="minhas">
+          <MinhasAtividades />
+        </TabsContent>
+        
+        <TabsContent value="acoes">
+          <ReunioesPlanosAcao />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
