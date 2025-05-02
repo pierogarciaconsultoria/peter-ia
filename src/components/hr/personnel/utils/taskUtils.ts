@@ -3,10 +3,13 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define types locally to avoid deep type instantiation issues
-type SimpleManagerData = { id: string }; // Simplified version
+// Define simple local interfaces instead of importing complex types
+interface SimpleManagerData { 
+  id: string 
+}
 
-interface TaskRequestDataLite {
+// Local interface to replace TaskRequestDataLite
+interface LocalTaskRequestData {
   id?: string;
   type?: string;
   department?: string;
@@ -16,47 +19,33 @@ interface TaskRequestDataLite {
   justification?: string;
 }
 
-interface CreatedTask {
-  id: string;
-  title: string;
-  // Only essential fields
-}
-
-type TaskCreationData = Omit<TaskRequestDataLite, 'justification'> & {
-  status: string;
-};
-
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Using a simpler approach that avoids complex typing
-    const result = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
       .eq('module', module);
-      
-    // Use a direct type assertion without deep inference
-    const data = result.data as SimpleManagerData[] || [];
-    const error = result.error;
       
     if (error) {
       console.error('Error fetching module managers:', error);
       return [];
     }
     
-    return data;
+    // Safe type conversion with proper null handling
+    return (data || []) as SimpleManagerData[];
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
   }
 };
 
-// More typed function for createNotification
+// Helper function with explicit types
 const safeCreateNotification = async (
   userId: string,
   title: string,
   message: string,
-  entityType: "task" | "other", // Explicit types
+  entityType: "task" | "other", 
   entityId: string,
   link?: string
 ) => {
@@ -67,7 +56,7 @@ const safeCreateNotification = async (
   }
 };
 
-export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
+export const createTaskInModule = async (taskRequestData: LocalTaskRequestData): Promise<void> => {
   // Extracting primitive values immediately to avoid deep type inference
   const requestId = String(taskRequestData.id || '');
   const requestType = String(taskRequestData.type || '');
