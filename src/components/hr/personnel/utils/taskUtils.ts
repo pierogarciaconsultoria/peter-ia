@@ -11,8 +11,8 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Simplify the query and type handling to avoid deep instantiation
-    const { data, error } = await supabase
+    // Execute a simpler query without complex type inference
+    const { data: rawData, error } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
@@ -23,23 +23,18 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    if (!data || !Array.isArray(data)) {
-      return [];
+    // Simple array creation with explicit typing to avoid deep type inference
+    const managers: SimpleManagerData[] = [];
+    
+    if (Array.isArray(rawData)) {
+      rawData.forEach(item => {
+        if (item && typeof item.id === 'string') {
+          managers.push({ id: item.id });
+        }
+      });
     }
     
-    // Use explicitly typed intermediary variable to break potential type recursion
-    const result: SimpleManagerData[] = [];
-    
-    // Process each item individually with simple type checking
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-      if (item && typeof item === 'object' && 'id' in item && typeof item.id === 'string') {
-        result.push({ id: item.id });
-      }
-    }
-    
-    return result;
-      
+    return managers;
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
