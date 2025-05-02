@@ -28,34 +28,23 @@ type TaskCreationData = Omit<TaskRequestDataLite, 'justification'> & {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Using any to break deep type inference
+    // Using a simpler approach that avoids complex typing
     const result = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
       .eq('module', module);
       
-    const { data, error } = result as unknown as { data: any[], error: any };
+    // Use a direct type assertion without deep inference
+    const data = result.data as SimpleManagerData[] || [];
+    const error = result.error;
       
     if (error) {
       console.error('Error fetching module managers:', error);
       return [];
     }
     
-    // Creating explicitly typed array
-    const managers: SimpleManagerData[] = [];
-    
-    // Using basic loop to avoid complex type inference
-    if (data && Array.isArray(data)) {
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i];
-        if (item && typeof item.id === 'string') {
-          managers.push({ id: item.id });
-        }
-      }
-    }
-    
-    return managers;
+    return data;
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -68,9 +57,14 @@ const safeCreateNotification = async (
   title: string,
   message: string,
   entityType: "task" | "other", // Explicit types
-  entityId: string
+  entityId: string,
+  link?: string
 ) => {
-  await createNotification(userId, title, message, entityType, entityId);
+  try {
+    await createNotification(userId, title, message, entityType, entityId, link);
+  } catch (error) {
+    console.error('Error creating notification:', error);
+  }
 };
 
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
@@ -120,10 +114,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
     });
     
     // Getting managers using our fixed function
-    const managers = await getModuleManagers(targetModule).catch(err => {
-      console.error('Error fetching managers:', err);
-      return [] as SimpleManagerData[];
-    });
+    const managers = await getModuleManagers(targetModule);
     
     // Processing notifications with explicit typing
     for (const manager of managers) {
