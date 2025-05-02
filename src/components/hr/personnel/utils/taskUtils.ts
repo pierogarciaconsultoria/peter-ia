@@ -52,6 +52,17 @@ interface SafeTaskRequestDataLite {
   justification?: string;
 }
 
+// 3. Função mais tipada para createNotification
+const safeCreateNotification = async (
+  userId: string,
+  title: string,
+  message: string,
+  entityType: "task" | "other", // Tipos explícitos
+  entityId: string
+) => {
+  await createNotification(userId, title, message, entityType, entityId);
+};
+
 export const createTaskInModule = async (taskRequestData: SafeTaskRequestDataLite): Promise<void> => {
   // Extraindo valores primitivos imediatamente para evitar inferência de tipo profunda
   const requestId = String(taskRequestData.id || '');
@@ -112,14 +123,14 @@ export const createTaskInModule = async (taskRequestData: SafeTaskRequestDataLit
       
       const notificationTitle = `Nova tarefa de ${movementLabel}`;
       const notificationMessage = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
-      const entityType = "task";
       
       try {
-        await createNotification(
+        // Usando a função safeCreateNotification em vez da createNotification direta
+        await safeCreateNotification(
           managerId,
           notificationTitle,
           notificationMessage,
-          entityType,
+          "task",  // tipo explícito
           taskId
         );
       } catch (notifError) {
