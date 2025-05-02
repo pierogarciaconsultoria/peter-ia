@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      access_tokens: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_tokens_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       action_items: {
         Row: {
           action_plan_id: string
@@ -1535,6 +1570,1897 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_announcements: {
+        Row: {
+          author_id: string
+          company_id: string
+          content: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          image_url: string | null
+          is_pinned: boolean
+          publish_date: string
+          target_audience: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          company_id: string
+          content: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_pinned?: boolean
+          publish_date?: string
+          target_audience?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          company_id?: string
+          content?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_pinned?: boolean
+          publish_date?: string
+          target_audience?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_announcements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_applications: {
+        Row: {
+          application_date: string
+          candidate_id: string
+          company_id: string
+          cover_letter: string | null
+          created_at: string
+          current_stage: string
+          id: string
+          job_opening_id: string
+          notes: string | null
+          referral_person: string | null
+          referral_source: string | null
+          rejection_reason: string | null
+          resume_score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          application_date?: string
+          candidate_id: string
+          company_id: string
+          cover_letter?: string | null
+          created_at?: string
+          current_stage?: string
+          id?: string
+          job_opening_id: string
+          notes?: string | null
+          referral_person?: string | null
+          referral_source?: string | null
+          rejection_reason?: string | null
+          resume_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          application_date?: string
+          candidate_id?: string
+          company_id?: string
+          cover_letter?: string | null
+          created_at?: string
+          current_stage?: string
+          id?: string
+          job_opening_id?: string
+          notes?: string | null
+          referral_person?: string | null
+          referral_source?: string | null
+          rejection_reason?: string | null
+          resume_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "hr_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_applications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_applications_job_opening_id_fkey"
+            columns: ["job_opening_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_openings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_candidate_assessments: {
+        Row: {
+          application_id: string
+          areas_for_improvement: string | null
+          assessment_date: string
+          assessment_type: string
+          assessor_id: string
+          behavioral_competencies: Json | null
+          comments: string | null
+          company_id: string
+          created_at: string
+          fit_for_role: string
+          id: string
+          overall_rating: number | null
+          strengths: string | null
+          technical_skills: Json | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          areas_for_improvement?: string | null
+          assessment_date?: string
+          assessment_type: string
+          assessor_id: string
+          behavioral_competencies?: Json | null
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          fit_for_role?: string
+          id?: string
+          overall_rating?: number | null
+          strengths?: string | null
+          technical_skills?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          areas_for_improvement?: string | null
+          assessment_date?: string
+          assessment_type?: string
+          assessor_id?: string
+          behavioral_competencies?: Json | null
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          fit_for_role?: string
+          id?: string
+          overall_rating?: number | null
+          strengths?: string | null
+          technical_skills?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_candidate_assessments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "hr_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_candidate_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_candidates: {
+        Row: {
+          company_id: string
+          created_at: string
+          current_job_title: string | null
+          education: string | null
+          email: string
+          expected_salary: number | null
+          experience: string | null
+          first_name: string
+          id: string
+          is_available: boolean
+          last_name: string
+          linkedin_url: string | null
+          location: string | null
+          notes: string | null
+          notice_period: string | null
+          other_social_media: Json | null
+          phone: string | null
+          resume_url: string | null
+          skills: string[] | null
+          source: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          current_job_title?: string | null
+          education?: string | null
+          email: string
+          expected_salary?: number | null
+          experience?: string | null
+          first_name: string
+          id?: string
+          is_available?: boolean
+          last_name: string
+          linkedin_url?: string | null
+          location?: string | null
+          notes?: string | null
+          notice_period?: string | null
+          other_social_media?: Json | null
+          phone?: string | null
+          resume_url?: string | null
+          skills?: string[] | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          current_job_title?: string | null
+          education?: string | null
+          email?: string
+          expected_salary?: number | null
+          experience?: string | null
+          first_name?: string
+          id?: string
+          is_available?: boolean
+          last_name?: string
+          linkedin_url?: string | null
+          location?: string | null
+          notes?: string | null
+          notice_period?: string | null
+          other_social_media?: Json | null
+          phone?: string | null
+          resume_url?: string | null
+          skills?: string[] | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_climate_survey_questions: {
+        Row: {
+          category: string
+          company_id: string
+          created_at: string
+          id: string
+          options: Json | null
+          order_number: number
+          question: string
+          question_type: string
+          required: boolean
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          company_id: string
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_number: number
+          question: string
+          question_type?: string
+          required?: boolean
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_number?: number
+          question?: string
+          question_type?: string
+          required?: boolean
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_climate_survey_questions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_climate_survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "hr_climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_climate_survey_responses: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string | null
+          id: string
+          is_anonymous: boolean
+          responses: Json
+          submitted_at: string
+          survey_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          responses: Json
+          submitted_at?: string
+          survey_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string | null
+          id?: string
+          is_anonymous?: boolean
+          responses?: Json
+          submitted_at?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_climate_survey_responses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_climate_survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "hr_climate_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_climate_surveys: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description: string
+          end_date: string
+          id?: string
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_climate_surveys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_company_documents: {
+        Row: {
+          company_id: string
+          content: string | null
+          created_at: string
+          document_type: string
+          file_url: string | null
+          id: string
+          published_date: string
+          required_acknowledgment: boolean
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          company_id: string
+          content?: string | null
+          created_at?: string
+          document_type: string
+          file_url?: string | null
+          id?: string
+          published_date: string
+          required_acknowledgment?: boolean
+          title: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          document_type?: string
+          file_url?: string | null
+          id?: string
+          published_date?: string
+          required_acknowledgment?: boolean
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_departments: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          manager_id: string | null
+          name: string
+          parent_department_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name: string
+          parent_department_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id?: string | null
+          name?: string
+          parent_department_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_departments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_departments_parent_department_id_fkey"
+            columns: ["parent_department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_development_plans: {
+        Row: {
+          action_items: Json
+          career_goal: string | null
+          company_id: string
+          created_at: string
+          creator_id: string
+          development_areas: Json
+          employee_id: string
+          end_date: string
+          id: string
+          progress: number
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_items: Json
+          career_goal?: string | null
+          company_id: string
+          created_at?: string
+          creator_id: string
+          development_areas: Json
+          employee_id: string
+          end_date: string
+          id?: string
+          progress?: number
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          career_goal?: string | null
+          company_id?: string
+          created_at?: string
+          creator_id?: string
+          development_areas?: Json
+          employee_id?: string
+          end_date?: string
+          id?: string
+          progress?: number
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_development_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_disc_evaluations: {
+        Row: {
+          company_id: string
+          compliance_score: number
+          created_at: string
+          dominance_score: number
+          employee_id: string
+          evaluation_date: string
+          id: string
+          influence_score: number
+          primary_type: string
+          report_url: string | null
+          secondary_type: string | null
+          steadiness_score: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          compliance_score: number
+          created_at?: string
+          dominance_score: number
+          employee_id: string
+          evaluation_date: string
+          id?: string
+          influence_score: number
+          primary_type: string
+          report_url?: string | null
+          secondary_type?: string | null
+          steadiness_score: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          compliance_score?: number
+          created_at?: string
+          dominance_score?: number
+          employee_id?: string
+          evaluation_date?: string
+          id?: string
+          influence_score?: number
+          primary_type?: string
+          report_url?: string | null
+          secondary_type?: string | null
+          steadiness_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_disc_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_document_acknowledgments: {
+        Row: {
+          acknowledged: boolean
+          acknowledgment_date: string | null
+          company_id: string
+          created_at: string
+          document_id: string
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          acknowledged?: boolean
+          acknowledgment_date?: string | null
+          company_id: string
+          created_at?: string
+          document_id: string
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          acknowledged?: boolean
+          acknowledgment_date?: string | null
+          company_id?: string
+          created_at?: string
+          document_id?: string
+          employee_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_document_acknowledgments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_document_acknowledgments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "hr_company_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employee_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_type: string
+          document_url: string | null
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          signed: boolean
+          signed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_type: string
+          document_url?: string | null
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          signed?: boolean
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_type?: string
+          document_url?: string | null
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          signed?: boolean
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_employee_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employee_movements: {
+        Row: {
+          approver_id: string | null
+          comments: string | null
+          company_id: string
+          created_at: string
+          effective_date: string
+          employee_id: string
+          from_department_id: string | null
+          from_position_id: string | null
+          id: string
+          justification: string
+          movement_type: string
+          new_salary: number | null
+          previous_salary: number | null
+          requester_id: string
+          status: string
+          to_department_id: string | null
+          to_position_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approver_id?: string | null
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          effective_date: string
+          employee_id: string
+          from_department_id?: string | null
+          from_position_id?: string | null
+          id?: string
+          justification: string
+          movement_type: string
+          new_salary?: number | null
+          previous_salary?: number | null
+          requester_id: string
+          status?: string
+          to_department_id?: string | null
+          to_position_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string | null
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          effective_date?: string
+          employee_id?: string
+          from_department_id?: string | null
+          from_position_id?: string | null
+          id?: string
+          justification?: string
+          movement_type?: string
+          new_salary?: number | null
+          previous_salary?: number | null
+          requester_id?: string
+          status?: string
+          to_department_id?: string | null
+          to_position_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_employee_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employee_movements_from_department_id_fkey"
+            columns: ["from_department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employee_movements_from_position_id_fkey"
+            columns: ["from_position_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employee_movements_to_department_id_fkey"
+            columns: ["to_department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employee_movements_to_position_id_fkey"
+            columns: ["to_position_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employee_occurrences: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          days_count: number | null
+          document_url: string | null
+          employee_id: string
+          end_date: string | null
+          hours_count: number | null
+          id: string
+          occurrence_type: string
+          reason: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          days_count?: number | null
+          document_url?: string | null
+          employee_id: string
+          end_date?: string | null
+          hours_count?: number | null
+          id?: string
+          occurrence_type: string
+          reason?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          days_count?: number | null
+          document_url?: string | null
+          employee_id?: string
+          end_date?: string | null
+          hours_count?: number | null
+          id?: string
+          occurrence_type?: string
+          reason?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_employee_occurrences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employee_trainings: {
+        Row: {
+          certificate_url: string | null
+          company_id: string
+          completion_date: string | null
+          created_at: string
+          employee_id: string
+          feedback: string | null
+          id: string
+          score: number | null
+          status: string
+          training_id: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_url?: string | null
+          company_id: string
+          completion_date?: string | null
+          created_at?: string
+          employee_id: string
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          training_id: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_url?: string | null
+          company_id?: string
+          completion_date?: string | null
+          created_at?: string
+          employee_id?: string
+          feedback?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          training_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_employee_trainings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employee_trainings_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "hr_trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_equipment: {
+        Row: {
+          acquisition_date: string | null
+          assigned_date: string | null
+          assigned_to: string | null
+          company_id: string
+          created_at: string
+          expected_return_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          serial_number: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          acquisition_date?: string | null
+          assigned_date?: string | null
+          assigned_to?: string | null
+          company_id: string
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          acquisition_date?: string | null
+          assigned_date?: string | null
+          assigned_to?: string | null
+          company_id?: string
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_equipment_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_exit_interviews: {
+        Row: {
+          colleagues_feedback: string | null
+          company_feedback: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          exit_date: string
+          id: string
+          interview_date: string | null
+          interviewer_id: string | null
+          manager_feedback: string | null
+          reason_for_leaving: string
+          status: string
+          suggestions: string | null
+          updated_at: string
+          would_return: boolean | null
+        }
+        Insert: {
+          colleagues_feedback?: string | null
+          company_feedback?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          exit_date: string
+          id?: string
+          interview_date?: string | null
+          interviewer_id?: string | null
+          manager_feedback?: string | null
+          reason_for_leaving: string
+          status?: string
+          suggestions?: string | null
+          updated_at?: string
+          would_return?: boolean | null
+        }
+        Update: {
+          colleagues_feedback?: string | null
+          company_feedback?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          exit_date?: string
+          id?: string
+          interview_date?: string | null
+          interviewer_id?: string | null
+          manager_feedback?: string | null
+          reason_for_leaving?: string
+          status?: string
+          suggestions?: string | null
+          updated_at?: string
+          would_return?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_exit_interviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_feedbacks: {
+        Row: {
+          company_id: string
+          content: string
+          created_at: string
+          feedback_type: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          company_id: string
+          content: string
+          created_at?: string
+          feedback_type: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_feedbacks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_interviews: {
+        Row: {
+          application_id: string
+          company_id: string
+          created_at: string
+          duration: number
+          feedback: string | null
+          id: string
+          interview_date: string
+          interview_type: string
+          interviewer_id: string
+          location: string | null
+          recommendation: string
+          score: number | null
+          status: string
+          strengths: string | null
+          updated_at: string
+          weaknesses: string | null
+        }
+        Insert: {
+          application_id: string
+          company_id: string
+          created_at?: string
+          duration: number
+          feedback?: string | null
+          id?: string
+          interview_date: string
+          interview_type: string
+          interviewer_id: string
+          location?: string | null
+          recommendation?: string
+          score?: number | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+        }
+        Update: {
+          application_id?: string
+          company_id?: string
+          created_at?: string
+          duration?: number
+          feedback?: string | null
+          id?: string
+          interview_date?: string
+          interview_type?: string
+          interviewer_id?: string
+          location?: string | null
+          recommendation?: string
+          score?: number | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+          weaknesses?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_interviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "hr_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_interviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_job_openings: {
+        Row: {
+          application_deadline: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          department_id: string
+          description: string
+          id: string
+          is_internal: boolean
+          is_published: boolean
+          job_position_id: string
+          location: string | null
+          requirements: string | null
+          responsibilities: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          vacancies: number
+        }
+        Insert: {
+          application_deadline?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          department_id: string
+          description: string
+          id?: string
+          is_internal?: boolean
+          is_published?: boolean
+          job_position_id: string
+          location?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          vacancies?: number
+        }
+        Update: {
+          application_deadline?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          department_id?: string
+          description?: string
+          id?: string
+          is_internal?: boolean
+          is_published?: boolean
+          job_position_id?: string
+          location?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          vacancies?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_job_openings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_job_openings_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_job_openings_job_position_id_fkey"
+            columns: ["job_position_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_job_positions: {
+        Row: {
+          company_id: string
+          created_at: string
+          department_id: string
+          description: string | null
+          id: string
+          is_active: boolean
+          requirements: string | null
+          responsibilities: string | null
+          salary_range_max: number | null
+          salary_range_min: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department_id: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department_id?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_job_positions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_job_positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_mood_checkins: {
+        Row: {
+          check_in_date: string
+          comment: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          mood_score: number
+        }
+        Insert: {
+          check_in_date?: string
+          comment?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          mood_score: number
+        }
+        Update: {
+          check_in_date?: string
+          comment?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          mood_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_mood_checkins_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          reference_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          reference_id?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          reference_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hr_onboarding_processes: {
+        Row: {
+          checklist: Json | null
+          company_id: string
+          completion_percentage: number
+          created_at: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          responsible_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          checklist?: Json | null
+          company_id: string
+          completion_percentage?: number
+          created_at?: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          responsible_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          checklist?: Json | null
+          company_id?: string
+          completion_percentage?: number
+          created_at?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          responsible_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_onboarding_processes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_organization_structure: {
+        Row: {
+          company_id: string
+          created_at: string
+          department_id: string
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_current: boolean
+          job_position_id: string
+          manager_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department_id: string
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          job_position_id: string
+          manager_id?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department_id?: string
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          job_position_id?: string
+          manager_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_organization_structure_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_organization_structure_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_organization_structure_job_position_id_fkey"
+            columns: ["job_position_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_performance_evaluations: {
+        Row: {
+          approved: boolean | null
+          comments: string | null
+          company_id: string
+          created_at: string
+          development_plan: string | null
+          employee_comments: string | null
+          employee_id: string
+          evaluation_date: string
+          evaluation_period: string
+          evaluation_type: string
+          evaluator_id: string
+          goals_achievement_score: number | null
+          id: string
+          improvement_areas: string | null
+          overall_score: number | null
+          skills_score: number | null
+          status: string
+          strengths: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean | null
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          development_plan?: string | null
+          employee_comments?: string | null
+          employee_id: string
+          evaluation_date: string
+          evaluation_period: string
+          evaluation_type: string
+          evaluator_id: string
+          goals_achievement_score?: number | null
+          id?: string
+          improvement_areas?: string | null
+          overall_score?: number | null
+          skills_score?: number | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean | null
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          development_plan?: string | null
+          employee_comments?: string | null
+          employee_id?: string
+          evaluation_date?: string
+          evaluation_period?: string
+          evaluation_type?: string
+          evaluator_id?: string
+          goals_achievement_score?: number | null
+          id?: string
+          improvement_areas?: string | null
+          overall_score?: number | null
+          skills_score?: number | null
+          status?: string
+          strengths?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_performance_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_room_reservations: {
+        Row: {
+          attendees: Json | null
+          company_id: string
+          created_at: string
+          description: string | null
+          end_time: string
+          id: string
+          room_id: string
+          start_time: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendees?: Json | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_time: string
+          id?: string
+          room_id: string
+          start_time: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendees?: Json | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          room_id?: string
+          start_time?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_room_reservations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_room_reservations_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "hr_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_rooms: {
+        Row: {
+          amenities: Json | null
+          available: boolean
+          capacity: number
+          company_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          location: string
+          name: string
+          room_type: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: Json | null
+          available?: boolean
+          capacity: number
+          company_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location: string
+          name: string
+          room_type: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: Json | null
+          available?: boolean
+          capacity?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          name?: string
+          room_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_rooms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_trainings: {
+        Row: {
+          company_id: string
+          cost: number | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          end_date: string | null
+          id: string
+          instructor: string | null
+          location: string | null
+          max_participants: number | null
+          provider: string | null
+          start_date: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          instructor?: string | null
+          location?: string | null
+          max_participants?: number | null
+          provider?: string | null
+          start_date: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          instructor?: string | null
+          location?: string | null
+          max_participants?: number | null
+          provider?: string | null
+          start_date?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_trainings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_turnover_metrics: {
+        Row: {
+          company_id: string
+          created_at: string
+          department_id: string | null
+          id: string
+          involuntary_terminations: number
+          month: number
+          new_hires: number
+          total_employees: number
+          turnover_rate: number
+          updated_at: string
+          voluntary_terminations: number
+          year: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          involuntary_terminations: number
+          month: number
+          new_hires: number
+          total_employees: number
+          turnover_rate: number
+          updated_at?: string
+          voluntary_terminations: number
+          year: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          involuntary_terminations?: number
+          month?: number
+          new_hires?: number
+          total_employees?: number
+          turnover_rate?: number
+          updated_at?: string
+          voluntary_terminations?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_turnover_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_turnover_metrics_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_vacation_requests: {
+        Row: {
+          approval_date: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          end_date: string
+          id: string
+          manager_id: string
+          notes: string | null
+          start_date: string
+          status: string
+          total_days: number
+          updated_at: string
+        }
+        Insert: {
+          approval_date?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          end_date: string
+          id?: string
+          manager_id: string
+          notes?: string | null
+          start_date: string
+          status?: string
+          total_days: number
+          updated_at?: string
+        }
+        Update: {
+          approval_date?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          end_date?: string
+          id?: string
+          manager_id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          total_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_vacation_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -3275,6 +5201,74 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      strategic_action_plans: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          due_date: string
+          how_execution: string
+          how_much: string | null
+          id: string
+          origin: string | null
+          priority: string
+          progress: number
+          stakeholders: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          what_description: string
+          where_location: string
+          who_responsible: string
+          why_description: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          due_date: string
+          how_execution: string
+          how_much?: string | null
+          id?: string
+          origin?: string | null
+          priority: string
+          progress?: number
+          stakeholders?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          what_description: string
+          where_location: string
+          who_responsible: string
+          why_description: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          due_date?: string
+          how_execution?: string
+          how_much?: string | null
+          id?: string
+          origin?: string | null
+          priority?: string
+          progress?: number
+          stakeholders?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          what_description?: string
+          where_location?: string
+          who_responsible?: string
+          why_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_action_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_evaluations: {
         Row: {
