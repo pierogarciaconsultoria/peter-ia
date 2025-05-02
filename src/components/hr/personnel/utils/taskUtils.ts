@@ -11,27 +11,29 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Execute a simpler query without complex type inference
-    const { data: rawData, error } = await supabase
+    // Use any type to break the deep type instantiation
+    const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
-      .eq('module', module);
+      .eq('module', module) as { data: any, error: any };
       
     if (error) {
       console.error('Error fetching module managers:', error);
       return [];
     }
     
-    // Simple array creation with explicit typing to avoid deep type inference
+    // Create a new array explicitly typed
     const managers: SimpleManagerData[] = [];
     
-    if (Array.isArray(rawData)) {
-      rawData.forEach(item => {
+    // Use a basic loop to avoid complex type inference
+    if (data && Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
         if (item && typeof item.id === 'string') {
           managers.push({ id: item.id });
         }
-      });
+      }
     }
     
     return managers;
