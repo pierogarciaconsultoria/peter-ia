@@ -11,11 +11,10 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Define an explicit interface for the database result
-    interface UserProfileResult {
-      id: string;
-    }
+    // Use an explicit type for the query result
+    type UserProfileRow = { id: string };
     
+    // Perform the query with explicit type casting
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -31,10 +30,12 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Explicitly type and map the result
-    return (data as UserProfileResult[])
-      .filter(item => item && typeof item.id === 'string')
+    // Use a simple map operation with type safety
+    return data
+      .filter((item): item is UserProfileRow => 
+        item !== null && typeof item === 'object' && typeof item.id === 'string')
       .map(manager => ({ id: manager.id }));
+      
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -88,9 +89,9 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
     });
     
     // Get managers with simple type handling
-    const managers: SimpleManagerData[] = await getModuleManagers(targetModule).catch(err => {
+    const managers = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
-      return [];
+      return [] as SimpleManagerData[];
     });
     
     // Process notifications
