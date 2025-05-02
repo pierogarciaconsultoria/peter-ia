@@ -1,4 +1,3 @@
-
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,33 +19,8 @@ interface LocalTaskRequestData {
 }
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
-  try {
-    // Use proper type handling without @ts-ignore
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('role', 'manager')
-      .eq('module', module);
-    
-    if (error) {
-      console.error('Error fetching module managers:', error.message);
-      return [];
-    }
-    
-    if (!data || !Array.isArray(data)) {
-      console.warn('No manager data found or invalid data format for module:', module);
-      return [];
-    }
-    
-    // Safely transform data with proper type checks
-    return data
-      .filter(item => item && typeof item === 'object' && 'id' in item && item.id)
-      .map(item => ({ id: String(item.id) }));
-      
-  } catch (err) {
-    console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
-    return [];
-  }
+  const { data, error } = await supabase.rpc('get_managers', { module });
+  return error ? [] : (data as { id: string }[]);
 };
 
 // Helper function with explicit types
