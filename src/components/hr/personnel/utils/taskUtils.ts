@@ -21,6 +21,12 @@ interface LocalTaskRequestData {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
+    // Validar o parâmetro de entrada
+    if (!module || typeof module !== 'string') {
+      console.warn('Módulo inválido fornecido para getModuleManagers:', module);
+      return [];
+    }
+    
     // Instead of using RPC, query the database directly
     const { data, error } = await supabase
       .from('user_profiles')
@@ -33,14 +39,14 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    if (!data || !Array.isArray(data)) {
-      console.warn('No manager data found or invalid data format for module:', module);
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.warn('No manager data found for module:', module);
       return [];
     }
     
     // Safely transform data with proper type checking
     return data
-      .filter(item => item && typeof item === 'object' && 'id' in item && item.id)
+      .filter(item => item && typeof item === 'object' && 'id' in item && item.id && typeof item.id === 'string')
       .map(item => ({ id: String(item.id) }));
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
@@ -58,6 +64,12 @@ const safeCreateNotification = async (
   link?: string
 ) => {
   try {
+    // Validação extra de ID do usuário
+    if (!userId || typeof userId !== 'string' || userId === 'current-user-id') {
+      console.warn('ID de usuário inválido para notificação:', userId);
+      return;
+    }
+    
     await createNotification(userId, title, message, entityType, entityId, link);
   } catch (error) {
     console.error('Error creating notification:', error);
@@ -65,6 +77,12 @@ const safeCreateNotification = async (
 };
 
 export const createTaskInModule = async (taskRequestData: LocalTaskRequestData): Promise<void> => {
+  // Validar dados de entrada
+  if (!taskRequestData || typeof taskRequestData !== 'object') {
+    console.error('Dados de solicitação de tarefa inválidos');
+    return;
+  }
+
   // Extracting primitive values immediately to avoid deep type inference
   const requestId = String(taskRequestData.id || '');
   const requestType = String(taskRequestData.type || '');
@@ -87,7 +105,10 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     }
   }
   
-  if (!targetModule) return;
+  if (!targetModule) {
+    console.warn('Módulo alvo não encontrado para o tipo:', requestType);
+    return;
+  }
 
   try {
     console.log(`Creating task in module: ${targetModule}`);
@@ -113,9 +134,16 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     // Getting managers using our fixed function
     const managers = await getModuleManagers(targetModule);
     
+    if (managers.length === 0) {
+      console.warn(`Nenhum gerente encontrado para o módulo: ${targetModule}`);
+    }
+    
     // Processing notifications with explicit typing
     for (const manager of managers) {
-      if (!manager || typeof manager.id !== 'string') continue;
+      if (!manager || typeof manager.id !== 'string' || !manager.id) {
+        console.warn('Dados de gerente inválidos:', manager);
+        continue;
+      }
       
       const managerId = manager.id;
       
