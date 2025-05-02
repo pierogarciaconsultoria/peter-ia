@@ -2,10 +2,10 @@
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-// Definindo interfaces simplificadas para evitar problemas de instanciação de tipo
-type SafeSimpleManagerData = { id: string };
+// Importando tipos simplificados do novo arquivo
+import { SimpleManagerData, TaskRequestDataLite } from "../types/safeTaskTypes";
 
-export const getModuleManagers = async (module: string): Promise<SafeSimpleManagerData[]> => {
+export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
     // Usando any para quebrar a inferência de tipo profunda
     const result = await supabase
@@ -22,7 +22,7 @@ export const getModuleManagers = async (module: string): Promise<SafeSimpleManag
     }
     
     // Criando um novo array explicitamente tipado
-    const managers: SafeSimpleManagerData[] = [];
+    const managers: SimpleManagerData[] = [];
     
     // Usando um loop básico para evitar inferência de tipo complexa
     if (data && Array.isArray(data)) {
@@ -41,18 +41,7 @@ export const getModuleManagers = async (module: string): Promise<SafeSimpleManag
   }
 };
 
-// Interface simplificada para evitar problemas de instanciação de tipo
-interface SafeTaskRequestDataLite {
-  id?: string;
-  type?: string;
-  department?: string;
-  requester_id?: string;
-  employee_id?: string;
-  employeeName?: string;
-  justification?: string;
-}
-
-// 3. Função mais tipada para createNotification
+// Função mais tipada para createNotification
 const safeCreateNotification = async (
   userId: string,
   title: string,
@@ -63,7 +52,7 @@ const safeCreateNotification = async (
   await createNotification(userId, title, message, entityType, entityId);
 };
 
-export const createTaskInModule = async (taskRequestData: SafeTaskRequestDataLite): Promise<void> => {
+export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
   // Extraindo valores primitivos imediatamente para evitar inferência de tipo profunda
   const requestId = String(taskRequestData.id || '');
   const requestType = String(taskRequestData.type || '');
@@ -112,7 +101,7 @@ export const createTaskInModule = async (taskRequestData: SafeTaskRequestDataLit
     // Obtendo gerentes usando nossa função corrigida
     const managers = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
-      return [] as SafeSimpleManagerData[];
+      return [] as SimpleManagerData[];
     });
     
     // Processando notificações com tipagem explícita
