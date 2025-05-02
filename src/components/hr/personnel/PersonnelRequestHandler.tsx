@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { JobPosition } from "../types";
 import { PersonnelRequest, RequestFormValues } from "./types";
@@ -6,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/services/notificationService";
 import { useToast } from "@/hooks/use-toast";
 import { createTaskInModule } from "./utils/taskUtils";
-import { TaskRequestDataLite } from "./types/taskTypes";
+import { TaskRequestDataLite } from "./types/safeTaskTypes";
 
 interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;

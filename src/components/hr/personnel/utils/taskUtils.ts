@@ -3,7 +3,12 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 // Importando tipos simplificados do novo arquivo
-import { SimpleManagerData, TaskRequestDataLite } from "../types/safeTaskTypes";
+import { 
+  SimpleManagerData,
+  TaskRequestDataLite,
+  CreatedTask,
+  TaskCreationData
+} from '../types/safeTaskTypes'; // Importe do arquivo local
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
