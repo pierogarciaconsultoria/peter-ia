@@ -11,7 +11,7 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Define an explicit interface for the database result with minimal properties
+    // Define an explicit interface for the database result
     interface UserProfileResult {
       id: string;
     }
@@ -31,14 +31,10 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Transform with minimal type conversion and simple return
-    const result: SimpleManagerData[] = [];
-    for (let i = 0; i < data.length; i++) {
-      if (data[i] && typeof data[i].id === 'string') {
-        result.push({ id: data[i].id });
-      }
-    }
-    return result;
+    // Explicitly type and map the result
+    return (data as UserProfileResult[])
+      .filter(item => item && typeof item.id === 'string')
+      .map(manager => ({ id: manager.id }));
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -97,9 +93,8 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       return [];
     });
     
-    // Process notifications with simple loop and explicit string handling
-    for (let j = 0; j < managers.length; j++) {
-      const manager = managers[j];
+    // Process notifications
+    for (const manager of managers) {
       if (!manager || typeof manager.id !== 'string') continue;
       
       const managerId = manager.id;
