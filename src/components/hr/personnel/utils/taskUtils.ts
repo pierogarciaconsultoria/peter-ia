@@ -26,7 +26,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
-      .eq('allowed_modules', module, { operator: 'cs' }); // Using containedBy operator for array check
+      .contains('allowed_modules', [module]); // Using contains operator for array check
     
     if (error) {
       console.error('Error fetching module managers:', error.message);
