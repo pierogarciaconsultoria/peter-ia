@@ -11,7 +11,7 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Define an explicit interface for the database result
+    // Define an explicit interface for the database result with minimal properties
     interface UserProfileResult {
       id: string;
     }
@@ -27,9 +27,18 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Explicitly type the result and transform it
-    const typedData = data as UserProfileResult[] | null;
-    return typedData ? typedData.map(manager => ({ id: manager.id })) : [];
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+    
+    // Transform with minimal type conversion and simple return
+    const result: SimpleManagerData[] = [];
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] && typeof data[i].id === 'string') {
+        result.push({ id: data[i].id });
+      }
+    }
+    return result;
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -37,12 +46,12 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
 };
 
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Extract primitive values immediately to avoid deep type inference
-  const requestId = String(taskRequestData.id);
-  const requestType = String(taskRequestData.type);
-  const requestDepartment = String(taskRequestData.department);
-  const requesterId = String(taskRequestData.requester_id);
-  const employeeId = String(taskRequestData.employee_id);
+  // Extract all primitive values immediately to avoid deep type inference
+  const requestId = String(taskRequestData.id || '');
+  const requestType = String(taskRequestData.type || '');
+  const requestDepartment = String(taskRequestData.department || '');
+  const requesterId = String(taskRequestData.requester_id || '');
+  const employeeId = String(taskRequestData.employee_id || '');
   const employeeName = String(taskRequestData.employeeName || '');
   const requestJustification = String(taskRequestData.justification || '');
   
@@ -82,22 +91,18 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       personnel_request_id: requestId
     });
     
-    // Fetch managers with explicit type for result
-    let managers: SimpleManagerData[] = [];
-    try {
-      managers = await getModuleManagers(targetModule);
-    } catch (err) {
+    // Get managers with simple type handling
+    const managers: SimpleManagerData[] = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
-      managers = [];
-    }
+      return [];
+    });
     
-    // Process each notification individually with explicit string types
+    // Process notifications with simple loop and explicit string handling
     for (let j = 0; j < managers.length; j++) {
-      // Safety check and explicit type
-      if (!managers[j] || !managers[j].id) continue;
+      const manager = managers[j];
+      if (!manager || typeof manager.id !== 'string') continue;
       
-      const managerId = String(managers[j].id);
-      if (!managerId) continue;
+      const managerId = manager.id;
       
       const notificationTitle = `Nova tarefa de ${movementLabel}`;
       const notificationMessage = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
@@ -116,9 +121,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       }
     }
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Erro ao criar tarefa:', error.message);
-    }
+    console.error('Erro ao criar tarefa:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 };
