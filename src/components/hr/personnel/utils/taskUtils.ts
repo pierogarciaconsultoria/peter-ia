@@ -21,19 +21,27 @@ interface LocalTaskRequestData {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // @ts-ignore - Temporarily ignore type checking
+    // Use proper type handling without @ts-ignore
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
       .eq('module', module);
     
-    if (error || !data) return [];
+    if (error) {
+      console.error('Error fetching module managers:', error.message);
+      return [];
+    }
     
-    // Filter and manually type the data
+    if (!data || !Array.isArray(data)) {
+      console.warn('No manager data found or invalid data format for module:', module);
+      return [];
+    }
+    
+    // Safely transform data with proper type checks
     return data
-      .filter((item: any) => item?.id)
-      .map((item: any) => ({ id: String(item.id) }));
+      .filter(item => item && typeof item === 'object' && 'id' in item && item.id)
+      .map(item => ({ id: String(item.id) }));
       
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
