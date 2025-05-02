@@ -2,31 +2,29 @@
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  SimpleManagerData, 
-  TaskCreationData, 
-  CreatedTask,
-  TaskRequestDataLite
-} from "../types/taskTypes";
+// Definindo interfaces simplificadas para evitar problemas de instanciação de tipo
+type SafeSimpleManagerData = { id: string };
 
-export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
+export const getModuleManagers = async (module: string): Promise<SafeSimpleManagerData[]> => {
   try {
-    // Use any type to break the deep type instantiation
-    const { data, error } = await supabase
+    // Usando any para quebrar a inferência de tipo profunda
+    const result = await supabase
       .from('user_profiles')
       .select('id')
       .eq('role', 'manager')
-      .eq('module', module) as { data: any, error: any };
+      .eq('module', module);
+      
+    const { data, error } = result as unknown as { data: any[], error: any };
       
     if (error) {
       console.error('Error fetching module managers:', error);
       return [];
     }
     
-    // Create a new array explicitly typed
-    const managers: SimpleManagerData[] = [];
+    // Criando um novo array explicitamente tipado
+    const managers: SafeSimpleManagerData[] = [];
     
-    // Use a basic loop to avoid complex type inference
+    // Usando um loop básico para evitar inferência de tipo complexa
     if (data && Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
@@ -43,8 +41,19 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Extract all primitive values immediately to avoid deep type inference
+// Interface simplificada para evitar problemas de instanciação de tipo
+interface SafeTaskRequestDataLite {
+  id?: string;
+  type?: string;
+  department?: string;
+  requester_id?: string;
+  employee_id?: string;
+  employeeName?: string;
+  justification?: string;
+}
+
+export const createTaskInModule = async (taskRequestData: SafeTaskRequestDataLite): Promise<void> => {
+  // Extraindo valores primitivos imediatamente para evitar inferência de tipo profunda
   const requestId = String(taskRequestData.id || '');
   const requestType = String(taskRequestData.type || '');
   const requestDepartment = String(taskRequestData.department || '');
@@ -53,7 +62,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
   const employeeName = String(taskRequestData.employeeName || '');
   const requestJustification = String(taskRequestData.justification || '');
   
-  // Find movement type using primitive string comparison
+  // Encontrando o tipo de movimento usando comparação de string primitiva
   let targetModule = '';
   let movementLabel = '';
   
@@ -75,10 +84,10 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
     const taskDescription = requestJustification;
     const taskStatus = 'pending';
     
-    // Create task ID in advance to avoid nested references
+    // Criando ID da tarefa antecipadamente para evitar referências aninhadas
     const taskId = crypto.randomUUID();
     
-    // Log task data without complex object
+    // Registrando dados da tarefa sem objeto complexo
     console.log({
       title: taskTitle,
       description: taskDescription,
@@ -89,13 +98,13 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       personnel_request_id: requestId
     });
     
-    // Get managers using our fixed function
+    // Obtendo gerentes usando nossa função corrigida
     const managers = await getModuleManagers(targetModule).catch(err => {
       console.error('Error fetching managers:', err);
-      return [] as SimpleManagerData[];
+      return [] as SafeSimpleManagerData[];
     });
     
-    // Process notifications with explicit typing
+    // Processando notificações com tipagem explícita
     for (const manager of managers) {
       if (!manager || typeof manager.id !== 'string') continue;
       
