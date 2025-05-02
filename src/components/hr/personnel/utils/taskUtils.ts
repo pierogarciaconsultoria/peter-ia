@@ -11,8 +11,8 @@ import {
 
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
-    // Use uma interface explícita para o retorno da query
-    interface UserProfile {
+    // Define an explicit interface for the database result
+    interface UserProfileResult {
       id: string;
     }
     
@@ -27,9 +27,9 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
       return [];
     }
     
-    // Conversão explícita do tipo retornado
-    const typedData = data as UserProfile[] | null;
-    return typedData?.map(manager => ({ id: manager.id })) ?? [];
+    // Explicitly type the result and transform it
+    const typedData = data as UserProfileResult[] | null;
+    return typedData ? typedData.map(manager => ({ id: manager.id })) : [];
   } catch (err) {
     console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
     return [];
@@ -37,7 +37,7 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
 };
 
 export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): Promise<void> => {
-  // Extrair valores primitivos imediatamente para evitar inferência de tipo profunda
+  // Extract primitive values immediately to avoid deep type inference
   const requestId = String(taskRequestData.id);
   const requestType = String(taskRequestData.type);
   const requestDepartment = String(taskRequestData.department);
@@ -46,7 +46,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
   const employeeName = String(taskRequestData.employeeName || '');
   const requestJustification = String(taskRequestData.justification || '');
   
-  // Encontrar tipo de movimento usando comparação de string primitiva
+  // Find movement type using primitive string comparison
   let targetModule = '';
   let movementLabel = '';
   
@@ -68,10 +68,10 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
     const taskDescription = requestJustification;
     const taskStatus = 'pending';
     
-    // Criar ID da tarefa antecipadamente para evitar referências aninhadas
+    // Create task ID in advance to avoid nested references
     const taskId = crypto.randomUUID();
     
-    // Registrar dados da tarefa sem objeto complexo
+    // Log task data without complex object
     console.log({
       title: taskTitle,
       description: taskDescription,
@@ -82,7 +82,7 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       personnel_request_id: requestId
     });
     
-    // Buscar gerentes usando tipo explícito para o resultado
+    // Fetch managers with explicit type for result
     let managers: SimpleManagerData[] = [];
     try {
       managers = await getModuleManagers(targetModule);
@@ -91,9 +91,9 @@ export const createTaskInModule = async (taskRequestData: TaskRequestDataLite): 
       managers = [];
     }
     
-    // Processar cada notificação individualmente com tipos de string explícitos
+    // Process each notification individually with explicit string types
     for (let j = 0; j < managers.length; j++) {
-      // Verificação de segurança e tipagem explícita
+      // Safety check and explicit type
       if (!managers[j] || !managers[j].id) continue;
       
       const managerId = String(managers[j].id);
