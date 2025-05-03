@@ -146,8 +146,9 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     });
     
     // Actually create the task in database
-    const { error: taskError } = await supabase
-      .from('tasks')
+    // Use type assertion to bypass TypeScript's checking since the table exists but isn't in types
+    const { error: taskError } = await (supabase
+      .from('tasks' as any)
       .insert({
         id: taskId,
         title: taskTitle,
@@ -157,7 +158,7 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
         employee_id: employeeId,
         requester_id: requesterId,
         personnel_request_id: requestId
-      });
+      }) as any);
       
     if (taskError) {
       console.error('Error creating task:', taskError);
