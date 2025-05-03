@@ -1,63 +1,41 @@
 
 import React from "react";
-import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 interface PermissionGuardProps {
   children: React.ReactNode;
-  modulo: string;
-  requerPermissao?: 'visualizar' | 'editar' | 'excluir' | 'criar';
-  fallback?: React.ReactNode;
-  showLoader?: boolean;
+  requiredRole?: string;
 }
 
-export const PermissionGuard = ({
-  children,
-  modulo,
-  requerPermissao = 'visualizar',
-  fallback = null,
-  showLoader = false
-}: PermissionGuardProps) => {
-  const { isMaster, isAdmin } = useCurrentUser();
-  const { temPermissao, isLoading } = useUserPermissions();
+export const PermissionGuard = ({ children, requiredRole = "admin" }: PermissionGuardProps) => {
+  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const location = useLocation();
   
   // Detecta se é um super admin no Lovable Editor
   const isMasterLovable = isSuperAdminInLovable();
   
-  // Se estiver carregando, mostra o loader se configurado ou não mostra nada
-  if (isLoading) {
-    return showLoader ? (
-      <div className="flex items-center justify-center p-4">
-        <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mr-2"></div>
-        <span className="text-sm text-muted-foreground">Verificando permissões...</span>
-      </div>
-    ) : null;
-  }
-  
-  // Verificação hierárquica de permissões - do maior para o menor nível
-  // 0. Super Admin no Lovable Editor tem acesso irrestrito a tudo
+  // Super Admin no Lovable Editor tem acesso irrestrito a tudo
   if (isMasterLovable) {
-    console.log(`Acesso concedido ao módulo '${modulo}' via Lovable Editor`);
+    console.log(`Acesso concedido ao módulo administrativo via Lovable Editor`);
     return <>{children}</>;
   }
   
-  // 1. Usuários master têm acesso irrestrito a todos os módulos
-  if (isMaster) {
+  // Usuários super admin têm acesso a todos os módulos
+  if (isSuperAdmin) {
     return <>{children}</>;
   }
   
-  // 2. Administradores têm acesso a tudo dentro de sua empresa
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-  
-  // 3. Para usuários comuns, verifica as permissões específicas
-  if (!temPermissao(modulo, requerPermissao)) {
-    console.log(`Acesso negado: usuário não tem permissão '${requerPermissao}' para módulo '${modulo}'`);
-    return <>{fallback}</>;
+  // Para os demais, verificamos a role específica
+  if (requiredRole === "admin" && !isAdmin) {
+    // Redirect to dashboard if admin access is required but user is not an admin
+    console.log("Acesso negado: usuário não tem permissão de administrador");
+    return <Navigate to="/" replace />;
   }
   
   // Se chegou até aqui, o usuário tem permissão
   return <>{children}</>;
 };
+
+export default PermissionGuard;

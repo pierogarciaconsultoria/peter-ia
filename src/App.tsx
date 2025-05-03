@@ -82,9 +82,11 @@ function App() {
           <Route path="/tasks" element={<Tasks />} /> {/* Nova rota para tarefas */}
 
           {/* Rotas protegidas com PermissionGuard */}
-          <Route element={<PermissionGuard requiredRole="admin" />}>
-            <Route path="/admin/*" element={<Admin />} />
-          </Route>
+          <Route path="/admin/*" element={
+            <PermissionGuard requiredRole="admin">
+              <Admin />
+            </PermissionGuard>
+          } />
         </Route>
       </Routes>
       <Toaster />

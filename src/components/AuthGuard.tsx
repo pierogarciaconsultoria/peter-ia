@@ -1,20 +1,20 @@
 
 import { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { shouldGrantFreeAccess, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
 interface AuthGuardProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   requireAdmin?: boolean;
   requireSuperAdmin?: boolean;
   bypassForMasterAdmin?: boolean;
 }
 
 export const AuthGuard = ({ 
-  children, 
+  children,
   requireAdmin = false,
   requireSuperAdmin = false,
   bypassForMasterAdmin = true
@@ -69,7 +69,7 @@ export const AuthGuard = ({
   // Acesso gratuito para testes: sempre concede acesso
   if (isFreeAccessEnabled) {
     console.log("Acesso gratuito para testes concedido - autenticação ignorada");
-    return <>{children}</>;
+    return children ? <>{children}</> : <Outlet />;
   }
 
   // Special bypass for Lovable editing - always return children directly
@@ -77,7 +77,7 @@ export const AuthGuard = ({
   // and grants them super admin privileges
   if (isEditorSuperAdmin) {
     console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
-    return <>{children}</>;
+    return children ? <>{children}</> : <Outlet />;
   }
 
   if (!user) {
@@ -96,5 +96,7 @@ export const AuthGuard = ({
   }
 
   // User is authenticated (and has required permissions if specified)
-  return <>{children}</>;
+  return children ? <>{children}</> : <Outlet />;
 };
+
+export default AuthGuard;
