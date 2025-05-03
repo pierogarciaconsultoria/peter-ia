@@ -3,20 +3,7 @@ import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-// Define task-related interfaces
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  module: string;
-  status: string;
-  employee_id?: string;
-  requester_id?: string;
-  personnel_request_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { Task, TaskManager } from "@/types/tasks";
 
 // Define simple local interfaces instead of importing complex types
 interface SimpleManagerData { 
@@ -161,10 +148,10 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     
     console.log('Creating task with data:', taskData);
     
-    // Actually create the task in database
-    const { error: taskError } = await supabase
-      .from('tasks')
-      .insert(taskData);
+    // Use type assertion to tell TypeScript that this table exists
+    const { error: taskError } = await (supabase
+      .from('tasks' as any)
+      .insert(taskData as any));
       
     if (taskError) {
       console.error('Error creating task:', taskError);
