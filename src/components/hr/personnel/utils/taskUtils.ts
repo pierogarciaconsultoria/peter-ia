@@ -4,6 +4,20 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define task-related interfaces
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  module: string;
+  status: string;
+  employee_id?: string;
+  requester_id?: string;
+  personnel_request_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // Define simple local interfaces instead of importing complex types
 interface SimpleManagerData { 
   id: string 
@@ -134,7 +148,7 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     const taskId = crypto.randomUUID();
     
     // Log structured task data for debugging
-    console.log({
+    const taskData: Task = {
       id: taskId,
       title: taskTitle,
       description: taskDescription,
@@ -143,22 +157,14 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
       employee_id: employeeId,
       requester_id: requesterId,
       personnel_request_id: requestId
-    });
+    };
+    
+    console.log('Creating task with data:', taskData);
     
     // Actually create the task in database
-    // Use type assertion to bypass TypeScript's checking since the table exists but isn't in types
-    const { error: taskError } = await (supabase
-      .from('tasks' as any)
-      .insert({
-        id: taskId,
-        title: taskTitle,
-        description: taskDescription,
-        module: targetModule,
-        status: taskStatus,
-        employee_id: employeeId,
-        requester_id: requesterId,
-        personnel_request_id: requestId
-      }) as any);
+    const { error: taskError } = await supabase
+      .from('tasks')
+      .insert(taskData);
       
     if (taskError) {
       console.error('Error creating task:', taskError);
