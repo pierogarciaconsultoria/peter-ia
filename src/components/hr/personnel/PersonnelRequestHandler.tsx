@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/services/notificationService";
 import { useToast } from "@/hooks/use-toast";
 import { createTaskInModule } from "./utils/taskUtils";
+import { toast } from "sonner";
 
 interface PersonnelRequestHandlerParams {
   onAddRequest: () => void;
@@ -52,9 +53,9 @@ export function PersonnelRequestHandler({
     // Update the requests state with the new request
     setRequests(prevRequests => [newRequest, ...prevRequests]);
     
-    // Creating a task associated with the request with explicit typing
+    // Creating a task associated with the request with explicitly structured data
     try {
-      // Create explicitly typed transfer object
+      // Create properly typed transfer object with all necessary fields
       const taskRequestData = {
         id: newRequest.id,
         type: newRequest.type,
@@ -67,7 +68,12 @@ export function PersonnelRequestHandler({
       
       await createTaskInModule(taskRequestData);
     } catch (error) {
-      console.error("Erro ao criar tarefa:", error);
+      console.error("Error creating task:", error);
+      toast({
+        title: "Aviso",
+        description: "Solicitação criada, mas houve um erro ao criar a tarefa associada.",
+        variant: "destructive"
+      });
     }
     
     // Show a success toast
@@ -80,12 +86,19 @@ export function PersonnelRequestHandler({
     try {
       // Find HR manager employees
       const hrManagers = employees.filter(emp => 
-        emp.department === "Recursos Humanos" && emp.position.includes("Gerente")
+        emp.department === "Recursos Humanos" && 
+        emp.position && 
+        (emp.position.includes("Gerente") || emp.position.includes("Manager"))
       );
       
       // Notify HR managers about the new request
       if (hrManagers && hrManagers.length > 0) {
         for (const manager of hrManagers) {
+          if (!manager.id) {
+            console.warn("Manager without valid ID:", manager);
+            continue;
+          }
+          
           await createNotification(
             manager.id,
             "Nova Solicitação de Movimentação",
@@ -95,6 +108,8 @@ export function PersonnelRequestHandler({
             `/human-resources?activeTab=movimentacao`
           );
         }
+      } else {
+        console.warn("No HR managers found to notify about the new request");
       }
       
       // If this is for a specific employee, notify them as well

@@ -2,6 +2,7 @@
 import { createNotification } from "@/services/notificationService";
 import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Define simple local interfaces instead of importing complex types
 interface SimpleManagerData { 
@@ -19,15 +20,18 @@ interface LocalTaskRequestData {
   justification?: string;
 }
 
+/**
+ * Gets all managers for a specific module
+ */
 export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
   try {
     // Validar o parâmetro de entrada
     if (!module || typeof module !== 'string') {
-      console.warn('Módulo inválido fornecido para getModuleManagers:', module);
+      console.warn('Invalid module provided to getModuleManagers:', module);
       return [];
     }
     
-    // Instead of using RPC, query the database directly
+    // Query the database directly
     const { data, error } = await supabase
       .from('user_profiles')
       .select('id')
@@ -54,7 +58,9 @@ export const getModuleManagers = async (module: string): Promise<SimpleManagerDa
   }
 };
 
-// Helper function with explicit types
+/**
+ * Helper function with explicit types to safely create notifications
+ */
 const safeCreateNotification = async (
   userId: string,
   title: string,
@@ -62,24 +68,31 @@ const safeCreateNotification = async (
   entityType: "task" | "other", 
   entityId: string,
   link?: string
-) => {
+): Promise<void> => {
   try {
-    // Validação extra de ID do usuário
-    if (!userId || typeof userId !== 'string' || userId === 'current-user-id') {
-      console.warn('ID de usuário inválido para notificação:', userId);
+    // Extra validation of user ID
+    if (!userId || typeof userId !== 'string' || userId.length < 10) {
+      console.warn('Invalid user ID for notification:', userId);
       return;
     }
     
-    await createNotification(userId, title, message, entityType, entityId, link);
+    const result = await createNotification(userId, title, message, entityType, entityId, link);
+    if (!result.success) {
+      console.error('Failed to create notification:', result.error);
+    }
   } catch (error) {
     console.error('Error creating notification:', error);
   }
 };
 
+/**
+ * Creates a task in the appropriate module based on the request type
+ */
 export const createTaskInModule = async (taskRequestData: LocalTaskRequestData): Promise<void> => {
-  // Validar dados de entrada
+  // Validate input data
   if (!taskRequestData || typeof taskRequestData !== 'object') {
-    console.error('Dados de solicitação de tarefa inválidos');
+    console.error('Invalid task request data');
+    toast.error("Cannot create task: Invalid request data");
     return;
   }
 
@@ -92,12 +105,11 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
   const employeeName = String(taskRequestData.employeeName || '');
   const requestJustification = String(taskRequestData.justification || '');
   
-  // Finding movement type using primitive string comparison
+  // Finding target module using primitive string comparison
   let targetModule = '';
   let movementLabel = '';
   
-  for (let i = 0; i < movementTypes.length; i++) {
-    const currentType = movementTypes[i];
+  for (const currentType of movementTypes) {
     if (currentType.id === requestType) {
       targetModule = currentType.targetModule;
       movementLabel = currentType.label;
@@ -106,22 +118,24 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
   }
   
   if (!targetModule) {
-    console.warn('Módulo alvo não encontrado para o tipo:', requestType);
+    console.warn('Target module not found for type:', requestType);
+    toast.error(`Cannot create task: Unknown request type "${requestType}"`);
     return;
   }
 
   try {
-    console.log(`Creating task in module: ${targetModule}`);
+    console.log(`Creating task in module: ${targetModule} for movement type: ${movementLabel}`);
     
-    const taskTitle = `${movementLabel} - ${employeeName}`;
-    const taskDescription = requestJustification;
+    const taskTitle = `${movementLabel} - ${employeeName || 'Employee'}`;
+    const taskDescription = requestJustification || 'No justification provided';
     const taskStatus = 'pending';
     
-    // Creating task ID in advance to avoid nested references
+    // Creating task ID in advance for consistent references
     const taskId = crypto.randomUUID();
     
-    // Logging task data without complex object
+    // Log structured task data for debugging
     console.log({
+      id: taskId,
       title: taskTitle,
       description: taskDescription,
       module: targetModule,
@@ -131,40 +145,61 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
       personnel_request_id: requestId
     });
     
-    // Getting managers using our fixed function
+    // Actually create the task in database
+    const { error: taskError } = await supabase
+      .from('tasks')
+      .insert({
+        id: taskId,
+        title: taskTitle,
+        description: taskDescription,
+        module: targetModule,
+        status: taskStatus,
+        employee_id: employeeId,
+        requester_id: requesterId,
+        personnel_request_id: requestId
+      });
+      
+    if (taskError) {
+      console.error('Error creating task:', taskError);
+      toast.error("Failed to create task in database");
+      return;
+    }
+    
+    // Get managers for the target module
     const managers = await getModuleManagers(targetModule);
     
     if (managers.length === 0) {
-      console.warn(`Nenhum gerente encontrado para o módulo: ${targetModule}`);
+      console.warn(`No managers found for module: ${targetModule}`);
+      toast.warning(`Task created but no module managers found to notify for ${targetModule}`);
     }
     
-    // Processing notifications with explicit typing
+    // Process notifications for all managers with explicit typing
     for (const manager of managers) {
       if (!manager || typeof manager.id !== 'string' || !manager.id) {
-        console.warn('Dados de gerente inválidos:', manager);
+        console.warn('Invalid manager data:', manager);
         continue;
       }
       
       const managerId = manager.id;
       
-      const notificationTitle = `Nova tarefa de ${movementLabel}`;
-      const notificationMessage = `Uma nova tarefa foi criada para ${employeeName || 'um colaborador'}`;
+      const notificationTitle = `New ${movementLabel} task`;
+      const notificationMessage = `A new task has been created for ${employeeName || 'an employee'}`;
+      const notificationLink = `/tasks/${taskId}`;
       
-      try {
-        // Using safeCreateNotification instead of direct createNotification
-        await safeCreateNotification(
-          managerId,
-          notificationTitle,
-          notificationMessage,
-          "task",  // explicit type
-          taskId
-        );
-      } catch (notifError) {
-        console.error('Error sending notification:', notifError);
-      }
+      // Use safeCreateNotification instead of direct createNotification
+      await safeCreateNotification(
+        managerId,
+        notificationTitle,
+        notificationMessage,
+        "task",
+        taskId,
+        notificationLink
+      );
     }
+    
+    toast.success("Task created and notifications sent successfully");
   } catch (error) {
-    console.error('Erro ao criar tarefa:', error instanceof Error ? error.message : String(error));
-    throw error;
+    console.error('Error creating task:', error instanceof Error ? error.message : String(error));
+    toast.error("Failed to create task: Unexpected error");
   }
 };
