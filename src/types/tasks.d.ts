@@ -2,8 +2,8 @@
 export interface Task {
   id: string;
   title: string;
-  description: string;
-  module: string;
+  description?: string;
+  module?: string;
   status: string;
   employee_id?: string;
   requester_id?: string;

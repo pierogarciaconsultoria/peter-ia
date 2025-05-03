@@ -1,182 +1,182 @@
 import {
-  BarChart3,
-  Building2,
-  Calendar,
-  CheckSquare,
-  Cog,
-  File,
   Home,
-  ListChecks,
-  LucideIcon,
-  Network,
-  ScrollText,
-  User2,
-  Users,
-  AlertTriangle,
-  PackageCheck,
-  LayoutDashboard,
   FileText,
-  TrendingUp,
-  MessageSquare,
+  Users,
+  Calendar,
   Settings,
-  HelpCircle,
-  GitBranch,
   ClipboardCheck,
-  ClipboardList,
-  Shield,
-  Video,
-  Users2,
-  Package
+  LineChart,
+  Award,
+  AlertTriangle,
+  BookOpen,
+  BriefcaseBusiness,
+  Gauge,
+  LucideIcon,
+  CheckSquare,
+  BarChart3,
+  SlidersHorizontal,
+  Building,
+  Upload,
+  Clipboard,
+  FileBox,
+  Truck,
+  ThumbsUp,
+  Cog,
+  CalendarDays,
+  Check,
+  CalendarClock,
 } from "lucide-react";
 
-export interface MenuItem {
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type MenuItem = {
   title: string;
-  href: string;
   icon: LucideIcon;
-  modulo?: string; // Chave do módulo para verificação de permissão
-  adminOnly?: boolean; // Se o item deve ser mostrado apenas para admins
-}
+  href: string;
+  children?: MenuItem[];
+  requiredRole?: string;
+};
 
 export const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Landing Page",
-    href: "/landing",
     icon: Home,
+    href: "/dashboard",
   },
   {
-    title: "Processo",
-    href: "/processo",
-    icon: GitBranch,
-    modulo: "processo",
+    title: "Processos",
+    icon: FileText,
+    href: "#",
+    children: [
+      { title: "Mapeamento de Processos", icon: FileText, href: "/process-form" },
+    ],
   },
   {
-    title: "Planejamento Estratégico",
-    href: "/strategic-planning",
-    icon: TrendingUp,
-    modulo: "planejamento_estrategico",
+    title: "ISO Templates",
+    icon: FileBox,
+    href: "#",
+    children: [
+      { title: "ISO 9001:2015", icon: FileBox, href: "/iso-9001" },
+      { title: "ISO 14001:2015", icon: FileBox, href: "/iso-14001" },
+      { title: "ISO 45001:2018", icon: FileBox, href: "/iso-45001" },
+    ],
   },
   {
-    title: "Contexto da Organização",
-    href: "/organization-context",
-    icon: Building2,
-    modulo: "contexto_organizacao",
-  },
-  {
-    title: "Análise Crítica",
-    href: "/critical-analysis",
-    icon: BarChart3,
-    modulo: "analise_critica",
-  },
-  {
-    title: "Gente e Gestão",
-    href: "/human-resources",
+    title: "Recursos Humanos",
     icon: Users,
-    modulo: "gente_gestao",
-  },
-  {
-    title: "Reuniões",
-    href: "/reunioes",
-    icon: Users2,
-    modulo: "reunioes",
-  },
-  {
-    title: "Plano de Ação",
-    href: "/action-schedule",
-    icon: ClipboardList,
-    modulo: "plano_acao",
+    href: "#",
+    children: [
+      { title: "Funcionários", icon: Users, href: "/human-resources/employees" },
+      { title: "Cargos", icon: BriefcaseBusiness, href: "/human-resources/positions" },
+      { title: "Solicitações", icon: Clipboard, href: "/human-resources/requests" },
+    ],
   },
   {
     title: "Não Conformidades",
-    href: "/non-compliance",
     icon: AlertTriangle,
-    modulo: "nao_conformidades",
+    href: "/non-compliance",
   },
   {
-    title: "Produtos Não Conformes",
-    href: "/non-conforming-products",
-    icon: PackageCheck,
-    modulo: "produtos_nao_conformes",
+    title: "Plano de Ação",
+    icon: Calendar,
+    href: "/action-schedule",
   },
   {
-    title: "Controle de Qualidade",
-    href: "/quality-control",
+    title: "Auditoria",
+    icon: CheckSquare,
+    href: "#",
+    children: [
+      { title: "Cronograma de Auditoria", icon: CalendarClock, href: "/audit-schedule" },
+      { title: "Auditoria Externa", icon: Check, href: "/external-audit" },
+    ],
+  },
+  {
+    title: "Planejamento Estratégico",
+    icon: LineChart,
+    href: "/strategic-planning",
+  },
+  {
+    title: "Análise Crítica",
     icon: ClipboardCheck,
-    modulo: "controle_qualidade",
+    href: "/critical-analysis",
   },
   {
-    title: "Auditoria Externa",
-    href: "/external-audit",
-    icon: Shield,
-    modulo: "auditoria_externa",
+    title: "Contexto da Organização",
+    icon: Building,
+    href: "/organization-context",
   },
   {
-    title: "Indicadores de Desempenho",
-    href: "/performance-indicators",
-    icon: BarChart3,
-    modulo: "indicadores_desempenho",
+    title: "Gerenciamento de Riscos",
+    icon: AlertTriangle,
+    href: "/risk-management",
   },
   {
     title: "Reclamações de Clientes",
+    icon: ThumbsUp,
     href: "/customer-complaints",
-    icon: MessageSquare,
-    modulo: "reclamacoes_clientes",
+  },
+  {
+    title: "Indicadores de Desempenho",
+    icon: Gauge,
+    href: "/performance-indicators",
+  },
+  {
+    title: "Controle de Qualidade",
+    icon: SlidersHorizontal,
+    href: "/quality-control",
   },
   {
     title: "Avaliação de Fornecedores",
+    icon: Truck,
     href: "/supplier-evaluation",
-    icon: Network,
-    modulo: "avaliacao_fornecedores",
+  },
+  {
+    title: "Reuniões",
+    icon: CalendarDays,
+    href: "/reunioes",
+  },
+  {
+    title: "Controle de Treinamento",
+    icon: BookOpen,
+    href: "/training-control",
+  },
+  {
+    title: "Produtos Não Conformes",
+    icon: AlertTriangle,
+    href: "/non-conforming-products",
   },
   {
     title: "Calibração de Equipamentos",
-    href: "/equipment-calibration",
     icon: Cog,
-    modulo: "calibracao_equipamentos",
+    href: "/equipment-calibration",
   },
   {
     title: "Inspeção de Matéria Prima",
+    icon: BarChart3,
     href: "/raw-material-inspection",
-    icon: Package,
-    modulo: "inspecao_materia_prima",
-  },
-  {
-    title: "Agenda de Auditoria",
-    href: "/audit-schedule",
-    icon: ListChecks,
-    modulo: "agenda_auditoria",
-  },
-  {
-    title: "Gestão de Riscos",
-    href: "/risk-management",
-    icon: AlertTriangle,
-    modulo: "gestao_riscos",
   },
   {
     title: "Pesquisa de Satisfação",
+    icon: Award,
     href: "/satisfaction-survey",
-    icon: MessageSquare,
-    modulo: "pesquisa_satisfacao",
   },
   {
-    title: "Documentos",
-    href: "/documents",
-    icon: FileText,
-    modulo: "documentos",
-  },
-  {
-    title: "Admin",
-    href: "/admin",
+    title: "Ambiente",
     icon: Settings,
-    adminOnly: true,
+    href: "/ambiente",
   },
   {
-    title: "Ajuda",
-    href: "/help",
-    icon: HelpCircle,
+    title: "Tarefas",
+    icon: CheckSquare,
+    href: "/tasks",
   },
 ];
+
+export default menuItems;

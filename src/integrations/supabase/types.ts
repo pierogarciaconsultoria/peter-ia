@@ -4579,6 +4579,44 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projetos_tap: {
         Row: {
           company_id: string | null
@@ -5318,6 +5356,45 @@ export type Database = {
           support_score?: number | null
           total_score?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          employee_id: string | null
+          id: string
+          module: string | null
+          personnel_request_id: string | null
+          requester_id: string | null
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          employee_id?: string | null
+          id?: string
+          module?: string | null
+          personnel_request_id?: string | null
+          requester_id?: string | null
+          status: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          employee_id?: string | null
+          id?: string
+          module?: string | null
+          personnel_request_id?: string | null
+          requester_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

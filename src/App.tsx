@@ -1,310 +1,94 @@
-import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
-import { Toaster } from "sonner";
 
-import Auth from "./pages/Auth";
-import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard";
-import Admin from "./pages/Admin";
-import { AuthProvider } from "@/hooks/useAuth";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
-import { Navigation } from "@/components/Navigation";
-import { EmployeeOnboarding } from "@/components/hr/EmployeeOnboarding";
-import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { PermissionGuard } from "@/components/PermissionGuard";
 
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Profile from "./pages/Profile";
-import ExternalAudit from "./pages/ExternalAudit";
-import { CookieConsent } from "./components/CookieConsent";
-import { PersonnelMovement } from "@/components/hr/PersonnelMovement";
+import Home from '@/pages/Home';
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import Dashboard from '@/pages/Dashboard';
+import Profile from '@/pages/Profile';
+import DocumentUpload from '@/pages/DocumentUpload';
+import Documents from '@/pages/Documents';
+import HumanResources from '@/pages/HumanResources';
+import ProcessFormPage from '@/pages/ProcessFormPage';
+import ProcessoPage from '@/pages/ProcessoPage';
+import NonCompliance from '@/pages/NonCompliance';
+import ActionSchedule from '@/pages/ActionSchedule';
+import AuditSchedule from '@/pages/AuditSchedule';
+import ExternalAudit from '@/pages/ExternalAudit';
+import StrategicPlanning from '@/pages/StrategicPlanning';
+import CriticalAnalysis from '@/pages/CriticalAnalysis';
+import OrganizationContext from '@/pages/OrganizationContext';
+import RiskManagement from '@/pages/RiskManagement';
+import CustomerComplaints from '@/pages/CustomerComplaints';
+import PerformanceIndicators from '@/pages/PerformanceIndicators';
+import QualityControl from '@/pages/QualityControl';
+import SupplierEvaluation from '@/pages/SupplierEvaluation';
+import Reunioes from '@/pages/Reunioes';
+import TrainingControl from '@/pages/TrainingControl';
+import NonConformingProducts from '@/pages/NonConformingProducts';
+import EquipmentCalibration from '@/pages/EquipmentCalibration';
+import RawMaterialInspection from '@/pages/RawMaterialInspection';
+import SatisfactionSurvey from '@/pages/SatisfactionSurvey';
+import Admin from '@/pages/Admin';
+import Ambiente from '@/pages/Ambiente';
+import ExternalDiscAssessment from '@/pages/ExternalDiscAssessment';
+import Tasks from '@/pages/Tasks'; // Importando a página de tarefas
 
-import HumanResources from "./pages/HumanResources";
-import ActionSchedule from "./pages/ActionSchedule";
-import NonCompliance from "./pages/NonCompliance";
-import NonConformingProducts from "./pages/NonConformingProducts";
-import QualityControl from "./pages/QualityControl";
-import PerformanceIndicators from "./pages/PerformanceIndicators";
-import RiskManagement from "./pages/RiskManagement";
-import SatisfactionSurvey from "./pages/SatisfactionSurvey";
-import Documents from "./pages/Documents";
-import ProcessoPage from "./pages/ProcessoPage";
-import ProcessFormPage from "./pages/ProcessFormPage";
-import OrganizationContext from "./pages/OrganizationContext";
-import StrategicPlanning from "./pages/StrategicPlanning";
-import AuditSchedule from "./pages/AuditSchedule";
-import CustomerComplaints from "./pages/CustomerComplaints";
-import SupplierEvaluation from "./pages/SupplierEvaluation";
-import EquipmentCalibration from "./pages/EquipmentCalibration";
-import RawMaterialInspection from "./pages/RawMaterialInspection";
-import TrainingControl from "./pages/TrainingControl";
-import Reunioes from "./pages/Reunioes";
-import ExternalDiscAssessment from "./pages/ExternalDiscAssessment";
-import { ExternalAssessment } from "@/components/hr/recruitment/ExternalAssessment";
+import './App.css';
 
 function App() {
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-  const isEditor = isLovableEditor();
-
-  useEffect(() => {
-    if (isEditor) {
-      console.log("Acesso total concedido - usuário está no Lovable Editor");
-    }
-    
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [isEditor]);
+  const { toast } = useToast();
 
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/landing" element={<LandingPage />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route
-            path="/"
-            element={
-              <AuthGuard>
-                <Dashboard />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <AuthGuard requireAdmin bypassForMasterAdmin={false}>
-                <Admin />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/onboarding"
-            element={
-              <AuthGuard requireAdmin>
-                <EmployeeOnboarding />
-              </AuthGuard>
-            }
-          />
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
 
-          <Route
-            path="/external-audit"
-            element={
-              <AuthGuard>
-                <ExternalAudit />
-              </AuthGuard>
-            }
-          />
+        {/* Rotas protegidas com AuthGuard */}
+        <Route element={<AuthGuard />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/document-upload" element={<DocumentUpload />} />
+          <Route path="/human-resources/*" element={<HumanResources />} />
+          <Route path="/process-form" element={<ProcessFormPage />} />
+          <Route path="/process/:id" element={<ProcessoPage />} />
+          <Route path="/non-compliance" element={<NonCompliance />} />
+          <Route path="/action-schedule" element={<ActionSchedule />} />
+          <Route path="/audit-schedule" element={<AuditSchedule />} />
+          <Route path="/external-audit" element={<ExternalAudit />} />
+          <Route path="/strategic-planning" element={<StrategicPlanning />} />
+          <Route path="/critical-analysis" element={<CriticalAnalysis />} />
+          <Route path="/organization-context" element={<OrganizationContext />} />
+          <Route path="/risk-management" element={<RiskManagement />} />
+          <Route path="/customer-complaints" element={<CustomerComplaints />} />
+          <Route path="/performance-indicators" element={<PerformanceIndicators />} />
+          <Route path="/quality-control" element={<QualityControl />} />
+          <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
+          <Route path="/reunioes" element={<Reunioes />} />
+          <Route path="/training-control" element={<TrainingControl />} />
+          <Route path="/non-conforming-products" element={<NonConformingProducts />} />
+          <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
+          <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
+          <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
+          <Route path="/ambiente" element={<Ambiente />} />
+          <Route path="/tasks" element={<Tasks />} /> {/* Nova rota para tarefas */}
 
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-
-          <Route
-            path="/profile"
-            element={
-              <AuthGuard>
-                <Profile />
-              </AuthGuard>
-            }
-          />
-
-          <Route
-            path="/processo"
-            element={
-              <AuthGuard>
-                <ProcessoPage />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/processo/:id"
-            element={
-              <AuthGuard>
-                <ProcessFormPage />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/strategic-planning"
-            element={
-              <AuthGuard>
-                <StrategicPlanning />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/organization-context"
-            element={
-              <AuthGuard>
-                <OrganizationContext />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/critical-analysis"
-            element={
-              <AuthGuard>
-                <Dashboard /> {/* Temporary until this page exists */}
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/human-resources"
-            element={
-              <AuthGuard>
-                <HumanResources />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/reunioes"
-            element={
-              <AuthGuard>
-                <Reunioes />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/action-schedule"
-            element={
-              <AuthGuard>
-                <ActionSchedule />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/non-compliance"
-            element={
-              <AuthGuard>
-                <NonCompliance />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/non-conforming-products"
-            element={
-              <AuthGuard>
-                <NonConformingProducts />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/quality-control"
-            element={
-              <AuthGuard>
-                <QualityControl />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/audit-schedule"
-            element={
-              <AuthGuard>
-                <AuditSchedule />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/performance-indicators"
-            element={
-              <AuthGuard>
-                <PerformanceIndicators />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/customer-complaints"
-            element={
-              <AuthGuard>
-                <CustomerComplaints />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/supplier-evaluation"
-            element={
-              <AuthGuard>
-                <SupplierEvaluation />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/equipment-calibration"
-            element={
-              <AuthGuard>
-                <EquipmentCalibration />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/raw-material-inspection"
-            element={
-              <AuthGuard>
-                <RawMaterialInspection />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/risk-management"
-            element={
-              <AuthGuard>
-                <RiskManagement />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/satisfaction-survey"
-            element={
-              <AuthGuard>
-                <SatisfactionSurvey />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/documents"
-            element={
-              <AuthGuard>
-                <Documents />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/help"
-            element={
-              <AuthGuard>
-                <Dashboard /> {/* Temporary until this page exists */}
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/training-control"
-            element={
-              <AuthGuard>
-                <TrainingControl />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/disc-assessment/:token"
-            element={<ExternalDiscAssessment />}
-          />
-          <Route path="/assessments/:token" element={<ExternalAssessment />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-        {isDesktop && <Navigation />}
-        <CookieConsent />
-        <Toaster />
-      </Router>
-    </AuthProvider>
+          {/* Rotas protegidas com PermissionGuard */}
+          <Route element={<PermissionGuard requiredRole="admin" />}>
+            <Route path="/admin/*" element={<Admin />} />
+          </Route>
+        </Route>
+      </Routes>
+      <Toaster />
+    </Router>
   );
 }
 
