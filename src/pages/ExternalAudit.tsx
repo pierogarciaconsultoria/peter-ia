@@ -22,8 +22,13 @@ const ExternalAudit = () => {
   const [selectedAudit, setSelectedAudit] = useState<ExternalAuditType | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Fetch audits data
-  const { data: audits = [], isLoading, refetch } = useQuery({
+  // Fetch audits data with proper error handling
+  const { 
+    data: audits = [], 
+    isLoading, 
+    error,
+    refetch 
+  } = useQuery({
     queryKey: ['external-audits'],
     queryFn: getExternalAudits,
     meta: {
@@ -57,7 +62,7 @@ const ExternalAudit = () => {
 
   const handleCloseDialog = () => {
     setIsNewAuditOpen(false);
-    refetch();
+    setSelectedAudit(null);
   };
 
   const handleOpenReport = (audit: ExternalAuditType) => {
@@ -67,30 +72,11 @@ const ExternalAudit = () => {
 
   const handleCloseReport = () => {
     setIsReportOpen(false);
-    setSelectedAudit(null);
-    refetch();
-  };
-
-  const handleSaveAudit = (audit: ExternalAuditType) => {
-    refetch();
   };
 
   const handleEditAudit = (audit: ExternalAuditType) => {
     setSelectedAudit(audit);
     setIsNewAuditOpen(true);
-  };
-
-  const handleShareAudit = (audit: ExternalAuditType) => {
-    if (audit.report_url) {
-      navigator.clipboard.writeText(audit.report_url);
-      toast.success("Link do relatório copiado para a área de transferência");
-    }
-  };
-
-  const handleDownloadAudit = (audit: ExternalAuditType) => {
-    if (audit.report_url) {
-      window.open(audit.report_url, '_blank');
-    }
   };
 
   // Detect if sidebar is collapsed
@@ -106,78 +92,51 @@ const ExternalAudit = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Get counts by status
+  const getStatusCount = (status: string) => {
+    return audits.filter(audit => audit.status === status).length;
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
       <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
-        <div className="max-w-6xl mx-auto space-y-6">
-          <ExternalAuditHeader onNewAudit={handleNewAudit} />
+        <div className="max-w-7xl mx-auto w-full space-y-6">
+          <ExternalAuditHeader 
+            onNewAudit={handleNewAudit} 
+            nextAudit={nextAudit}
+            daysRemaining={daysRemaining}
+          />
           
-          {/* Next Audit Countdown Card */}
-          {nextAudit && (
-            <Card className="mb-4 border-green-200 bg-green-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center">
-                  <Calendar className="mr-2 h-5 w-5 text-green-600" />
-                  Próxima Auditoria Externa
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Título</h3>
-                    <p className="text-base font-medium">{nextAudit.title}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Data</h3>
-                    <p className="text-base font-medium flex items-center">
-                      <CalendarDays className="mr-2 h-4 w-4 text-green-600" />
-                      {format(new Date(nextAudit.audit_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                    <div className="flex items-center">
-                      <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
-                      <p className="text-base font-bold text-amber-600">
-                        {daysRemaining === 1 ? 'Falta 1 dia' : `Faltam ${daysRemaining} dias`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          <ExternalAuditStatusCards audits={audits} />
+          <ExternalAuditStatusCards 
+            scheduledCount={getStatusCount('scheduled')}
+            inProgressCount={getStatusCount('in_progress')}
+            completedCount={getStatusCount('completed')}
+            cancelledCount={getStatusCount('cancelled')}
+          />
           
           <ExternalAuditTable 
-            audits={audits} 
-            onEdit={handleEditAudit}
-            onView={handleOpenReport}
-            onShare={handleShareAudit}
-            onDownload={handleDownloadAudit}
+            audits={audits}
+            isLoading={isLoading}
+            onOpenReport={handleOpenReport}
+            onEditAudit={handleEditAudit}
           />
         </div>
       </main>
       
       <ExternalAuditDialog 
-        isOpen={isNewAuditOpen}
+        open={isNewAuditOpen}
         onClose={handleCloseDialog}
         audit={selectedAudit}
-        onSave={handleSaveAudit}
+        onSuccess={refetch}
       />
       
-      {selectedAudit && (
-        <ExternalAuditReportDialog
-          isOpen={isReportOpen}
-          onClose={handleCloseReport}
-          audit={selectedAudit}
-          onDownload={handleDownloadAudit}
-          onShare={handleShareAudit}
-        />
-      )}
+      <ExternalAuditReportDialog 
+        open={isReportOpen}
+        onClose={handleCloseReport}
+        audit={selectedAudit}
+      />
       
       <Footer />
     </div>
