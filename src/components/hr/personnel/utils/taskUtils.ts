@@ -4,6 +4,8 @@ import { movementTypes } from "../form/MovementTypeSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Task, TaskManager } from "@/types/tasks";
+import { getModuleManagers } from "./managerUtils";
+import { safeCreateNotification } from "./notificationUtils";
 
 // Define simple local interfaces instead of importing complex types
 interface SimpleManagerData { 
@@ -20,71 +22,6 @@ interface LocalTaskRequestData {
   employeeName?: string;
   justification?: string;
 }
-
-/**
- * Gets all managers for a specific module
- */
-export const getModuleManagers = async (module: string): Promise<SimpleManagerData[]> => {
-  try {
-    // Validar o parâmetro de entrada
-    if (!module || typeof module !== 'string') {
-      console.warn('Invalid module provided to getModuleManagers:', module);
-      return [];
-    }
-    
-    // Query the database directly
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('role', 'manager')
-      .contains('allowed_modules', [module]); // Using contains operator for array check
-    
-    if (error) {
-      console.error('Error fetching module managers:', error.message);
-      return [];
-    }
-    
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      console.warn('No manager data found for module:', module);
-      return [];
-    }
-    
-    // Safely transform data with proper type checking
-    return data
-      .filter(item => item && typeof item === 'object' && 'id' in item && item.id && typeof item.id === 'string')
-      .map(item => ({ id: String(item.id) }));
-  } catch (err) {
-    console.error('Exception when fetching module managers:', err instanceof Error ? err.message : 'Unknown error');
-    return [];
-  }
-};
-
-/**
- * Helper function with explicit types to safely create notifications
- */
-const safeCreateNotification = async (
-  userId: string,
-  title: string,
-  message: string,
-  entityType: "task" | "other", 
-  entityId: string,
-  link?: string
-): Promise<void> => {
-  try {
-    // Extra validation of user ID
-    if (!userId || typeof userId !== 'string' || userId.length < 10) {
-      console.warn('Invalid user ID for notification:', userId);
-      return;
-    }
-    
-    const result = await createNotification(userId, title, message, entityType, entityId, link);
-    if (!result.success) {
-      console.error('Failed to create notification:', result.error);
-    }
-  } catch (error) {
-    console.error('Error creating notification:', error);
-  }
-};
 
 /**
  * Creates a task in the appropriate module based on the request type
@@ -168,28 +105,7 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     }
     
     // Process notifications for all managers with explicit typing
-    for (const manager of managers) {
-      if (!manager || typeof manager.id !== 'string' || !manager.id) {
-        console.warn('Invalid manager data:', manager);
-        continue;
-      }
-      
-      const managerId = manager.id;
-      
-      const notificationTitle = `New ${movementLabel} task`;
-      const notificationMessage = `A new task has been created for ${employeeName || 'an employee'}`;
-      const notificationLink = `/tasks/${taskId}`;
-      
-      // Use safeCreateNotification instead of direct createNotification
-      await safeCreateNotification(
-        managerId,
-        notificationTitle,
-        notificationMessage,
-        "task",
-        taskId,
-        notificationLink
-      );
-    }
+    await notifyManagers(managers, movementLabel, employeeName, taskId);
     
     toast.success("Task created and notifications sent successfully");
   } catch (error) {
@@ -197,3 +113,36 @@ export const createTaskInModule = async (taskRequestData: LocalTaskRequestData):
     toast.error("Failed to create task: Unexpected error");
   }
 };
+
+/**
+ * Send notifications to all managers about a new task
+ */
+async function notifyManagers(
+  managers: TaskManager[], 
+  movementLabel: string, 
+  employeeName: string, 
+  taskId: string
+): Promise<void> {
+  for (const manager of managers) {
+    if (!manager || typeof manager.id !== 'string' || !manager.id) {
+      console.warn('Invalid manager data:', manager);
+      continue;
+    }
+    
+    const managerId = manager.id;
+    
+    const notificationTitle = `New ${movementLabel} task`;
+    const notificationMessage = `A new task has been created for ${employeeName || 'an employee'}`;
+    const notificationLink = `/tasks/${taskId}`;
+    
+    // Use safeCreateNotification instead of direct createNotification
+    await safeCreateNotification(
+      managerId,
+      notificationTitle,
+      notificationMessage,
+      "task",
+      taskId,
+      notificationLink
+    );
+  }
+}
