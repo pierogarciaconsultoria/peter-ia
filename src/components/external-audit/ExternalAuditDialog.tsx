@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Dialog,
@@ -11,15 +10,23 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload } from "lucide-react";
-import { ExternalAudit, uploadAuditReport, updateExternalAudit } from "@/services/externalAuditService";
+import { 
+  ExternalAudit, 
+  uploadAuditReport, 
+  updateExternalAudit 
+} from "@/services/externalAuditService";
 import { ExternalAuditForm } from "./ExternalAuditForm";
-import { useQueryClient } from "@tanstack/react-query";
+import { 
+  useQueryClient, 
+  QueryObserverResult, 
+  RefetchOptions 
+} from "@tanstack/react-query";
 
 interface ExternalAuditDialogProps {
   audit: ExternalAudit | null;
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (options?: RefetchOptions) => Promise<QueryObserverResult<ExternalAudit[], Error>>;
 }
 
 export function ExternalAuditDialog({ 
@@ -40,7 +47,7 @@ export function ExternalAuditDialog({
     try {
       const updated = await updateExternalAudit(audit.id, values);
       queryClient.invalidateQueries({ queryKey: ['external-audits'] });
-      onSuccess();
+      await onSuccess();
       toast.success("Auditoria atualizada com sucesso");
       onClose();
     } catch (error) {
@@ -61,7 +68,7 @@ export function ExternalAuditDialog({
       const fileUrl = await uploadAuditReport(file, audit.id);
       const updated = await updateExternalAudit(audit.id, { report_url: fileUrl });
       queryClient.invalidateQueries({ queryKey: ['external-audits'] });
-      onSuccess();
+      await onSuccess();
       toast.success("Relatório carregado com sucesso");
     } catch (error) {
       console.error(error);
