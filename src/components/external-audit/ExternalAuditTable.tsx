@@ -16,25 +16,22 @@ import {
   Calendar,
   Edit,
   FileText,
-  Download,
-  Share2
+  Loader2
 } from "lucide-react";
 import { ExternalAudit } from "@/services/externalAuditService";
 
 interface ExternalAuditTableProps {
   audits: ExternalAudit[];
-  onEdit: (audit: ExternalAudit) => void;
-  onView: (audit: ExternalAudit) => void;
-  onShare: (audit: ExternalAudit) => void;
-  onDownload: (audit: ExternalAudit) => void;
+  isLoading: boolean;
+  onOpenReport: (audit: ExternalAudit) => void;
+  onEditAudit: (audit: ExternalAudit) => void;
 }
 
 export function ExternalAuditTable({ 
   audits, 
-  onEdit, 
-  onView, 
-  onShare, 
-  onDownload 
+  isLoading,
+  onOpenReport,
+  onEditAudit
 }: ExternalAuditTableProps) {
   const getStatusBadge = (status: ExternalAudit['status']) => {
     switch (status) {
@@ -58,6 +55,15 @@ export function ExternalAuditTable({
       return "Data inválida";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="text-center p-8 border rounded-md">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+        <p>Carregando auditorias...</p>
+      </div>
+    );
+  }
 
   if (!audits.length) {
     return (
@@ -97,7 +103,7 @@ export function ExternalAuditTable({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => onView(audit)}
+                    onClick={() => onOpenReport(audit)}
                     title="Visualizar relatório"
                   >
                     <FileText className="h-4 w-4" />
@@ -105,31 +111,11 @@ export function ExternalAuditTable({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={() => onEdit(audit)}
+                    onClick={() => onEditAudit(audit)}
                     title="Editar auditoria"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  {audit.report_url && (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => onShare(audit)}
-                        title="Compartilhar relatório"
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => onDownload(audit)}
-                        title="Baixar relatório"
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
                 </div>
               </TableCell>
             </TableRow>

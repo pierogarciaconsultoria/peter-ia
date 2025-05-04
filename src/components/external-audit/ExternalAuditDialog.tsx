@@ -13,23 +13,25 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Upload } from "lucide-react";
 import { ExternalAudit, uploadAuditReport, updateExternalAudit } from "@/services/externalAuditService";
 import { ExternalAuditForm } from "./ExternalAuditForm";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ExternalAuditDialogProps {
   audit: ExternalAudit | null;
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onSave: (audit: ExternalAudit) => void;
+  onSuccess: () => void;
 }
 
 export function ExternalAuditDialog({ 
   audit, 
-  isOpen, 
+  open, 
   onClose, 
-  onSave 
+  onSuccess 
 }: ExternalAuditDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (values: any) => {
     if (!audit) return;
@@ -37,7 +39,8 @@ export function ExternalAuditDialog({
     setIsSubmitting(true);
     try {
       const updated = await updateExternalAudit(audit.id, values);
-      onSave(updated);
+      queryClient.invalidateQueries({ queryKey: ['external-audits'] });
+      onSuccess();
       toast.success("Auditoria atualizada com sucesso");
       onClose();
     } catch (error) {
@@ -57,7 +60,8 @@ export function ExternalAuditDialog({
     try {
       const fileUrl = await uploadAuditReport(file, audit.id);
       const updated = await updateExternalAudit(audit.id, { report_url: fileUrl });
-      onSave(updated);
+      queryClient.invalidateQueries({ queryKey: ['external-audits'] });
+      onSuccess();
       toast.success("Relatório carregado com sucesso");
     } catch (error) {
       console.error(error);
@@ -70,7 +74,7 @@ export function ExternalAuditDialog({
   if (!audit) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">{audit.title}</DialogTitle>

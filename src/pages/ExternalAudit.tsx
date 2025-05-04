@@ -11,10 +11,7 @@ import { ExternalAudit as ExternalAuditType } from "@/services/externalAuditServ
 import { useQuery } from "@tanstack/react-query";
 import { getExternalAudits } from "@/services/externalAuditService";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Calendar, CalendarDays } from "lucide-react";
-import { differenceInDays, format, formatDistanceToNow, isAfter } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { differenceInDays, isAfter } from "date-fns";
 
 const ExternalAudit = () => {
   const [isNewAuditOpen, setIsNewAuditOpen] = useState(false);

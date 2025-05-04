@@ -26,18 +26,14 @@ import { ExternalAudit } from "@/services/externalAuditService";
 
 interface ExternalAuditReportDialogProps {
   audit: ExternalAudit | null;
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onDownload: (audit: ExternalAudit) => void;
-  onShare: (audit: ExternalAudit) => void;
 }
 
 export function ExternalAuditReportDialog({
   audit,
-  isOpen,
-  onClose,
-  onDownload,
-  onShare
+  open,
+  onClose
 }: ExternalAuditReportDialogProps) {
   if (!audit) return null;
 
@@ -65,8 +61,30 @@ export function ExternalAuditReportDialog({
     }
   };
 
+  const handleDownload = () => {
+    if (audit.report_url) {
+      window.open(audit.report_url, '_blank');
+    }
+  };
+
+  const handleShare = async () => {
+    if (audit.report_url) {
+      try {
+        await navigator.clipboard.writeText(audit.report_url);
+        // Using setTimeout to avoid importing toast if not already imported
+        setTimeout(() => {
+          if (window.toast) {
+            window.toast.success("Link copiado para a área de transferência");
+          }
+        }, 0);
+      } catch (err) {
+        console.error("Erro ao copiar link:", err);
+      }
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Relatório de Auditoria</DialogTitle>
@@ -166,7 +184,7 @@ export function ExternalAuditReportDialog({
             {audit.report_url && (
               <>
                 <Button 
-                  onClick={() => onShare(audit)} 
+                  onClick={handleShare} 
                   variant="outline"
                   className="gap-1"
                 >
@@ -174,7 +192,7 @@ export function ExternalAuditReportDialog({
                   Compartilhar
                 </Button>
                 <Button 
-                  onClick={() => onDownload(audit)}
+                  onClick={handleDownload}
                   className="gap-1"
                 >
                   <Download className="h-4 w-4" />

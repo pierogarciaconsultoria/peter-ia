@@ -6,43 +6,45 @@ import {
   Clock, 
   AlertTriangle 
 } from "lucide-react";
-import { ExternalAudit } from "@/services/externalAuditService";
 
 interface ExternalAuditStatusCardsProps {
-  audits: ExternalAudit[];
+  scheduledCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  cancelledCount: number;
 }
 
-export function ExternalAuditStatusCards({ audits }: ExternalAuditStatusCardsProps) {
-  const scheduled = audits.filter(audit => audit.status === 'scheduled').length;
-  const inProgress = audits.filter(audit => audit.status === 'in_progress').length;
-  const completed = audits.filter(audit => audit.status === 'completed').length;
-  const canceled = audits.filter(audit => audit.status === 'canceled').length;
-
+export function ExternalAuditStatusCards({ 
+  scheduledCount,
+  inProgressCount,
+  completedCount,
+  cancelledCount
+}: ExternalAuditStatusCardsProps) {
   const cards = [
     {
       title: "Agendadas",
-      value: scheduled,
+      value: scheduledCount,
       icon: Calendar,
       color: "bg-blue-100 text-blue-800",
       iconColor: "text-blue-500"
     },
     {
       title: "Em Andamento",
-      value: inProgress,
+      value: inProgressCount,
       icon: Clock,
       color: "bg-yellow-100 text-yellow-800",
       iconColor: "text-yellow-500"
     },
     {
       title: "Concluídas",
-      value: completed,
+      value: completedCount,
       icon: ClipboardCheck,
       color: "bg-green-100 text-green-800",
       iconColor: "text-green-500"
     },
     {
       title: "Canceladas",
-      value: canceled,
+      value: cancelledCount,
       icon: AlertTriangle,
       color: "bg-red-100 text-red-800",
       iconColor: "text-red-500"
