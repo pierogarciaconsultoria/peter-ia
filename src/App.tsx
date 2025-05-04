@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
 import { PermissionGuard } from "@/components/PermissionGuard";
+import { SidebarProvider } from "@/contexts/SidebarContext";
+import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook just to check it
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -38,6 +40,7 @@ import Ambiente from '@/pages/Ambiente';
 import ExternalDiscAssessment from '@/pages/ExternalDiscAssessment';
 import Tasks from '@/pages/Tasks';
 import { Toaster as SonnerToaster } from 'sonner';
+import { AuthProvider } from "@/contexts/AuthContext"; // Import the AuthProvider
 
 import './App.css';
 
@@ -45,55 +48,59 @@ function App() {
   const { toast } = useToast();
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
+    <AuthProvider> {/* Add AuthProvider wrapper */}
+      <SidebarProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
 
-        {/* Rotas protegidas com AuthGuard */}
-        <Route element={<AuthGuard />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/document-upload" element={<DocumentUpload />} />
-          <Route path="/human-resources/*" element={<HumanResources />} />
-          <Route path="/process-form" element={<ProcessFormPage />} />
-          <Route path="/process/:id" element={<ProcessoPage />} />
-          <Route path="/non-compliance" element={<NonCompliance />} />
-          <Route path="/action-schedule" element={<ActionSchedule />} />
-          <Route path="/audit-schedule" element={<AuditSchedule />} />
-          <Route path="/external-audit" element={<ExternalAudit />} />
-          <Route path="/strategic-planning" element={<StrategicPlanning />} />
-          <Route path="/critical-analysis" element={<CriticalAnalysis />} />
-          <Route path="/organization-context" element={<OrganizationContext />} />
-          <Route path="/risk-management" element={<RiskManagement />} />
-          <Route path="/customer-complaints" element={<CustomerComplaints />} />
-          <Route path="/performance-indicators" element={<PerformanceIndicators />} />
-          <Route path="/quality-control" element={<QualityControl />} />
-          <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
-          <Route path="/reunioes" element={<Reunioes />} />
-          <Route path="/training-control" element={<TrainingControl />} />
-          <Route path="/non-conforming-products" element={<NonConformingProducts />} />
-          <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
-          <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
-          <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
-          <Route path="/ambiente" element={<Ambiente />} />
-          <Route path="/tasks" element={<Tasks />} />
+            {/* Rotas protegidas com AuthGuard */}
+            <Route element={<AuthGuard />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/document-upload" element={<DocumentUpload />} />
+              <Route path="/human-resources/*" element={<HumanResources />} />
+              <Route path="/process-form" element={<ProcessFormPage />} />
+              <Route path="/process/:id" element={<ProcessoPage />} />
+              <Route path="/non-compliance" element={<NonCompliance />} />
+              <Route path="/action-schedule" element={<ActionSchedule />} />
+              <Route path="/audit-schedule" element={<AuditSchedule />} />
+              <Route path="/external-audit" element={<ExternalAudit />} />
+              <Route path="/strategic-planning" element={<StrategicPlanning />} />
+              <Route path="/critical-analysis" element={<CriticalAnalysis />} />
+              <Route path="/organization-context" element={<OrganizationContext />} />
+              <Route path="/risk-management" element={<RiskManagement />} />
+              <Route path="/customer-complaints" element={<CustomerComplaints />} />
+              <Route path="/performance-indicators" element={<PerformanceIndicators />} />
+              <Route path="/quality-control" element={<QualityControl />} />
+              <Route path="/supplier-evaluation" element={<SupplierEvaluation />} />
+              <Route path="/reunioes" element={<Reunioes />} />
+              <Route path="/training-control" element={<TrainingControl />} />
+              <Route path="/non-conforming-products" element={<NonConformingProducts />} />
+              <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
+              <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
+              <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
+              <Route path="/ambiente" element={<Ambiente />} />
+              <Route path="/tasks" element={<Tasks />} />
+              
+              {/* Rota administrativa protegida com requisito de admin - restaurando proteção */}
+              <Route path="/admin/*" element={
+                <PermissionGuard requiredRole="admin">
+                  <Admin />
+                </PermissionGuard>
+              } />
+            </Route>
+          </Routes>
           
-          {/* Rota administrativa protegida com requisito de admin - restaurando proteção */}
-          <Route path="/admin/*" element={
-            <PermissionGuard requiredRole="admin">
-              <Admin />
-            </PermissionGuard>
-          } />
-        </Route>
-      </Routes>
-      
-      <Toaster />
-      <SonnerToaster position="top-right" />
-    </Router>
+          <Toaster />
+          <SonnerToaster position="top-right" />
+        </Router>
+      </SidebarProvider>
+    </AuthProvider>
   );
 }
 
