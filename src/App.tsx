@@ -36,7 +36,8 @@ import SatisfactionSurvey from '@/pages/SatisfactionSurvey';
 import Admin from '@/pages/Admin';
 import Ambiente from '@/pages/Ambiente';
 import ExternalDiscAssessment from '@/pages/ExternalDiscAssessment';
-import Tasks from '@/pages/Tasks'; // Importando a página de tarefas
+import Tasks from '@/pages/Tasks';
+import { Toaster as SonnerToaster } from 'sonner';
 
 import './App.css';
 
@@ -78,18 +79,14 @@ function App() {
           <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
           <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
           <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/ambiente" element={<Ambiente />} />
-          <Route path="/tasks" element={<Tasks />} /> {/* Nova rota para tarefas */}
-
-          {/* Rotas protegidas com PermissionGuard */}
-          <Route path="/admin/*" element={
-            <PermissionGuard requiredRole="admin">
-              <Admin />
-            </PermissionGuard>
-          } />
+          <Route path="/tasks" element={<Tasks />} />
         </Route>
       </Routes>
+      
       <Toaster />
+      <SonnerToaster position="top-right" />
     </Router>
   );
 }
