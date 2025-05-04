@@ -1,3 +1,4 @@
+
 import {
   Home,
   FileText,
@@ -70,7 +71,7 @@ export const menuItems: MenuItem[] = [
     children: [
       { title: "Funcionários", icon: Users, href: "/human-resources/employees", modulo: "rh" },
       { title: "Cargos", icon: BriefcaseBusiness, href: "/human-resources/positions", modulo: "rh" },
-      { title: "Solicitações", icon: Clipboard, href: "/human-resources/requests", modulo: "rh" },
+      { title: "Solicitações", icon: CheckSquare, href: "/human-resources/requests", modulo: "rh" },
     ],
   },
   {
