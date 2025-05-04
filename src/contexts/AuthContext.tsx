@@ -10,6 +10,8 @@ type AuthContextType = {
   userTeams: any[] | null;
   userRoles: string[] | null;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isCompanyAdmin: boolean;
   isAuthenticated: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<any>;
@@ -24,6 +26,8 @@ export const AuthContext = createContext<AuthContextType>({
   userTeams: null,
   userRoles: null,
   isAdmin: false,
+  isSuperAdmin: false,
+  isCompanyAdmin: false,
   isAuthenticated: false,
   loading: true,
   signIn: async () => null,
@@ -41,6 +45,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userTeams, setUserTeams] = useState<any[] | null>(null);
   const [userRoles, setUserRoles] = useState<string[] | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
+  const [isCompanyAdmin, setIsCompanyAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
@@ -48,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Get user profile
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -64,29 +70,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (companyError) throw companyError;
       
-      // Get user roles
-      const { data: userRolesData, error: userRolesError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (userRolesError) throw userRolesError;
-
-      // Get user teams
-      const { data: userTeamsData, error: userTeamsError } = await supabase
-        .from('user_teams')
-        .select('team_id, teams(*)')
-        .eq('user_id', userId);
-
-      if (userTeamsError) throw userTeamsError;
-
+      // Get user roles from user_profiles
+      // Using the role field from user_profiles which should contain the role information
+      const roles = profileData?.role ? [profileData.role] : [];
+      
+      // Determine admin status
+      const isUserAdmin = roles.includes('admin');
+      const isUserCompanyAdmin = roles.includes('company_admin');
+      const isUserSuperAdmin = roles.includes('super_admin');
+      
       // Update state with fetched data
       setUserCompany(companyData);
-      setUserTeams(userTeamsData?.map(item => item.teams));
-      
-      const roles = userRolesData?.map(item => item.role) || [];
+      setUserTeams([]); // Initialize with empty array since user_teams table might not exist yet
       setUserRoles(roles);
-      setIsAdmin(roles.includes('admin'));
+      setIsAdmin(isUserAdmin || isUserCompanyAdmin || isUserSuperAdmin);
+      setIsSuperAdmin(isUserSuperAdmin);
+      setIsCompanyAdmin(isUserCompanyAdmin);
 
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -127,6 +126,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUserTeams(null);
       setUserRoles(null);
       setIsAdmin(false);
+      setIsSuperAdmin(false);
+      setIsCompanyAdmin(false);
     } catch (error: any) {
       toast({
         title: "Erro ao sair",
@@ -175,6 +176,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserTeams(null);
         setUserRoles(null);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
+        setIsCompanyAdmin(false);
       }
     });
 
@@ -191,6 +194,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     userTeams,
     userRoles,
     isAdmin,
+    isSuperAdmin,
+    isCompanyAdmin,
     isAuthenticated: !!user,
     loading,
     signIn,
