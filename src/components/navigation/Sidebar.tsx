@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { menuItems } from "@/components/navigation/MenuItems";
 import { useSidebar } from "@/contexts/SidebarContext";
@@ -163,13 +163,9 @@ export function Sidebar() {
           <nav className="space-y-2 px-3 py-2">
             {menuCategories.map((category, index) => (
               <div key={`category-${index}`} className="space-y-1">
-                {/* Category Label */}
+                {/* Removed the separator with category label, just adding minimal top spacing for categories after the first */}
                 {!collapsed && index > 0 && (
-                  <div className="flex items-center gap-2 py-2">
-                    <Separator className="flex-1" />
-                    <span className="text-xs font-semibold text-muted-foreground">{category.label}</span>
-                    <Separator className="flex-1" />
-                  </div>
+                  <div className="h-3"></div>
                 )}
                 
                 {/* Category Items */}
@@ -186,3 +182,4 @@ export function Sidebar() {
     </div>
   );
 }
+
