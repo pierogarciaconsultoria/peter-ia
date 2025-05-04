@@ -2,7 +2,7 @@
 import { 
   Building, AlertTriangle, FileText, ClipboardCheck, 
   ThumbsUp, SlidersHorizontal, Truck, BarChart3, Cog,
-  ClipboardList, Check, CalendarClock
+  ClipboardList, Check, CalendarClock, CheckSquare
 } from "lucide-react";
 import { MenuItem } from "../types";
 
