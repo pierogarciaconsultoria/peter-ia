@@ -79,9 +79,15 @@ function App() {
           <Route path="/equipment-calibration" element={<EquipmentCalibration />} />
           <Route path="/raw-material-inspection" element={<RawMaterialInspection />} />
           <Route path="/satisfaction-survey" element={<SatisfactionSurvey />} />
-          <Route path="/admin" element={<Admin />} />
           <Route path="/ambiente" element={<Ambiente />} />
           <Route path="/tasks" element={<Tasks />} />
+          
+          {/* Rota administrativa protegida com requisito de admin */}
+          <Route path="/admin/*" element={
+            <PermissionGuard requiredRole="admin">
+              <Admin />
+            </PermissionGuard>
+          } />
         </Route>
       </Routes>
       
