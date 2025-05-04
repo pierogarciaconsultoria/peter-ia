@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -12,24 +11,30 @@ import { useSidebar } from "@/contexts/SidebarContext";
 
 // Import all menu categories
 import { dashboardItems } from "./menu-categories/dashboard-items";
+import { isoItems } from "./menu-categories/iso-items";
+import { strategicItems } from "./menu-categories/strategic-items";
 import { processItems } from "./menu-categories/process-items";
-import { hrItems } from "./menu-categories/hr-items";
-import { complianceItems } from "./menu-categories/compliance-items";
-import { planningItems } from "./menu-categories/planning-items";
+import { indicatorsItems } from "./menu-categories/indicators-items";
+import { actionItems } from "./menu-categories/action-items";
+import { meetingItems } from "./menu-categories/meeting-items";
 import { qualityItems } from "./menu-categories/quality-items";
-import { trainingItems } from "./menu-categories/training-items";
+import { hrItems } from "./menu-categories/hr-items";
+import { resourcesItems } from "./menu-categories/resources-items";
 import { settingsItems } from "./menu-categories/settings-items";
 import { MenuItem } from "./types";
 
 // Define our menu categories with labels
 const menuCategories = [
   { label: "Principal", items: dashboardItems },
+  { label: "ISO 9001:2015", items: isoItems },
+  { label: "Planejamento Estratégico", items: strategicItems },
   { label: "Processos", items: processItems },
-  { label: "RH", items: hrItems },
-  { label: "Compliance", items: complianceItems },
-  { label: "Planejamento", items: planningItems },
+  { label: "Indicadores", items: indicatorsItems },
+  { label: "Plano de Ação", items: actionItems },
+  { label: "Reuniões", items: meetingItems },
   { label: "Qualidade", items: qualityItems },
-  { label: "Treinamento", items: trainingItems },
+  { label: "Gente e Gestão", items: hrItems },
+  { label: "Recursos", items: resourcesItems },
   { label: "Configurações", items: settingsItems }
 ];
 
