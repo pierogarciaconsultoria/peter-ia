@@ -19,7 +19,7 @@ export const AuthGuard = ({
   requireSuperAdmin = false,
   bypassForMasterAdmin = true
 }: AuthGuardProps) => {
-  const { user, isLoading, isAdmin, isSuperAdmin } = useAuth();
+  const { user, loading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
 
@@ -57,7 +57,7 @@ export const AuthGuard = ({
     return () => clearTimeout(timer);
   }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
 
-  if (isLoading || isChecking) {
+  if (loading || isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

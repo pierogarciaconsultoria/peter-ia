@@ -9,16 +9,16 @@ interface AuthenticationRequiredProps {
 }
 
 export function AuthenticationRequired({ children }: AuthenticationRequiredProps) {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!loading && !user) {
       navigate('/auth');
     }
-  }, [user, isLoading, navigate]);
+  }, [user, loading, navigate]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
