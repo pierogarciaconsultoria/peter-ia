@@ -6,15 +6,15 @@ export const strategicItems: MenuItem[] = [
   {
     title: "Planejamento Estratégico",
     icon: LineChart,
-    href: "#",
+    href: "/strategic-planning",
     modulo: "planejamento_estrategico",
     children: [
-      { title: "Missão", icon: Target, href: "/strategic-planning/mission", modulo: "planejamento_estrategico" },
-      { title: "Visão", icon: ArrowUp, href: "/strategic-planning/vision", modulo: "planejamento_estrategico" },
-      { title: "Valores", icon: Book, href: "/strategic-planning/values", modulo: "planejamento_estrategico" },
+      { title: "Missão", icon: Target, href: "/strategic-planning", modulo: "planejamento_estrategico" },
+      { title: "Visão", icon: ArrowUp, href: "/strategic-planning", modulo: "planejamento_estrategico" },
+      { title: "Valores", icon: Book, href: "/strategic-planning", modulo: "planejamento_estrategico" },
       { title: "SWOT", icon: BarChart3, href: "/strategic-planning", modulo: "planejamento_estrategico" },
-      { title: "BSC", icon: BarChart4, href: "/strategic-planning/bsc", modulo: "planejamento_estrategico" },
-      { title: "Business Plan", icon: LineChart, href: "/strategic-planning/business-plan", modulo: "planejamento_estrategico" },
+      { title: "BSC", icon: BarChart4, href: "/strategic-planning", modulo: "planejamento_estrategico" },
+      { title: "Business Plan", icon: LineChart, href: "/strategic-planning", modulo: "planejamento_estrategico" },
     ],
   },
 ];

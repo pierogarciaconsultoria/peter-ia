@@ -16,9 +16,12 @@ import { exportStrategicPlanningToPDF } from "@/components/strategic-planning/ut
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 
 const StrategicPlanning = () => {
-  const [activeTab, setActiveTab] = useState("identity");
+  const { tab } = useParams();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(tab || "identity");
   const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
@@ -48,6 +51,20 @@ const StrategicPlanning = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    if (tab !== activeTab) {
+      navigate(`/strategic-planning/${activeTab === "identity" ? "" : activeTab}`, { replace: true });
+    }
+  }, [activeTab, navigate, tab]);
+
+  // Set active tab based on URL param
+  useEffect(() => {
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   useEffect(() => {
     fetchIdentity();
@@ -96,7 +113,7 @@ const StrategicPlanning = () => {
             </Button>
           </div>
           
-          <Tabs defaultValue="identity" value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="identity">Identidade Estratégica</TabsTrigger>
               <TabsTrigger value="swot">Análise SWOT</TabsTrigger>

@@ -70,6 +70,7 @@ function App() {
               <Route path="/audit-schedule" element={<AuditSchedule />} />
               <Route path="/external-audit" element={<ExternalAudit />} />
               <Route path="/strategic-planning" element={<StrategicPlanning />} />
+              <Route path="/strategic-planning/:tab" element={<StrategicPlanning />} />
               <Route path="/critical-analysis" element={<CriticalAnalysis />} />
               <Route path="/organization-context" element={<OrganizationContext />} />
               <Route path="/risk-management" element={<RiskManagement />} />
