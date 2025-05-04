@@ -5,15 +5,124 @@ import { cn } from "@/lib/utils";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { menuItems } from "@/components/navigation/MenuItems";
 import { useSidebar } from "@/contexts/SidebarContext";
+
+// Import all menu categories
+import { dashboardItems } from "./menu-categories/dashboard-items";
+import { processItems } from "./menu-categories/process-items";
+import { hrItems } from "./menu-categories/hr-items";
+import { complianceItems } from "./menu-categories/compliance-items";
+import { planningItems } from "./menu-categories/planning-items";
+import { qualityItems } from "./menu-categories/quality-items";
+import { trainingItems } from "./menu-categories/training-items";
+import { settingsItems } from "./menu-categories/settings-items";
+import { MenuItem } from "./types";
+
+// Define our menu categories with labels
+const menuCategories = [
+  { label: "Principal", items: dashboardItems },
+  { label: "Processos", items: processItems },
+  { label: "RH", items: hrItems },
+  { label: "Compliance", items: complianceItems },
+  { label: "Planejamento", items: planningItems },
+  { label: "Qualidade", items: qualityItems },
+  { label: "Treinamento", items: trainingItems },
+  { label: "Configurações", items: settingsItems }
+];
 
 export function Sidebar() {
   const { pathname } = useLocation();
   const { collapsed, setCollapsed } = useSidebar();
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+
+  // Initialize expanded state based on the current path
+  useEffect(() => {
+    const matchingCategory = menuCategories.findIndex(category => 
+      category.items.some(item => 
+        pathname === item.href || 
+        (item.children?.some(child => pathname === child.href))
+      )
+    );
+    
+    if (matchingCategory !== -1) {
+      setExpandedCategories([`category-${matchingCategory}`]);
+    }
+  }, [pathname]);
+
+  // Render a single menu item
+  const renderMenuItem = (item: MenuItem) => {
+    if (item.children && item.children.length > 0) {
+      return (
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full"
+          value={collapsed ? undefined : `item-${item.href}`}
+        >
+          <AccordionItem value={`item-${item.href}`} className="border-none">
+            <div className="flex">
+              <AccordionTrigger 
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted",
+                  collapsed && "justify-center px-2",
+                  "hover:no-underline w-full"
+                )}
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                {!collapsed && <span>{item.title}</span>}
+              </AccordionTrigger>
+            </div>
+            <AccordionContent className={collapsed ? "hidden" : ""}>
+              <div className="ml-6 flex flex-col space-y-1">
+                {item.children.map((child) => (
+                  <NavLink
+                    key={child.href}
+                    to={child.href}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-accent text-accent-foreground"
+                          : "transparent hover:bg-muted hover:text-foreground"
+                      )
+                    }
+                  >
+                    {child.icon && <child.icon className="h-4 w-4" />}
+                    <span>{child.title}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      );
+    }
+
+    return (
+      <NavLink
+        key={item.href}
+        to={item.href}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+            isActive
+              ? "bg-accent text-accent-foreground"
+              : "transparent hover:bg-muted hover:text-foreground",
+            collapsed && "justify-center px-2"
+          )
+        }
+      >
+        {item.icon && <item.icon className="h-4 w-4" />}
+        {!collapsed && <span>{item.title}</span>}
+      </NavLink>
+    );
   };
 
   return (
@@ -46,24 +155,25 @@ export function Sidebar() {
         </div>
 
         <ScrollArea className="flex-1">
-          <nav className="space-y-1 px-3 py-2">
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                    isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "transparent hover:bg-muted hover:text-foreground",
-                    collapsed && "justify-center px-2"
-                  )
-                }
-              >
-                {item.icon && <item.icon className="h-4 w-4" />}
-                {!collapsed && <span>{item.title}</span>}
-              </NavLink>
+          <nav className="space-y-2 px-3 py-2">
+            {menuCategories.map((category, index) => (
+              <div key={`category-${index}`} className="space-y-1">
+                {/* Category Label */}
+                {!collapsed && index > 0 && (
+                  <div className="flex items-center gap-2 py-2">
+                    <Separator className="flex-1" />
+                    <span className="text-xs font-semibold text-muted-foreground">{category.label}</span>
+                    <Separator className="flex-1" />
+                  </div>
+                )}
+                
+                {/* Category Items */}
+                {category.items.map((item) => (
+                  <div key={item.href || `nested-${item.title}`}>
+                    {renderMenuItem(item)}
+                  </div>
+                ))}
+              </div>
             ))}
           </nav>
         </ScrollArea>
