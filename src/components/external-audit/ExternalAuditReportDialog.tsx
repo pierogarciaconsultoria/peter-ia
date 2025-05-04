@@ -1,3 +1,4 @@
+
 import React from "react";
 import { 
   Dialog,
@@ -25,7 +26,7 @@ import { ExternalAudit } from "@/services/externalAuditService";
 import { toast } from "sonner";
 
 interface ExternalAuditReportDialogProps {
-  audit: ExternalAudit | null;
+  audit: ExternalAudit;
   open: boolean;
   onClose: () => void;
 }
@@ -35,8 +36,6 @@ export function ExternalAuditReportDialog({
   open,
   onClose
 }: ExternalAuditReportDialogProps) {
-  if (!audit) return null;
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Não definida";
     try {
@@ -71,7 +70,6 @@ export function ExternalAuditReportDialog({
     if (audit.report_url) {
       try {
         await navigator.clipboard.writeText(audit.report_url);
-        // Using the imported toast directly
         toast.success("Link copiado para a área de transferência");
       } catch (err) {
         console.error("Erro ao copiar link:", err);

@@ -129,11 +129,13 @@ const ExternalAudit = () => {
         onSuccess={refetch}
       />
       
-      <ExternalAuditReportDialog 
-        open={isReportOpen}
-        onClose={handleCloseReport}
-        audit={selectedAudit}
-      />
+      {selectedAudit && (
+        <ExternalAuditReportDialog 
+          open={isReportOpen}
+          onClose={handleCloseReport}
+          audit={selectedAudit}
+        />
+      )}
       
       <Footer />
     </div>
