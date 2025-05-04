@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
-import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook just to check it
+import { AuthProvider } from "@/contexts/AuthContext"; // Import the AuthProvider
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -40,7 +40,6 @@ import Ambiente from '@/pages/Ambiente';
 import ExternalDiscAssessment from '@/pages/ExternalDiscAssessment';
 import Tasks from '@/pages/Tasks';
 import { Toaster as SonnerToaster } from 'sonner';
-import { AuthProvider } from "@/contexts/AuthContext"; // Import the AuthProvider
 
 import './App.css';
 
@@ -48,7 +47,7 @@ function App() {
   const { toast } = useToast();
 
   return (
-    <AuthProvider> {/* Add AuthProvider wrapper */}
+    <AuthProvider> {/* Wrap entire app with AuthProvider */}
       <SidebarProvider>
         <Router>
           <Routes>
@@ -87,7 +86,7 @@ function App() {
               <Route path="/ambiente" element={<Ambiente />} />
               <Route path="/tasks" element={<Tasks />} />
               
-              {/* Rota administrativa protegida com requisito de admin - restaurando proteção */}
+              {/* Rota administrativa protegida com requisito de admin */}
               <Route path="/admin/*" element={
                 <PermissionGuard requiredRole="admin">
                   <Admin />
