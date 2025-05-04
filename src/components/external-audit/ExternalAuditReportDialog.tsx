@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   Dialog,
@@ -23,6 +22,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { ExternalAudit } from "@/services/externalAuditService";
+import { toast } from "sonner";
 
 interface ExternalAuditReportDialogProps {
   audit: ExternalAudit | null;
@@ -71,12 +71,8 @@ export function ExternalAuditReportDialog({
     if (audit.report_url) {
       try {
         await navigator.clipboard.writeText(audit.report_url);
-        // Using setTimeout to avoid importing toast if not already imported
-        setTimeout(() => {
-          if (window.toast) {
-            window.toast.success("Link copiado para a área de transferência");
-          }
-        }, 0);
+        // Using the imported toast directly
+        toast.success("Link copiado para a área de transferência");
       } catch (err) {
         console.error("Erro ao copiar link:", err);
       }
