@@ -110,7 +110,7 @@ const ExternalAudit = () => {
             scheduledCount={getStatusCount('scheduled')}
             inProgressCount={getStatusCount('in_progress')}
             completedCount={getStatusCount('completed')}
-            cancelledCount={getStatusCount('cancelled')}
+            cancelledCount={getStatusCount('canceled')}
           />
           
           <ExternalAuditTable 
