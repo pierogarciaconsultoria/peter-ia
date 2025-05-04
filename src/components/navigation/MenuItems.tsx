@@ -1,4 +1,3 @@
-
 import {
   Home,
   FileText,
@@ -17,8 +16,6 @@ import {
   BarChart3,
   SlidersHorizontal,
   Building,
-  Upload,
-  Clipboard,
   FileBox,
   Truck,
   ThumbsUp,
@@ -28,16 +25,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-type MenuItem = {
+export type MenuItem = {
   title: string;
   icon: LucideIcon;
   href: string;

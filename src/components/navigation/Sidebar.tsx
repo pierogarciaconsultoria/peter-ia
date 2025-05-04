@@ -61,8 +61,8 @@ export function Sidebar() {
                   )
                 }
               >
-                {item.icon}
-                {!collapsed && <span>{item.label}</span>}
+                {item.icon && <item.icon className="h-4 w-4" />}
+                {!collapsed && <span>{item.title}</span>}
               </NavLink>
             ))}
           </nav>

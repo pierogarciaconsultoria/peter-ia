@@ -82,7 +82,7 @@ function App() {
           <Route path="/ambiente" element={<Ambiente />} />
           <Route path="/tasks" element={<Tasks />} />
           
-          {/* Rota administrativa protegida com requisito de admin */}
+          {/* Rota administrativa protegida com requisito de admin - restaurando proteção */}
           <Route path="/admin/*" element={
             <PermissionGuard requiredRole="admin">
               <Admin />

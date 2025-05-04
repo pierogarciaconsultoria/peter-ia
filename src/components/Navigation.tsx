@@ -7,16 +7,13 @@ import { Sidebar } from "./navigation/Sidebar";
 import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
-
-  const toggleCollapsed = () => {
-    setIsCollapsed(prev => !prev);
-  };
+  const { collapsed, setCollapsed } = useSidebar();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -27,20 +24,15 @@ export function Navigation() {
     <>
       <MenuToggle 
         isOpen={isOpen} 
-        toggleMenu={() => setIsOpen(!isOpen)} 
+        onToggle={() => setIsOpen(!isOpen)} 
         className={`transition-opacity duration-300 ${!visible ? 'opacity-0' : 'opacity-100'}`}
-        toggleCollapsed={toggleCollapsed}
-        isCollapsed={isCollapsed}
       />
       <BackToHomeButton />
-      <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
+      <div className={`fixed top-5 right-5 z-50 flex items-center gap-2 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <NotificationCenter />
         <UserMenu />
       </div>
-      <Sidebar 
-        isOpen={isOpen} 
-        className={`transition-transform duration-300 ${!visible && !isOpen ? '-translate-y-full md:translate-y-0 md:-translate-x-full' : ''}`} 
-      />
+      <Sidebar />
     </>
   );
 }
