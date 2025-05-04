@@ -1,11 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DocumentForm } from "@/components/DocumentForm";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { ImplementationSchedule } from "@/components/dashboard/ImplementationSchedule";
-import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -78,16 +76,6 @@ export function Dashboard({ requirements }: DashboardProps) {
     <div className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
       <DashboardHeader onNewDocument={handleNewDocument} />
       
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Requisitos ISO 9001:2015</h2>
-          <p className="text-muted-foreground">
-            Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
-            e melhoria contínua do Sistema de Gestão da Qualidade.
-          </p>
-        </CardContent>
-      </Card>
-      
       {/* Upcoming Audits Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card className={nextInternalAudit ? "border-blue-200" : ""}>
@@ -146,10 +134,6 @@ export function Dashboard({ requirements }: DashboardProps) {
           </CardContent>
         </Card>
       </div>
-      
-      <ImplementationSchedule />
-      
-      <MaturityMetrics requirements={requirements} />
       
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

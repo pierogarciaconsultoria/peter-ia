@@ -6,6 +6,9 @@ import { DatabaseConnectionTest } from "@/components/DatabaseConnectionTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isoRequirements } from "@/utils/isoRequirements";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImplementationSchedule } from "@/components/dashboard/ImplementationSchedule";
+import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
 
 export default function Home() {
   const { collapsed } = useSidebar();
@@ -18,7 +21,21 @@ export default function Home() {
         <div className="max-w-7xl mx-auto space-y-8">
           <h1 className="text-3xl font-bold">Dashboard</h1>
           
-          <Tabs defaultValue="dashboard">
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Sistema de Gestão da Qualidade</h2>
+              <p className="text-muted-foreground">
+                Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
+                e melhoria contínua do Sistema de Gestão da Qualidade.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <ImplementationSchedule />
+          
+          <MaturityMetrics requirements={isoRequirements} />
+          
+          <Tabs defaultValue="dashboard" className="mt-8">
             <TabsList>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="connection">Status da Conexão</TabsTrigger>
