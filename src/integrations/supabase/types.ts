@@ -1574,6 +1574,86 @@ export type Database = {
           },
         ]
       }
+      hr_admission_processes: {
+        Row: {
+          candidate_id: string
+          company_id: string
+          completion_date: string | null
+          completion_percentage: number
+          created_at: string
+          document_checklist: Json
+          employee_id: string | null
+          id: string
+          job_opening_id: string
+          notes: string | null
+          responsible_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          company_id: string
+          completion_date?: string | null
+          completion_percentage?: number
+          created_at?: string
+          document_checklist?: Json
+          employee_id?: string | null
+          id?: string
+          job_opening_id: string
+          notes?: string | null
+          responsible_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          company_id?: string
+          completion_date?: string | null
+          completion_percentage?: number
+          created_at?: string
+          document_checklist?: Json
+          employee_id?: string | null
+          id?: string
+          job_opening_id?: string
+          notes?: string | null
+          responsible_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_admission_processes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "hr_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_admission_processes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_admission_processes_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_admission_processes_job_opening_id_fkey"
+            columns: ["job_opening_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_openings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hr_announcements: {
         Row: {
           author_id: string
@@ -1784,6 +1864,7 @@ export type Database = {
           first_name: string
           id: string
           is_available: boolean
+          is_hired: boolean | null
           last_name: string
           linkedin_url: string | null
           location: string | null
@@ -1808,6 +1889,7 @@ export type Database = {
           first_name: string
           id?: string
           is_available?: boolean
+          is_hired?: boolean | null
           last_name: string
           linkedin_url?: string | null
           location?: string | null
@@ -1832,6 +1914,7 @@ export type Database = {
           first_name?: string
           id?: string
           is_available?: boolean
+          is_hired?: boolean | null
           last_name?: string
           linkedin_url?: string | null
           location?: string | null
@@ -3176,6 +3259,112 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_personnel_movements: {
+        Row: {
+          approver_id: string | null
+          comments: string | null
+          company_id: string
+          created_at: string
+          effective_date: string | null
+          employee_id: string | null
+          from_department_id: string | null
+          from_position_id: string | null
+          id: string
+          justification: string
+          movement_type: string
+          new_salary: number | null
+          previous_salary: number | null
+          requester_id: string | null
+          status: string
+          to_department_id: string | null
+          to_position_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approver_id?: string | null
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          effective_date?: string | null
+          employee_id?: string | null
+          from_department_id?: string | null
+          from_position_id?: string | null
+          id?: string
+          justification: string
+          movement_type: string
+          new_salary?: number | null
+          previous_salary?: number | null
+          requester_id?: string | null
+          status?: string
+          to_department_id?: string | null
+          to_position_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string | null
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          effective_date?: string | null
+          employee_id?: string | null
+          from_department_id?: string | null
+          from_position_id?: string | null
+          id?: string
+          justification?: string
+          movement_type?: string
+          new_salary?: number | null
+          previous_salary?: number | null
+          requester_id?: string | null
+          status?: string
+          to_department_id?: string | null
+          to_position_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_personnel_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_personnel_movements_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_personnel_movements_from_department_id_fkey"
+            columns: ["from_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_personnel_movements_from_position_id_fkey"
+            columns: ["from_position_id"]
+            isOneToOne: false
+            referencedRelation: "job_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_personnel_movements_to_department_id_fkey"
+            columns: ["to_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_personnel_movements_to_position_id_fkey"
+            columns: ["to_position_id"]
+            isOneToOne: false
+            referencedRelation: "job_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -5769,6 +5958,10 @@ export type Database = {
       check_user_access: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      generate_trial_evaluations: {
+        Args: { employee_id: string; start_date: string }
+        Returns: undefined
       }
       generate_unique_assessment_token: {
         Args: Record<PropertyKey, never>
