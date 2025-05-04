@@ -45,8 +45,8 @@ const HumanResources = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      {/* Adjusted padding to provide more space for content */}
-      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
+      {/* Adjusted padding to provide space for breadcrumb navigation */}
+      <main className={`transition-all duration-300 pt-24 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
         <div className="max-w-7xl mx-auto w-full space-y-6">
           <HRHeader />
           
