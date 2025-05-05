@@ -9,6 +9,7 @@ import { NotificationCenter } from "./notifications/NotificationCenter";
 import { BreadcrumbNavigation } from "./navigation/BreadcrumbNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +52,7 @@ export function Navigation() {
         </div>
         
         {/* Main content padding to account for fixed header and breadcrumb */}
-        <main className="pt-28 px-4 md:px-6 pb-10 overflow-auto">
+        <main className="pt-28 px-4 md:px-6 pb-10 overflow-auto h-screen">
           <Outlet />
         </main>
       </div>
