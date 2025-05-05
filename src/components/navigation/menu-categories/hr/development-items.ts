@@ -1,17 +1,23 @@
 
-import { Award } from "lucide-react";
+import { Award, FileText } from "lucide-react";
 import { MenuItem } from "../../types";
 
 export const developmentItems: MenuItem[] = [
   {
-    title: "Desenvolvimento",
+    title: "Desenvolvimento Profissional",
     icon: Award,
     href: "#",
     modulo: "desenvolvimento",
     children: [
       { 
-        title: "Planos de Desenvolvimento", 
-        icon: Award, 
+        title: "Avaliação de Perfil DISC", 
+        icon: FileText, 
+        href: "/human-resources?activeTab=disc-assessment", 
+        modulo: "disc" 
+      },
+      { 
+        title: "Planos de Desenvolvimento Individual", 
+        icon: FileText, 
         href: "/human-resources?activeTab=development-plans", 
         modulo: "pdis" 
       },
@@ -22,20 +28,14 @@ export const developmentItems: MenuItem[] = [
         modulo: "treinamentos" 
       },
       { 
-        title: "Avaliação de Perfil DISC", 
-        icon: Award, 
-        href: "/human-resources?activeTab=disc-assessment", 
-        modulo: "disc" 
-      },
-      { 
-        title: "Pesquisa de Clima", 
-        icon: Award, 
+        title: "Pesquisa de Clima Organizacional", 
+        icon: FileText, 
         href: "/human-resources?activeTab=climate", 
         modulo: "clima" 
       },
       { 
         title: "Feedback", 
-        icon: Award, 
+        icon: FileText, 
         href: "/human-resources?activeTab=feedback", 
         modulo: "feedback" 
       },

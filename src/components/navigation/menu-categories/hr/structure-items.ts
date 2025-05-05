@@ -4,7 +4,7 @@ import { MenuItem } from "../../types";
 
 export const structureItems: MenuItem[] = [
   {
-    title: "Estrutura",
+    title: "Estrutura Organizacional",
     icon: BarChartBig,
     href: "#",
     modulo: "estrutura_org",
@@ -16,7 +16,7 @@ export const structureItems: MenuItem[] = [
         modulo: "departamentos" 
       },
       { 
-        title: "Quadro Aprovado", 
+        title: "Quadro de Posições Aprovadas", 
         icon: Users, 
         href: "/human-resources?activeTab=positions", 
         modulo: "posicoes" 
@@ -28,10 +28,16 @@ export const structureItems: MenuItem[] = [
         modulo: "cargos_salarios" 
       },
       { 
-        title: "Estrutura Organizacional", 
+        title: "Organograma", 
         icon: BarChartBig, 
         href: "/human-resources?activeTab=organizational-structure", 
         modulo: "organograma" 
+      },
+      { 
+        title: "Movimentação de Pessoal", 
+        icon: Users, 
+        href: "/human-resources?activeTab=personnel", 
+        modulo: "movimentacao_pessoal" 
       },
     ]
   }

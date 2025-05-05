@@ -1,5 +1,5 @@
 
-import { UserPlus } from "lucide-react";
+import { UserPlus, FileText } from "lucide-react";
 import { MenuItem } from "../../types";
 
 export const recruitmentItems: MenuItem[] = [
@@ -14,6 +14,12 @@ export const recruitmentItems: MenuItem[] = [
         icon: UserPlus, 
         href: "/human-resources?activeTab=recruitment-selection", 
         modulo: "recrutamento_selecao" 
+      },
+      { 
+        title: "Entrevista de admissão", 
+        icon: FileText, 
+        href: "/human-resources?activeTab=interview", 
+        modulo: "entrevista_admissao" 
       },
       { 
         title: "Admissão Online", 
