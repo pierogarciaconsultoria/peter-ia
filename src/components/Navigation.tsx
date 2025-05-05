@@ -7,22 +7,18 @@ import { Sidebar } from "./navigation/Sidebar";
 import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
-  const { collapsed, setCollapsed } = useCustomSidebar();
+  const { collapsed, toggleSidebar } = useSidebar();
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
-
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden">

@@ -1,6 +1,4 @@
 
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { HRHeader } from "@/components/hr/HRHeader";
@@ -8,12 +6,13 @@ import { HRTabSelect } from "@/components/hr/HRTabSelect";
 import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { collapsed } = useCustomSidebar();
 
   // Set active tab from URL state or query params if available
   useEffect(() => {
@@ -30,19 +29,6 @@ const HumanResources = () => {
     }
   }, [location.search, location.state]);
 
-  // Detect if sidebar is collapsed
-  useEffect(() => {
-    const checkSidebarState = () => {
-      const sidebar = document.querySelector('[class*="md:w-20"]');
-      setSidebarCollapsed(!!sidebar);
-    };
-    
-    // Check sidebar state periodically
-    const interval = setInterval(checkSidebarState, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   // Handle tab change and update URL
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
@@ -53,10 +39,8 @@ const HumanResources = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
       {/* Adjusted padding to provide space for breadcrumb navigation */}
-      <main className={`transition-all duration-300 pt-24 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
+      <main className={`transition-all duration-300 pt-24 p-6 flex-1 ${collapsed ? 'md:pl-24' : 'md:pl-72'}`}>
         <div className="max-w-7xl mx-auto w-full space-y-6">
           <HRHeader />
           
@@ -75,8 +59,6 @@ const HumanResources = () => {
           />
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

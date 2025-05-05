@@ -6,22 +6,10 @@ import { AmbienteTabContent } from '@/components/ambiente/AmbienteTabContent';
 import { AmbienteDialogs } from '@/components/ambiente/AmbienteDialogs';
 import { AmbienteTabs } from '@/components/ambiente/AmbienteTabs';
 import { useAmbienteState } from '@/hooks/useAmbienteState';
+import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
 
 export function AmbienteContent() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
-  // Detect if sidebar is collapsed
-  useEffect(() => {
-    const checkSidebarState = () => {
-      const sidebar = document.querySelector('[class*="md:w-20"]');
-      setSidebarCollapsed(!!sidebar);
-    };
-    
-    // Check sidebar state periodically
-    const interval = setInterval(checkSidebarState, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
+  const { collapsed } = useCustomSidebar();
   
   const {
     activeTab,
