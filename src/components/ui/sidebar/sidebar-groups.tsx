@@ -10,7 +10,7 @@ export const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("px-2 py-2 group/sidebar-group", className)}
+      className={cn("px-2 py-1 group/sidebar-group", className)}
       {...props}
     />
   );
@@ -26,7 +26,7 @@ export const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "mb-2 px-2 text-xs font-medium leading-6 text-sidebar-foreground/60 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-mt-10 group-data-[collapsible=icon]:hidden",
+        "mb-1 px-2 text-xs font-medium leading-6 text-sidebar-foreground/60 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-mt-10 group-data-[collapsible=icon]:hidden",
         className
       )}
       {...props}
@@ -43,10 +43,9 @@ export const SidebarGroupContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group-content"
-      className={cn("space-y-1", className)}
+      className={cn("space-y-0.5", className)}
       {...props}
     />
   );
 });
 SidebarGroupContent.displayName = "SidebarGroupContent";
-
