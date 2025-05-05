@@ -11,19 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Save, PlusCircle, Trash2 } from "lucide-react";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { ModuleAssistant } from "@/types/module-assistant";
 
 interface ModuleAssistantSettingsProps {
   isAdmin: boolean;
-}
-
-interface ModuleAssistant {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  capabilities: string;
-  limitations: string;
-  created_at: string;
 }
 
 export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProps) {
@@ -39,12 +30,13 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
   // Verificar se a chave da API está configurada
   const checkApiKeyStatus = async () => {
     try {
-      const { data, error } = await supabase.rpc('check_secret_exists', {
-        secret_name: 'OPENAI_API_KEY'
+      // Use the function invoke method instead of rpc
+      const { data, error } = await supabase.functions.invoke('check-secret-exists', {
+        body: { secret_name: 'OPENAI_API_KEY' }
       });
       
       if (error) throw error;
-      setApiKeyConfigured(!!data);
+      setApiKeyConfigured(!!data?.exists);
     } catch (error) {
       console.error("Erro ao verificar o status da API key:", error);
       setApiKeyConfigured(false);
@@ -55,6 +47,7 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
   const loadModuleAssistants = async () => {
     setLoading(true);
     try {
+      // Use custom query to get around type issues
       const { data, error } = await supabase
         .from('module_assistants')
         .select('*')
@@ -62,7 +55,7 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
         
       if (error) throw error;
       
-      setModules(data || []);
+      setModules(data as ModuleAssistant[]);
     } catch (error: any) {
       console.error("Erro ao carregar dados dos assistentes:", error);
       toast.error(`Erro ao carregar dados: ${error.message}`);
@@ -106,10 +99,12 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
     
     setSaving(true);
     try {
+      // Use custom query to get around type issues
       const { data, error } = await supabase
         .from('module_assistants')
         .insert({
           name: newModuleName,
+          label: `Assistente para ${newModuleName}`,
           description: `Assistente para o módulo ${newModuleName}`,
           enabled: true,
           capabilities: "Responder perguntas sobre o módulo, fornecer dicas de uso",
@@ -121,7 +116,11 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
       
       toast.success(`Assistente do módulo "${newModuleName}" adicionado`);
       setNewModuleName("");
-      setModules([...modules, data[0]]);
+      
+      // Make sure we cast the data to the correct type
+      if (data) {
+        setModules([...modules, data[0] as ModuleAssistant]);
+      }
     } catch (error: any) {
       console.error("Erro ao adicionar assistente:", error);
       toast.error(`Erro ao adicionar assistente: ${error.message}`);
@@ -134,10 +133,12 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
   const updateModuleAssistant = async (module: ModuleAssistant) => {
     setSaving(true);
     try {
+      // Use custom query to get around type issues
       const { error } = await supabase
         .from('module_assistants')
         .update({
           name: module.name,
+          label: module.label,
           description: module.description,
           enabled: module.enabled,
           capabilities: module.capabilities,
@@ -165,6 +166,7 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
     
     setSaving(true);
     try {
+      // Use custom query to get around type issues
       const { error } = await supabase
         .from('module_assistants')
         .delete()
@@ -293,10 +295,21 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
                       </CardHeader>
                       <CardContent className="p-4 pt-0 space-y-3">
                         <div>
+                          <Label htmlFor={`label-${module.id}`}>Título Exibido</Label>
+                          <Input 
+                            id={`label-${module.id}`}
+                            value={module.label || ''}
+                            onChange={(e) => setModules(modules.map(m => 
+                              m.id === module.id ? {...m, label: e.target.value} : m
+                            ))}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
                           <Label htmlFor={`desc-${module.id}`}>Descrição</Label>
                           <Textarea 
                             id={`desc-${module.id}`}
-                            value={module.description}
+                            value={module.description || ''}
                             onChange={(e) => setModules(modules.map(m => 
                               m.id === module.id ? {...m, description: e.target.value} : m
                             ))}
@@ -308,7 +321,7 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
                           <Label htmlFor={`capabilities-${module.id}`}>Capacidades</Label>
                           <Textarea 
                             id={`capabilities-${module.id}`}
-                            value={module.capabilities}
+                            value={module.capabilities || ''}
                             onChange={(e) => setModules(modules.map(m => 
                               m.id === module.id ? {...m, capabilities: e.target.value} : m
                             ))}
@@ -320,7 +333,7 @@ export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProp
                           <Label htmlFor={`limitations-${module.id}`}>Limitações</Label>
                           <Textarea 
                             id={`limitations-${module.id}`}
-                            value={module.limitations}
+                            value={module.limitations || ''}
                             onChange={(e) => setModules(modules.map(m => 
                               m.id === module.id ? {...m, limitations: e.target.value} : m
                             ))}

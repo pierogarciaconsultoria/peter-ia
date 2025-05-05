@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ModuleAssistant } from "@/types/module-assistant";
 
 interface UseModuleAssistantOptions {
   moduleName: string;
@@ -20,7 +21,7 @@ export function useModuleAssistant({ moduleName, initialQuery, autoOpen = false 
     const checkAssistantStatus = async () => {
       setIsLoading(true);
       try {
-        // Verificar se o assistente está configurado e habilitado
+        // Use custom query to get around type issues
         const { data, error } = await supabase
           .from('module_assistants')
           .select('*')

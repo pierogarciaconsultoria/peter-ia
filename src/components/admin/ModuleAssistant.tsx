@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ModuleAssistant as ModuleAssistantType } from "@/types/module-assistant";
 
 interface ModuleAssistantProps {
   moduleName: string;
@@ -15,11 +16,12 @@ export function ModuleAssistant({ moduleName }: ModuleAssistantProps) {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [moduleContext, setModuleContext] = useState<any>(null);
+  const [moduleContext, setModuleContext] = useState<ModuleAssistantType | null>(null);
 
   useEffect(() => {
     const fetchModuleContext = async () => {
       try {
+        // Use custom query to get around type issues
         const { data, error } = await supabase
           .from('module_assistants')
           .select('*')
@@ -28,7 +30,7 @@ export function ModuleAssistant({ moduleName }: ModuleAssistantProps) {
         
         if (error) throw error;
         
-        setModuleContext(data);
+        setModuleContext(data as ModuleAssistantType);
       } catch (error: any) {
         console.error('Erro ao carregar contexto do módulo:', error.message);
       }

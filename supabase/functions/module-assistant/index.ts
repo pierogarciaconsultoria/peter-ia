@@ -7,6 +7,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ModuleContext {
+  id: string;
+  name: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+  capabilities: string;
+  limitations: string;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -16,65 +26,67 @@ serve(async (req) => {
   try {
     const { prompt, moduleContext } = await req.json();
     
-    // Obter a chave da API do OpenAI das variáveis de ambiente
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY não está configurada');
-    }
-
     if (!prompt || !moduleContext) {
-      throw new Error('O prompt e o contexto do módulo são obrigatórios');
+      throw new Error('Os parâmetros "prompt" e "moduleContext" são obrigatórios');
     }
 
-    // Construir o contexto específico do módulo
-    let systemPrompt = `Você é um assistente virtual especializado no módulo ${moduleContext.name} do sistema. `;
-    
-    // Adicionar informações específicas do módulo ao prompt do sistema
-    systemPrompt += moduleContext.description || '';
-    
-    // Adicionar recursos e limitações específicas do módulo
-    if (moduleContext.capabilities) {
-      systemPrompt += `\nVocê pode: ${moduleContext.capabilities}`;
-    }
-    
-    if (moduleContext.limitations) {
-      systemPrompt += `\nVocê não pode: ${moduleContext.limitations}`;
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!apiKey) {
+      throw new Error('A chave da API OpenAI não está configurada');
     }
 
-    // Fazer a chamada para a API do OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Preparar o sistema de prompt com o contexto do módulo
+    const system = `
+Você é um assistente virtual para o módulo "${moduleContext.label}" de um sistema de gestão empresarial.
+
+Sobre este módulo:
+${moduleContext.description || 'Este é um módulo do sistema.'}
+
+Capacidades:
+${moduleContext.capabilities || 'Responder perguntas sobre o módulo.'}
+
+Limitações:
+${moduleContext.limitations || 'Não posso modificar dados do sistema nem acessar informações de outros módulos.'}
+
+Responda de forma clara, profissional e objetiva às perguntas dos usuários sobre este módulo específico.
+    `;
+
+    // Call OpenAI API
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: systemPrompt },
+          { role: 'system', content: system },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-      }),
+        max_tokens: 1000
+      })
     });
 
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(`Erro na API do OpenAI: ${data.error.message}`);
+    if (!openaiResponse.ok) {
+      const error = await openaiResponse.json();
+      throw new Error(`Erro da API OpenAI: ${JSON.stringify(error)}`);
     }
 
-    return new Response(JSON.stringify({
-      response: data.choices[0].message.content,
-      module: moduleContext.name
-    }), {
+    const data = await openaiResponse.json();
+    const response = data.choices[0].message.content;
+
+    return new Response(JSON.stringify({ response }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Erro no assistente do módulo:', error);
     
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      response: "Desculpe, não foi possível processar sua pergunta. Por favor, verifique se a chave da API está configurada corretamente."
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
