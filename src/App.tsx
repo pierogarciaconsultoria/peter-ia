@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +63,8 @@ function App() {
               <Route path="/document-upload" element={<DocumentUpload />} />
               <Route path="/human-resources/*" element={<HumanResources />} />
               <Route path="/process-form" element={<ProcessFormPage />} />
-              <Route path="/process/:id" element={<ProcessoPage />} />
+              <Route path="/processo" element={<ProcessoPage />} />
+              <Route path="/processo/:id" element={<ProcessFormPage />} />
               <Route path="/non-compliance" element={<NonCompliance />} />
               <Route path="/action-schedule" element={<ActionSchedule />} />
               <Route path="/audit-schedule" element={<AuditSchedule />} />

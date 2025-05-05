@@ -6,10 +6,15 @@ export const processItems: MenuItem[] = [
   {
     title: "Processos",
     icon: FileText,
-    href: "#",
+    href: "/processo",
     modulo: "processos",
     children: [
-      { title: "Mapeamento de Processos", icon: FileText, href: "/process-form", modulo: "processos" },
+      { 
+        title: "Mapeamento de Processos", 
+        icon: FileText, 
+        href: "/process-form", 
+        modulo: "processos" 
+      },
     ],
   },
 ];
