@@ -5107,6 +5107,45 @@ export type Database = {
           },
         ]
       }
+      resume_analyses: {
+        Row: {
+          analysis: string
+          candidate_id: string
+          compatibility_score: number
+          created_at: string
+          created_by: string
+          id: string
+          job_opening_id: string
+          recommendation: string
+          strengths: string[]
+          weaknesses: string[]
+        }
+        Insert: {
+          analysis: string
+          candidate_id: string
+          compatibility_score: number
+          created_at?: string
+          created_by: string
+          id?: string
+          job_opening_id: string
+          recommendation: string
+          strengths: string[]
+          weaknesses: string[]
+        }
+        Update: {
+          analysis?: string
+          candidate_id?: string
+          compatibility_score?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          job_opening_id?: string
+          recommendation?: string
+          strengths?: string[]
+          weaknesses?: string[]
+        }
+        Relationships: []
+      }
       reunioes: {
         Row: {
           created_at: string
