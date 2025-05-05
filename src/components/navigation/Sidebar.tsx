@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { menuItems } from "@/components/navigation/MenuItems";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Import all menu categories
 import { dashboardItems } from "./menu-categories/dashboard-items";
@@ -42,6 +43,7 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const { collapsed, setCollapsed } = useSidebar();
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -61,52 +63,66 @@ export function Sidebar() {
     }
   }, [pathname]);
 
+  // Handle hover events
+  const handleMouseEnter = (itemHref: string) => {
+    setHoveredItem(itemHref);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredItem(null);
+  };
+
   // Render a single menu item
   const renderMenuItem = (item: MenuItem) => {
     if (item.children && item.children.length > 0) {
+      const isHovered = hoveredItem === item.href;
+      const isActive = pathname === item.href || item.children.some(child => pathname === child.href);
+      
       return (
-        <Accordion
-          type="single"
-          collapsible
+        <Collapsible
+          open={isHovered || isActive}
           className="w-full"
-          value={collapsed ? undefined : `item-${item.href}`}
         >
-          <AccordionItem value={`item-${item.href}`} className="border-none">
-            <div className="flex">
-              <AccordionTrigger 
+          <div 
+            className="flex"
+            onMouseEnter={() => handleMouseEnter(item.href || '')}
+            onMouseLeave={handleMouseLeave}
+          >
+            <CollapsibleTrigger className="w-full">
+              <div
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted",
                   collapsed && "justify-center px-2",
-                  "hover:no-underline w-full"
+                  isActive ? "bg-muted" : "transparent"
                 )}
               >
                 {item.icon && <item.icon className="h-4 w-4" />}
                 {!collapsed && <span>{item.title}</span>}
-              </AccordionTrigger>
-            </div>
-            <AccordionContent className={collapsed ? "hidden" : ""}>
-              <div className="ml-6 flex flex-col space-y-1">
-                {item.children.map((child) => (
-                  <NavLink
-                    key={child.href}
-                    to={child.href}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                        isActive
-                          ? "bg-accent text-accent-foreground"
-                          : "transparent hover:bg-muted hover:text-foreground"
-                      )
-                    }
-                  >
-                    {child.icon && <child.icon className="h-4 w-4" />}
-                    <span>{child.title}</span>
-                  </NavLink>
-                ))}
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent className={collapsed ? "hidden" : ""}>
+            <div className="ml-6 flex flex-col space-y-1">
+              {item.children.map((child) => (
+                <NavLink
+                  key={child.href}
+                  to={child.href}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "transparent hover:bg-muted hover:text-foreground"
+                    )
+                  }
+                >
+                  {child.icon && <child.icon className="h-4 w-4" />}
+                  <span>{child.title}</span>
+                </NavLink>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       );
     }
 
@@ -163,7 +179,7 @@ export function Sidebar() {
           <nav className="space-y-2 px-3 py-2">
             {menuCategories.map((category, index) => (
               <div key={`category-${index}`} className="space-y-1">
-                {/* Removed the separator with category label, just adding minimal top spacing for categories after the first */}
+                {/* Minimal top spacing for categories after the first */}
                 {!collapsed && index > 0 && (
                   <div className="h-3"></div>
                 )}
@@ -182,4 +198,3 @@ export function Sidebar() {
     </div>
   );
 }
-
