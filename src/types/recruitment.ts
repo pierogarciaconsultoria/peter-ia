@@ -40,3 +40,30 @@ export interface AssessmentResponse {
   score?: number;
   submitted_at: string;
 }
+
+export interface ResumeAnalysis {
+  id: string;
+  candidate_id: string;
+  job_opening_id: string;
+  compatibility_score: number;
+  recommendation: string;
+  strengths: string[];
+  weaknesses: string[];
+  analysis: string;
+  created_at: string;
+  created_by: string;
+}
+
+export interface Candidate {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  resume_url?: string;
+  status: string;
+  recruitment_process_id: string;
+  created_at: string;
+  updated_at: string;
+  company_id: string;
+  source?: string;
+}

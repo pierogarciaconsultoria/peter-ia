@@ -14,6 +14,7 @@ import { JobPortalPreview } from "./recruitment/JobPortalPreview";
 import { RecruitmentMetrics } from "./recruitment/RecruitmentMetrics";
 import { getStatusBadge } from "./recruitment/StatusUtils";
 import { CandidateAssessmentManager } from "./recruitment/candidate-assessment/CandidateAssessmentManager";
+import { CandidateAnalysisTab } from "./recruitment/CandidateAnalysisTab";
 
 export function RecruitmentSelection() {
   const { toast } = useToast();
@@ -147,6 +148,7 @@ export function RecruitmentSelection() {
           <TabsTrigger value="internal">Processos Internos</TabsTrigger>
           <TabsTrigger value="public">Divulgação Pública</TabsTrigger>
           <TabsTrigger value="candidates">Candidatos</TabsTrigger>
+          <TabsTrigger value="analysis">Análise de Candidatos</TabsTrigger>
           <TabsTrigger value="assessments">Avaliações</TabsTrigger>
         </TabsList>
         
@@ -194,6 +196,10 @@ export function RecruitmentSelection() {
               />
             ))}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="analysis">
+          <CandidateAnalysisTab />
         </TabsContent>
         
         <TabsContent value="assessments">
