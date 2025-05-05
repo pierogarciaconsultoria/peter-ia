@@ -34,10 +34,10 @@ export const hrTabGroups: TabGroup[] = [
     name: "Estrutura",
     icon: createIcon(icons.BarChartBig),
     subTabs: [
-      { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart" },
-      { id: "departments", name: "Departamentos", component: "DepartmentManagement" },
-      { id: "positions", name: "Quadro Aprovado", component: "ApprovedPositions" },
-      { id: "salary", name: "Plano de Cargos e Salários", component: "JobSalaryPlan" }
+      { id: "organizational-structure", name: "Estrutura Organizacional", component: "DepartmentOrgChart", icon: createIcon(icons.BarChartBig) },
+      { id: "departments", name: "Departamentos", component: "DepartmentManagement", icon: createIcon(icons.Building2) },
+      { id: "positions", name: "Quadro Aprovado", component: "ApprovedPositions", icon: createIcon(icons.Users) },
+      { id: "salary", name: "Plano de Cargos e Salários", component: "JobSalaryPlan", icon: createIcon(icons.DollarSign) }
     ]
   },
   {
@@ -45,8 +45,8 @@ export const hrTabGroups: TabGroup[] = [
     name: "Recrutamento",
     icon: createIcon(icons.UserPlus),
     subTabs: [
-      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection" },
-      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission" }
+      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection", icon: createIcon(icons.UserPlus) },
+      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission", icon: createIcon(icons.UserPlus) }
     ]
   },
   {
@@ -56,7 +56,7 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { 
         id: "directory", 
-        name: "Colaborador", 
+        name: "Colaboradores", 
         component: "EmployeeDirectory",
         icon: createIcon(icons.UserCircle)
       },
@@ -91,11 +91,11 @@ export const hrTabGroups: TabGroup[] = [
     name: "Desenvolvimento",
     icon: createIcon(icons.Award),
     subTabs: [
-      { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans" },
-      { id: "training", name: "Treinamentos", component: "TrainingControl" },
-      { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment" },
-      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" },
-      { id: "feedback", name: "Feedback", component: "FeedbackManagement" }
+      { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans", icon: createIcon(icons.Award) },
+      { id: "training", name: "Treinamentos", component: "TrainingControl", icon: createIcon(icons.Award) },
+      { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment", icon: createIcon(icons.Award) },
+      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch", icon: createIcon(icons.Award) },
+      { id: "feedback", name: "Feedback", component: "FeedbackManagement", icon: createIcon(icons.Award) }
     ]
   },
   {
@@ -103,12 +103,42 @@ export const hrTabGroups: TabGroup[] = [
     name: "Gestão",
     icon: createIcon(icons.BriefcaseBusiness),
     subTabs: [
-      { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement" },
-      { id: "vacation", name: "Férias", component: "VacationManagement" },
-      { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement", icon: createIcon(icons.AlertCircle) },
-      { id: "medical", name: "Atestados", component: "MedicalCertificateManagement", icon: createIcon(icons.FileHeart) },
-      { id: "board", name: "Mural do Colaborador", component: "EmployeeBoard" },
-      { id: "thermometer", name: "Termômetro de Maturidade", component: "MaturityThermometer" }
+      { 
+        id: "personnel", 
+        name: "Movimentação de Pessoal", 
+        component: "PersonnelMovement", 
+        icon: createIcon(icons.Users) 
+      },
+      { 
+        id: "vacation", 
+        name: "Férias", 
+        component: "VacationManagement", 
+        icon: createIcon(icons.Calendar) 
+      },
+      { 
+        id: "occurrences", 
+        name: "Ocorrências", 
+        component: "OccurrenceManagement", 
+        icon: createIcon(icons.AlertCircle) 
+      },
+      { 
+        id: "medical", 
+        name: "Atestados", 
+        component: "MedicalCertificateManagement", 
+        icon: createIcon(icons.FileHeart) 
+      },
+      { 
+        id: "board", 
+        name: "Mural do Colaborador", 
+        component: "EmployeeBoard", 
+        icon: createIcon(icons.FileText) 
+      },
+      { 
+        id: "thermometer", 
+        name: "Termômetro de Maturidade", 
+        component: "MaturityThermometer", 
+        icon: createIcon(icons.Thermometer) 
+      }
     ]
   },
   {

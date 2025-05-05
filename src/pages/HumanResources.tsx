@@ -7,12 +7,13 @@ import { HRHeader } from "@/components/hr/HRHeader";
 import { HRTabSelect } from "@/components/hr/HRTabSelect";
 import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Set active tab from URL state or query params if available
   useEffect(() => {
@@ -46,7 +47,8 @@ const HumanResources = () => {
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     
-    // Additional logic could be added here if needed for dropdown state management
+    // Update URL query parameter for better bookmarking and navigation
+    navigate(`/human-resources?activeTab=${tabId}`, { replace: true });
   };
 
   return (
