@@ -12,17 +12,14 @@ export function SidebarToggle({ collapsed, toggleSidebar }: SidebarToggleProps) 
     <Button
       variant="ghost"
       size="sm"
-      className="ml-auto w-full flex justify-between mb-2"
+      className="w-full flex justify-between items-center mb-2"
       onClick={toggleSidebar}
     >
       {collapsed ? (
-        <>
-          <span className="sr-only">Expandir</span>
-          <ChevronsRight className="h-4 w-4" />
-        </>
+        <ChevronsRight className="h-4 w-4 mx-auto" />
       ) : (
         <>
-          <span>Recolher</span>
+          <span className="text-sm font-medium">Recolher</span>
           <ChevronsLeft className="h-4 w-4" />
         </>
       )}

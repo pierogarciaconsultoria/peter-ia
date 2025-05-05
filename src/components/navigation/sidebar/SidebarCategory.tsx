@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel } from "@/components/ui/sidebar";
 import { MenuItem } from "../types";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 
@@ -26,25 +26,30 @@ export function SidebarCategory({
   onMouseLeave,
   toggleItemExpanded,
 }: SidebarCategoryProps) {
+  // Don't render empty categories
+  if (items.length === 0) return null;
+  
   return (
-    <div key={`category-${label}`} className="space-y-1">
-      {!collapsed && items.length > 0 && label !== "Principal" && (
-        <div className="h-3"></div>
+    <SidebarGroup key={`category-${label}`}>
+      {!collapsed && label !== "Principal" && (
+        <SidebarGroupLabel>{label}</SidebarGroupLabel>
       )}
       
-      {items.map((item) => (
-        <SidebarMenuItem
-          key={item.href || item.title}
-          item={item}
-          pathname={pathname}
-          collapsed={collapsed}
-          expandedItems={expandedItems}
-          hoveredItem={hoveredItem}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          toggleItemExpanded={toggleItemExpanded}
-        />
-      ))}
-    </div>
+      <SidebarGroupContent>
+        {items.map((item) => (
+          <SidebarMenuItem
+            key={item.href || item.title}
+            item={item}
+            pathname={pathname}
+            collapsed={collapsed}
+            expandedItems={expandedItems}
+            hoveredItem={hoveredItem}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            toggleItemExpanded={toggleItemExpanded}
+          />
+        ))}
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }

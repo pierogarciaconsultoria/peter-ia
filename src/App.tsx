@@ -1,10 +1,11 @@
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
-import { AuthProvider } from "@/contexts/AuthContext"; // Import the AuthProvider
+import { AuthProvider } from "@/contexts/AuthContext"; 
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -46,7 +47,7 @@ function App() {
   const { toast } = useToast();
 
   return (
-    <AuthProvider> {/* Wrap entire app with AuthProvider */}
+    <AuthProvider>
       <SidebarProvider>
         <Router>
           <Routes>

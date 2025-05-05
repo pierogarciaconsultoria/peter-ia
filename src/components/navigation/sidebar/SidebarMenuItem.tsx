@@ -2,6 +2,12 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { MenuItem } from "../types";
+import {
+  SidebarMenuItem as ShadcnSidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubButton
+} from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface SidebarMenuItemProps {
@@ -31,75 +37,65 @@ export function SidebarMenuItem({
 
   if (item.children && item.children.length > 0) {
     return (
-      <div
+      <ShadcnSidebarMenuItem
         key={itemKey}
         className="w-full"
         onMouseEnter={() => onMouseEnter(itemKey)}
         onMouseLeave={onMouseLeave}
       >
         <Collapsible open={isExpanded} className="w-full">
-          <div className="flex w-full">
-            <CollapsibleTrigger
-              onClick={(e) => {
-                e.preventDefault();
-                toggleItemExpanded(itemKey);
-              }}
-              className="w-full"
+          <CollapsibleTrigger
+            onClick={(e) => {
+              e.preventDefault();
+              toggleItemExpanded(itemKey);
+            }}
+            className="w-full"
+            asChild
+          >
+            <SidebarMenuButton 
+              variant={isActive ? "default" : "ghost"}
+              isActive={isActive}
+              tooltip={collapsed ? item.title : undefined}
             >
-              <div
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted",
-                  collapsed && "justify-center px-2",
-                  isActive ? "bg-muted" : "transparent"
-                )}
-              >
-                {item.icon && <item.icon className="h-4 w-4" />}
-                {!collapsed && <span>{item.title}</span>}
-              </div>
-            </CollapsibleTrigger>
-          </div>
+              {item.icon && <item.icon className="h-4 w-4" />}
+              {!collapsed && <span>{item.title}</span>}
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          
           <CollapsibleContent className={collapsed ? "hidden" : ""}>
-            <div className="ml-6 flex flex-col space-y-1">
+            <SidebarMenuSub className="ml-6 mt-1">
               {item.children.map((child) => (
-                <NavLink
-                  key={child.href}
-                  to={child.href}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                      isActive
-                        ? "bg-accent text-accent-foreground"
-                        : "transparent hover:bg-muted hover:text-foreground"
-                    )
-                  }
-                >
-                  {child.icon && <child.icon className="h-4 w-4" />}
-                  <span>{child.title}</span>
+                <NavLink key={child.href} to={child.href}>
+                  {({ isActive }) => (
+                    <SidebarMenuSubButton
+                      isActive={isActive}
+                    >
+                      {child.icon && <child.icon className="h-4 w-4 mr-2" />}
+                      <span>{child.title}</span>
+                    </SidebarMenuSubButton>
+                  )}
                 </NavLink>
               ))}
-            </div>
+            </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>
-      </div>
+      </ShadcnSidebarMenuItem>
     );
   }
 
   return (
-    <NavLink
-      key={item.href}
-      to={item.href}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-          isActive
-            ? "bg-accent text-accent-foreground"
-            : "transparent hover:bg-muted hover:text-foreground",
-          collapsed && "justify-center px-2"
-        )
-      }
-    >
-      {item.icon && <item.icon className="h-4 w-4" />}
-      {!collapsed && <span>{item.title}</span>}
-    </NavLink>
+    <ShadcnSidebarMenuItem key={item.href}>
+      <NavLink to={item.href}>
+        {({ isActive }) => (
+          <SidebarMenuButton 
+            isActive={isActive}
+            tooltip={collapsed ? item.title : undefined}
+          >
+            {item.icon && <item.icon className="h-4 w-4" />}
+            {!collapsed && <span>{item.title}</span>}
+          </SidebarMenuButton>
+        )}
+      </NavLink>
+    </ShadcnSidebarMenuItem>
   );
 }

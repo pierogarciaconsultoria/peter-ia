@@ -1,7 +1,14 @@
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { 
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarMenu,
+} from "@/components/ui/sidebar";
 
 // Import sidebar components
 import { SidebarToggle } from "./sidebar/SidebarToggle";
@@ -51,37 +58,49 @@ export function Sidebar() {
     setCollapsed(!collapsed);
   };
 
+  // Sync the sidebar state with the shadcn sidebar
+  useEffect(() => {
+    const sidebarState = localStorage.getItem("sidebar-collapsed");
+    if (sidebarState) {
+      setCollapsed(sidebarState === "true");
+    }
+  }, [setCollapsed]);
+
   return (
-    <div
+    <ShadcnSidebar 
+      collapsible={collapsed ? "icon" : "none"}
+      variant="sidebar"
       className={cn(
-        "fixed top-0 left-0 z-40 h-screen transition-all duration-300 bg-card border-r pt-16",
-        collapsed ? "md:w-20" : "md:w-64"
+        "transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex flex-col h-full">
-        <div className="px-3 py-2">
-          <SidebarToggle collapsed={collapsed} toggleSidebar={toggleSidebar} />
-        </div>
-
-        <ScrollArea className="flex-1">
-          <nav className="space-y-2 px-3 py-2">
-            {menuCategories.map((category) => (
-              <SidebarCategory
-                key={`category-${category.label}`}
-                label={category.label}
-                items={category.items}
-                collapsed={collapsed}
-                pathname={pathname}
-                expandedItems={expandedItems}
-                hoveredItem={hoveredItem}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-                toggleItemExpanded={toggleItemExpanded}
-              />
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
-    </div>
+      <SidebarHeader className="px-2 py-2">
+        <SidebarToggle collapsed={collapsed} toggleSidebar={toggleSidebar} />
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarMenu>
+          {menuCategories.map((category) => (
+            <SidebarCategory
+              key={`category-${category.label}`}
+              label={category.label}
+              items={category.items}
+              collapsed={collapsed}
+              pathname={pathname}
+              expandedItems={expandedItems}
+              hoveredItem={hoveredItem}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              toggleItemExpanded={toggleItemExpanded}
+            />
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      
+      <SidebarFooter className="py-2">
+        {/* Add footer content here if needed */}
+      </SidebarFooter>
+    </ShadcnSidebar>
   );
 }
