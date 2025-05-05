@@ -1,18 +1,24 @@
 
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 interface SidebarToggleProps {
   collapsed: boolean;
-  toggleSidebar: () => void;
 }
 
-export function SidebarToggle({ collapsed, toggleSidebar }: SidebarToggleProps) {
+export function SidebarToggle({ collapsed }: SidebarToggleProps) {
+  const { setCollapsed } = useSidebar();
+  
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <Button
       variant="ghost"
       size="sm"
-      className="w-full flex justify-between items-center mb-2"
+      className="w-full flex justify-between items-center"
       onClick={toggleSidebar}
     >
       {collapsed ? (

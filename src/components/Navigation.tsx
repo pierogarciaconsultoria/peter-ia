@@ -6,7 +6,6 @@ import { UserMenu } from "./navigation/UserMenu";
 import { Sidebar } from "./navigation/Sidebar";
 import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
-import { BreadcrumbNavigation } from "./navigation/BreadcrumbNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
 
@@ -14,12 +13,16 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
-  const { collapsed } = useCustomSidebar();
+  const { collapsed, setCollapsed } = useCustomSidebar();
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -28,12 +31,12 @@ export function Navigation() {
       
       {/* Main content */}
       <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
-        <header className="fixed top-0 right-0 z-30 h-16 bg-background/95 backdrop-blur-sm border-b">
+        <header className="fixed top-0 right-0 z-30 w-full h-16 bg-background/95 backdrop-blur-sm border-b">
           <div className="flex h-full items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <MenuToggle 
-                isOpen={isOpen} 
-                onToggle={() => setIsOpen(!isOpen)}
+                isOpen={collapsed} 
+                onToggle={toggleSidebar}
               />
               <BackToHomeButton />
             </div>
