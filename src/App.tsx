@@ -7,6 +7,7 @@ import { PermissionGuard } from "@/components/PermissionGuard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { AuthProvider } from "@/contexts/AuthContext"; 
 import { Navigation } from "@/components/Navigation";
+import NotFound from "@/pages/NotFound";
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -98,6 +99,9 @@ function App() {
                 } />
               </Route>
             </Route>
+            
+            {/* Catch-all route for pages not found */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           
           <Toaster />
