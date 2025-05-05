@@ -53,7 +53,7 @@ export function SidebarMenuItem({
             asChild
           >
             <SidebarMenuButton 
-              variant={isActive ? "default" : "ghost"}
+              variant="default"
               isActive={isActive}
               tooltip={collapsed ? item.title : undefined}
             >
@@ -90,6 +90,7 @@ export function SidebarMenuItem({
           <SidebarMenuButton 
             isActive={isActive}
             tooltip={collapsed ? item.title : undefined}
+            variant="default"
           >
             {item.icon && <item.icon className="h-4 w-4" />}
             {!collapsed && <span>{item.title}</span>}
