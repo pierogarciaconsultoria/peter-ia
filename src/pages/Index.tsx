@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { isoRequirements, ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -34,23 +33,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-6xl mx-auto">
-          {/* Informações do usuário atual */}
-          <div className="mb-6">
-            <UserProfileInfo />
-          </div>
-          
-          <Dashboard requirements={isoRequirements} />
+    <div className="p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Informações do usuário atual */}
+        <div className="mb-6">
+          <UserProfileInfo />
+        </div>
+        
+        <Dashboard requirements={isoRequirements} />
+        
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-6">Requisitos da ISO 9001:2015</h2>
           <RequirementsList 
             requirements={isoRequirements} 
             onSelectRequirement={handleCardClick} 
           />
         </div>
-      </main>
+      </div>
       
       {/* Main requirement dialog */}
       <Dialog open={!!selectedRequirement} onOpenChange={() => closeRequirementDialog()}>

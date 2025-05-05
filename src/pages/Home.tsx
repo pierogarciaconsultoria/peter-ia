@@ -1,5 +1,4 @@
 
-import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Dashboard } from "@/components/Dashboard";
 import { DatabaseConnectionTest } from "@/components/DatabaseConnectionTest";
@@ -12,8 +11,8 @@ import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <main className="flex-1 p-8 pt-24 md:pt-16">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold">Dashboard</h1>
           
           <Card className="mb-6">

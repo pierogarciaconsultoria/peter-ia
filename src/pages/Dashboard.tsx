@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Navigation } from "@/components/Navigation";
 import { Dashboard as DashboardComponent } from "@/components/Dashboard";
 import { RequirementsList } from "@/components/RequirementsList";
 import { isoRequirements } from "@/utils/isoRequirements";
@@ -32,9 +31,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto">
+    <div className="p-6">
       <div className="max-w-6xl mx-auto">
-        <CardHeader className="px-0">
+        <CardHeader className="px-0 pt-0">
           <CardTitle className="text-2xl font-bold">Dashboard</CardTitle>
           <CardDescription>Acompanhamento do Sistema de Gestão da Qualidade</CardDescription>
         </CardHeader>

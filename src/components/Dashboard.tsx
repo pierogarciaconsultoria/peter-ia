@@ -73,7 +73,7 @@ export function Dashboard({ requirements }: DashboardProps) {
   const nextExternalAudit = upcomingExternalAudits.length > 0 ? upcomingExternalAudits[0] : null;
 
   return (
-    <div className="mb-8 appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
+    <div className="appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
       <DashboardHeader onNewDocument={handleNewDocument} />
       
       {/* Upcoming Audits Section */}

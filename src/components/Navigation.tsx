@@ -28,13 +28,12 @@ export function Navigation() {
       
       {/* Main content */}
       <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
-        <header className="fixed top-0 right-0 left-0 z-30 h-16 bg-background/80 backdrop-blur-sm">
-          <div className="container flex h-full items-center justify-between">
+        <header className="fixed top-0 right-0 z-30 h-16 bg-background/95 backdrop-blur-sm border-b">
+          <div className="flex h-full items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <MenuToggle 
                 isOpen={isOpen} 
                 onToggle={() => setIsOpen(!isOpen)}
-                className={`transition-opacity duration-300 ${!visible ? 'opacity-0' : 'opacity-100'}`}
               />
               <BackToHomeButton />
             </div>
@@ -45,13 +44,8 @@ export function Navigation() {
           </div>
         </header>
         
-        {/* Breadcrumb navigation - positioned below the header */}
-        <div className="fixed top-16 left-0 right-0 z-20 px-6 py-2 bg-background/80 backdrop-blur-sm">
-          <BreadcrumbNavigation />
-        </div>
-        
-        {/* Main content padding to account for fixed header and breadcrumb */}
-        <main className="pt-28 px-4 md:px-6 pb-10 overflow-auto h-screen">
+        {/* Main content padding to account for fixed header */}
+        <main className="pt-16 pb-6 h-screen overflow-auto">
           <Outlet />
         </main>
       </div>
