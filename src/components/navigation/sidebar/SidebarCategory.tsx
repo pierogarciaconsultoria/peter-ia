@@ -31,12 +31,15 @@ export function SidebarCategory({
   // Don't render empty categories
   if (items.length === 0) return null;
   
-  // Determine if we should hide the label (when there's only one item and hideLabelForSingleItem is true)
+  // Determine if we should hide the label
   const shouldHideLabel = hideLabelForSingleItem && items.length === 1;
+  
+  // Also hide labels for "Recursos" and "Configurações" categories
+  const hideSpecificLabels = label === "Recursos" || label === "Configurações";
   
   return (
     <div className="px-2 py-1">
-      {!collapsed && !shouldHideLabel && label !== "Principal" && (
+      {!collapsed && !shouldHideLabel && !hideSpecificLabels && label !== "Principal" && (
         <div className="mb-1 px-2 text-xs font-medium leading-6 text-foreground/60">
           {label}
         </div>
