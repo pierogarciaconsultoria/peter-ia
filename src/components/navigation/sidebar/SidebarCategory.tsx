@@ -1,7 +1,7 @@
 
-import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel } from "@/components/ui/sidebar";
 import { MenuItem } from "../types";
 import { SidebarMenuItem } from "./SidebarMenuItem";
+import { cn } from "@/lib/utils";
 
 interface SidebarCategoryProps {
   label: string;
@@ -30,12 +30,14 @@ export function SidebarCategory({
   if (items.length === 0) return null;
   
   return (
-    <SidebarGroup key={`category-${label}`}>
+    <div className="px-2 py-1">
       {!collapsed && label !== "Principal" && (
-        <SidebarGroupLabel>{label}</SidebarGroupLabel>
+        <div className="mb-1 px-2 text-xs font-medium leading-6 text-foreground/60">
+          {label}
+        </div>
       )}
       
-      <SidebarGroupContent>
+      <div className="space-y-1">
         {items.map((item) => (
           <SidebarMenuItem
             key={item.href || item.title}
@@ -49,7 +51,7 @@ export function SidebarCategory({
             toggleItemExpanded={toggleItemExpanded}
           />
         ))}
-      </SidebarGroupContent>
-    </SidebarGroup>
+      </div>
+    </div>
   );
 }

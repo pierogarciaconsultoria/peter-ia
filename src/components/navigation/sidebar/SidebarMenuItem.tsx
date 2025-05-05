@@ -2,12 +2,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { MenuItem } from "../types";
-import {
-  SidebarMenuItem as ShadcnSidebarMenuItem,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubButton
-} from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface SidebarMenuItemProps {
@@ -38,8 +32,7 @@ export function SidebarMenuItem({
 
   if (item.children && item.children.length > 0) {
     return (
-      <ShadcnSidebarMenuItem
-        key={itemKey}
+      <div 
         className="w-full"
         onMouseEnter={() => onMouseEnter(itemKey)}
         onMouseLeave={onMouseLeave}
@@ -50,54 +43,66 @@ export function SidebarMenuItem({
               e.preventDefault();
               toggleItemExpanded(itemKey);
             }}
-            className="w-full"
-            asChild
+            className={cn(
+              "flex w-full items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+              (isActive || hasActiveChild) ? 
+                "bg-accent text-accent-foreground font-medium" : 
+                "hover:bg-accent/50 hover:text-accent-foreground"
+            )}
           >
-            <SidebarMenuButton 
-              variant="default"
-              isActive={isActive || hasActiveChild}
-              tooltip={collapsed ? item.title : undefined}
-            >
-              {item.icon && <item.icon className="h-4 w-4" />}
-              {!collapsed && <span>{item.title}</span>}
-            </SidebarMenuButton>
+            {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
+            {!collapsed && <span className="truncate">{item.title}</span>}
           </CollapsibleTrigger>
           
           <CollapsibleContent className={collapsed ? "hidden" : ""}>
-            <SidebarMenuSub className="ml-6 mt-1">
+            <div className="ml-6 mt-1 flex flex-col gap-1">
               {item.children.map((child) => (
-                <NavLink key={child.href} to={child.href}>
-                  {({ isActive }) => (
-                    <SidebarMenuSubButton
-                      isActive={isActive}
-                    >
-                      {child.icon && <child.icon className="h-4 w-4 mr-2" />}
-                      <span>{child.title}</span>
-                    </SidebarMenuSubButton>
+                <NavLink 
+                  key={child.href} 
+                  to={child.href}
+                  className={({ isActive }) => cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
+                    isActive ? 
+                      "bg-accent text-accent-foreground font-medium" : 
+                      "hover:bg-accent/50 hover:text-accent-foreground"
                   )}
+                >
+                  {child.icon && <child.icon className="h-4 w-4 shrink-0" />}
+                  <span className="truncate">{child.title}</span>
                 </NavLink>
               ))}
-            </SidebarMenuSub>
+            </div>
           </CollapsibleContent>
         </Collapsible>
-      </ShadcnSidebarMenuItem>
+      </div>
     );
   }
 
   return (
-    <ShadcnSidebarMenuItem key={item.href}>
-      <NavLink to={item.href}>
-        {({ isActive }) => (
-          <SidebarMenuButton 
-            isActive={isActive}
-            tooltip={collapsed ? item.title : undefined}
-            variant="default"
-          >
-            {item.icon && <item.icon className="h-4 w-4" />}
-            {!collapsed && <span>{item.title}</span>}
-          </SidebarMenuButton>
-        )}
-      </NavLink>
-    </ShadcnSidebarMenuItem>
+    <NavLink 
+      to={item.href}
+      className={({ isActive }) => cn(
+        "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+        isActive ? 
+          "bg-accent text-accent-foreground font-medium" : 
+          "hover:bg-accent/50 hover:text-accent-foreground"
+      )}
+    >
+      {item.icon && (
+        collapsed ? (
+          <item.icon className="h-4 w-4 mx-auto" />
+        ) : (
+          <item.icon className="h-4 w-4 shrink-0" />
+        )
+      )}
+      {!collapsed && <span className="truncate">{item.title}</span>}
+      
+      {/* Tooltip para modo collapsed */}
+      {collapsed && (
+        <div className="absolute left-full ml-2 hidden group-hover:flex px-2 py-1 bg-popover text-popover-foreground rounded z-50">
+          {item.title}
+        </div>
+      )}
+    </NavLink>
   );
 }

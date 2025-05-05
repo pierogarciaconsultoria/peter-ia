@@ -2,13 +2,6 @@
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/SidebarContext";
-import { 
-  Sidebar as ShadcnSidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarFooter,
-  SidebarMenu,
-} from "@/components/ui/sidebar";
 
 // Import sidebar components
 import { SidebarToggle } from "./sidebar/SidebarToggle";
@@ -48,46 +41,50 @@ export function Sidebar() {
   const nonEmptyCategories = menuCategories.filter(category => category.items.length > 0);
 
   return (
-    <ShadcnSidebar 
-      variant="sidebar"
+    <div 
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-background border-r",
-        collapsed ? "w-16 transition-all duration-300" : "w-64 transition-all duration-300"
+        "fixed left-0 top-0 z-40 h-screen bg-background border-r transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
       )}
     >
-      <SidebarHeader className="px-2 py-2 border-b">
-        <div className="flex items-center justify-center h-14">
-          {!collapsed && (
-            <h2 className="text-lg font-semibold">SGQ Sistema</h2>
-          )}
-          {collapsed && (
-            <span className="text-xl font-bold">SGQ</span>
-          )}
+      <div className="flex flex-col h-screen">
+        {/* Header */}
+        <div className="px-2 py-2 border-b">
+          <div className="flex items-center justify-center h-14">
+            {!collapsed && (
+              <h2 className="text-lg font-semibold">SGQ Sistema</h2>
+            )}
+            {collapsed && (
+              <span className="text-xl font-bold">SGQ</span>
+            )}
+          </div>
         </div>
-      </SidebarHeader>
-      
-      <SidebarContent className="px-0 py-0 overflow-y-auto">
-        <SidebarMenu>
-          {nonEmptyCategories.map((category) => (
-            <SidebarCategory
-              key={`category-${category.label}`}
-              label={category.label}
-              items={category.items}
-              collapsed={collapsed}
-              pathname={pathname}
-              expandedItems={expandedItems}
-              hoveredItem={hoveredItem}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              toggleItemExpanded={toggleItemExpanded}
-            />
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-      
-      <SidebarFooter className="mt-auto border-t py-2">
-        <SidebarToggle collapsed={collapsed} />
-      </SidebarFooter>
-    </ShadcnSidebar>
+        
+        {/* Content - Menu Items */}
+        <div className="flex-1 px-0 py-0 overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {nonEmptyCategories.map((category) => (
+              <SidebarCategory
+                key={`category-${category.label}`}
+                label={category.label}
+                items={category.items}
+                collapsed={collapsed}
+                pathname={pathname}
+                expandedItems={expandedItems}
+                hoveredItem={hoveredItem}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                toggleItemExpanded={toggleItemExpanded}
+              />
+            ))}
+          </nav>
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-auto border-t py-2">
+          <SidebarToggle collapsed={collapsed} />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Menu, PanelLeftClose, PanelLeft } from "lucide-react";
+import { PanelLeftClose, PanelLeft } from "lucide-react";
 
 interface MenuToggleProps {
   isOpen: boolean;
