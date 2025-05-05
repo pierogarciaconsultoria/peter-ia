@@ -43,7 +43,7 @@ const HumanResources = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle tab change and ensure dropdowns show the correct content
+  // Handle tab change and update URL
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     

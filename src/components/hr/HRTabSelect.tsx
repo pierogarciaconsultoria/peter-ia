@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { hrTabGroups } from "./HRTabConfig";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +11,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type HRTabSelectProps = {
   tabGroups: typeof hrTabGroups;
@@ -36,6 +38,11 @@ export function HRTabSelect({
       ...prev,
       [groupId]: !prev[groupId]
     }));
+  };
+
+  // Handle menu item click
+  const handleMenuItemClick = (tabId: string, href?: string) => {
+    setActiveTab(tabId);
   };
 
   return (
@@ -95,7 +102,7 @@ export function HRTabSelect({
                     {group.subTabs?.map(tab => (
                       <DropdownMenuItem
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleMenuItemClick(tab.id, tab.href)}
                         className={cn(
                           "flex items-center gap-2 cursor-pointer",
                           activeTab === tab.id && "bg-accent text-accent-foreground font-medium"
