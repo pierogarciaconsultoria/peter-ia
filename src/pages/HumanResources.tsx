@@ -38,26 +38,24 @@ const HumanResources = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1">
-        <div className="w-full px-4 sm:px-6 py-6 space-y-6">
-          <HRHeader />
-          
-          {activeTab !== "ambiente" && <HRFilters />}
+    <div className="min-h-screen bg-background">
+      <div className="w-full px-4 sm:px-6 py-6 space-y-6">
+        <HRHeader />
+        
+        {activeTab !== "ambiente" && <HRFilters />}
 
-          {/* Dropdown navigation system */}
-          <HRTabSelect 
-            tabGroups={hrTabGroups} 
-            activeTab={activeTab} 
-            setActiveTab={handleTabChange} 
-          />
-          
-          <HRTabContent 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange} 
-          />
-        </div>
-      </main>
+        {/* Dropdown navigation system */}
+        <HRTabSelect 
+          tabGroups={hrTabGroups} 
+          activeTab={activeTab} 
+          setActiveTab={handleTabChange} 
+        />
+        
+        <HRTabContent 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange} 
+        />
+      </div>
     </div>
   );
 };

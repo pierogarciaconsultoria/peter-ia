@@ -11,6 +11,7 @@ import { qualityItems } from "./menu-categories/quality-items";
 import { hrItems } from "./menu-categories/hr";
 import { resourcesItems } from "./menu-categories/resources-items";
 import { settingsItems } from "./menu-categories/settings-items";
+import { complianceItems } from "./menu-categories/compliance-items";
 
 export type { MenuItem };
 
@@ -26,6 +27,7 @@ export const menuItems: MenuItem[] = [
   ...hrItems,
   ...resourcesItems,
   ...settingsItems,
+  ...complianceItems,
 ];
 
 export default menuItems;
