@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, Outlet } from "react-router-dom";
 import { MenuToggle } from "./navigation/MenuToggle";
 import { UserMenu } from "./navigation/UserMenu";
 import { Sidebar } from "./navigation/Sidebar";
