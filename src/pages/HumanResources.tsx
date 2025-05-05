@@ -6,13 +6,13 @@ import { HRTabSelect } from "@/components/hr/HRTabSelect";
 import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const location = useLocation();
   const navigate = useNavigate();
-  const { collapsed } = useCustomSidebar();
+  const { collapsed } = useSidebar();
 
   // Set active tab from URL state or query params if available
   useEffect(() => {

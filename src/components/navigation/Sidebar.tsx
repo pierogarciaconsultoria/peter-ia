@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
+import { useSidebar } from "@/contexts/SidebarContext";
 import { 
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -30,11 +30,11 @@ const menuCategories = [
   { label: "Qualidade", items: menuItems.filter(item => item.modulo === "qualidade") },
   { label: "Gente e Gestão", items: menuItems.filter(item => item.modulo === "rh") },
   { label: "Recursos", items: menuItems.filter(item => item.modulo === "ambiente") },
-  { label: "Configurações", items: menuItems.filter(item => ((item.modulo === "admin") || (item.modulo === "tarefas"))) }
+  { label: "Configurações", items: menuItems.filter(item => item.modulo === "admin" || item.modulo === "tarefas") }
 ];
 
 export function Sidebar() {
-  const { collapsed } = useCustomSidebar();
+  const { collapsed } = useSidebar();
   const {
     pathname,
     expandedItems,

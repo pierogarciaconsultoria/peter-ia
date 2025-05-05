@@ -6,10 +6,10 @@ import { AmbienteTabContent } from '@/components/ambiente/AmbienteTabContent';
 import { AmbienteDialogs } from '@/components/ambiente/AmbienteDialogs';
 import { AmbienteTabs } from '@/components/ambiente/AmbienteTabs';
 import { useAmbienteState } from '@/hooks/useAmbienteState';
-import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 export function AmbienteContent() {
-  const { collapsed } = useCustomSidebar();
+  const { collapsed } = useSidebar();
   
   const {
     activeTab,
