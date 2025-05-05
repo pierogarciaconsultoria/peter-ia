@@ -34,15 +34,14 @@ export async function saveResumeAnalysis(analysisData: Omit<ResumeAnalysis, 'id'
     const { data, error } = await supabase
       .from('resume_analyses')
       .insert(analysisData)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error("Erro ao salvar análise:", error);
       throw error;
     }
 
-    return data as ResumeAnalysis;
+    return data[0] as ResumeAnalysis;
   } catch (error: any) {
     console.error("Erro ao salvar análise:", error);
     toast.error("Erro ao salvar análise de currículo", {
@@ -95,8 +94,7 @@ export async function sendDiscAssessment(candidateId: string, assessmentId: stri
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
         used: false
       })
-      .select()
-      .single();
+      .select();
 
     if (linkError) throw linkError;
 
@@ -105,7 +103,7 @@ export async function sendDiscAssessment(candidateId: string, assessmentId: stri
       description: `Um e-mail foi enviado para ${candidate.email}`
     });
 
-    return link;
+    return link[0];
   } catch (error: any) {
     console.error("Erro ao enviar avaliação DISC:", error);
     toast.error("Erro ao enviar avaliação DISC", {

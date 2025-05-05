@@ -39,9 +39,8 @@ const HumanResources = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Adjusted padding to provide space for breadcrumb navigation */}
-      <main className={`transition-all duration-300 pt-24 p-6 flex-1 ${collapsed ? 'md:pl-24' : 'md:pl-72'}`}>
-        <div className="max-w-7xl mx-auto w-full space-y-6">
+      <main className="flex-1">
+        <div className="w-full px-4 sm:px-6 py-6 space-y-6">
           <HRHeader />
           
           {activeTab !== "ambiente" && <HRFilters />}

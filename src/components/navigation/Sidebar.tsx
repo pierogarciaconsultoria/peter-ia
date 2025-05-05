@@ -43,26 +43,26 @@ export function Sidebar() {
   return (
     <div 
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-background border-r transition-all duration-300",
+        "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
     >
       <div className="flex flex-col h-screen">
         {/* Header */}
-        <div className="px-2 py-2 border-b">
+        <div className="px-3 py-2 border-b border-sidebar-border">
           <div className="flex items-center justify-center h-14">
             {!collapsed && (
-              <h2 className="text-lg font-semibold">SGQ Sistema</h2>
+              <h2 className="text-lg font-semibold text-white">SGQ Sistema</h2>
             )}
             {collapsed && (
-              <span className="text-xl font-bold">SGQ</span>
+              <span className="text-xl font-bold text-white">SGQ</span>
             )}
           </div>
         </div>
         
         {/* Content - Menu Items */}
-        <div className="flex-1 px-0 py-0 overflow-y-auto">
-          <nav className="flex flex-col gap-1">
+        <div className="flex-1 py-0 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-sidebar">
+          <nav className="flex flex-col gap-1 p-2">
             {nonEmptyCategories.map((category) => (
               <SidebarCategory
                 key={`category-${category.label}`}
@@ -81,7 +81,7 @@ export function Sidebar() {
         </div>
         
         {/* Footer */}
-        <div className="mt-auto border-t py-2">
+        <div className="mt-auto border-t border-sidebar-border py-2">
           <SidebarToggle collapsed={collapsed} />
         </div>
       </div>

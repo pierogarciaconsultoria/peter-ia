@@ -38,7 +38,7 @@ export function Navigation() {
         </header>
         
         {/* Main content padding to account for fixed header */}
-        <main className="pt-16 pb-6 h-screen overflow-auto">
+        <main className="pt-16 h-screen overflow-auto">
           <Outlet />
         </main>
       </div>

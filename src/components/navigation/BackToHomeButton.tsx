@@ -11,7 +11,8 @@ export function BackToHomeButton() {
   // Don't show on the main dashboard or landing pages
   if (location.pathname === "/" || 
       location.pathname === "/landing" || 
-      location.pathname === "/auth") {
+      location.pathname === "/auth" ||
+      location.pathname === "/dashboard") {
     return null;
   }
   
@@ -19,7 +20,7 @@ export function BackToHomeButton() {
     <Button
       variant="outline"
       size="sm"
-      className="fixed top-5 left-20 z-50 md:left-72 transition-all duration-300"
+      className="hidden md:flex"
       onClick={() => navigate("/")}
       title="Voltar para o Dashboard"
     >

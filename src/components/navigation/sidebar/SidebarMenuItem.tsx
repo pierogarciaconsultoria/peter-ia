@@ -33,38 +33,49 @@ export function SidebarMenuItem({
   if (item.children && item.children.length > 0) {
     return (
       <div 
-        className="w-full"
+        className="relative w-full"
         onMouseEnter={() => onMouseEnter(itemKey)}
         onMouseLeave={onMouseLeave}
       >
-        <Collapsible open={isExpanded} className="w-full">
+        <Collapsible open={collapsed ? hoveredItem === itemKey : isExpanded} className="w-full">
           <CollapsibleTrigger
             onClick={(e) => {
               e.preventDefault();
-              toggleItemExpanded(itemKey);
+              if (!collapsed) {
+                toggleItemExpanded(itemKey);
+              }
             }}
             className={cn(
               "flex w-full items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
               (isActive || hasActiveChild) ? 
-                "bg-accent text-accent-foreground font-medium" : 
-                "hover:bg-accent/50 hover:text-accent-foreground"
+                "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : 
+                "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
             )}
           >
-            {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
+            {item.icon && (
+              collapsed ? (
+                <item.icon className="h-5 w-5 mx-auto" />
+              ) : (
+                <item.icon className="h-5 w-5 shrink-0" />
+              )
+            )}
             {!collapsed && <span className="truncate">{item.title}</span>}
           </CollapsibleTrigger>
           
-          <CollapsibleContent className={collapsed ? "hidden" : ""}>
-            <div className="ml-6 mt-1 flex flex-col gap-1">
+          {collapsed ? (
+            <div className={cn(
+              "absolute left-full top-0 ml-2 min-w-[180px] rounded-md border border-sidebar-border bg-sidebar p-2 shadow-md z-50",
+              hoveredItem === itemKey ? "block" : "hidden"
+            )}>
               {item.children.map((child) => (
                 <NavLink 
                   key={child.href} 
                   to={child.href}
                   className={({ isActive }) => cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
+                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors mb-1",
                     isActive ? 
-                      "bg-accent text-accent-foreground font-medium" : 
-                      "hover:bg-accent/50 hover:text-accent-foreground"
+                      "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : 
+                      "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                   )}
                 >
                   {child.icon && <child.icon className="h-4 w-4 shrink-0" />}
@@ -72,37 +83,62 @@ export function SidebarMenuItem({
                 </NavLink>
               ))}
             </div>
-          </CollapsibleContent>
+          ) : (
+            <CollapsibleContent>
+              <div className="ml-6 mt-1 flex flex-col gap-1">
+                {item.children.map((child) => (
+                  <NavLink 
+                    key={child.href} 
+                    to={child.href}
+                    className={({ isActive }) => cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors",
+                      isActive ? 
+                        "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : 
+                        "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                    )}
+                  >
+                    {child.icon && <child.icon className="h-4 w-4 shrink-0" />}
+                    <span className="truncate">{child.title}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </CollapsibleContent>
+          )}
         </Collapsible>
       </div>
     );
   }
 
   return (
-    <NavLink 
-      to={item.href}
-      className={({ isActive }) => cn(
-        "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
-        isActive ? 
-          "bg-accent text-accent-foreground font-medium" : 
-          "hover:bg-accent/50 hover:text-accent-foreground"
-      )}
-    >
-      {item.icon && (
-        collapsed ? (
-          <item.icon className="h-4 w-4 mx-auto" />
-        ) : (
-          <item.icon className="h-4 w-4 shrink-0" />
-        )
-      )}
-      {!collapsed && <span className="truncate">{item.title}</span>}
+    <div className="relative" onMouseEnter={() => onMouseEnter(itemKey)} onMouseLeave={onMouseLeave}>
+      <NavLink 
+        to={item.href}
+        className={({ isActive }) => cn(
+          "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
+          isActive ? 
+            "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : 
+            "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+        )}
+      >
+        {item.icon && (
+          collapsed ? (
+            <item.icon className="h-5 w-5 mx-auto" />
+          ) : (
+            <item.icon className="h-5 w-5 shrink-0" />
+          )
+        )}
+        {!collapsed && <span className="truncate">{item.title}</span>}
+      </NavLink>
       
-      {/* Tooltip para modo collapsed */}
+      {/* Tooltip for collapsed mode */}
       {collapsed && (
-        <div className="absolute left-full ml-2 hidden group-hover:flex px-2 py-1 bg-popover text-popover-foreground rounded z-50">
-          {item.title}
+        <div className={cn(
+          "absolute left-full top-0 ml-2 min-w-[180px] rounded-md border border-sidebar-border bg-sidebar p-2 shadow-md z-50",
+          hoveredItem === itemKey ? "block" : "hidden"
+        )}>
+          <div className="px-3 py-2 font-medium">{item.title}</div>
         </div>
       )}
-    </NavLink>
+    </div>
   );
 }
