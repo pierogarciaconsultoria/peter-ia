@@ -4502,6 +4502,27 @@ export type Database = {
         }
         Relationships: []
       }
+      perfis: {
+        Row: {
+          criado_em: string | null
+          id: string
+          nome: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       performance_evaluations: {
         Row: {
           comments: string | null
@@ -4767,6 +4788,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          criado_em: string | null
+          id: string
+          nome: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       projects: {
         Row: {

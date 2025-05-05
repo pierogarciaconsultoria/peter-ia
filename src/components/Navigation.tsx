@@ -8,14 +8,13 @@ import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
 import { BreadcrumbNavigation } from "./navigation/BreadcrumbNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
-import { useSidebar } from "@/contexts/SidebarContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
-  const { collapsed } = useSidebar();
+  const { collapsed } = useCustomSidebar();
 
   // Close mobile menu when route changes
   useEffect(() => {

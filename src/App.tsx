@@ -4,10 +4,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
 import { PermissionGuard } from "@/components/PermissionGuard";
-import { SidebarProvider } from "@/contexts/SidebarContext";
-import { AuthProvider } from "@/contexts/AuthContext"; // Make sure this is imported
+import { SidebarProvider as CustomSidebarProvider } from "@/contexts/SidebarContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/Navigation";
 import NotFound from "@/pages/NotFound";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -51,8 +52,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <SidebarProvider>
-        <ShadcnSidebarProvider>
+      <CustomSidebarProvider>
+        <SidebarProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -109,8 +110,8 @@ function App() {
             <Toaster />
             <SonnerToaster position="top-right" />
           </Router>
-        </ShadcnSidebarProvider>
-      </SidebarProvider>
+        </SidebarProvider>
+      </CustomSidebarProvider>
     </AuthProvider>
   );
 }

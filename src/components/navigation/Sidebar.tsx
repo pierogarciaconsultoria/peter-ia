@@ -1,13 +1,14 @@
 
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/contexts/SidebarContext";
+import { useSidebar as useCustomSidebar } from "@/contexts/SidebarContext";
 import { 
   Sidebar as ShadcnSidebar,
   SidebarContent,
   SidebarHeader,
   SidebarFooter,
   SidebarMenu,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 // Import sidebar components
@@ -34,7 +35,7 @@ const menuCategories = [
 ];
 
 export function Sidebar() {
-  const { collapsed, setCollapsed } = useSidebar();
+  const { collapsed, setCollapsed } = useCustomSidebar();
   const {
     pathname,
     expandedItems,
@@ -47,14 +48,6 @@ export function Sidebar() {
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
-
-  // Sync the sidebar state with the shadcn sidebar
-  useEffect(() => {
-    const sidebarState = localStorage.getItem("sidebar-collapsed");
-    if (sidebarState) {
-      setCollapsed(sidebarState === "true");
-    }
-  }, [setCollapsed]);
 
   // Filter categories to only show those with at least one item
   const nonEmptyCategories = menuCategories.filter(category => category.items.length > 0);
