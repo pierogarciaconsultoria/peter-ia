@@ -14,12 +14,20 @@ const HumanResources = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
 
-  // Set active tab from URL state if available
+  // Set active tab from URL state or query params if available
   useEffect(() => {
-    if (location.state?.activeTab) {
+    // Check for URL query parameters first
+    const params = new URLSearchParams(location.search);
+    const tabFromQuery = params.get('activeTab');
+    
+    if (tabFromQuery) {
+      setActiveTab(tabFromQuery);
+    } 
+    // If no query param, try location state
+    else if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
     }
-  }, [location.state]);
+  }, [location.search, location.state]);
 
   // Detect if sidebar is collapsed
   useEffect(() => {

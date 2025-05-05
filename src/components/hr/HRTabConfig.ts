@@ -93,15 +93,15 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { id: "development-plans", name: "Planos de Desenvolvimento", component: "DevelopmentPlans" },
       { id: "training", name: "Treinamentos", component: "TrainingControl" },
-      { id: "feedback", name: "Feedback", component: "FeedbackManagement" },
       { id: "disc-assessment", name: "Avaliação DISC", component: "DiscAssessment" },
-      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" }
+      { id: "climate", name: "Pesquisa de Clima", component: "ClimateResearch" },
+      { id: "feedback", name: "Feedback", component: "FeedbackManagement" }
     ]
   },
   {
     id: "management",
     name: "Gestão",
-    icon: createIcon(icons.ClipboardList),
+    icon: createIcon(icons.BriefcaseBusiness),
     subTabs: [
       { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement" },
       { id: "vacation", name: "Férias", component: "VacationManagement" },

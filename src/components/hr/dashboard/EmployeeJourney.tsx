@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,11 +19,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const JOURNEY_STAGES = [
-  { id: 'recruitment', title: 'Recrutamento', icon: Briefcase, route: '?activeTab=recruitment' },
-  { id: 'hiring', title: 'Contratação', icon: Handshake, route: '?activeTab=movimentacao' },
+  { id: 'recruitment', title: 'Recrutamento', icon: Briefcase, route: '?activeTab=recruitment-selection' },
+  { id: 'hiring', title: 'Contratação', icon: Handshake, route: '?activeTab=personnel' },
   { id: 'onboarding', title: 'Onboarding', icon: UserPlus, route: '?activeTab=onboarding' },
-  { id: 'trial', title: 'Período de Experiência', icon: UserCheck, route: '?activeTab=trial' },
-  { id: 'development', title: 'Desenvolvimento', icon: GraduationCap, route: '?activeTab=development' }
+  { id: 'trial', title: 'Período de Experiência', icon: UserCheck, route: '?activeTab=trial-evaluation' },
+  { id: 'development', title: 'Desenvolvimento', icon: GraduationCap, route: '?activeTab=development-plans' }
 ];
 
 export function EmployeeJourney() {

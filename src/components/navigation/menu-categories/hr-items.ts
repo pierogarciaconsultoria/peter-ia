@@ -2,7 +2,8 @@
 import { 
   Users, BarChartBig, BriefcaseBusiness, CheckSquare, 
   UserPlus, FileHeart, AlertCircle, LogOut, UserCircle, 
-  ClipboardCheck, BarChart2, DollarSign, Award, Building2
+  ClipboardCheck, BarChart2, DollarSign, Award, Building2,
+  Calendar, FileText, Thermometer
 } from "lucide-react";
 import { MenuItem } from "../types";
 
@@ -14,7 +15,7 @@ export const hrItems: MenuItem[] = [
     modulo: "rh",
   },
   {
-    title: "Estrutura Organizacional",
+    title: "Estrutura",
     icon: BarChartBig,
     href: "#",
     modulo: "estrutura_org",
@@ -22,52 +23,26 @@ export const hrItems: MenuItem[] = [
       { 
         title: "Departamentos", 
         icon: Building2, 
-        href: "/human-resources/structure/departments", 
+        href: "/human-resources?activeTab=departments", 
         modulo: "departamentos" 
       },
       { 
-        title: "Quadro de Posições Aprovadas", 
+        title: "Quadro Aprovado", 
         icon: Users, 
-        href: "/human-resources/structure/positions", 
+        href: "/human-resources?activeTab=positions", 
         modulo: "posicoes" 
       },
       { 
         title: "Plano de Cargos e Salários", 
         icon: DollarSign, 
-        href: "/human-resources/structure/salary", 
+        href: "/human-resources?activeTab=salary", 
         modulo: "cargos_salarios" 
       },
       { 
-        title: "Organograma", 
+        title: "Estrutura Organizacional", 
         icon: BarChartBig, 
-        href: "/human-resources/structure/organizational-structure", 
+        href: "/human-resources?activeTab=organizational-structure", 
         modulo: "organograma" 
-      },
-    ]
-  },
-  {
-    title: "Movimentação de Pessoal",
-    icon: UserPlus,
-    href: "#",
-    modulo: "movimentacao",
-    children: [
-      { 
-        title: "Solicitação de Nova Posição", 
-        icon: UserPlus, 
-        href: "/human-resources/management/personnel", 
-        modulo: "nova_posicao" 
-      },
-      { 
-        title: "Ocorrências", 
-        icon: AlertCircle, 
-        href: "/human-resources/management/occurrences", 
-        modulo: "ocorrencias" 
-      },
-      { 
-        title: "Atestados Médicos", 
-        icon: FileHeart, 
-        href: "/human-resources/management/medical", 
-        modulo: "atestados" 
       },
     ]
   },
@@ -80,19 +55,13 @@ export const hrItems: MenuItem[] = [
       { 
         title: "Recrutamento e Seleção", 
         icon: UserPlus, 
-        href: "/human-resources/recruitment/recruitment-selection", 
+        href: "/human-resources?activeTab=recruitment-selection", 
         modulo: "recrutamento_selecao" 
-      },
-      { 
-        title: "Entrevista de admissão", 
-        icon: ClipboardCheck, 
-        href: "/human-resources/recruitment/interview", 
-        modulo: "entrevista" 
       },
       { 
         title: "Admissão Online", 
         icon: UserPlus, 
-        href: "/human-resources/recruitment/online-admission", 
+        href: "/human-resources?activeTab=online-admission", 
         modulo: "admissao" 
       },
     ]
@@ -106,77 +75,127 @@ export const hrItems: MenuItem[] = [
       { 
         title: "Colaboradores", 
         icon: UserCircle, 
-        href: "/human-resources/employees/directory", 
+        href: "/human-resources?activeTab=directory", 
         modulo: "colaboradores" 
       },
       { 
         title: "Integração", 
         icon: UserPlus, 
-        href: "/human-resources/employees/onboarding", 
+        href: "/human-resources?activeTab=onboarding", 
         modulo: "integracao" 
       },
       { 
         title: "Avaliação de Experiência", 
         icon: ClipboardCheck, 
-        href: "/human-resources/employees/trial-evaluation", 
+        href: "/human-resources?activeTab=trial-evaluation", 
         modulo: "avaliacao_experiencia" 
       },
       { 
         title: "Avaliação de Desempenho", 
         icon: BarChart2, 
-        href: "/human-resources/employees/performance", 
+        href: "/human-resources?activeTab=performance", 
         modulo: "avaliacao_desempenho" 
       },
       { 
         title: "Custos de Pessoal", 
         icon: DollarSign, 
-        href: "/human-resources/employees/employee-costs", 
+        href: "/human-resources?activeTab=employee-costs", 
         modulo: "custos_pessoal" 
       },
     ]
   },
   {
-    title: "Desenvolvimento Profissional",
+    title: "Desenvolvimento",
     icon: Award,
     href: "#",
     modulo: "desenvolvimento",
     children: [
       { 
-        title: "Avaliação de Perfil DISC", 
-        icon: Award, 
-        href: "/human-resources/development/disc-assessment", 
-        modulo: "disc" 
-      },
-      { 
         title: "Planos de Desenvolvimento", 
         icon: Award, 
-        href: "/human-resources/development/development-plans", 
+        href: "/human-resources?activeTab=development-plans", 
         modulo: "pdis" 
       },
       { 
         title: "Treinamentos", 
         icon: Award, 
-        href: "/human-resources/development/training", 
+        href: "/human-resources?activeTab=training", 
         modulo: "treinamentos" 
+      },
+      { 
+        title: "Avaliação de Perfil DISC", 
+        icon: Award, 
+        href: "/human-resources?activeTab=disc-assessment", 
+        modulo: "disc" 
       },
       { 
         title: "Pesquisa de Clima", 
         icon: Award, 
-        href: "/human-resources/development/climate", 
+        href: "/human-resources?activeTab=climate", 
         modulo: "clima" 
       },
       { 
         title: "Feedback", 
         icon: Award, 
-        href: "/human-resources/development/feedback", 
+        href: "/human-resources?activeTab=feedback", 
         modulo: "feedback" 
+      },
+    ]
+  },
+  {
+    title: "Gestão",
+    icon: BriefcaseBusiness,
+    href: "#",
+    modulo: "gestao",
+    children: [
+      { 
+        title: "Movimentação de Pessoal", 
+        icon: Users, 
+        href: "/human-resources?activeTab=personnel", 
+        modulo: "movimentacao" 
+      },
+      { 
+        title: "Férias", 
+        icon: Calendar, 
+        href: "/human-resources?activeTab=vacation", 
+        modulo: "ferias" 
+      },
+      { 
+        title: "Ocorrências", 
+        icon: AlertCircle, 
+        href: "/human-resources?activeTab=occurrences", 
+        modulo: "ocorrencias" 
+      },
+      { 
+        title: "Atestados", 
+        icon: FileHeart, 
+        href: "/human-resources?activeTab=medical", 
+        modulo: "atestados" 
+      },
+      { 
+        title: "Mural do Colaborador", 
+        icon: FileText, 
+        href: "/human-resources?activeTab=board", 
+        modulo: "mural" 
+      },
+      { 
+        title: "Termômetro de Maturidade", 
+        icon: Thermometer, 
+        href: "/human-resources?activeTab=thermometer", 
+        modulo: "termometro" 
       },
     ]
   },
   {
     title: "Desligamento",
     icon: LogOut,
-    href: "/human-resources/exit",
+    href: "/human-resources?activeTab=exit",
     modulo: "desligamento",
+  },
+  {
+    title: "Ambiente",
+    icon: Building2,
+    href: "/human-resources?activeTab=ambiente",
+    modulo: "ambiente",
   }
 ];
