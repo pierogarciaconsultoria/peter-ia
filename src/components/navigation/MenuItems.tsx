@@ -8,7 +8,7 @@ import { indicatorsItems } from "./menu-categories/indicators-items";
 import { actionItems } from "./menu-categories/action-items";
 import { meetingItems } from "./menu-categories/meeting-items";
 import { qualityItems } from "./menu-categories/quality-items";
-import { hrItems } from "./menu-categories/hr-items";
+import { hrItems } from "./menu-categories/hr"; // Updated import path
 import { resourcesItems } from "./menu-categories/resources-items";
 import { settingsItems } from "./menu-categories/settings-items";
 
