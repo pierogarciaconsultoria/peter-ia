@@ -2,7 +2,7 @@
 import { 
   Building, AlertTriangle, FileText, ClipboardCheck, 
   ThumbsUp, SlidersHorizontal, Truck, BarChart3, Cog,
-  ClipboardList, Check, CalendarClock, CheckSquare
+  ClipboardList, Check, CalendarClock, CheckSquare, Users
 } from "lucide-react";
 import { MenuItem } from "../types";
 
@@ -18,6 +18,12 @@ export const qualityItems: MenuItem[] = [
         icon: Building, 
         href: "/organization-context", 
         modulo: "contexto_organizacao" 
+      },
+      { 
+        title: "Partes Interessadas", 
+        icon: Users, 
+        href: "/stakeholders", 
+        modulo: "partes_interessadas" 
       },
       { 
         title: "Gerenciamento de Riscos", 

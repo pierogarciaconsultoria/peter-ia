@@ -33,7 +33,8 @@ export function SidebarMenuItem({
 }: SidebarMenuItemProps) {
   const itemKey = item.href || item.title;
   const isExpanded = expandedItems[itemKey] || hoveredItem === itemKey;
-  const isActive = pathname === item.href || item.children?.some(child => pathname === child.href);
+  const isActive = pathname === item.href;
+  const hasActiveChild = item.children?.some(child => pathname === child.href);
 
   if (item.children && item.children.length > 0) {
     return (
@@ -54,7 +55,7 @@ export function SidebarMenuItem({
           >
             <SidebarMenuButton 
               variant="default"
-              isActive={isActive}
+              isActive={isActive || hasActiveChild}
               tooltip={collapsed ? item.title : undefined}
             >
               {item.icon && <item.icon className="h-4 w-4" />}

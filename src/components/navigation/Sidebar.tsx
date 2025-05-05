@@ -65,7 +65,7 @@ export function Sidebar() {
         <SidebarToggle collapsed={collapsed} toggleSidebar={toggleSidebar} />
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="px-0 py-0">
         <SidebarMenu>
           {nonEmptyCategories.map((category) => (
             <SidebarCategory

@@ -8,13 +8,6 @@ export const processItems: MenuItem[] = [
     icon: FileText,
     href: "/processo",
     modulo: "processos",
-    children: [
-      { 
-        title: "Mapeamento de Processos", 
-        icon: FileText, 
-        href: "/process-form", 
-        modulo: "processos" 
-      },
-    ],
+    // Removed the children array so it directly links to /processo
   },
 ];
