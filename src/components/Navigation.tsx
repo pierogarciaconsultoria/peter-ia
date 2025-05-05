@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Outlet } from "react-router-dom";
 import { MenuToggle } from "./navigation/MenuToggle";
 import { UserMenu } from "./navigation/UserMenu";
 import { Sidebar } from "./navigation/Sidebar";
@@ -51,7 +51,7 @@ export function Navigation() {
           
           {/* Main content padding to account for fixed header and breadcrumb */}
           <div className="pt-28 px-4 md:px-6">
-            {/* App content will be rendered here */}
+            <Outlet />
           </div>
         </SidebarInset>
       </div>

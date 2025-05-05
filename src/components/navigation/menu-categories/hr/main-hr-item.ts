@@ -8,5 +8,5 @@ export const mainHrItem: MenuItem[] = [
     icon: Users,
     href: "/human-resources",
     modulo: "rh",
-  }
+  },
 ];

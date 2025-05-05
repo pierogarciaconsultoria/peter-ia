@@ -15,32 +15,22 @@ import { SidebarToggle } from "./sidebar/SidebarToggle";
 import { SidebarCategory } from "./sidebar/SidebarCategory";
 import { useSidebarState } from "./sidebar/useSidebarState";
 
-// Import all menu categories
-import { dashboardItems } from "./menu-categories/dashboard-items";
-import { isoItems } from "./menu-categories/iso-items";
-import { strategicItems } from "./menu-categories/strategic-items";
-import { processItems } from "./menu-categories/process-items";
-import { indicatorsItems } from "./menu-categories/indicators-items";
-import { actionItems } from "./menu-categories/action-items";
-import { meetingItems } from "./menu-categories/meeting-items";
-import { qualityItems } from "./menu-categories/quality-items";
-import { hrItems } from "./menu-categories/hr";
-import { resourcesItems } from "./menu-categories/resources-items";
-import { settingsItems } from "./menu-categories/settings-items";
+// Import all menu items
+import menuItems from "./MenuItems";
 
 // Define our menu categories with labels
 const menuCategories = [
-  { label: "Principal", items: dashboardItems },
-  { label: "ISO 9001:2015", items: isoItems },
-  { label: "Planejamento Estratégico", items: strategicItems },
-  { label: "Processos", items: processItems },
-  { label: "Indicadores", items: indicatorsItems },
-  { label: "Plano de Ação", items: actionItems },
-  { label: "Reuniões", items: meetingItems },
-  { label: "Qualidade", items: qualityItems },
-  { label: "Gente e Gestão", items: hrItems },
-  { label: "Recursos", items: resourcesItems },
-  { label: "Configurações", items: settingsItems }
+  { label: "Principal", items: menuItems.filter(item => item.modulo === "dashboard") },
+  { label: "ISO 9001:2015", items: menuItems.filter(item => item.modulo === "iso") },
+  { label: "Planejamento Estratégico", items: menuItems.filter(item => item.modulo === "planejamento_estrategico") },
+  { label: "Processos", items: menuItems.filter(item => item.modulo === "processos") },
+  { label: "Indicadores", items: menuItems.filter(item => item.modulo === "indicadores_desempenho") },
+  { label: "Plano de Ação", items: menuItems.filter(item => item.modulo === "plano_acao") },
+  { label: "Reuniões", items: menuItems.filter(item => item.modulo === "reunioes") },
+  { label: "Qualidade", items: menuItems.filter(item => item.modulo === "qualidade") },
+  { label: "Gente e Gestão", items: menuItems.filter(item => item.modulo === "rh") },
+  { label: "Recursos", items: menuItems.filter(item => item.modulo === "ambiente") },
+  { label: "Configurações", items: menuItems.filter(item => ((item.modulo === "admin") || (item.modulo === "tarefas"))) }
 ];
 
 export function Sidebar() {
@@ -66,6 +56,9 @@ export function Sidebar() {
     }
   }, [setCollapsed]);
 
+  // Filter categories to only show those with at least one item
+  const nonEmptyCategories = menuCategories.filter(category => category.items.length > 0);
+
   return (
     <ShadcnSidebar 
       collapsible={collapsed ? "icon" : "none"}
@@ -81,7 +74,7 @@ export function Sidebar() {
       
       <SidebarContent>
         <SidebarMenu>
-          {menuCategories.map((category) => (
+          {nonEmptyCategories.map((category) => (
             <SidebarCategory
               key={`category-${category.label}`}
               label={category.label}
