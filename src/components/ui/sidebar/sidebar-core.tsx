@@ -5,7 +5,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "./context";
-import { SidebarCollapsibleMode, SidebarSide, SidebarVariant } from "./types";
+import { SidebarCollapsibleMode, SidebarSide, SidebarVariant, SIDEBAR_WIDTH_MOBILE } from "./types";
 
 export const Sidebar = React.forwardRef<
   HTMLDivElement,
@@ -164,6 +164,3 @@ export const SidebarRail = React.forwardRef<
   );
 });
 SidebarRail.displayName = "SidebarRail";
-
-// Import from types file
-import { SIDEBAR_WIDTH_MOBILE } from "./types";
