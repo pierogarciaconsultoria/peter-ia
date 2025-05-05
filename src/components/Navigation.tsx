@@ -10,15 +10,9 @@ import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSidebar } from "@/contexts/SidebarContext";
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { visible } = useScrollDirection();
   const { collapsed, toggleSidebar } = useSidebar();
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -26,13 +20,14 @@ export function Navigation() {
       <Sidebar />
       
       {/* Main content */}
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
         <header className="fixed top-0 right-0 z-30 w-full h-16 bg-background/95 backdrop-blur-sm border-b">
           <div className="flex h-full items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <MenuToggle 
-                isOpen={collapsed} 
+                isOpen={!collapsed} 
                 onToggle={toggleSidebar}
+                className="ml-2"
               />
               <BackToHomeButton />
             </div>

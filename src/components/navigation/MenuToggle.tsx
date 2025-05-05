@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Menu, PanelLeftClose, PanelLeft } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface MenuToggleProps {
   isOpen: boolean;
@@ -11,18 +10,20 @@ interface MenuToggleProps {
 
 export function MenuToggle({ isOpen, onToggle, className }: MenuToggleProps) {
   return (
-    <SidebarTrigger 
+    <Button 
+      variant="ghost" 
+      size="icon"
       className={className}
       onClick={onToggle}
     >
       {isOpen ? (
-        <PanelLeft className="h-5 w-5" />
-      ) : (
         <PanelLeftClose className="h-5 w-5" />
+      ) : (
+        <PanelLeft className="h-5 w-5" />
       )}
       <span className="sr-only">
-        {isOpen ? "Expand sidebar" : "Collapse sidebar"}
+        {isOpen ? "Collapse sidebar" : "Expand sidebar"}
       </span>
-    </SidebarTrigger>
+    </Button>
   );
 }

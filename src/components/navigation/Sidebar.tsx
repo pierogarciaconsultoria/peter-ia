@@ -49,11 +49,10 @@ export function Sidebar() {
 
   return (
     <ShadcnSidebar 
-      collapsible={collapsed ? "icon" : "none"}
       variant="sidebar"
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        "fixed left-0 top-0 z-40 h-screen bg-background border-r",
+        collapsed ? "w-16 transition-all duration-300" : "w-64 transition-all duration-300"
       )}
     >
       <SidebarHeader className="px-2 py-2 border-b">
