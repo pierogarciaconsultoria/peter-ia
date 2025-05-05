@@ -75,6 +75,7 @@ export function Sidebar() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 toggleItemExpanded={toggleItemExpanded}
+                hideLabelForSingleItem={true} // Add this prop to hide label for categories with single item
               />
             ))}
           </nav>

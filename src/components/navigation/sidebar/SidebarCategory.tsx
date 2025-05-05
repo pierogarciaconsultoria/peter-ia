@@ -13,6 +13,7 @@ interface SidebarCategoryProps {
   onMouseEnter: (itemKey: string) => void;
   onMouseLeave: () => void;
   toggleItemExpanded: (itemKey: string) => void;
+  hideLabelForSingleItem?: boolean;
 }
 
 export function SidebarCategory({
@@ -25,13 +26,17 @@ export function SidebarCategory({
   onMouseEnter,
   onMouseLeave,
   toggleItemExpanded,
+  hideLabelForSingleItem = false,
 }: SidebarCategoryProps) {
   // Don't render empty categories
   if (items.length === 0) return null;
   
+  // Determine if we should hide the label (when there's only one item and hideLabelForSingleItem is true)
+  const shouldHideLabel = hideLabelForSingleItem && items.length === 1;
+  
   return (
     <div className="px-2 py-1">
-      {!collapsed && label !== "Principal" && (
+      {!collapsed && !shouldHideLabel && label !== "Principal" && (
         <div className="mb-1 px-2 text-xs font-medium leading-6 text-foreground/60">
           {label}
         </div>
