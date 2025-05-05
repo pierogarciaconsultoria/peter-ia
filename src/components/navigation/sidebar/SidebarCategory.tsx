@@ -1,6 +1,6 @@
 
 import { MenuItem } from "../types";
-import { SidebarMenuItem } from "./SidebarMenuItem";
+import { SidebarMenuItem } from "./menu-item";
 import { cn } from "@/lib/utils";
 
 interface SidebarCategoryProps {
