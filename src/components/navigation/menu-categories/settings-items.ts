@@ -4,12 +4,6 @@ import { MenuItem } from "../types";
 
 export const settingsItems: MenuItem[] = [
   {
-    title: "Ambiente",
-    icon: Settings,
-    href: "/ambiente",
-    modulo: "ambiente",
-  },
-  {
     title: "Tarefas",
     icon: CheckSquare,
     href: "/tasks",

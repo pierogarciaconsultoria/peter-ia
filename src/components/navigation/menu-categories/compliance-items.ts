@@ -1,5 +1,5 @@
 
-import { AlertTriangle, Calendar, CheckSquare, CalendarClock, Check } from "lucide-react";
+import { AlertTriangle, CheckSquare, CalendarClock, Check } from "lucide-react";
 import { MenuItem } from "../types";
 
 export const complianceItems: MenuItem[] = [
@@ -8,12 +8,6 @@ export const complianceItems: MenuItem[] = [
     icon: AlertTriangle,
     href: "/non-compliance",
     modulo: "nao_conformidades",
-  },
-  {
-    title: "Plano de Ação",
-    icon: Calendar,
-    href: "/action-schedule",
-    modulo: "plano_acao",
   },
   {
     title: "Auditoria",

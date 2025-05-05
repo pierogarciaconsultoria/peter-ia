@@ -20,11 +20,33 @@ const menuCategories = [
   { label: "Indicadores", items: menuItems.filter(item => item.modulo === "indicadores_desempenho") },
   { label: "Plano de Ação", items: menuItems.filter(item => item.modulo === "plano_acao") },
   { label: "Reuniões", items: menuItems.filter(item => item.modulo === "reunioes") },
-  { label: "Qualidade", items: menuItems.filter(item => item.modulo === "qualidade") },
+  { label: "Qualidade", items: menuItems.filter(item => item.modulo === "qualidade" || item.modulo === "nao_conformidades" || item.modulo === "auditoria") },
   { label: "Gente e Gestão", items: menuItems.filter(item => item.modulo === "rh") },
   { label: "Recursos", items: menuItems.filter(item => item.modulo === "ambiente") },
   { label: "Configurações", items: menuItems.filter(item => item.modulo === "admin" || item.modulo === "tarefas") }
 ];
+
+// Create a utility function to deduplicate items by href
+const deduplicateItems = (categories) => {
+  // Track used hrefs to avoid duplicates
+  const usedHrefs = new Set();
+  
+  return categories.map(category => {
+    // Filter out any items whose hrefs have already been used
+    const uniqueItems = category.items.filter(item => {
+      if (usedHrefs.has(item.href)) {
+        return false;
+      }
+      usedHrefs.add(item.href);
+      return true;
+    });
+    
+    return {
+      ...category,
+      items: uniqueItems
+    };
+  });
+};
 
 export function Sidebar() {
   const { collapsed } = useSidebar();
@@ -37,8 +59,8 @@ export function Sidebar() {
     toggleItemExpanded
   } = useSidebarState();
 
-  // Filter categories to only show those with at least one item
-  const nonEmptyCategories = menuCategories.filter(category => category.items.length > 0);
+  // Filter categories to only show those with at least one item and deduplicate
+  const nonEmptyCategories = deduplicateItems(menuCategories).filter(category => category.items.length > 0);
 
   return (
     <div 
@@ -75,7 +97,7 @@ export function Sidebar() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 toggleItemExpanded={toggleItemExpanded}
-                hideLabelForSingleItem={true} // Add this prop to hide label for categories with single item
+                hideLabelForSingleItem={true}
               />
             ))}
           </nav>

@@ -15,6 +15,7 @@ import { complianceItems } from "./menu-categories/compliance-items";
 
 export type { MenuItem };
 
+// Combine all menu items, but we'll filter out duplicates in the Sidebar component
 export const menuItems: MenuItem[] = [
   ...dashboardItems,
   ...isoItems,
@@ -27,7 +28,6 @@ export const menuItems: MenuItem[] = [
   ...hrItems,
   ...resourcesItems,
   ...settingsItems,
-  ...complianceItems,
 ];
 
 export default menuItems;
