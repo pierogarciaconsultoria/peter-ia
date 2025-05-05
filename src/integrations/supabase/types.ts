@@ -216,6 +216,33 @@ export type Database = {
           },
         ]
       }
+      assistant_conversations: {
+        Row: {
+          content: string
+          id: string
+          module: string
+          role: string
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          id?: string
+          module: string
+          role: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          id?: string
+          module?: string
+          role?: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           created_at: string | null
@@ -4034,6 +4061,42 @@ export type Database = {
         }
         Relationships: []
       }
+      module_assistants: {
+        Row: {
+          capabilities: string | null
+          created_at: string | null
+          description: string | null
+          enabled: boolean | null
+          id: string
+          label: string
+          limitations: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          capabilities?: string | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          label: string
+          limitations?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          capabilities?: string | null
+          created_at?: string | null
+          description?: string | null
+          enabled?: boolean | null
+          id?: string
+          label?: string
+          limitations?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           description: string | null
@@ -6044,6 +6107,10 @@ export type Database = {
       add_updated_at_trigger: {
         Args: { table_name: string }
         Returns: undefined
+      }
+      check_secret_exists: {
+        Args: { secret_name: string }
+        Returns: boolean
       }
       check_user_access: {
         Args: { user_id: string }
