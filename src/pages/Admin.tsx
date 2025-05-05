@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -13,6 +12,7 @@ import RoleManagement from "@/components/admin/RoleManagement";
 import DeleteConfirmDialog from "@/components/admin/DeleteConfirmDialog";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { executeQuery } from "@/utils/databaseHelpers";
+import { ModuleAssistantSettings } from "@/components/admin/ModuleAssistantSettings";
 
 interface Company {
   id: string;
@@ -339,6 +339,7 @@ const Admin = () => {
                 {isSuperAdmin && <TabsTrigger value="companies">Empresas</TabsTrigger>}
                 <TabsTrigger value="users">Usuários</TabsTrigger>
                 <TabsTrigger value="roles">Papéis</TabsTrigger>
+                {(isSuperAdmin || isEditorSuperAdmin) && <TabsTrigger value="assistants">Assistentes</TabsTrigger>}
               </TabsList>
               
               {isSuperAdmin && (
@@ -379,6 +380,12 @@ const Admin = () => {
                   userCompany={userCompany}
                 />
               </TabsContent>
+              
+              {(isSuperAdmin || isEditorSuperAdmin) && (
+                <TabsContent value="assistants" className="space-y-4">
+                  <ModuleAssistantSettings isAdmin={isSuperAdmin || isEditorSuperAdmin} />
+                </TabsContent>
+              )}
             </Tabs>
             
             <DeleteConfirmDialog
