@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { menuItems } from "@/components/navigation/MenuItems";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -42,7 +41,7 @@ const menuCategories = [
 export function Sidebar() {
   const { pathname } = useLocation();
   const { collapsed, setCollapsed } = useSidebar();
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const toggleSidebar = () => {
@@ -51,78 +50,101 @@ export function Sidebar() {
 
   // Initialize expanded state based on the current path
   useEffect(() => {
-    const matchingCategory = menuCategories.findIndex(category => 
-      category.items.some(item => 
-        pathname === item.href || 
-        (item.children?.some(child => pathname === child.href))
-      )
-    );
+    // Reset expanded states
+    const newExpandedState: Record<string, boolean> = {};
     
-    if (matchingCategory !== -1) {
-      setExpandedCategories([`category-${matchingCategory}`]);
-    }
+    // Check which menu items match the current path
+    menuCategories.forEach(category => {
+      category.items.forEach(item => {
+        // If this item or any of its children match the current path, expand it
+        const isActive = pathname === item.href || 
+          (item.children?.some(child => pathname === child.href));
+        
+        if (isActive && item.children?.length) {
+          newExpandedState[item.href || item.title] = true;
+        }
+      });
+    });
+    
+    setExpandedItems(newExpandedState);
   }, [pathname]);
 
-  // Handle hover events
-  const handleMouseEnter = (itemHref: string) => {
-    setHoveredItem(itemHref);
+  // Handle mouse enter for an item
+  const handleMouseEnter = (itemKey: string) => {
+    setHoveredItem(itemKey);
   };
 
+  // Handle mouse leave
   const handleMouseLeave = () => {
     setHoveredItem(null);
   };
 
+  // Toggle an item's expanded state when clicked
+  const toggleItemExpanded = (itemKey: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemKey]: !prev[itemKey]
+    }));
+  };
+
   // Render a single menu item
   const renderMenuItem = (item: MenuItem) => {
+    const itemKey = item.href || item.title;
+    const isExpanded = expandedItems[itemKey] || hoveredItem === itemKey;
+    const isActive = pathname === item.href || item.children?.some(child => pathname === child.href);
+    
     if (item.children && item.children.length > 0) {
-      const isHovered = hoveredItem === item.href;
-      const isActive = pathname === item.href || item.children.some(child => pathname === child.href);
-      
       return (
-        <Collapsible
-          open={isHovered || isActive}
-          className="w-full"
+        <div 
+          key={itemKey}
+          className="w-full" 
+          onMouseEnter={() => handleMouseEnter(itemKey)}
+          onMouseLeave={handleMouseLeave}
         >
-          <div 
-            className="flex"
-            onMouseEnter={() => handleMouseEnter(item.href || '')}
-            onMouseLeave={handleMouseLeave}
-          >
-            <CollapsibleTrigger className="w-full">
-              <div
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted",
-                  collapsed && "justify-center px-2",
-                  isActive ? "bg-muted" : "transparent"
-                )}
+          <Collapsible open={isExpanded} className="w-full">
+            <div className="flex w-full">
+              <CollapsibleTrigger 
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleItemExpanded(itemKey);
+                }}
+                className="w-full"
               >
-                {item.icon && <item.icon className="h-4 w-4" />}
-                {!collapsed && <span>{item.title}</span>}
-              </div>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className={collapsed ? "hidden" : ""}>
-            <div className="ml-6 flex flex-col space-y-1">
-              {item.children.map((child) => (
-                <NavLink
-                  key={child.href}
-                  to={child.href}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                      isActive
-                        ? "bg-accent text-accent-foreground"
-                        : "transparent hover:bg-muted hover:text-foreground"
-                    )
-                  }
+                <div
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted",
+                    collapsed && "justify-center px-2",
+                    isActive ? "bg-muted" : "transparent"
+                  )}
                 >
-                  {child.icon && <child.icon className="h-4 w-4" />}
-                  <span>{child.title}</span>
-                </NavLink>
-              ))}
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {!collapsed && <span>{item.title}</span>}
+                </div>
+              </CollapsibleTrigger>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+            <CollapsibleContent className={collapsed ? "hidden" : ""}>
+              <div className="ml-6 flex flex-col space-y-1">
+                {item.children.map((child) => (
+                  <NavLink
+                    key={child.href}
+                    to={child.href}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-accent text-accent-foreground"
+                          : "transparent hover:bg-muted hover:text-foreground"
+                      )
+                    }
+                  >
+                    {child.icon && <child.icon className="h-4 w-4" />}
+                    <span>{child.title}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
       );
     }
 
@@ -179,17 +201,11 @@ export function Sidebar() {
           <nav className="space-y-2 px-3 py-2">
             {menuCategories.map((category, index) => (
               <div key={`category-${index}`} className="space-y-1">
-                {/* Minimal top spacing for categories after the first */}
                 {!collapsed && index > 0 && (
                   <div className="h-3"></div>
                 )}
                 
-                {/* Category Items */}
-                {category.items.map((item) => (
-                  <div key={item.href || `nested-${item.title}`}>
-                    {renderMenuItem(item)}
-                  </div>
-                ))}
+                {category.items.map((item) => renderMenuItem(item))}
               </div>
             ))}
           </nav>
