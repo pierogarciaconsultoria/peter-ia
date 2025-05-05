@@ -5362,23 +5362,32 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string
+          description: string | null
           id: string
           is_default: boolean
           name: string
+          permissions: Json | null
+          updated_at: string | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           is_default?: boolean
           name: string
+          permissions?: Json | null
+          updated_at?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           is_default?: boolean
           name?: string
+          permissions?: Json | null
+          updated_at?: string | null
         }
         Relationships: [
           {
