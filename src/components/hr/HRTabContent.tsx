@@ -22,7 +22,7 @@ import { VacationManagement } from "./VacationManagement";
 import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";
 import { EmployeeBoard } from "./EmployeeBoard";
-import { MaturityThermometer } from "../MaturityThermometer";
+import { MaturityThermometer } from "../hr/MaturityThermometer";
 import { ExitInterviews } from "./ExitInterviews";
 import { AmbienteContent } from "./AmbienteContent";
 
@@ -82,7 +82,17 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
       case "board":
         return <EmployeeBoard />;
       case "thermometer":
-        return <MaturityThermometer />;
+        return <MaturityThermometer 
+          score={65} 
+          modulesCompletion={[
+            { module: "Recrutamento", completion: 75, weight: 0.15 },
+            { module: "Gestão de Pessoas", completion: 60, weight: 0.20 },
+            { module: "Desenvolvimento", completion: 55, weight: 0.25 },
+            { module: "Estrutura", completion: 70, weight: 0.20 },
+            { module: "Desligamento", completion: 40, weight: 0.10 }
+          ]} 
+          goalsAchievement={70} 
+        />;
       case "exit-interviews":
         return <ExitInterviews />;
       case "ambiente":
