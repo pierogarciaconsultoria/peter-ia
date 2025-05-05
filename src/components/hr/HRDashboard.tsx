@@ -20,7 +20,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { EmployeeJourney } from "./dashboard/EmployeeJourney";
 
 export function HRDashboard() {
   const { toast } = useToast();
@@ -243,14 +242,10 @@ export function HRDashboard() {
         </Card>
       </div>
       
-      <Tabs defaultValue="journey" className="space-y-4">
+      <Tabs defaultValue="analytics" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="journey">Jornada do Colaborador</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
-        <TabsContent value="journey" className="space-y-4">
-          <EmployeeJourney />
-        </TabsContent>
         <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
