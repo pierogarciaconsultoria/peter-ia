@@ -9,7 +9,6 @@ import { NotificationCenter } from "./notifications/NotificationCenter";
 import { BreadcrumbNavigation } from "./navigation/BreadcrumbNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSidebar } from "@/contexts/SidebarContext";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,38 +22,39 @@ export function Navigation() {
   }, [location.pathname]);
 
   return (
-    <SidebarProvider defaultOpen={!collapsed}>
-      <div className="flex min-h-screen w-full">
-        <Sidebar />
-        <SidebarInset>
-          <div className="fixed top-0 left-0 right-0 z-30 h-16 bg-background/80 backdrop-blur-sm">
-            <div className="container flex h-full items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MenuToggle 
-                  isOpen={isOpen} 
-                  onToggle={() => setIsOpen(!isOpen)}
-                  className={`transition-opacity duration-300 ${!visible ? 'opacity-0' : 'opacity-100'}`}
-                />
-                <BackToHomeButton />
-              </div>
-              <div className="flex items-center gap-2">
-                <NotificationCenter />
-                <UserMenu />
-              </div>
+    <div className="flex h-screen w-full overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Main content */}
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
+        <header className="fixed top-0 right-0 left-0 z-30 h-16 bg-background/80 backdrop-blur-sm">
+          <div className="container flex h-full items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MenuToggle 
+                isOpen={isOpen} 
+                onToggle={() => setIsOpen(!isOpen)}
+                className={`transition-opacity duration-300 ${!visible ? 'opacity-0' : 'opacity-100'}`}
+              />
+              <BackToHomeButton />
+            </div>
+            <div className="flex items-center gap-2">
+              <NotificationCenter />
+              <UserMenu />
             </div>
           </div>
-          
-          {/* Breadcrumb navigation - positioned below the header */}
-          <div className="fixed top-16 left-0 right-0 z-20 px-6 py-2 bg-background/80 backdrop-blur-sm">
-            <BreadcrumbNavigation />
-          </div>
-          
-          {/* Main content padding to account for fixed header and breadcrumb */}
-          <div className="pt-28 px-4 md:px-6">
-            <Outlet />
-          </div>
-        </SidebarInset>
+        </header>
+        
+        {/* Breadcrumb navigation - positioned below the header */}
+        <div className="fixed top-16 left-0 right-0 z-20 px-6 py-2 bg-background/80 backdrop-blur-sm">
+          <BreadcrumbNavigation />
+        </div>
+        
+        {/* Main content padding to account for fixed header and breadcrumb */}
+        <main className="pt-28 px-4 md:px-6 pb-10 overflow-auto">
+          <Outlet />
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
