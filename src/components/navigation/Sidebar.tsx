@@ -20,10 +20,15 @@ const menuCategories = [
   { label: "Indicadores", items: menuItems.filter(item => item.modulo === "indicadores_desempenho") },
   { label: "Plano de Ação", items: menuItems.filter(item => item.modulo === "plano_acao") },
   { label: "Reuniões", items: menuItems.filter(item => item.modulo === "reunioes") },
-  { label: "Qualidade", items: menuItems.filter(item => item.modulo === "qualidade" || item.modulo === "nao_conformidades" || item.modulo === "auditoria") },
+  { label: "Qualidade", items: menuItems.filter(item => 
+    item.modulo === "qualidade" || 
+    item.modulo === "nao_conformidades" || 
+    item.modulo === "auditoria"
+  ) },
   { label: "Gente e Gestão", items: menuItems.filter(item => item.modulo === "rh") },
-  { label: "Recursos", items: menuItems.filter(item => item.modulo === "ambiente") },
-  { label: "Configurações", items: menuItems.filter(item => item.modulo === "admin" || item.modulo === "tarefas") }
+  { label: "Ambiente", items: menuItems.filter(item => item.modulo === "ambiente") },
+  { label: "Tarefas", items: menuItems.filter(item => item.modulo === "tarefas") },
+  { label: "Administração", items: menuItems.filter(item => item.modulo === "admin") }
 ];
 
 // Create a utility function to deduplicate items by href
@@ -34,6 +39,7 @@ const deduplicateItems = (categories) => {
   return categories.map(category => {
     // Filter out any items whose hrefs have already been used
     const uniqueItems = category.items.filter(item => {
+      if (item.href === "#") return true; // Always keep parent items with "#" href
       if (usedHrefs.has(item.href)) {
         return false;
       }

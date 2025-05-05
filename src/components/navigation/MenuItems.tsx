@@ -28,6 +28,7 @@ export const menuItems: MenuItem[] = [
   ...hrItems,
   ...resourcesItems,
   ...settingsItems,
+  ...complianceItems,
 ];
 
 export default menuItems;
