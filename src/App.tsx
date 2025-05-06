@@ -87,11 +87,11 @@ function App() {
               <Route path="ambiente" element={<Ambiente />} />
               <Route path="tasks" element={<Tasks />} />
               
-              {/* Admin route protected with permission guard */}
+              {/* Admin route protected with AuthGuard instead of PermissionGuard */}
               <Route path="admin/*" element={
-                <PermissionGuard requiredRole="admin">
+                <AuthGuard requireAdmin={true}>
                   <Admin />
-                </PermissionGuard>
+                </AuthGuard>
               } />
             </Route>
 

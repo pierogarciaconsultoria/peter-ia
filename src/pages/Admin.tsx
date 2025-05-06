@@ -1,18 +1,22 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import CompanyManagement from "@/components/admin/CompanyManagement";
 import UserManagement from "@/components/admin/UserManagement";
 import RoleManagement from "@/components/admin/RoleManagement";
 import DeleteConfirmDialog from "@/components/admin/DeleteConfirmDialog";
-import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { isSuperAdminInLovable, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 import { executeQuery } from "@/utils/databaseHelpers";
 import { ModuleAssistantSettings } from "@/components/admin/ModuleAssistantSettings";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Company {
   id: string;
@@ -62,29 +66,43 @@ const Admin = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'user' | 'company' | 'role'} | null>(null);
   
   const isEditorSuperAdmin = isSuperAdminInLovable();
+  const isFreeAccessEnabled = shouldGrantFreeAccess();
 
   useEffect(() => {
-    fetchCompanies();
-    fetchUsers();
-    fetchRoles();
+    fetchData();
   }, [isSuperAdmin, isCompanyAdmin, userCompany]);
+  
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await Promise.all([
+        fetchCompanies(),
+        fetchUsers(),
+        fetchRoles()
+      ]);
+    } catch (error: any) {
+      console.error("Error fetching admin data:", error);
+      setError(error.message || "Falha ao carregar dados administrativos");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchCompanies = async () => {
     try {
-      setLoading(true);
-      
-      if (isEditorSuperAdmin) {
+      if (isEditorSuperAdmin || isFreeAccessEnabled) {
         const result = await executeQuery('SELECT * FROM public.companies ORDER BY name');
         
         if (!result.success) {
           console.error("Error executing SQL for companies:", result.error);
           toast.error("Erro ao carregar empresas");
           setCompanies([]);
-          setLoading(false);
           return;
         }
         
@@ -113,18 +131,13 @@ const Admin = () => {
       }
     } catch (error) {
       console.error("Error in fetchCompanies:", error);
-      toast.error("Erro ao carregar empresas");
-      setCompanies([]);
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
-      
-      if (isEditorSuperAdmin) {
+      if (isEditorSuperAdmin || isFreeAccessEnabled) {
         const result = await executeQuery(`
           SELECT p.*, c.name as company_name
           FROM public.user_profiles p
@@ -136,7 +149,6 @@ const Admin = () => {
           console.error("Error executing SQL for users:", result.error);
           toast.error("Erro ao carregar usuários");
           setUsers([]);
-          setLoading(false);
           return;
         }
         
@@ -170,16 +182,13 @@ const Admin = () => {
       }
     } catch (error) {
       console.error("Error in fetchUsers:", error);
-      toast.error("Erro ao carregar usuários");
-      setUsers([]);
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
   const fetchRoles = async () => {
     try {
-      if (isEditorSuperAdmin) {
+      if (isEditorSuperAdmin || isFreeAccessEnabled) {
         const result = await executeQuery(`
           SELECT r.*, c.name as company_name
           FROM public.roles r
@@ -229,8 +238,7 @@ const Admin = () => {
       }
     } catch (error) {
       console.error("Error in fetchRoles:", error);
-      toast.error("Erro ao carregar papéis");
-      setRoles([]);
+      throw error;
     }
   };
 
@@ -317,6 +325,113 @@ const Admin = () => {
       setItemToDelete(null);
     }
   };
+  
+  // Function to render content based on error status
+  const renderContent = () => {
+    if (error) {
+      return (
+        <div className="space-y-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar dados administrativos</AlertTitle>
+            <AlertDescription>
+              {error}
+              <div className="mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchData}
+                  className="flex items-center"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Tentar novamente
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+          
+          {(isEditorSuperAdmin || isFreeAccessEnabled) && (
+            <div className="mt-4">
+              <Alert>
+                <AlertTitle>Acesso especial disponível</AlertTitle>
+                <AlertDescription>
+                  Você está acessando o sistema via Lovable Editor ou com acesso gratuito.
+                  Algumas funcionalidades administrativas podem funcionar com dados simulados.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="mt-4">
+                <Tabs defaultValue="assistants">
+                  <TabsList>
+                    <TabsTrigger value="assistants">Assistentes</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="assistants">
+                    <ModuleAssistantSettings isAdmin={true} />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    return (
+      <Tabs defaultValue={isSuperAdmin ? "companies" : "users"}>
+        <TabsList className="mb-4">
+          {isSuperAdmin && <TabsTrigger value="companies">Empresas</TabsTrigger>}
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="roles">Papéis</TabsTrigger>
+          {(isSuperAdmin || isEditorSuperAdmin) && <TabsTrigger value="assistants">Assistentes</TabsTrigger>}
+        </TabsList>
+        
+        {isSuperAdmin && (
+          <TabsContent value="companies" className="space-y-4">
+            <CompanyManagement
+              companies={companies}
+              loading={loading}
+              fetchCompanies={fetchCompanies}
+              setItemToDelete={setItemToDelete}
+              setDeleteDialogOpen={setDeleteDialogOpen}
+              isSuperAdmin={isSuperAdmin}
+            />
+          </TabsContent>
+        )}
+        
+        <TabsContent value="users" className="space-y-4">
+          <UserManagement
+            users={users}
+            companies={companies}
+            loading={loading}
+            fetchUsers={fetchUsers}
+            setItemToDelete={setItemToDelete}
+            setDeleteDialogOpen={setDeleteDialogOpen}
+            isSuperAdmin={isSuperAdmin}
+            userCompany={userCompany}
+          />
+        </TabsContent>
+        
+        <TabsContent value="roles" className="space-y-4">
+          <RoleManagement
+            roles={roles}
+            companies={companies}
+            loading={loading}
+            fetchRoles={fetchRoles}
+            setItemToDelete={setItemToDelete}
+            setDeleteDialogOpen={setDeleteDialogOpen}
+            isSuperAdmin={isSuperAdmin}
+            userCompany={userCompany}
+          />
+        </TabsContent>
+        
+        {(isSuperAdmin || isEditorSuperAdmin) && (
+          <TabsContent value="assistants" className="space-y-4">
+            <ModuleAssistantSettings isAdmin={isSuperAdmin || isEditorSuperAdmin} />
+          </TabsContent>
+        )}
+      </Tabs>
+    );
+  };
 
   return (
     <AuthGuard requireAdmin={true}>
@@ -334,59 +449,14 @@ const Admin = () => {
               </p>
             </div>
             
-            <Tabs defaultValue={isSuperAdmin ? "companies" : "users"}>
-              <TabsList className="mb-4">
-                {isSuperAdmin && <TabsTrigger value="companies">Empresas</TabsTrigger>}
-                <TabsTrigger value="users">Usuários</TabsTrigger>
-                <TabsTrigger value="roles">Papéis</TabsTrigger>
-                {(isSuperAdmin || isEditorSuperAdmin) && <TabsTrigger value="assistants">Assistentes</TabsTrigger>}
-              </TabsList>
-              
-              {isSuperAdmin && (
-                <TabsContent value="companies" className="space-y-4">
-                  <CompanyManagement
-                    companies={companies}
-                    loading={loading}
-                    fetchCompanies={fetchCompanies}
-                    setItemToDelete={setItemToDelete}
-                    setDeleteDialogOpen={setDeleteDialogOpen}
-                    isSuperAdmin={isSuperAdmin}
-                  />
-                </TabsContent>
-              )}
-              
-              <TabsContent value="users" className="space-y-4">
-                <UserManagement
-                  users={users}
-                  companies={companies}
-                  loading={loading}
-                  fetchUsers={fetchUsers}
-                  setItemToDelete={setItemToDelete}
-                  setDeleteDialogOpen={setDeleteDialogOpen}
-                  isSuperAdmin={isSuperAdmin}
-                  userCompany={userCompany}
-                />
-              </TabsContent>
-              
-              <TabsContent value="roles" className="space-y-4">
-                <RoleManagement
-                  roles={roles}
-                  companies={companies}
-                  loading={loading}
-                  fetchRoles={fetchRoles}
-                  setItemToDelete={setItemToDelete}
-                  setDeleteDialogOpen={setDeleteDialogOpen}
-                  isSuperAdmin={isSuperAdmin}
-                  userCompany={userCompany}
-                />
-              </TabsContent>
-              
-              {(isSuperAdmin || isEditorSuperAdmin) && (
-                <TabsContent value="assistants" className="space-y-4">
-                  <ModuleAssistantSettings isAdmin={isSuperAdmin || isEditorSuperAdmin} />
-                </TabsContent>
-              )}
-            </Tabs>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                <span className="ml-3 text-lg">Carregando dados administrativos...</span>
+              </div>
+            ) : (
+              renderContent()
+            )}
             
             <DeleteConfirmDialog
               open={deleteDialogOpen}
