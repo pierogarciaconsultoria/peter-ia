@@ -41,6 +41,7 @@ import Admin from '@/pages/Admin';
 import Ambiente from '@/pages/Ambiente';
 import ExternalDiscAssessment from '@/pages/ExternalDiscAssessment';
 import Tasks from '@/pages/Tasks';
+import LandingPage from '@/pages/LandingPage';
 import { Toaster as SonnerToaster } from 'sonner';
 
 import './App.css';
@@ -97,6 +98,7 @@ function App() {
 
             {/* Rotas não protegidas */}
             <Route path="/auth" element={<Auth />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
             
             {/* Catch-all route for pages not found */}

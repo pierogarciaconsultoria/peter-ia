@@ -2,12 +2,25 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useLogin } from "@/hooks/useLogin";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 
 export const LoginForm = () => {
-  const { loading, handleDirectAdminLogin, isFreeAccessEnabled } = useLogin();
+  const {
+    loginEmail,
+    setLoginEmail,
+    loginPassword,
+    setLoginPassword,
+    loading,
+    errorDetails,
+    handleLogin,
+    handleDirectAdminLogin
+  } = useLogin();
   const navigate = useNavigate();
   
   // Use the centralized Lovable editor detection
@@ -15,64 +28,100 @@ export const LoginForm = () => {
   // Verifica se é modo de acesso gratuito
   const isFreeAccess = shouldGrantFreeAccess();
 
-  // If in Lovable editor or free access mode, automatically redirect to dashboard
-  useEffect(() => {
-    if (isEditor || isFreeAccess) {
-      console.log("Acesso total concedido - redirecionando para dashboard");
-      navigate("/");
-    }
-  }, [isEditor, isFreeAccess, navigate]);
-  
-  // If in Lovable editor or free access mode, don't render login form at all
   if (isEditor || isFreeAccess) {
-    return null;
+    return (
+      <div>
+        <CardContent className="space-y-4">
+          <div className={`p-3 ${isEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
+            {isEditor ? (
+              "Acesso total concedido! Você pode acessar todas as funcionalidades do sistema via Lovable Editor."
+            ) : (
+              "Acesso gratuito concedido! Você pode usar todas as funcionalidades do sistema no modo demonstração."
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
+          <Button
+            type="button" 
+            className="w-full bg-green-600 hover:bg-green-700"
+            onClick={() => navigate("/")}
+          >
+            Acessar Dashboard
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleDirectAdminLogin}
+          >
+            Acessar Área Administrativa
+          </Button>
+        </CardFooter>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <form onSubmit={handleLogin}>
       <CardContent className="space-y-4">
-        <div className={`p-3 ${isEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
-          {isEditor ? (
-            "Acesso total concedido! Você pode acessar todas as funcionalidades do sistema via Lovable Editor."
-          ) : (
-            "A funcionalidade de login está temporariamente desativada."
-          )}
+        {errorDetails && (
+          <Alert variant="destructive" className="py-2">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {errorDetails}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            placeholder="seu@email.com"
+            type="email"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect="off"
+            required
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Senha</Label>
+            <a href="#" className="text-xs text-primary hover:underline">
+              Esqueceu a senha?
+            </a>
+          </div>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+          />
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-2">
-        {isEditor ? (
-          <>
-            <Button
-              type="button" 
-              className="w-full bg-green-600 hover:bg-green-700"
-              onClick={() => navigate("/")}
-            >
-              Acessar Dashboard
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleDirectAdminLogin}
-            >
-              Acessar Área Administrativa
-            </Button>
-          </>
-        ) : (
-          <Button
-            type="button"
-            className="w-full"
-            disabled={true}
-          >
-            Login Desativado
-          </Button>
-        )}
-        <p className="text-xs text-muted-foreground text-center pt-2">
-          {isEditor ? 
-            "Você está usando o acesso total via Lovable Editor." : 
-            "Entre em contato com o suporte para mais informações."}
-        </p>
+      
+      <CardFooter>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Entrando...
+            </>
+          ) : (
+            "Entrar"
+          )}
+        </Button>
       </CardFooter>
-    </div>
+    </form>
   );
 };

@@ -27,6 +27,7 @@ export function UserMenu() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      toast.success("Logout realizado com sucesso");
       navigate("/auth");
     } catch (error) {
       toast.error("Erro ao fazer logout");

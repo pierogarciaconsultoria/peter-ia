@@ -1,94 +1,70 @@
 
 /**
- * Detecta se o usuário está acessando via Lovable Editor
- * @returns {boolean}
+ * Helper functions for detecting if the app is running in Lovable Editor
+ * and applying special access rules
  */
-export function isLovableEditor(): boolean {
-  // Verifica se está no ambiente de desenvolvimento do Lovable
-  const isInLovable = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('lovable.dev') || 
-     window.location.hostname.includes('lovable.app') ||
-     window.location.hostname === 'localhost');
-
-  if (!isInLovable) return false;
-  
-  // Verifica também localStorage para acesso persistente via Lovable
-  try {
-    const hasLocalStorageAccess = localStorage.getItem('lovableEditorAccess') === 'true';
-    if (hasLocalStorageAccess) return true;
-  } catch (e) {
-    // Em caso de erro de acesso ao localStorage (ex: cookies desativados)
-    console.error("Erro ao acessar localStorage:", e);
-  }
-  
-  // Verifica se estamos em um contexto onde o editor está ativo
-  // (Esta é uma detecção simples, pode ser aprimorada conforme necessário)
-  return typeof window !== 'undefined' && 
-    (window.parent !== window || 
-     document.referrer.includes('lovable.dev') || 
-     document.referrer.includes('lovable.app'));
-}
 
 /**
- * Verifica se o usuário deve ter acesso super admin via Lovable Editor
- * @returns {boolean}
+ * Checks if the app is currently running in Lovable Editor
  */
-export function isSuperAdminInLovable(): boolean {
-  // Se não estiver no Lovable Editor, não é super admin
-  if (!isLovableEditor()) return false;
+export const isLovableEditor = (): boolean => {
+  // Check if running in Lovable Editor or preview via URL parameters
+  const url = new URL(window.location.href);
+  const isEditor = url.searchParams.has("lovable_editor") 
+                || url.hostname.includes("lovable.cloud")
+                || url.hostname.includes("lovable.app");
   
-  // Verifica o parâmetro master_admin na URL
-  const urlParams = new URLSearchParams(
-    typeof window !== 'undefined' ? window.location.search : ''
-  );
-  
-  const isMasterAdminUrl = urlParams.get('master_admin') === 'true';
-  
-  // Verifica também localStorage para acesso persistente
-  let hasStorageAccess = false;
-  try {
-    hasStorageAccess = localStorage.getItem('lovableEditorAccess') === 'true';
-    
-    // Salva no localStorage se vier via URL para persistir entre páginas
-    if (isMasterAdminUrl && !hasStorageAccess) {
-      localStorage.setItem('lovableEditorAccess', 'true');
-      hasStorageAccess = true;
-    }
-  } catch (e) {
-    console.error("Erro ao acessar localStorage:", e);
-  }
-  
-  return isMasterAdminUrl || hasStorageAccess;
-}
+  return isEditor;
+};
 
 /**
- * Verifica se deve conceder acesso gratuito para testes
- * @returns {boolean}
+ * Checks if the current editor session should be granted super admin privileges
  */
-export function shouldGrantFreeAccess(): boolean {
-  // Verifica o parâmetro free_access na URL
-  const urlParams = new URLSearchParams(
-    typeof window !== 'undefined' ? window.location.search : ''
-  );
-  
-  const isFreeAccessUrl = urlParams.get('free_access') === 'true';
-  
-  // Verifica a existência de uma variável de ambiente (para dev local)
-  const hasEnvAccess = import.meta.env.VITE_FREE_ACCESS === 'true';
-  
-  // Verifica também localStorage para acesso persistente
-  let hasStorageAccess = false;
-  try {
-    hasStorageAccess = localStorage.getItem('freeAccessEnabled') === 'true';
-    
-    // Salva no localStorage se vier via URL para persistir entre páginas
-    if (isFreeAccessUrl && !hasStorageAccess) {
-      localStorage.setItem('freeAccessEnabled', 'true');
-      hasStorageAccess = true;
-    }
-  } catch (e) {
-    console.error("Erro ao acessar localStorage:", e);
+export const isSuperAdminInLovable = (): boolean => {
+  // If not in editor, definitely not super admin
+  if (!isLovableEditor()) {
+    return false;
   }
   
-  return isFreeAccessUrl || hasEnvAccess || hasStorageAccess;
-}
+  // Check explicit master admin parameter
+  const url = new URL(window.location.href);
+  const isMasterAdmin = url.searchParams.has("master_admin");
+  
+  // Check saved session state
+  const savedAccess = localStorage.getItem('lovableEditorAccess') === 'super_admin';
+  
+  // If master_admin parameter is set, save it for future use
+  if (isMasterAdmin) {
+    localStorage.setItem('lovableEditorAccess', 'super_admin');
+  }
+  
+  return isMasterAdmin || savedAccess;
+};
+
+/**
+ * Check if the current access mode should grant free access for demonstration purposes
+ * This can be toggled by URL parameter or localStorage setting
+ */
+export const shouldGrantFreeAccess = (): boolean => {
+  const url = new URL(window.location.href);
+  const freeAccessParam = url.searchParams.has("free_access");
+  
+  // Check saved free access state or URL parameter
+  const hasFreeAccess = 
+    localStorage.getItem('freeAccessEnabled') === 'true' || 
+    freeAccessParam;
+  
+  // If URL parameter is set, save the preference
+  if (freeAccessParam) {
+    localStorage.setItem('freeAccessEnabled', 'true');
+  }
+  
+  return hasFreeAccess;
+};
+
+/**
+ * Explicit function to disable free access mode
+ */
+export const disableFreeAccess = (): void => {
+  localStorage.removeItem('freeAccessEnabled');
+};

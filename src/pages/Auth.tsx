@@ -88,7 +88,7 @@ const Auth = () => {
         <div className="mt-4 text-center">
           <button 
             className="text-sm text-muted-foreground hover:text-primary hover:underline"
-            onClick={() => navigate("/landing")}
+            onClick={() => navigate("/")}
           >
             Voltar para a página inicial
           </button>

@@ -1,54 +1,47 @@
 
-import { Footer } from "@/components/Footer";
-import { Dashboard } from "@/components/Dashboard";
-import { DatabaseConnectionTest } from "@/components/DatabaseConnectionTest";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { isoRequirements } from "@/utils/isoRequirements";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImplementationSchedule } from "@/components/dashboard/ImplementationSchedule";
-import { MaturityMetrics } from "@/components/dashboard/MaturityMetrics";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+  
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <main className="flex-1 p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Sistema de Gestão da Qualidade</h2>
-              <p className="text-muted-foreground">
-                Monitoramento e controle dos requisitos da norma ISO 9001:2015, com foco na implementação
-                e melhoria contínua do Sistema de Gestão da Qualidade.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <ImplementationSchedule />
-          
-          <MaturityMetrics requirements={isoRequirements} />
-          
-          <Tabs defaultValue="dashboard" className="mt-8">
-            <TabsList>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="connection">Status da Conexão</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="dashboard">
-              <Dashboard requirements={isoRequirements} />
-            </TabsContent>
-            
-            <TabsContent value="connection">
-              <div className="max-w-3xl mx-auto py-4">
-                <DatabaseConnectionTest />
-              </div>
-            </TabsContent>
-          </Tabs>
+    <div className="container py-10">
+      <div className="text-center space-y-6 max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold">Bem-vindo a Peter.IA</h1>
+        <p className="text-xl text-muted-foreground">
+          Plataforma de gestão inteligente para sua empresa
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={() => navigate("/dashboard")}>
+            Acessar Dashboard
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/auth")}>
+            Login / Cadastro
+          </Button>
         </div>
-      </main>
-      
-      <Footer />
+      </div>
     </div>
-  );
+  )
+}
+
+export function getIndex() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      <div className="text-center space-y-6 max-w-3xl p-4">
+        <h1 className="text-4xl font-bold">Peter.IA</h1>
+        <p className="text-xl text-muted-foreground">
+          Gestão inteligente para empresas
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button asChild>
+            <a href="/dashboard">Acessar Dashboard</a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href="/auth">Login / Cadastro</a>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
