@@ -71,13 +71,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (companyError) throw companyError;
       
       // Get user roles from user_profiles
-      // Using the role field from user_profiles which should contain the role information
+      // Check if this is our master admin
+      const isMasterAdmin = userId === profileData?.id && profileData?.email === "contato@pierogarcia.com.br";
       const roles = profileData?.role ? [profileData.role] : [];
       
+      if (isMasterAdmin && !roles.includes('super_admin')) {
+        roles.push('super_admin');
+      }
+      
       // Determine admin status
-      const isUserAdmin = roles.includes('admin');
-      const isUserCompanyAdmin = roles.includes('company_admin');
-      const isUserSuperAdmin = roles.includes('super_admin');
+      const isUserAdmin = roles.includes('admin') || isMasterAdmin;
+      const isUserCompanyAdmin = roles.includes('company_admin') || isMasterAdmin;
+      const isUserSuperAdmin = roles.includes('super_admin') || isMasterAdmin;
       
       // Update state with fetched data
       setUserCompany(companyData);

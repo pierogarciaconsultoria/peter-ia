@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/contexts/SidebarContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/Navigation";
 import NotFound from "@/pages/NotFound";
+import { useAdminCreation } from "@/hooks/useAdminCreation";
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -48,6 +49,9 @@ import './App.css';
 
 function App() {
   const { toast } = useToast();
+  
+  // Initialize admin account
+  useAdminCreation();
 
   return (
     <AuthProvider>

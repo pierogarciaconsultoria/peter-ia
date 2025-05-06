@@ -8,6 +8,10 @@ export const useAdminCreation = () => {
   useEffect(() => {
     const createDefaultAdmin = async () => {
       try {
+        // Admin credentials
+        const adminEmail = "contato@pierogarcia.com.br";
+        const adminPassword = "pi391500";
+        
         // First check if admin account exists
         const { data: { users }, error: fetchError } = await supabase.auth.admin.listUsers();
         
@@ -17,7 +21,6 @@ export const useAdminCreation = () => {
         }
         
         // Find the admin user by email
-        const adminEmail = "contato@pierogarcia.com.br";
         // Explicitly type the user to avoid 'never' type issues
         const adminUser = users?.find((user: any) => user.email === adminEmail);
         
@@ -41,15 +44,16 @@ export const useAdminCreation = () => {
           return;
         }
         
-        // If admin doesn't exist, create it without a password (will require password reset)
+        // If admin doesn't exist, create it with the specified password
         console.log("Admin account not found, creating...");
         
         const { data, error: signUpError } = await supabase.auth.admin.createUser({
           email: adminEmail,
+          password: adminPassword,
           email_confirm: true,
           user_metadata: {
             first_name: "Admin",
-            last_name: "User",
+            last_name: "Master",
             is_super_admin: true,
             is_company_admin: true
           }
@@ -59,7 +63,7 @@ export const useAdminCreation = () => {
           console.error("Error creating admin:", signUpError);
         } else {
           console.log("Admin user creation initiated:", data);
-          toast.info("Conta de administrador criada. Um link para definir a senha será enviado por email.");
+          toast.success("Conta de administrador criada com as credenciais definidas.");
         }
       } catch (error: any) {
         console.error("Error in admin user creation:", error);
