@@ -5,7 +5,7 @@ import { HRHeader } from "@/components/hr/HRHeader";
 import { HRTabSelect } from "@/components/hr/HRTabSelect";
 import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { StarkCorpDemo } from "@/components/hr/StarkCorpDemo";
 
@@ -13,26 +13,29 @@ const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { collapsed } = useSidebar();
 
-  // Set active tab from URL state or query params if available
+  // Set active tab from URL query parameters or location state
   useEffect(() => {
     // Check for URL query parameters first
-    const params = new URLSearchParams(location.search);
-    const tabFromQuery = params.get('activeTab');
+    const tabFromQuery = searchParams.get('activeTab');
     
     if (tabFromQuery) {
       setActiveTab(tabFromQuery);
+      console.log(`Setting active tab from query param: ${tabFromQuery}`);
     } 
     // If no query param, try location state
     else if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
+      console.log(`Setting active tab from location state: ${location.state.activeTab}`);
     }
-  }, [location.search, location.state]);
+  }, [searchParams, location.state]);
 
   // Handle tab change and update URL
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
+    console.log(`Tab changed to: ${tabId}`);
     
     // Update URL query parameter for better bookmarking and navigation
     navigate(`/human-resources?activeTab=${tabId}`, { replace: true });

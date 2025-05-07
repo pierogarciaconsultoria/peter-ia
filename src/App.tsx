@@ -66,7 +66,10 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="documents" element={<Documents />} />
               <Route path="document-upload" element={<DocumentUpload />} />
-              <Route path="human-resources/*" element={<HumanResources />} />
+              
+              {/* Corrigir a rota de recursos humanos para aceitar query params */}
+              <Route path="human-resources" element={<HumanResources />} />
+              
               <Route path="process-form" element={<ProcessFormPage />} />
               <Route path="processo" element={<ProcessoPage />} />
               <Route path="processo/:id" element={<ProcessFormPage />} />
