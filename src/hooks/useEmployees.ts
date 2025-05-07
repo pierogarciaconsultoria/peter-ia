@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Employee, JobPosition } from "@/components/hr/types/employee";
+import { generateMockEmployees } from "@/utils/mockEmployeeData";
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -65,65 +66,7 @@ export function useEmployees() {
           setEmployees(enrichedEmployees);
         } else {
           // For demo, we'll use mock data
-          const mockEmployeeData = [
-            {
-              id: "1",
-              name: "João Silva",
-              email: "joao.silva@exemplo.com",
-              department: "Produção",
-              position: "Gerente de Produção",
-              position_id: "pos1", 
-              status: "active" as const,
-              hire_date: "2020-03-15",
-              avatar_url: "",
-            },
-            {
-              id: "2",
-              name: "Maria Oliveira",
-              email: "maria.oliveira@exemplo.com",
-              department: "Recursos Humanos",
-              position: "Coordenadora de RH",
-              position_id: "pos2",
-              status: "active" as const,
-              hire_date: "2019-08-22",
-              avatar_url: "",
-            },
-            {
-              id: "3",
-              name: "Pedro Santos",
-              email: "pedro.santos@exemplo.com",
-              department: "TI",
-              position: "Desenvolvedor Sênior",
-              position_id: "pos3",
-              status: "active" as const,
-              hire_date: "2021-01-10",
-              avatar_url: "",
-            },
-            {
-              id: "4",
-              name: "Ana Ferreira",
-              email: "ana.ferreira@exemplo.com",
-              department: "Vendas",
-              position: "Executiva de Contas",
-              position_id: "pos4",
-              status: "on_leave" as const,
-              hire_date: "2018-11-05",
-              avatar_url: "",
-            },
-            {
-              id: "5",
-              name: "Carlos Mendes",
-              email: "carlos.mendes@exemplo.com",
-              department: "Financeiro",
-              position: "Analista Financeiro",
-              position_id: "pos5",
-              status: "inactive" as const,
-              hire_date: "2017-05-18",
-              avatar_url: "",
-            },
-          ];
-          
-          setEmployees(mockEmployeeData);
+          setEmployees(generateMockEmployees());
         }
       } catch (error) {
         console.error('Error fetching data:', error);
