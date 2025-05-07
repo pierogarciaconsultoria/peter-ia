@@ -91,6 +91,7 @@ export function EmployeeDirectory() {
             const positionDetails = positionsData?.find(p => p.title === employee.position);
             return {
               ...employee,
+              status: employee.status as "active" | "inactive" | "on_leave",
               position_details: positionDetails
             };
           });
