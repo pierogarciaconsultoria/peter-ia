@@ -7,6 +7,7 @@ import { HRTabContent } from "@/components/hr/HRTabContent";
 import { hrTabGroups } from "@/components/hr/HRTabConfig";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { StarkCorpDemo } from "@/components/hr/StarkCorpDemo";
 
 const HumanResources = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -55,6 +56,9 @@ const HumanResources = () => {
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
         />
+        
+        {/* Add the Stark Corp demo button */}
+        <StarkCorpDemo />
       </div>
     </div>
   );
