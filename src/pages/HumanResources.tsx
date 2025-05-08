@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const HumanResources = () => {
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("dashboard"); // Default to dashboard
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,54 +22,46 @@ const HumanResources = () => {
   // Set active tab from URL query parameters or location state
   useEffect(() => {
     try {
-      setIsLoading(true);
-      
-      // Check for URL query parameters first
-      const tabFromQuery = searchParams.get('activeTab');
-      
-      if (tabFromQuery) {
-        setActiveTab(tabFromQuery);
-        console.log(`Setting active tab from query param: ${tabFromQuery}`);
-      } 
-      // If no query param, try location state
-      else if (location.state?.activeTab) {
-        setActiveTab(location.state.activeTab);
-        console.log(`Setting active tab from location state: ${location.state.activeTab}`);
-      } else {
-        // Default to dashboard if no tab is specified
-        setActiveTab("dashboard");
-        console.log("No tab specified, defaulting to dashboard");
-      }
+      // Short timeout to show loading state but prevent flickering
+      const loadingTimeout = setTimeout(() => {
+        // Check for URL query parameters first
+        const tabFromQuery = searchParams.get('activeTab');
+        
+        if (tabFromQuery) {
+          setActiveTab(tabFromQuery);
+          console.log(`Setting active tab from query param: ${tabFromQuery}`);
+        } 
+        // If no query param, try location state
+        else if (location.state?.activeTab) {
+          setActiveTab(location.state.activeTab);
+          console.log(`Setting active tab from location state: ${location.state.activeTab}`);
+        } 
+        // Default is already set in useState
+
+        // Finish loading regardless of result
+        setIsLoading(false);
+      }, 300);
+
+      return () => clearTimeout(loadingTimeout);
     } catch (error) {
       console.error("Error setting active tab:", error);
-    } finally {
-      // Short timeout to prevent flickering
-      setTimeout(() => setIsLoading(false), 300);
+      // Always ensure loading ends even on error
+      setIsLoading(false);
+      // Set default tab on error
+      setActiveTab("dashboard");
     }
   }, [searchParams, location.state]);
 
   // Handle tab change and update URL
   const handleTabChange = (tabId: string) => {
+    if (tabId === activeTab) return; // Prevent unnecessary state updates
+    
     setActiveTab(tabId);
     console.log(`Tab changed to: ${tabId}`);
     
     // Update URL query parameter for better bookmarking and navigation
     navigate(`/human-resources?activeTab=${tabId}`, { replace: true });
   };
-
-  // Render loading state when active tab is not set
-  if (isLoading || !activeTab) {
-    return (
-      <AuthenticationRequired>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="text-lg text-muted-foreground">Carregando módulo de Recursos Humanos...</p>
-          </div>
-        </div>
-      </AuthenticationRequired>
-    );
-  }
 
   return (
     <AuthenticationRequired>
@@ -86,10 +78,17 @@ const HumanResources = () => {
             setActiveTab={handleTabChange} 
           />
           
-          <HRTabContent 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange} 
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="ml-2 text-muted-foreground">Carregando...</p>
+            </div>
+          ) : (
+            <HRTabContent 
+              activeTab={activeTab} 
+              onTabChange={handleTabChange} 
+            />
+          )}
           
           {/* Add the Stark Corp demo button */}
           <StarkCorpDemo />

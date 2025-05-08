@@ -1,28 +1,33 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
 export function ClimateResearch() {
   const navigate = useNavigate();
-  const [isRedirecting, setIsRedirecting] = useState(true);
+  const location = useLocation();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Redirecionar para a página de pesquisa de clima usando query parameter
+  // Verificar se já estamos na URL correta para evitar redirecionamentos infinitos
   useEffect(() => {
-    // Verifica se já estamos na página correta com o parâmetro correto
-    const currentUrl = window.location.href;
+    // Se já estamos na página com o parâmetro climate, não redirecionar
+    const isAlreadyOnCorrectTab = location.search.includes('activeTab=climate');
     
-    if (!currentUrl.includes('activeTab=climate')) {
-      const timer = setTimeout(() => {
-        navigate("/human-resources?activeTab=climate");
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    } else {
+    if (isAlreadyOnCorrectTab) {
       setIsRedirecting(false);
+      return;
     }
-  }, [navigate]);
+    
+    setIsRedirecting(true);
+    
+    // Redirecionar para a página HR com a aba climate
+    const redirectTimer = setTimeout(() => {
+      navigate("/human-resources?activeTab=climate", { replace: true });
+    }, 300);
+    
+    return () => clearTimeout(redirectTimer);
+  }, [navigate, location.search]);
   
   if (isRedirecting) {
     return (

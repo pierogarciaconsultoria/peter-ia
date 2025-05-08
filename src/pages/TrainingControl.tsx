@@ -1,26 +1,29 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 const TrainingControl = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isRedirecting, setIsRedirecting] = useState(true);
   
   useEffect(() => {
-    // Verificar se já estamos na URL correta para evitar redirecionamentos desnecessários
-    if (window.location.href.includes('activeTab=training')) {
+    // Verificar se já estamos na URL correta para evitar redirecionamentos infinitos
+    const isAlreadyOnCorrectTab = location.search.includes('activeTab=training');
+    
+    if (isAlreadyOnCorrectTab) {
       setIsRedirecting(false);
       return;
     }
     
     const redirectTimer = setTimeout(() => {
       // Redirect to the HR Development Tab with proper query parameter
-      navigate("/human-resources?activeTab=training");
+      navigate("/human-resources?activeTab=training", { replace: true });
     }, 300);
     
     return () => clearTimeout(redirectTimer);
-  }, [navigate]);
+  }, [navigate, location.search]);
   
   if (isRedirecting) {
     return (
@@ -33,7 +36,7 @@ const TrainingControl = () => {
     );
   }
   
-  return null; // This component will redirect, so no need to render anything when not redirecting
+  return null; // Este componente vai redirecionar, então não precisa renderizar nada quando não está redirecionando
 };
 
 export default TrainingControl;
