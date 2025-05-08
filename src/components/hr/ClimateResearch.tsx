@@ -1,46 +1,17 @@
 
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 
 export function ClimateResearch() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   
-  // Verificar se já estamos na URL correta para evitar redirecionamentos infinitos
-  useEffect(() => {
-    // Se já estamos na página com o parâmetro climate, não redirecionar
-    const isAlreadyOnCorrectTab = location.search.includes('activeTab=climate');
-    
-    if (isAlreadyOnCorrectTab) {
-      setIsRedirecting(false);
-      return;
-    }
-    
-    setIsRedirecting(true);
-    
-    // Redirecionar para a página HR com a aba climate
-    const redirectTimer = setTimeout(() => {
-      navigate("/human-resources?activeTab=climate", { replace: true });
-    }, 300);
-    
-    return () => clearTimeout(redirectTimer);
-  }, [navigate, location.search]);
+  // Verificamos se já estamos na URL correta com a aba climate
+  const isCorrectTab = location.search.includes('activeTab=climate');
   
-  if (isRedirecting) {
-    return (
-      <Card className="w-full">
-        <CardContent className="flex items-center justify-center p-6">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-            <p className="text-muted-foreground">Redirecionando para pesquisa de clima...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Se não estamos na URL correta, isso seria tratado em TrainingControl.tsx ou na navegação
+  // Este componente agora apenas renderiza seu conteúdo
   
   return (
     <div className="space-y-6">

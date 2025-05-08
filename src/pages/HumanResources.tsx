@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { HRHeader } from "@/components/hr/HRHeader";
@@ -12,8 +11,8 @@ import { Loader2 } from "lucide-react";
 import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const HumanResources = () => {
-  const [activeTab, setActiveTab] = useState<string>("dashboard"); // Default to dashboard
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -21,35 +20,22 @@ const HumanResources = () => {
 
   // Set active tab from URL query parameters or location state
   useEffect(() => {
-    try {
-      // Short timeout to show loading state but prevent flickering
-      const loadingTimeout = setTimeout(() => {
-        // Check for URL query parameters first
-        const tabFromQuery = searchParams.get('activeTab');
-        
-        if (tabFromQuery) {
-          setActiveTab(tabFromQuery);
-          console.log(`Setting active tab from query param: ${tabFromQuery}`);
-        } 
-        // If no query param, try location state
-        else if (location.state?.activeTab) {
-          setActiveTab(location.state.activeTab);
-          console.log(`Setting active tab from location state: ${location.state.activeTab}`);
-        } 
-        // Default is already set in useState
-
-        // Finish loading regardless of result
-        setIsLoading(false);
-      }, 300);
-
-      return () => clearTimeout(loadingTimeout);
-    } catch (error) {
-      console.error("Error setting active tab:", error);
-      // Always ensure loading ends even on error
-      setIsLoading(false);
-      // Set default tab on error
-      setActiveTab("dashboard");
+    // Reset loading state for infinite loading issues
+    setIsLoading(false);
+    
+    // Check for URL query parameters first
+    const tabFromQuery = searchParams.get('activeTab');
+    
+    if (tabFromQuery) {
+      setActiveTab(tabFromQuery);
+      console.log(`Setting active tab from query param: ${tabFromQuery}`);
+    } 
+    // If no query param, try location state
+    else if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      console.log(`Setting active tab from location state: ${location.state.activeTab}`);
     }
+    // Keep default that was set in useState
   }, [searchParams, location.state]);
 
   // Handle tab change and update URL

@@ -22,10 +22,9 @@ export const AuthGuard = ({
   const { user, loading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(true);
+  const [authCheckCompleted, setAuthCheckCompleted] = useState(false);
 
   // Enhanced Lovable editor detection
-  // This check allows anyone editing in Lovable to bypass authentication entirely
-  // AND automatically grants them super admin privileges
   const isEditorSuperAdmin = isSuperAdminInLovable();
   
   // Verifica se o acesso gratuito está habilitado
@@ -52,12 +51,14 @@ export const AuthGuard = ({
     // Short delay to prevent flash of redirect
     const timer = setTimeout(() => {
       setIsChecking(false);
+      setAuthCheckCompleted(true);
     }, 500);
     
     return () => clearTimeout(timer);
   }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
 
-  if (loading || isChecking) {
+  // Exibir indicador de carregamento apenas na primeira verificação
+  if ((loading || isChecking) && !authCheckCompleted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -72,9 +73,7 @@ export const AuthGuard = ({
     return children ? <>{children}</> : <Outlet />;
   }
 
-  // Special bypass for Lovable editing - always return children directly
-  // This completely bypasses all authentication for Lovable editors
-  // and grants them super admin privileges
+  // Special bypass for Lovable editing
   if (isEditorSuperAdmin) {
     console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
     return children ? <>{children}</> : <Outlet />;
