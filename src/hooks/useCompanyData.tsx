@@ -38,8 +38,8 @@ export function useCompanyData() {
           toast.error("Falha ao carregar dados da empresa");
         } else {
           console.log("Dados da empresa carregados:", data);
-          // Important: The RPC function returns a single object, not an array
-          setCompany(data);
+          // The RPC function returns a single object (not an array)
+          setCompany(data as CompanyData);
         }
       } catch (err: any) {
         console.error("Erro inesperado:", err);
@@ -65,7 +65,7 @@ export function useCompanyData() {
         });
         
         if (error) throw error;
-        setCompany(data);
+        setCompany(data as CompanyData);
         return { success: true, data };
       } catch (err: any) {
         setError(err);
