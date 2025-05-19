@@ -38,8 +38,18 @@ export function useCompanyData() {
           toast.error("Falha ao carregar dados da empresa");
         } else {
           console.log("Dados da empresa carregados:", data);
-          // The RPC function returns a single object (not an array)
-          setCompany(data as CompanyData);
+          // The database function is supposed to return a single object
+          // But let's handle both possibilities to be safe
+          if (Array.isArray(data)) {
+            if (data.length > 0) {
+              setCompany(data[0] as CompanyData);
+            } else {
+              setCompany(null);
+            }
+          } else {
+            // Handle case where it's already an object
+            setCompany(data as CompanyData);
+          }
         }
       } catch (err: any) {
         console.error("Erro inesperado:", err);
@@ -65,7 +75,13 @@ export function useCompanyData() {
         });
         
         if (error) throw error;
-        setCompany(data as CompanyData);
+        
+        if (Array.isArray(data)) {
+          setCompany(data.length > 0 ? data[0] as CompanyData : null);
+        } else {
+          setCompany(data as CompanyData);
+        }
+        
         return { success: true, data };
       } catch (err: any) {
         setError(err);
