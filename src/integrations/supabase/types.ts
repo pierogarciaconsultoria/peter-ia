@@ -477,6 +477,79 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_disc_evaluations: {
+        Row: {
+          candidate_id: string
+          company_id: string
+          compliance_score: number
+          created_at: string
+          dominance_score: number
+          employee_id: string | null
+          evaluation_date: string
+          id: string
+          influence_score: number
+          primary_type: string
+          report_url: string | null
+          secondary_type: string | null
+          steadiness_score: number
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          company_id: string
+          compliance_score: number
+          created_at?: string
+          dominance_score: number
+          employee_id?: string | null
+          evaluation_date: string
+          id?: string
+          influence_score: number
+          primary_type: string
+          report_url?: string | null
+          secondary_type?: string | null
+          steadiness_score: number
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          company_id?: string
+          compliance_score?: number
+          created_at?: string
+          dominance_score?: number
+          employee_id?: string | null
+          evaluation_date?: string
+          id?: string
+          influence_score?: number
+          primary_type?: string
+          report_url?: string | null
+          secondary_type?: string | null
+          steadiness_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_disc_evaluations_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "hr_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_disc_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_disc_evaluations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidates: {
         Row: {
           company_id: string
@@ -1158,6 +1231,81 @@ export type Database = {
         }
         Relationships: []
       }
+      disc_evaluation_links: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          email: string
+          entity_id: string
+          entity_type: string
+          expires_at: string
+          id: string
+          is_used: boolean
+          name: string
+          token: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          email: string
+          entity_id: string
+          entity_type: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          name: string
+          token: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          entity_id?: string
+          entity_type?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          name?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      disc_evaluation_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          questions: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          questions: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          questions?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       disc_evaluations: {
         Row: {
           company_id: string
@@ -1220,6 +1368,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      disc_responses: {
+        Row: {
+          c_score: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          d_score: number
+          entity_id: string
+          entity_type: string
+          i_score: number
+          id: string
+          primary_type: string
+          report_url: string | null
+          responses: Json
+          s_score: number
+          secondary_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          c_score: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          d_score: number
+          entity_id: string
+          entity_type: string
+          i_score: number
+          id?: string
+          primary_type: string
+          report_url?: string | null
+          responses: Json
+          s_score: number
+          secondary_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          c_score?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          d_score?: number
+          entity_id?: string
+          entity_type?: string
+          i_score?: number
+          id?: string
+          primary_type?: string
+          report_url?: string | null
+          responses?: Json
+          s_score?: number
+          secondary_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       document_revisions: {
         Row: {
@@ -1806,6 +2008,70 @@ export type Database = {
             columns: ["job_opening_id"]
             isOneToOne: false
             referencedRelation: "hr_job_openings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_approved_positions: {
+        Row: {
+          approved_count: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string
+          filled_count: number
+          id: string
+          is_active: boolean
+          job_position_id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_count?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id: string
+          filled_count?: number
+          id?: string
+          is_active?: boolean
+          job_position_id: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_count?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string
+          filled_count?: number
+          id?: string
+          is_active?: boolean
+          job_position_id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_approved_positions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_approved_positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "hr_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_approved_positions_job_position_id_fkey"
+            columns: ["job_position_id"]
+            isOneToOne: false
+            referencedRelation: "hr_job_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -4526,6 +4792,50 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_contexts: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          scope: string | null
+          stakeholders: string | null
+          swot_analysis: Json | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          scope?: string | null
+          stakeholders?: string | null
+          swot_analysis?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          scope?: string | null
+          stakeholders?: string | null
+          swot_analysis?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_contexts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_receipts: {
         Row: {
           amount_paid: number
@@ -4854,24 +5164,35 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_id: string | null
           criado_em: string | null
           id: string
           nome: string | null
           user_id: string | null
         }
         Insert: {
+          company_id?: string | null
           criado_em?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
         }
         Update: {
+          company_id?: string | null
           criado_em?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -5020,6 +5341,103 @@ export type Database = {
           why?: string
         }
         Relationships: []
+      }
+      quality_objectives: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          frequency: string | null
+          id: string
+          name: string
+          status: string | null
+          target: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          status?: string | null
+          target?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          status?: string | null
+          target?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_objectives_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quality_policies: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          status: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       raw_material_inspections: {
         Row: {
@@ -6108,19 +6526,49 @@ export type Database = {
         Args: { table_name: string }
         Returns: undefined
       }
+      belongs_to_company: {
+        Args: { company_uuid: string }
+        Returns: boolean
+      }
       check_secret_exists: {
         Args: { secret_name: string }
         Returns: boolean
       }
+      check_table_exists: {
+        Args: { table_name: string }
+        Returns: {
+          table_exists: boolean
+        }[]
+      }
       check_user_access: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      create_check_table_exists_function: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_get_db_version_function: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      exec_sql: {
+        Args: { sql_statement: string }
+        Returns: undefined
       }
       generate_trial_evaluations: {
         Args: { employee_id: string; start_date: string }
         Returns: undefined
       }
       generate_unique_assessment_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_unique_disc_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_db_version: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -6144,8 +6592,16 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      is_company_admin_for: {
+        Args: { company_uuid: string }
+        Returns: boolean
+      }
       is_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      user_has_module_access: {
+        Args: { module_key: string }
         Returns: boolean
       }
       user_has_permission: {

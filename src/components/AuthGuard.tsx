@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -21,8 +21,6 @@ export const AuthGuard = ({
 }: AuthGuardProps) => {
   const { user, loading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
-  const [isChecking, setIsChecking] = useState(true);
-  const [authCheckCompleted, setAuthCheckCompleted] = useState(false);
 
   // Enhanced Lovable editor detection
   const isEditorSuperAdmin = isSuperAdminInLovable();
@@ -48,17 +46,10 @@ export const AuthGuard = ({
       sessionStorage.setItem('freeAccessNotified', 'true');
     }
     
-    // Short delay to prevent flash of redirect
-    const timer = setTimeout(() => {
-      setIsChecking(false);
-      setAuthCheckCompleted(true);
-    }, 500);
-    
-    return () => clearTimeout(timer);
   }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
 
-  // Exibir indicador de carregamento apenas na primeira verificação
-  if ((loading || isChecking) && !authCheckCompleted) {
+  // Exibir indicador de carregamento se estiver carregando
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -74,7 +65,7 @@ export const AuthGuard = ({
   }
 
   // Special bypass for Lovable editing
-  if (isEditorSuperAdmin) {
+  if (isEditorSuperAdmin && bypassForMasterAdmin) {
     console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
     return children ? <>{children}</> : <Outlet />;
   }
