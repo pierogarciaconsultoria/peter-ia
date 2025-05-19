@@ -10,7 +10,6 @@ export const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: false,
-      timeout: 15000, // 15 seconds timeout
       meta: {
         onError: (error: Error) => {
           console.error("Query error:", error);

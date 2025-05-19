@@ -30,3 +30,44 @@ export function setFreeAccessMode(enable: boolean): void {
     }
   }
 }
+
+/**
+ * Verifica se estamos no ambiente do editor Lovable
+ * Útil para personalizar comportamentos quando estiver no editor
+ */
+export function isLovableEditor(): boolean {
+  // Verificar se estamos em ambiente de desenvolvimento
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // Verificar se temos algum parâmetro específico do Lovable na URL
+  const hasLovableParam = typeof window !== 'undefined' && 
+    (new URLSearchParams(window.location.search).has('lovable') || 
+     window.location.hostname.includes('lovable.app'));
+  
+  // Verificar se foi marcado no localStorage
+  const hasLovableStorage = typeof localStorage !== 'undefined' && 
+    localStorage.getItem('lovable_editor') === 'true';
+  
+  return isDevelopment || hasLovableParam || hasLovableStorage;
+}
+
+/**
+ * Verifica se devemos conceder acesso livre/gratuito para demonstração
+ * Combinação de várias verificações para garantir acesso em ambiente de desenvolvimento
+ */
+export function shouldGrantFreeAccess(): boolean {
+  // Verifica se estamos no editor Lovable
+  const isEditor = isLovableEditor();
+  
+  // Verificar parâmetros de URL específicos para acesso livre
+  const hasFreeAccessParam = typeof window !== 'undefined' && 
+    (new URLSearchParams(window.location.search).has('freeAccess') || 
+     new URLSearchParams(window.location.search).has('demo'));
+  
+  // Verificar localStorage para acesso livre
+  const hasFreeAccessStorage = typeof localStorage !== 'undefined' && 
+    (localStorage.getItem('sgq_free_access') === 'true' || 
+     localStorage.getItem('demo_access') === 'true');
+  
+  return isEditor || hasFreeAccessParam || hasFreeAccessStorage || isSuperAdminInLovable();
+}
