@@ -7,6 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { PermissionCheck, PermissionType, SecurityAuditLogEntry, SecurityContextType } from "./SecurityTypes";
 import { toast } from "sonner";
 
+// Flag para desabilitar temporariamente a autenticação
+const BYPASS_AUTH_TEMPORARILY = true;
+
 // Create security context
 const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
 
@@ -23,13 +26,21 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   const isFreeAccessMode = shouldGrantFreeAccess();
   
   const isAuthenticated = useMemo(() => {
-    return Boolean(user) || isLovableAdmin || isFreeAccessMode;
+    return Boolean(user) || isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY;
   }, [user, isLovableAdmin, isFreeAccessMode]);
+
+  useEffect(() => {
+    // Notification for temporary auth bypass
+    if (BYPASS_AUTH_TEMPORARILY && sessionStorage.getItem('tempAuthBypassNotified') !== 'true') {
+      toast.info("Autenticação por email temporariamente desabilitada");
+      sessionStorage.setItem('tempAuthBypassNotified', 'true');
+    }
+  }, []);
 
   // Permission checking functions
   const checkPermission = (module: string, permission: PermissionType): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode) return true;
+    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     
@@ -39,7 +50,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   
   const checkMultiplePermissions = (checks: PermissionCheck[]): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode) return true;
+    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     
@@ -49,7 +60,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   
   const checkAnyPermission = (checks: PermissionCheck[]): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode) return true;
+    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     

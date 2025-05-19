@@ -6,6 +6,9 @@ import { useSecurity } from "./SecurityContext";
 import { PermissionCheck, PermissionType } from "./SecurityTypes";
 import { useAuth } from "@/hooks/useAuth";
 
+// Flag para desabilitar temporariamente a autenticação
+const BYPASS_AUTH_TEMPORARILY = true;
+
 interface SecureRouteProps {
   children?: React.ReactNode;
   requireAuth?: boolean;
@@ -47,6 +50,18 @@ export const SecureRoute: React.FC<SecureRouteProps> = ({
         <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
+  }
+
+  // Temporarily bypass authentication
+  if (BYPASS_AUTH_TEMPORARILY) {
+    console.log("Autenticação temporariamente desabilitada - acesso concedido");
+    logSecurityEvent({
+      action: 'ACCESS_GRANTED',
+      targetResource: location.pathname,
+      details: { reason: 'Authentication temporarily disabled' },
+      status: 'success'
+    });
+    return children ? <>{children}</> : <Outlet />;
   }
 
   // Special case: Lovable Editor or Free Access mode bypass all restrictions

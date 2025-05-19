@@ -6,9 +6,12 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
+
+// Flag para desabilitar temporariamente a autenticação
+const BYPASS_AUTH_TEMPORARILY = true;
 
 export const LoginForm = () => {
   const {
@@ -28,12 +31,14 @@ export const LoginForm = () => {
   // Verifica se é modo de acesso gratuito
   const isFreeAccess = shouldGrantFreeAccess();
 
-  if (isEditor || isFreeAccess) {
+  if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
     return (
       <div>
         <CardContent className="space-y-4">
           <div className={`p-3 ${isEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
-            {isEditor ? (
+            {BYPASS_AUTH_TEMPORARILY ? (
+              "Autenticação temporariamente desabilitada. Você será automaticamente autenticado."
+            ) : isEditor ? (
               "Acesso total concedido! Você pode acessar todas as funcionalidades do sistema via Lovable Editor."
             ) : (
               "Acesso gratuito concedido! Você pode usar todas as funcionalidades do sistema no modo demonstração."

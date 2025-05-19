@@ -3,10 +3,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, AlertTriangle } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Flag para desabilitar temporariamente a autenticação
+const BYPASS_AUTH_TEMPORARILY = true;
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -17,15 +21,16 @@ const Auth = () => {
   const isFreeAccess = shouldGrantFreeAccess();
   
   // Immediately redirect to dashboard if in Lovable editor or free access mode
+  // or if authentication is temporarily disabled
   useEffect(() => {
-    if (isEditor || isFreeAccess) {
+    if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
       console.log("Acesso total concedido - redirecionando para dashboard");
       navigate("/");
     }
   }, [isEditor, isFreeAccess, navigate]);
   
   // If in Lovable editor or free access mode, don't render the auth page at all
-  if (isEditor || isFreeAccess) {
+  if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
     return null;
   }
   
@@ -39,6 +44,15 @@ const Auth = () => {
           </div>
           <p className="text-muted-foreground">Gestão Inteligente para Empresas</p>
         </div>
+        
+        {BYPASS_AUTH_TEMPORARILY && (
+          <Alert variant="warning" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-amber-600">
+              Autenticação por email temporariamente desabilitada. Você será redirecionado...
+            </AlertDescription>
+          </Alert>
+        )}
         
         <Card>
           <Tabs defaultValue="login">

@@ -6,6 +6,9 @@ import { Loader2 } from "lucide-react";
 import { shouldGrantFreeAccess, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
+// Flag para desabilitar temporariamente a autenticação
+const BYPASS_AUTH_TEMPORARILY = true;
+
 interface AuthGuardProps {
   children?: React.ReactNode;
   requireAdmin?: boolean;
@@ -46,6 +49,12 @@ export const AuthGuard = ({
       sessionStorage.setItem('freeAccessNotified', 'true');
     }
     
+    // Notification for temporary auth bypass
+    if (BYPASS_AUTH_TEMPORARILY && sessionStorage.getItem('tempAuthBypassNotified') !== 'true') {
+      toast.info("Autenticação por email temporariamente desabilitada");
+      sessionStorage.setItem('tempAuthBypassNotified', 'true');
+    }
+    
   }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
 
   // Exibir indicador de carregamento se estiver carregando
@@ -56,6 +65,12 @@ export const AuthGuard = ({
         <span className="ml-2 text-lg">Carregando...</span>
       </div>
     );
+  }
+
+  // Temporariamente desabilitar autenticação
+  if (BYPASS_AUTH_TEMPORARILY) {
+    console.log("Autenticação temporariamente desabilitada - acesso concedido");
+    return children ? <>{children}</> : <Outlet />;
   }
 
   // Acesso gratuito para testes: sempre concede acesso
