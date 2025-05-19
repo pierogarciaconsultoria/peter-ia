@@ -14,21 +14,44 @@ export function SidebarMenuItemSimple({
 }: SidebarMenuItemProps) {
   const itemKey = item.href || item.title;
 
-  // Corrigir a navegação para usar o objeto to em vez de string
+  // Fix the navigation route to handle both absolute and relative paths
+  const getNavRoute = () => {
+    // If it's already an absolute path, return it directly
+    if (item.href?.startsWith('/')) {
+      return item.href;
+    }
+    
+    // If it's a relative path or undefined, make it absolute
+    return item.href ? `/${item.href}` : '/';
+  };
+
+  const navRoute = getNavRoute();
+  
+  // Determine if this item should be marked as active
+  const isExactMatch = pathname === navRoute;
+  const isParentMatch = pathname.startsWith(navRoute) && 
+                        pathname.length > navRoute.length && 
+                        pathname.charAt(navRoute.length) === '/';
+  const isActive = isExactMatch || (navRoute !== '/' && isParentMatch);
+
   return (
-    <div className="relative" onMouseEnter={() => onMouseEnter(itemKey)} onMouseLeave={onMouseLeave}>
+    <div 
+      className="relative" 
+      onMouseEnter={() => onMouseEnter(itemKey)} 
+      onMouseLeave={onMouseLeave}
+    >
       <NavLink 
-        to={item.href}
-        end={item.href === "/" || item.href === "/dashboard"}
-        className={({ isActive }) => cn(
+        to={navRoute}
+        end={navRoute === "/" || navRoute === "/dashboard"}
+        className={({ isActive: linkActive }) => cn(
           "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors",
-          isActive ? 
+          (linkActive || isActive) ? 
             "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : 
             "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
         )}
         onClick={(e) => {
-          // Logging para debug
-          console.log(`Navegando para: ${item.href}`);
+          // Log navigation for debugging
+          console.log(`Navegando para: ${navRoute} (de ${pathname})`);
         }}
       >
         {item.icon && (
@@ -41,7 +64,7 @@ export function SidebarMenuItemSimple({
         {!collapsed && <span className="truncate">{item.title}</span>}
       </NavLink>
       
-      {/* Tooltip para modo colapsado */}
+      {/* Tooltip for collapsed mode */}
       {collapsed && hoveredItem === itemKey && (
         <div className={cn(
           "absolute left-full top-0 ml-2 min-w-[180px] rounded-md border border-sidebar-border bg-sidebar p-2 shadow-md z-50"
