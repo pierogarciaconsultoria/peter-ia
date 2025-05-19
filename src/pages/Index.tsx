@@ -8,6 +8,7 @@ import { RequirementsList } from "@/components/RequirementsList";
 import { RequirementDialog } from "@/components/requirement-dialog/RequirementDialog";
 import { ChildRequirementDialog } from "@/components/child-requirement-dialog/ChildRequirementDialog";
 import { UserProfileInfo } from "@/components/UserProfileInfo";
+import { CompanyInfoCard } from "@/components/CompanyInfoCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -35,9 +36,10 @@ const Index = () => {
   return (
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Informações do usuário atual */}
-        <div className="mb-6">
+        {/* Informações do usuário e empresa */}
+        <div className="mb-6 grid gap-6 md:grid-cols-2">
           <UserProfileInfo />
+          <CompanyInfoCard />
         </div>
         
         <Dashboard requirements={isoRequirements} />

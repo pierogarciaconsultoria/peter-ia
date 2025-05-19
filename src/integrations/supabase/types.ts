@@ -6604,6 +6604,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_company_by_id: {
+        Args: { company_uuid: string }
+        Returns: {
+          id: string
+          nome: string
+          cnpj: string
+        }[]
+      }
       get_db_version: {
         Args: Record<PropertyKey, never>
         Returns: string
