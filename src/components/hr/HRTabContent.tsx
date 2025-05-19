@@ -23,7 +23,6 @@ import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";
 import { EmployeeBoard } from "./EmployeeBoard";
 import { ExitInterviews } from "./ExitInterviews";
-import { AmbienteContent } from "./AmbienteContent";
 
 interface HRTabContentProps {
   activeTab: string;
@@ -82,8 +81,6 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <EmployeeBoard />;
       case "exit-interviews":
         return <ExitInterviews />;
-      case "ambiente":
-        return <AmbienteContent />;
       default:
         return <HRDashboard />;
     }

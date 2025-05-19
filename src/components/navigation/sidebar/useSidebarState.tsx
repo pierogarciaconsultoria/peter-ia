@@ -47,17 +47,30 @@ export function useSidebarState() {
   const isItemActive = (itemPath: string): boolean => {
     if (!itemPath) return false;
     
+    // Log para debug
+    console.log(`Verificando se ${itemPath} está ativo. Pathname atual: ${pathname}`);
+    
     // Exact match
-    if (pathname === itemPath) return true;
+    if (pathname === itemPath) {
+      console.log(`Exata correspondência para ${itemPath}`);
+      return true;
+    }
     
     // Match for index routes with trailing slash
-    if (pathname === `${itemPath}/` || `${pathname}/` === itemPath) return true;
+    if (pathname === `${itemPath}/` || `${pathname}/` === itemPath) {
+      console.log(`Correspondência com barra para ${itemPath}`);
+      return true;
+    }
     
     // Parent path match for nested routes
     const isParentPath = pathname.startsWith(itemPath) && 
                         (pathname.charAt(itemPath.length) === '/' || 
                         itemPath === '/');
                         
+    if (isParentPath) {
+      console.log(`${itemPath} é rota pai de ${pathname}`);
+    }
+    
     return isParentPath;
   };
 

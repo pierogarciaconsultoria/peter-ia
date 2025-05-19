@@ -27,6 +27,9 @@ export function SidebarMenuItemSimple({
 
   const navRoute = getNavRoute();
   
+  // Log navigation routes for debugging
+  console.log(`Item: ${item.title}, Route: ${navRoute}, Current Path: ${pathname}`);
+  
   // Determine if this item should be marked as active
   const isExactMatch = pathname === navRoute;
   const isParentMatch = pathname.startsWith(navRoute) && 

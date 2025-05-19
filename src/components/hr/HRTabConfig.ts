@@ -114,12 +114,5 @@ export const hrTabGroups: TabGroup[] = [
     subTabs: [
       { id: "exit-interviews", name: "Entrevistas de Desligamento", component: "ExitInterviews", icon: createIcon(icons.FileText), href: "/human-resources?activeTab=exit-interviews" }
     ]
-  },
-  {
-    id: "ambiente",
-    name: "Ambiente",
-    icon: createIcon(icons.Building2),
-    component: "AmbienteContent",
-    href: "/human-resources?activeTab=ambiente"
   }
 ];
