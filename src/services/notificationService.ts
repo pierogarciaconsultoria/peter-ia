@@ -16,6 +16,7 @@ export interface Notification {
 
 /**
  * Creates a notification for a user
+ * TEMPORARY DISABLED
  */
 export async function createNotification(
   userId: string,
@@ -25,107 +26,45 @@ export async function createNotification(
   referenceId: string = "",
   link: string = ""
 ): Promise<{ success: boolean; error?: any }> {
-  try {
-    // Enhanced validation to prevent security issues
-    if (!userId || !isValidUUID(userId)) {
-      console.warn("Invalid user ID for notification:", userId);
-      return { success: false, error: "Invalid user ID" };
-    }
-
-    const { error } = await supabase.from("notifications").insert({
-      user_id: userId,
-      title,
-      message,
-      read: false,
-      type,
-      reference_id: referenceId,
-      link,
-    });
-
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    console.error("Error creating notification:", error);
-    return { success: false, error };
-  }
+  console.log("Notificação desabilitada temporariamente:", { userId, title, message });
+  // Retorna sucesso sem realmente criar a notificação
+  return { success: true };
 }
 
 /**
  * Marks a notification as read
+ * TEMPORARY DISABLED
  */
 export async function markNotificationAsRead(
   notificationId: string
 ): Promise<{ success: boolean; error?: any }> {
-  try {
-    if (!notificationId || !isValidUUID(notificationId)) {
-      console.warn("Invalid notification ID:", notificationId);
-      return { success: false, error: "Invalid notification ID" };
-    }
-
-    const { error } = await supabase
-      .from("notifications")
-      .update({ read: true })
-      .eq("id", notificationId);
-
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    console.error("Error marking notification as read:", error);
-    return { success: false, error };
-  }
+  console.log("Marcação de notificação como lida desabilitada temporariamente:", notificationId);
+  // Retorna sucesso sem realmente marcar como lida
+  return { success: true };
 }
 
 /**
  * Marks all notifications of a user as read
+ * TEMPORARY DISABLED
  */
 export async function markAllNotificationsAsRead(
   userId: string
 ): Promise<{ success: boolean; error?: any }> {
-  try {
-    if (!userId || !isValidUUID(userId)) {
-      console.warn("Invalid user ID for marking notifications:", userId);
-      return { success: false, error: "Invalid user ID" };
-    }
-
-    const { error } = await supabase
-      .from("notifications")
-      .update({ read: true })
-      .eq("user_id", userId)
-      .eq("read", false);
-
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    console.error("Error marking all notifications as read:", error);
-    return { success: false, error };
-  }
+  console.log("Marcação de todas notificações como lidas desabilitada temporariamente:", userId);
+  // Retorna sucesso sem realmente marcar como lidas
+  return { success: true };
 }
 
 /**
  * Gets all notifications for a user
+ * TEMPORARY DISABLED
  */
 export async function getNotifications(
   userId: string
 ): Promise<{ data: Notification[] | null; error?: any }> {
-  try {
-    if (!userId || !isValidUUID(userId)) {
-      console.warn("Invalid user ID for fetching notifications:", userId);
-      toast.error("Failed to load notifications");
-      return { data: [], error: "Invalid user ID" };
-    }
-
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    return { data };
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-    return { data: null, error };
-  }
+  console.log("Busca de notificações desabilitada temporariamente:", userId);
+  // Retorna array vazio de notificações
+  return { data: [] };
 }
 
 /**
