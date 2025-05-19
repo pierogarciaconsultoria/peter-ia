@@ -72,7 +72,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
       
       // Store in database if in production
       if (process.env.NODE_ENV === 'production') {
-        // Using custom insert instead of direct table access to handle type issues
+        // Use our custom RPC function to handle type issues
         const { error } = await supabase
           .rpc('log_security_event', {
             action_text: entry.action,

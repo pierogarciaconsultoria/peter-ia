@@ -6608,6 +6608,48 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_security_logs: {
+        Args: {
+          user_id_filter?: string
+          action_filter?: string
+          status_filter?: string
+          from_date?: string
+          to_date?: string
+        }
+        Returns: {
+          id: string
+          action: string
+          user_id: string
+          target_resource: string
+          details: Json
+          status: string
+          ip_address: string
+          event_timestamp: string
+          created_at: string
+        }[]
+      }
+      get_security_logs_paginated: {
+        Args: {
+          user_id_filter?: string
+          action_filter?: string
+          status_filter?: string
+          from_date?: string
+          to_date?: string
+          page_number?: number
+          page_size?: number
+        }
+        Returns: {
+          id: string
+          action: string
+          user_id: string
+          target_resource: string
+          details: Json
+          status: string
+          ip_address: string
+          event_timestamp: string
+          created_at: string
+        }[]
+      }
       get_user_company_id: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -6632,8 +6674,27 @@ export type Database = {
         Args: { company_uuid: string }
         Returns: boolean
       }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          action_text: string
+          user_id_text: string
+          target_resource_text: string
+          details_json: Json
+          status_text: string
+          ip_address_text: string
+        }
+        Returns: undefined
+      }
+      user_belongs_to_company: {
+        Args: { company_uuid: string }
         Returns: boolean
       }
       user_has_module_access: {

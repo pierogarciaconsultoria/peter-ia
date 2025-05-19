@@ -58,9 +58,9 @@ export const useSecurityAudit = ({ showToasts = false }: UseSecurityAuditProps =
       // Always log to console
       console.log(`Security event: ${action}`, logEntry);
       
-      // In production, store in database
+      // In production, store in database using our custom RPC function
       if (process.env.NODE_ENV === 'production') {
-        // Use RPC instead of direct table access to handle type issues
+        // Using the RPC function we created to handle type issues
         const { error } = await supabase
           .rpc('log_security_event', {
             action_text: action,
@@ -108,7 +108,7 @@ export const useSecurityAudit = ({ showToasts = false }: UseSecurityAuditProps =
     try {
       setLoading(true);
       
-      // Use RPC function instead to handle type issues
+      // Use RPC functions to handle type issues
       let result;
       
       if (pagination) {
