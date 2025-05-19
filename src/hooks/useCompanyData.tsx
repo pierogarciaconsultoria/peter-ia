@@ -38,8 +38,8 @@ export function useCompanyData() {
           toast.error("Falha ao carregar dados da empresa");
         } else {
           console.log("Dados da empresa carregados:", data);
-          // The database function is supposed to return a single object
-          // But let's handle both possibilities to be safe
+          // A função pode retornar um objeto único ou um array
+          // Vamos tratar ambos os casos para garantir
           if (Array.isArray(data)) {
             if (data.length > 0) {
               setCompany(data[0] as CompanyData);
@@ -47,7 +47,7 @@ export function useCompanyData() {
               setCompany(null);
             }
           } else {
-            // Handle case where it's already an object
+            // Caso seja um objeto único
             setCompany(data as CompanyData);
           }
         }
