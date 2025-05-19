@@ -15,6 +15,7 @@ export interface ProcessFormState {
   entryRequirements: Array<{ id: number; requirement: string }>;
   expectedResult: string;
   indicators: ProcessIndicator[];
+  relatedDocuments?: Array<{ id: string; title: string; document_type: string }>;
 }
 
 export interface ProcessFormHelpers {
@@ -26,6 +27,8 @@ export interface ProcessFormHelpers {
   setNewEntryRequirement: (value: string) => void;
   newIndicator: ProcessIndicator;
   setNewIndicator: (indicator: ProcessIndicator) => void;
+  newDocument: { id: string; title: string; document_type: string };
+  setNewDocument: (document: { id: string; title: string; document_type: string }) => void;
 }
 
 export const useProcessMappingForm = (initialData: any) => {
@@ -58,6 +61,16 @@ export const useProcessMappingForm = (initialData: any) => {
     goal: "",
     current: ""
   });
+  
+  // Related Documents State
+  const [relatedDocuments, setRelatedDocuments] = useState<Array<{ id: string; title: string; document_type: string }>>(
+    initialData?.relatedDocuments || []
+  );
+  const [newDocument, setNewDocument] = useState<{ id: string; title: string; document_type: string }>({
+    id: "",
+    title: "",
+    document_type: ""
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -73,6 +86,7 @@ export const useProcessMappingForm = (initialData: any) => {
       setExpectedResult(initialData.expectedResult || "");
       setIndicators(initialData.indicators || []);
       setProcessType(initialData.type || "");
+      setRelatedDocuments(initialData.relatedDocuments || []);
     }
   }, [initialData]);
 
@@ -131,6 +145,18 @@ export const useProcessMappingForm = (initialData: any) => {
     updatedIndicators.splice(index, 1);
     setIndicators(updatedIndicators);
   };
+  
+  const handleAddDocument = (document: { id: string; title: string; document_type: string }) => {
+    if (document && document.id) {
+      setRelatedDocuments([...relatedDocuments, document]);
+    }
+  };
+  
+  const handleRemoveDocument = (index: number) => {
+    const updatedDocuments = [...relatedDocuments];
+    updatedDocuments.splice(index, 1);
+    setRelatedDocuments(updatedDocuments);
+  };
 
   const formState: ProcessFormState = {
     name,
@@ -144,7 +170,8 @@ export const useProcessMappingForm = (initialData: any) => {
     risks,
     entryRequirements,
     expectedResult,
-    indicators
+    indicators,
+    relatedDocuments
   };
 
   const formHelpers: ProcessFormHelpers = {
@@ -155,7 +182,9 @@ export const useProcessMappingForm = (initialData: any) => {
     newEntryRequirement,
     setNewEntryRequirement,
     newIndicator,
-    setNewIndicator
+    setNewIndicator,
+    newDocument,
+    setNewDocument
   };
 
   const handlers = {
@@ -174,7 +203,9 @@ export const useProcessMappingForm = (initialData: any) => {
     handleAddEntryRequirement,
     handleRemoveEntryRequirement,
     handleAddIndicator,
-    handleRemoveIndicator
+    handleRemoveIndicator,
+    handleAddDocument,
+    handleRemoveDocument
   };
 
   return {

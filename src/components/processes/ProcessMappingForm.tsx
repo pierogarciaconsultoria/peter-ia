@@ -7,6 +7,7 @@ import { ScenarioAnalysisSection } from "./form-sections/ScenarioAnalysisSection
 import { RequirementsSection } from "./form-sections/RequirementsSection";
 import { IndicatorsSection } from "./form-sections/IndicatorsSection";
 import { useProcessMappingForm } from "@/hooks/useProcessMappingForm";
+import { RelatedDocumentsSection } from "./form-sections/RelatedDocumentsSection";
 
 export interface ProcessIndicator {
   name: string;
@@ -43,7 +44,7 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
       lastUpdated: new Date().toISOString().split("T")[0],
       createdAt: new Date().toISOString().split("T")[0],
       risksCount: formState.risks.length,
-      documentsCount: 0,
+      documentsCount: formState.relatedDocuments ? formState.relatedDocuments.length : 0,
     };
 
     onSubmit(processData);
@@ -97,6 +98,14 @@ const ProcessMappingForm: React.FC<ProcessMappingFormProps> = ({
         setNewIndicator={formHelpers.setNewIndicator}
         handleAddIndicator={handlers.handleAddIndicator}
         handleRemoveIndicator={handlers.handleRemoveIndicator}
+      />
+
+      <RelatedDocumentsSection
+        relatedDocuments={formState.relatedDocuments || []}
+        handleAddDocument={handlers.handleAddDocument}
+        handleRemoveDocument={handlers.handleRemoveDocument}
+        newDocument={formHelpers.newDocument}
+        setNewDocument={formHelpers.setNewDocument}
       />
 
       <div className="flex justify-end gap-2">
