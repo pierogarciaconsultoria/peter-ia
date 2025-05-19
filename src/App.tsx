@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -60,8 +60,9 @@ function App() {
           <Router>
             <Routes>
               {/* Redirecionar da raiz para o dashboard */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              
               <Route path="/" element={<AuthGuard><Navigation /></AuthGuard>}>
-                <Route index element={<Dashboard />} />
                 <Route path="home" element={<Home />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="profile" element={<Profile />} />

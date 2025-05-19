@@ -65,7 +65,7 @@ export function Sidebar() {
     toggleItemExpanded
   } = useSidebarState();
 
-  // Filter categories to only show those with at least one item and deduplicate
+  // Filtrar categorias para mostrar apenas aquelas com pelo menos um item e desduplicar
   const nonEmptyCategories = deduplicateItems(menuCategories).filter(category => category.items.length > 0);
 
   return (

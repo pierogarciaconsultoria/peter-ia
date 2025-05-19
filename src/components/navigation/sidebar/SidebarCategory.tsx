@@ -28,13 +28,13 @@ export function SidebarCategory({
   toggleItemExpanded,
   hideLabelForSingleItem = false,
 }: SidebarCategoryProps) {
-  // Don't render empty categories
+  // Não renderizar categorias vazias
   if (items.length === 0) return null;
   
-  // Determine if we should hide the label
+  // Determinar se devemos esconder o rótulo
   const shouldHideLabel = hideLabelForSingleItem && items.length === 1;
   
-  // Also hide labels for "Recursos" and "Configurações" categories
+  // Também esconder rótulos para categorias específicas
   const hideSpecificLabels = label === "Recursos" || label === "Configurações";
   
   return (

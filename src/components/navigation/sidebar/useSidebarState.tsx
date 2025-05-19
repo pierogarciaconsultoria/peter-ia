@@ -7,17 +7,22 @@ export function useSidebarState() {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  // Handle mouse enter for an item
+  // Atualizar estados quando a rota muda
+  useEffect(() => {
+    console.log("Pathname changed to:", pathname);
+  }, [pathname]);
+
+  // Lidar com o hover em um item
   const handleMouseEnter = (itemKey: string) => {
     setHoveredItem(itemKey);
   };
 
-  // Handle mouse leave
+  // Lidar com o mouse deixando o item
   const handleMouseLeave = () => {
     setHoveredItem(null);
   };
 
-  // Toggle an item's expanded state when clicked
+  // Alternar o estado expandido de um item quando clicado
   const toggleItemExpanded = (itemKey: string) => {
     setExpandedItems(prev => ({
       ...prev,
