@@ -72,9 +72,16 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
       
       // Store in database if in production
       if (process.env.NODE_ENV === 'production') {
+        // Using custom insert instead of direct table access to handle type issues
         const { error } = await supabase
-          .from('security_audit_logs')
-          .insert(logEntry);
+          .rpc('log_security_event', {
+            action_text: entry.action,
+            user_id_text: user?.id || 'anonymous',
+            target_resource_text: entry.targetResource || null,
+            details_json: entry.details || {},
+            status_text: entry.status,
+            ip_address_text: window.sessionStorage.getItem('client_ip') || null
+          });
           
         if (error) {
           console.error('Failed to log security event:', error);

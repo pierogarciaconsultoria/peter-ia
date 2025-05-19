@@ -60,9 +60,16 @@ export const useSecurityAudit = ({ showToasts = false }: UseSecurityAuditProps =
       
       // In production, store in database
       if (process.env.NODE_ENV === 'production') {
+        // Use RPC instead of direct table access to handle type issues
         const { error } = await supabase
-          .from('security_audit_logs')
-          .insert(logEntry);
+          .rpc('log_security_event', {
+            action_text: action,
+            user_id_text: user?.id || 'anonymous',
+            target_resource_text: null,
+            details_json: details || {},
+            status_text: status,
+            ip_address_text: clientIp || null
+          });
         
         if (error) {
           console.error("Failed to log security event to database:", error);
@@ -101,42 +108,30 @@ export const useSecurityAudit = ({ showToasts = false }: UseSecurityAuditProps =
     try {
       setLoading(true);
       
-      let query = supabase
-        .from('security_audit_logs')
-        .select('*');
+      // Use RPC function instead to handle type issues
+      let result;
       
-      // Apply filters
-      if (filters?.userId) {
-        query = query.eq('userId', filters.userId);
-      }
-      
-      if (filters?.action) {
-        query = query.eq('action', filters.action);
-      }
-      
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      
-      if (filters?.from) {
-        query = query.gte('timestamp', filters.from.toISOString());
-      }
-      
-      if (filters?.to) {
-        query = query.lte('timestamp', filters.to.toISOString());
-      }
-      
-      // Apply pagination
       if (pagination) {
-        const { page, pageSize } = pagination;
-        query = query
-          .order('timestamp', { ascending: false })
-          .range(page * pageSize, (page + 1) * pageSize - 1);
+        result = await supabase.rpc('get_security_logs_paginated', {
+          user_id_filter: filters?.userId || null,
+          action_filter: filters?.action || null,
+          status_filter: filters?.status || null,
+          from_date: filters?.from?.toISOString() || null,
+          to_date: filters?.to?.toISOString() || null,
+          page_number: pagination.page,
+          page_size: pagination.pageSize
+        });
       } else {
-        query = query.order('timestamp', { ascending: false });
+        result = await supabase.rpc('get_security_logs', {
+          user_id_filter: filters?.userId || null,
+          action_filter: filters?.action || null,
+          status_filter: filters?.status || null,
+          from_date: filters?.from?.toISOString() || null,
+          to_date: filters?.to?.toISOString() || null
+        });
       }
       
-      const { data, error, count } = await query;
+      const { data, error, count } = result;
       
       if (error) {
         throw error;
