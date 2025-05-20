@@ -4,14 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 import { supabase } from "@/integrations/supabase/client";
-import { PermissionCheck, SecurityAuditLogEntry, SecurityContextType } from "./SecurityTypes";
+import { PermissionCheck, SecurityAuditLogEntry, SecurityContextType, PermissionType } from "./SecurityTypes";
 import { toast } from "sonner";
 
 // Create security context
 const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
-
-// Define a type for permission types if not already defined
-type PermissionType = string;
 
 export interface SecurityProviderProps {
   children: React.ReactNode;
