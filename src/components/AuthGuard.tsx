@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
+import { shouldBypassAuth, isProductionEnvironment } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
 
 interface AuthGuardProps {
@@ -19,23 +19,32 @@ export const AuthGuard = ({
   requireSuperAdmin = false,
   bypassForMasterAdmin = true
 }: AuthGuardProps) => {
-  const { user, loading, isAdmin, isSuperAdmin } = useAuth();
+  const { user, loading, isAdmin, isSuperAdmin, connectionStatus, reconnect } = useAuth();
   const location = useLocation();
-
-  // Verificar se devemos permitir acesso sem autenticação
+  
+  // Check if we should bypass auth (more restricted in production)
   const bypassAuth = shouldBypassAuth();
   
   useEffect(() => {
-    // Notificação para acesso especial
-    if (bypassAuth && sessionStorage.getItem('specialAccessNotified') !== 'true') {
+    // Only show special access notification in development
+    if (bypassAuth && !isProductionEnvironment() && sessionStorage.getItem('specialAccessNotified') !== 'true') {
       toast.info("Acesso especial concedido", {
         description: "Autenticação ignorada devido ao modo de desenvolvimento ou acesso especial"
       });
       sessionStorage.setItem('specialAccessNotified', 'true');
     }
-  }, [bypassAuth]);
+    
+    // In disconnected state, try to reconnect
+    if (connectionStatus === 'disconnected') {
+      const reconnectTimer = setTimeout(() => {
+        reconnect();
+      }, 5000);
+      
+      return () => clearTimeout(reconnectTimer);
+    }
+  }, [bypassAuth, connectionStatus, reconnect]);
 
-  // Exibir indicador de carregamento se estiver carregando
+  // Show loading indicator when checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -44,32 +53,54 @@ export const AuthGuard = ({
       </div>
     );
   }
+  
+  // Handle connection issues
+  if (connectionStatus === 'disconnected' && !bypassAuth) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
+          <h2 className="text-lg font-semibold text-red-700 mb-2">Problema de conexão</h2>
+          <p className="text-red-600 mb-4">Não foi possível conectar ao servidor. Verifique sua conexão com a internet.</p>
+          <button 
+            onClick={() => reconnect()}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // Permitir acesso se o bypass está habilitado
+  // Bypass authentication if allowed (more restricted in production)
   if (bypassAuth && bypassForMasterAdmin) {
     console.log("Acesso garantido via bypass de autenticação");
     return children ? <>{children}</> : <Outlet />;
   }
 
-  // Verificar autenticação
+  // Check authentication
   if (!user) {
-    // Registrar tentativa de acesso não autorizada
     console.log("Acesso negado: usuário não autenticado");
     
     // Redirect to login page but save the location they tried to access
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Verificar permissões específicas
+  // Check super admin permissions
   if (requireSuperAdmin && !isSuperAdmin) {
     console.log("Acesso negado: permissão de super admin requerida");
-    // Redirect to dashboard if super admin access is required but user is not a super admin
+    toast.error("Acesso negado", {
+      description: "Você não tem permissão para acessar esta área."
+    });
     return <Navigate to="/" replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  // Check admin permissions
+  if (requireAdmin && !isAdmin && !isSuperAdmin) {
     console.log("Acesso negado: permissão de admin requerida");
-    // Redirect to dashboard if admin access is required but user is not an admin
+    toast.error("Acesso negado", {
+      description: "Você não tem permissão para acessar esta área."
+    });
     return <Navigate to="/" replace />;
   }
 

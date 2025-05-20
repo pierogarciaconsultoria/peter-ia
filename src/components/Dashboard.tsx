@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DocumentForm } from "@/components/DocumentForm";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CalendarDays, AlertCircle } from "lucide-react";
+import { Calendar, CalendarDays, AlertCircle, RefreshCcw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAudits } from "@/services/auditService";
 import { getExternalAudits } from "@/services/externalAuditService";
@@ -15,6 +15,8 @@ import { getMockDashboardData } from "@/services/dashboardService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardProps {
   requirements: ISORequirement[];
@@ -24,6 +26,7 @@ export function Dashboard({ requirements }: DashboardProps) {
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
   const [errorOccurred, setErrorOccurred] = useState(false);
+  const { connectionStatus } = useAuth();
 
   const handleNewDocument = () => {
     setOpenDialog(true);
@@ -33,31 +36,49 @@ export function Dashboard({ requirements }: DashboardProps) {
     setOpenDialog(false);
   };
 
-  // Set a loading timeout to prevent indefinite loading state
+  // More aggressive timeout for better UX
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setIsLoadingTimeout(true);
-    }, 5000); // After 5 seconds, show alternative UI
+    }, 3000); // After 3 seconds, show alternative UI
     
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Fetch internal and external audits
+  // Function to retry queries when they fail
+  const handleRetryQueries = useCallback(() => {
+    // Reset error state
+    setErrorOccurred(false);
+    // Refetch both queries
+    refetchInternalAudits();
+    refetchExternalAudits();
+    // Show toast to indicate retrying
+    toast.info("Tentando carregar dados novamente...");
+  }, []);
+
+  // Fetch internal and external audits with better error handling
   const { 
     data: internalAudits = [], 
     isLoading: isInternalAuditsLoading,
-    error: internalAuditsError
+    error: internalAuditsError,
+    refetch: refetchInternalAudits
   } = useQuery({
     queryKey: ['audits-dashboard'],
     queryFn: getAudits,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 1,
+    retry: 2,
     retryDelay: 1000,
+    refetchOnWindowFocus: false,
     meta: {
       errorHandler: (error: Error) => {
         console.error("Failed to load internal audits:", error);
         setErrorOccurred(true);
-        toast.error(`Erro ao carregar auditorias internas: ${error.message}`);
+        
+        if (connectionStatus === 'connected') {
+          toast.error(`Erro ao carregar auditorias internas`, {
+            description: "Tente novamente em alguns momentos."
+          });
+        }
       }
     }
   });
@@ -65,26 +86,35 @@ export function Dashboard({ requirements }: DashboardProps) {
   const { 
     data: externalAudits = [], 
     isLoading: isExternalAuditsLoading,
-    error: externalAuditsError
+    error: externalAuditsError,
+    refetch: refetchExternalAudits
   } = useQuery({
     queryKey: ['external-audits-dashboard'],
     queryFn: getExternalAudits,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 1,
+    retry: 2,
     retryDelay: 1000,
+    refetchOnWindowFocus: false,
     meta: {
       errorHandler: (error: Error) => {
         console.error("Failed to load external audits:", error);
         setErrorOccurred(true);
-        toast.error(`Erro ao carregar auditorias externas: ${error.message}`);
+        
+        if (connectionStatus === 'connected') {
+          toast.error(`Erro ao carregar auditorias externas`, {
+            description: "Tente novamente em alguns momentos."
+          });
+        }
       }
     }
   });
 
-  // If there are errors in the queries, update the error state
+  // Update error state if queries fail
   useEffect(() => {
     if (internalAuditsError || externalAuditsError) {
       setErrorOccurred(true);
+    } else {
+      setErrorOccurred(false);
     }
   }, [internalAuditsError, externalAuditsError]);
 
@@ -108,9 +138,12 @@ export function Dashboard({ requirements }: DashboardProps) {
   const nextInternalAudit = upcomingInternalAudits.length > 0 ? upcomingInternalAudits[0] : null;
   const nextExternalAudit = upcomingExternalAudits.length > 0 ? upcomingExternalAudits[0] : null;
 
+  // Connection lost or failed to load
+  const hasConnectionIssue = connectionStatus === 'disconnected';
+  
   // Show fallback UI if all services failed and loading timed out
   const shouldShowFallback = 
-    (isLoadingTimeout || errorOccurred) && 
+    (isLoadingTimeout || errorOccurred || hasConnectionIssue) && 
     (internalAuditsError || isInternalAuditsLoading) && 
     (externalAuditsError || isExternalAuditsLoading);
 
@@ -123,15 +156,22 @@ export function Dashboard({ requirements }: DashboardProps) {
       <div className="appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
         <DashboardHeader onNewDocument={handleNewDocument} />
         
-        {errorOccurred && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erro ao carregar dados</AlertTitle>
-            <AlertDescription>
-              Não foi possível carregar todos os dados do dashboard. Mostrando dados de demonstração.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Problema ao carregar dados</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <p>Não foi possível carregar todos os dados do dashboard. Exibindo dados de demonstração.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="self-start flex items-center gap-2"
+              onClick={handleRetryQueries}
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Tentar novamente
+            </Button>
+          </AlertDescription>
+        </Alert>
         
         {/* Upcoming Audits Section with mock data */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +10,10 @@ import { useAdminCreation } from "@/hooks/useAdminCreation";
 import { SecurityProvider } from "@/security/SecurityContext";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from './integrations/supabase/client';
+import { isProductionEnvironment } from './utils/lovableEditorDetection';
 
+// Import pages 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
@@ -48,26 +50,30 @@ import LandingPage from '@/pages/LandingPage';
 import { Toaster as SonnerToaster } from 'sonner';
 
 import './App.css';
-import { supabase } from './integrations/supabase/client';
 
 function App() {
   const { toast } = useToast();
   
-  // Test Supabase connection
+  // Test Supabase connection once on startup
   useEffect(() => {
+    let connectionChecked = false;
+    
     const checkSupabaseConnection = async () => {
+      if (connectionChecked) return;
+      
       try {
         const { data, error } = await supabase.from('connection_test').select('*').limit(1);
         
         if (error) {
           console.error('Database connection error:', error);
-          toast({
-            title: "Erro de conexão com o banco de dados",
-            description: "Verifique sua conexão com a internet",
-            variant: "destructive",
-          });
+          if (isProductionEnvironment()) {
+            toast.error("Erro de conexão com o banco de dados", {
+              description: "Verifique sua conexão com a internet",
+            });
+          }
         } else {
           console.log('Database connection successful');
+          connectionChecked = true;
         }
       } catch (err) {
         console.error('Failed to test database connection:', err);
@@ -75,6 +81,17 @@ function App() {
     };
     
     checkSupabaseConnection();
+    
+    // Setup reconnection check on window focus
+    const handleFocus = () => {
+      // Only recheck connection if previously failed
+      if (!connectionChecked) {
+        checkSupabaseConnection();
+      }
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
   
   // Initialize admin account
@@ -89,18 +106,18 @@ function App() {
               {/* Página inicial sem requisitos de login */}
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
               
               {/* Rotas de autenticação */}
               <Route path="/auth" element={<Auth />} />
-              <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
+              <Route path="/external-disc-assessment/:token" element={<Navigate to="/auth" replace />} />
               
-              {/* Rotas protegidas por autenticação */}
-              <Route path="/" element={<AuthGuard><Navigation /></AuthGuard>}>
+              {/* Rotas protegidas por autenticação com AuthGuard */}
+              <Route element={<AuthGuard><Navigation /></AuthGuard>}>
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="documents" element={<Documents />} />
-                <Route path="document-upload" element={<DocumentUpload />} />
+                <Route path="profile" element={<Navigate to="/dashboard" replace />} />
+                <Route path="documents" element={<Navigate to="/dashboard" replace />} />
+                <Route path="document-upload" element={<Navigate to="/dashboard" replace />} />
                 
                 {/* Corrigir a rota de recursos humanos para aceitar query params */}
                 <Route path="human-resources" element={<HumanResources />} />
@@ -133,7 +150,7 @@ function App() {
                 {/* Admin route protected with requireAdmin flag */}
                 <Route path="admin/*" element={
                   <AuthGuard requireAdmin={true}>
-                    <Admin />
+                    <Navigate to="/dashboard" replace />
                   </AuthGuard>
                 } />
               </Route>
