@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
+import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 
 export const useLogin = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -17,29 +14,24 @@ export const useLogin = () => {
   const location = useLocation();
   const { signIn } = useAuth();
   
-  // Use the centralized Lovable editor detection
-  const isEditor = isLovableEditor();
-  // Verifica se o acesso gratuito está habilitado
-  const isFreeAccessEnabled = shouldGrantFreeAccess();
+  // Verificar se devemos permitir acesso sem autenticação
+  const bypassAuth = shouldBypassAuth();
     
-  // Automatically redirect to dashboard if in Lovable editor or free access mode
-  // or if authentication is temporarily disabled
+  // Automatically redirect to dashboard if special access is granted
   useEffect(() => {
-    if (isEditor || isFreeAccessEnabled || BYPASS_AUTH_TEMPORARILY) {
+    if (bypassAuth) {
       console.log("Acesso total concedido - redirecionando para dashboard");
-      if (BYPASS_AUTH_TEMPORARILY) {
-        toast.info("Autenticação temporariamente desabilitada", {
-          description: "Acesso concedido sem necessidade de email e senha"
-        });
-      }
+      toast.info("Acesso especial concedido", {
+        description: "Você tem acesso total ao sistema sem necessidade de autenticação"
+      });
       navigate("/");
     }
-  }, [isEditor, isFreeAccessEnabled, navigate]);
+  }, [bypassAuth, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isEditor || isFreeAccessEnabled || BYPASS_AUTH_TEMPORARILY) {
+    if (bypassAuth) {
       navigate("/");
       return;
     }
@@ -63,7 +55,7 @@ export const useLogin = () => {
   };
 
   const handleDirectAdminLogin = () => {
-    if (isEditor || isFreeAccessEnabled || BYPASS_AUTH_TEMPORARILY) {
+    if (bypassAuth) {
       navigate("/admin");
     } else {
       console.log("Direct admin login requires master admin access");
@@ -80,7 +72,6 @@ export const useLogin = () => {
     errorDetails,
     handleLogin,
     handleDirectAdminLogin,
-    isEditor,
-    isFreeAccessEnabled
+    bypassAuth
   };
 };

@@ -3,11 +3,9 @@ import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useSecurity } from "./SecurityContext";
-import { PermissionCheck, PermissionType } from "./SecurityTypes";
+import { PermissionCheck } from "./SecurityTypes";
 import { useAuth } from "@/hooks/useAuth";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
+import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 
 interface SecureRouteProps {
   children?: React.ReactNode;
@@ -36,11 +34,13 @@ export const SecureRoute: React.FC<SecureRouteProps> = ({
     isMaster,
     isLovableAdmin,
     isFreeAccessMode,
-    checkPermission,
     checkMultiplePermissions,
     checkAnyPermission,
     logSecurityEvent
   } = useSecurity();
+  
+  // Verificar se devemos permitir acesso sem autenticação
+  const bypassAuth = shouldBypassAuth();
 
   // Show loading indicator while authentication state is being determined
   if (loading) {
@@ -52,13 +52,13 @@ export const SecureRoute: React.FC<SecureRouteProps> = ({
     );
   }
 
-  // Temporarily bypass authentication
-  if (BYPASS_AUTH_TEMPORARILY) {
-    console.log("Autenticação temporariamente desabilitada - acesso concedido");
+  // Bypass authentication if special access is granted
+  if (bypassAuth) {
+    console.log("Autenticação ignorada: acesso especial concedido");
     logSecurityEvent({
       action: 'ACCESS_GRANTED',
       targetResource: location.pathname,
-      details: { reason: 'Authentication temporarily disabled' },
+      details: { reason: 'Special access granted' },
       status: 'success'
     });
     return children ? <>{children}</> : <Outlet />;

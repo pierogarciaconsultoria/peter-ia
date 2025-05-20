@@ -3,11 +3,8 @@ import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { shouldGrantFreeAccess, isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
+import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
 
 interface AuthGuardProps {
   children?: React.ReactNode;
@@ -25,37 +22,18 @@ export const AuthGuard = ({
   const { user, loading, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
 
-  // Enhanced Lovable editor detection
-  const isEditorSuperAdmin = isSuperAdminInLovable();
+  // Verificar se devemos permitir acesso sem autenticação
+  const bypassAuth = shouldBypassAuth();
   
-  // Verifica se o acesso gratuito está habilitado
-  const isFreeAccessEnabled = shouldGrantFreeAccess();
-
   useEffect(() => {
-    // Log access for debugging
-    if (isEditorSuperAdmin) {
-      console.log(`Acesso à rota ${location.pathname} concedido via Lovable editor com privilégios de super admin`);
-      
-      // Show toast for first access only
-      if (sessionStorage.getItem('lovableEditorAccessNotified') !== 'true') {
-        toast.success("Acesso total como super administrador concedido via Lovable Editor");
-        sessionStorage.setItem('lovableEditorAccessNotified', 'true');
-      }
+    // Notificação para acesso especial
+    if (bypassAuth && sessionStorage.getItem('specialAccessNotified') !== 'true') {
+      toast.info("Acesso especial concedido", {
+        description: "Autenticação ignorada devido ao modo de desenvolvimento ou acesso especial"
+      });
+      sessionStorage.setItem('specialAccessNotified', 'true');
     }
-    
-    // Special notification for free access mode
-    if (isFreeAccessEnabled && sessionStorage.getItem('freeAccessNotified') !== 'true') {
-      toast.success("Acesso gratuito para testes concedido automaticamente");
-      sessionStorage.setItem('freeAccessNotified', 'true');
-    }
-    
-    // Notification for temporary auth bypass
-    if (BYPASS_AUTH_TEMPORARILY && sessionStorage.getItem('tempAuthBypassNotified') !== 'true') {
-      toast.info("Autenticação por email temporariamente desabilitada");
-      sessionStorage.setItem('tempAuthBypassNotified', 'true');
-    }
-    
-  }, [user, location.pathname, isEditorSuperAdmin, isFreeAccessEnabled]);
+  }, [bypassAuth]);
 
   // Exibir indicador de carregamento se estiver carregando
   if (loading) {
@@ -67,40 +45,35 @@ export const AuthGuard = ({
     );
   }
 
-  // Temporariamente desabilitar autenticação
-  if (BYPASS_AUTH_TEMPORARILY) {
-    console.log("Autenticação temporariamente desabilitada - acesso concedido");
+  // Permitir acesso se o bypass está habilitado
+  if (bypassAuth && bypassForMasterAdmin) {
+    console.log("Acesso garantido via bypass de autenticação");
     return children ? <>{children}</> : <Outlet />;
   }
 
-  // Acesso gratuito para testes: sempre concede acesso
-  if (isFreeAccessEnabled) {
-    console.log("Acesso gratuito para testes concedido - autenticação ignorada");
-    return children ? <>{children}</> : <Outlet />;
-  }
-
-  // Special bypass for Lovable editing
-  if (isEditorSuperAdmin && bypassForMasterAdmin) {
-    console.log("Acesso total como super administrador concedido via Lovable editor - autenticação ignorada");
-    return children ? <>{children}</> : <Outlet />;
-  }
-
+  // Verificar autenticação
   if (!user) {
+    // Registrar tentativa de acesso não autorizada
+    console.log("Acesso negado: usuário não autenticado");
+    
     // Redirect to login page but save the location they tried to access
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  // Verificar permissões específicas
   if (requireSuperAdmin && !isSuperAdmin) {
+    console.log("Acesso negado: permissão de super admin requerida");
     // Redirect to dashboard if super admin access is required but user is not a super admin
     return <Navigate to="/" replace />;
   }
 
   if (requireAdmin && !isAdmin) {
+    console.log("Acesso negado: permissão de admin requerida");
     // Redirect to dashboard if admin access is required but user is not an admin
     return <Navigate to="/" replace />;
   }
 
-  // User is authenticated (and has required permissions if specified)
+  // User is authenticated and has required permissions
   return children ? <>{children}</> : <Outlet />;
 };
 

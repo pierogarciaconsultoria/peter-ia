@@ -3,34 +3,27 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BrainCircuit, AlertTriangle } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
+import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 
 const Auth = () => {
   const navigate = useNavigate();
   
-  // Use the centralized Lovable editor detection
-  const isEditor = isLovableEditor();
-  // Verifica se é modo de acesso gratuito
-  const isFreeAccess = shouldGrantFreeAccess();
+  // Verificar se devemos permitir acesso sem autenticação
+  const bypassAuth = shouldBypassAuth();
   
-  // Immediately redirect to dashboard if in Lovable editor or free access mode
-  // or if authentication is temporarily disabled
+  // Immediately redirect to dashboard if special access is granted
   useEffect(() => {
-    if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
+    if (bypassAuth) {
       console.log("Acesso total concedido - redirecionando para dashboard");
       navigate("/");
     }
-  }, [isEditor, isFreeAccess, navigate]);
+  }, [bypassAuth, navigate]);
   
-  // If in Lovable editor or free access mode, don't render the auth page at all
-  if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
+  // If special access is granted, don't render the auth page at all
+  if (bypassAuth) {
     return null;
   }
   
@@ -44,15 +37,6 @@ const Auth = () => {
           </div>
           <p className="text-muted-foreground">Gestão Inteligente para Empresas</p>
         </div>
-        
-        {BYPASS_AUTH_TEMPORARILY && (
-          <Alert variant="warning" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="text-amber-600">
-              Autenticação por email temporariamente desabilitada. Você será redirecionado...
-            </AlertDescription>
-          </Alert>
-        )}
         
         <Card>
           <Tabs defaultValue="login">

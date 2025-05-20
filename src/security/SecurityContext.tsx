@@ -1,14 +1,11 @@
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { isSuperAdminInLovable, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
+import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 import { supabase } from "@/integrations/supabase/client";
-import { PermissionCheck, PermissionType, SecurityAuditLogEntry, SecurityContextType } from "./SecurityTypes";
+import { PermissionCheck, SecurityAuditLogEntry, SecurityContextType } from "./SecurityTypes";
 import { toast } from "sonner";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
 
 // Create security context
 const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
@@ -21,26 +18,18 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { temPermissao } = useUserPermissions();
   
-  // Lovable Editor special access detection
-  const isLovableAdmin = isSuperAdminInLovable();
-  const isFreeAccessMode = shouldGrantFreeAccess();
+  // Verificar se devemos permitir acesso sem autenticação
+  const bypassAuth = shouldBypassAuth();
   
+  // Determine if user is authenticated based on actual user or bypass
   const isAuthenticated = useMemo(() => {
-    return Boolean(user) || isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY;
-  }, [user, isLovableAdmin, isFreeAccessMode]);
-
-  useEffect(() => {
-    // Notification for temporary auth bypass
-    if (BYPASS_AUTH_TEMPORARILY && sessionStorage.getItem('tempAuthBypassNotified') !== 'true') {
-      toast.info("Autenticação por email temporariamente desabilitada");
-      sessionStorage.setItem('tempAuthBypassNotified', 'true');
-    }
-  }, []);
+    return Boolean(user) || bypassAuth;
+  }, [user, bypassAuth]);
 
   // Permission checking functions
   const checkPermission = (module: string, permission: PermissionType): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
+    if (bypassAuth) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     
@@ -50,7 +39,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   
   const checkMultiplePermissions = (checks: PermissionCheck[]): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
+    if (bypassAuth) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     
@@ -60,7 +49,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
   
   const checkAnyPermission = (checks: PermissionCheck[]): boolean => {
     // Special bypass cases
-    if (isLovableAdmin || isFreeAccessMode || BYPASS_AUTH_TEMPORARILY) return true;
+    if (bypassAuth) return true;
     if (isSuperAdmin) return true;
     if (isAdmin) return true;
     
@@ -108,13 +97,13 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
     isAuthenticated,
     isAdmin,
     isMaster: isSuperAdmin,
-    isLovableAdmin,
-    isFreeAccessMode,
+    isLovableAdmin: bypassAuth,
+    isFreeAccessMode: bypassAuth,
     checkPermission,
     checkMultiplePermissions,
     checkAnyPermission,
     logSecurityEvent
-  }), [isAuthenticated, isAdmin, isSuperAdmin, isLovableAdmin, isFreeAccessMode]);
+  }), [isAuthenticated, isAdmin, isSuperAdmin, bypassAuth]);
 
   return (
     <SecurityContext.Provider value={securityContextValue}>

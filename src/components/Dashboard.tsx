@@ -11,7 +11,7 @@ import { getAudits } from "@/services/auditService";
 import { getExternalAudits } from "@/services/externalAuditService";
 import { formatDistanceToNow, format, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { getDashboardData, getMockDashboardData } from "@/services/dashboardService";
+import { getMockDashboardData } from "@/services/dashboardService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +22,7 @@ interface DashboardProps {
 export function Dashboard({ requirements }: DashboardProps) {
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
+  const [errorOccurred, setErrorOccurred] = useState(false);
 
   const handleNewDocument = () => {
     setOpenDialog(true);
@@ -35,23 +36,10 @@ export function Dashboard({ requirements }: DashboardProps) {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setIsLoadingTimeout(true);
-    }, 8000); // After 8 seconds, show alternative UI
+    }, 5000); // After 5 seconds, show alternative UI
     
     return () => clearTimeout(timeoutId);
   }, []);
-
-  // Use React Query to fetch dashboard data
-  const { 
-    data: dashboardData, 
-    isLoading: isDashboardLoading, 
-    error: dashboardError 
-  } = useQuery({
-    queryKey: ['dashboard-data'],
-    queryFn: getDashboardData,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-    retryDelay: 1000
-  });
 
   // Fetch internal and external audits
   const { 
@@ -61,9 +49,13 @@ export function Dashboard({ requirements }: DashboardProps) {
   } = useQuery({
     queryKey: ['audits-dashboard'],
     queryFn: getAudits,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
-    retryDelay: 1000
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error("Failed to load internal audits:", error);
+      setErrorOccurred(true);
+    }
   });
 
   const { 
@@ -73,9 +65,13 @@ export function Dashboard({ requirements }: DashboardProps) {
   } = useQuery({
     queryKey: ['external-audits-dashboard'],
     queryFn: getExternalAudits,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
-    retryDelay: 1000
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error("Failed to load external audits:", error);
+      setErrorOccurred(true);
+    }
   });
 
   // Filter upcoming audits (those with a future date)
@@ -100,12 +96,12 @@ export function Dashboard({ requirements }: DashboardProps) {
 
   // Show fallback UI if all services failed and loading timed out
   const shouldShowFallback = 
-    (isLoadingTimeout || dashboardError) && 
+    (isLoadingTimeout || errorOccurred) && 
     (internalAuditsError || isInternalAuditsLoading) && 
     (externalAuditsError || isExternalAuditsLoading);
 
   if (shouldShowFallback) {
-    console.log("Showing fallback UI for dashboard");
+    console.log("Showing fallback UI for dashboard with mock data");
     // If data loading timed out, show fallback UI with mock data
     const mockData = getMockDashboardData();
     
@@ -113,7 +109,7 @@ export function Dashboard({ requirements }: DashboardProps) {
       <div className="appear-animate" style={{ "--delay": 0 } as React.CSSProperties}>
         <DashboardHeader onNewDocument={handleNewDocument} />
         
-        {dashboardError && (
+        {errorOccurred && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Erro ao carregar dados</AlertTitle>

@@ -9,6 +9,8 @@ import { Navigation } from "@/components/Navigation";
 import NotFound from "@/pages/NotFound";
 import { useAdminCreation } from "@/hooks/useAdminCreation";
 import { SecurityProvider } from "@/security/SecurityContext";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import Home from '@/pages/Home';
 import Index from '@/pages/Index';
@@ -46,9 +48,34 @@ import LandingPage from '@/pages/LandingPage';
 import { Toaster as SonnerToaster } from 'sonner';
 
 import './App.css';
+import { supabase } from './integrations/supabase/client';
 
 function App() {
   const { toast } = useToast();
+  
+  // Test Supabase connection
+  useEffect(() => {
+    const checkSupabaseConnection = async () => {
+      try {
+        const { data, error } = await supabase.from('connection_test').select('*').limit(1);
+        
+        if (error) {
+          console.error('Database connection error:', error);
+          toast({
+            title: "Erro de conexão com o banco de dados",
+            description: "Verifique sua conexão com a internet",
+            variant: "destructive",
+          });
+        } else {
+          console.log('Database connection successful');
+        }
+      } catch (err) {
+        console.error('Failed to test database connection:', err);
+      }
+    };
+    
+    checkSupabaseConnection();
+  }, []);
   
   // Initialize admin account
   useAdminCreation();
@@ -59,11 +86,17 @@ function App() {
         <SidebarProvider>
           <Router>
             <Routes>
-              {/* Redirecionar da raiz para o dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Página inicial sem requisitos de login */}
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/landing" element={<LandingPage />} />
               
+              {/* Rotas de autenticação */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
+              
+              {/* Rotas protegidas por autenticação */}
               <Route path="/" element={<AuthGuard><Navigation /></AuthGuard>}>
-                <Route path="home" element={<Home />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="documents" element={<Documents />} />
@@ -97,7 +130,7 @@ function App() {
                 <Route path="ambiente" element={<Ambiente />} />
                 <Route path="tasks" element={<Tasks />} />
                 
-                {/* Admin route protected with SecureRoute instead of AuthGuard */}
+                {/* Admin route protected with requireAdmin flag */}
                 <Route path="admin/*" element={
                   <AuthGuard requireAdmin={true}>
                     <Admin />
@@ -105,11 +138,6 @@ function App() {
                 } />
               </Route>
 
-              {/* Rotas não protegidas */}
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/external-disc-assessment/:token" element={<ExternalDiscAssessment />} />
-              
               {/* Catch-all route for pages not found */}
               <Route path="*" element={<NotFound />} />
             </Routes>

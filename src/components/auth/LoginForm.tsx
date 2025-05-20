@@ -6,12 +6,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, Info } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { isLovableEditor, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
-
-// Flag para desabilitar temporariamente a autenticação
-const BYPASS_AUTH_TEMPORARILY = true;
 
 export const LoginForm = () => {
   const {
@@ -22,27 +18,17 @@ export const LoginForm = () => {
     loading,
     errorDetails,
     handleLogin,
-    handleDirectAdminLogin
+    handleDirectAdminLogin,
+    bypassAuth
   } = useLogin();
   const navigate = useNavigate();
-  
-  // Use the centralized Lovable editor detection
-  const isEditor = isLovableEditor();
-  // Verifica se é modo de acesso gratuito
-  const isFreeAccess = shouldGrantFreeAccess();
 
-  if (isEditor || isFreeAccess || BYPASS_AUTH_TEMPORARILY) {
+  if (bypassAuth) {
     return (
       <div>
         <CardContent className="space-y-4">
-          <div className={`p-3 ${isEditor ? "bg-green-50 border-green-200 text-green-600" : "bg-yellow-50 border-yellow-200 text-yellow-600"} border rounded-md text-sm`}>
-            {BYPASS_AUTH_TEMPORARILY ? (
-              "Autenticação temporariamente desabilitada. Você será automaticamente autenticado."
-            ) : isEditor ? (
-              "Acesso total concedido! Você pode acessar todas as funcionalidades do sistema via Lovable Editor."
-            ) : (
-              "Acesso gratuito concedido! Você pode usar todas as funcionalidades do sistema no modo demonstração."
-            )}
+          <div className="p-3 bg-green-50 border-green-200 text-green-600 border rounded-md text-sm">
+            Acesso especial concedido! Você pode acessar todas as funcionalidades do sistema sem necessidade de login.
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
