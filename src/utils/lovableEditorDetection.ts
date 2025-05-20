@@ -71,3 +71,11 @@ export function shouldGrantFreeAccess(): boolean {
   
   return isEditor || hasFreeAccessParam || hasFreeAccessStorage || isSuperAdminInLovable();
 }
+
+/**
+ * Função centralizada que verifica se o usuário deve ter acesso sem autenticação
+ * Consolida todas as verificações anteriores em uma única chamada
+ */
+export function shouldBypassAuth(): boolean {
+  return isLovableEditor() || isSuperAdminInLovable() || shouldGrantFreeAccess();
+}

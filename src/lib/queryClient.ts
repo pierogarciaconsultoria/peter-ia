@@ -11,17 +11,21 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: false, // Disable frequent refetches
       refetchOnMount: true, // Always refetch on component mount
-      onError: (error: Error) => {
-        console.error("Query error:", error);
-        toast.error(`Erro ao carregar dados: ${error.message}`);
+      meta: {
+        errorHandler: (error: Error) => {
+          console.error("Query error:", error);
+          toast.error(`Erro ao carregar dados: ${error.message}`);
+        }
       }
     },
     mutations: {
       retry: 1,
       retryDelay: 1000,
-      onError: (error: Error) => {
-        console.error("Mutation error:", error);
-        toast.error(`Erro ao processar operação: ${error.message}`);
+      meta: {
+        errorHandler: (error: Error) => {
+          console.error("Mutation error:", error);
+          toast.error(`Erro ao processar operação: ${error.message}`);
+        }
       }
     }
   }

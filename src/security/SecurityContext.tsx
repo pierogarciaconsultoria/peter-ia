@@ -10,6 +10,9 @@ import { toast } from "sonner";
 // Create security context
 const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
 
+// Define a type for permission types if not already defined
+type PermissionType = string;
+
 export interface SecurityProviderProps {
   children: React.ReactNode;
 }

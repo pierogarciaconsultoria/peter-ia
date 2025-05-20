@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { getMockDashboardData } from "@/services/dashboardService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface DashboardProps {
   requirements: ISORequirement[];
@@ -52,9 +53,12 @@ export function Dashboard({ requirements }: DashboardProps) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error("Failed to load internal audits:", error);
-      setErrorOccurred(true);
+    meta: {
+      errorHandler: (error: Error) => {
+        console.error("Failed to load internal audits:", error);
+        setErrorOccurred(true);
+        toast.error(`Erro ao carregar auditorias internas: ${error.message}`);
+      }
     }
   });
 
@@ -68,11 +72,21 @@ export function Dashboard({ requirements }: DashboardProps) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error("Failed to load external audits:", error);
-      setErrorOccurred(true);
+    meta: {
+      errorHandler: (error: Error) => {
+        console.error("Failed to load external audits:", error);
+        setErrorOccurred(true);
+        toast.error(`Erro ao carregar auditorias externas: ${error.message}`);
+      }
     }
   });
+
+  // If there are errors in the queries, update the error state
+  useEffect(() => {
+    if (internalAuditsError || externalAuditsError) {
+      setErrorOccurred(true);
+    }
+  }, [internalAuditsError, externalAuditsError]);
 
   // Filter upcoming audits (those with a future date)
   const today = new Date();
