@@ -52,7 +52,8 @@ import { Toaster as SonnerToaster } from 'sonner';
 import './App.css';
 
 function App() {
-  const { toast } = useToast();
+  // We're not using shadcn/ui toast here since we're using sonner toast in checkSupabaseConnection
+  // Remove the useToast hook import for shadcn as it's not being used here
   
   // Test Supabase connection once on startup
   useEffect(() => {
