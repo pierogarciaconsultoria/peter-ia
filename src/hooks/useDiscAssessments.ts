@@ -5,7 +5,7 @@ import {
   DiscAssessment, 
   DiscScore, 
   DiscType, 
-  createAssessment as createDiscAssessment,
+  createAssessment,
   fetchAllAssessments
 } from "@/services/discAssessmentService";
 
@@ -54,9 +54,9 @@ export function useDiscAssessments() {
    * @param assessment The assessment data to create
    * @returns The created assessment
    */
-  const createAssessment = async (assessment: CreateDiscAssessmentInput) => {
+  const createDiscAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
-      const newAssessment = await createDiscAssessment({
+      const newAssessment = await createAssessment({
         name: assessment.name,
         email: assessment.email,
         scores: assessment.scores,
@@ -89,6 +89,6 @@ export function useDiscAssessments() {
     isLoading,
     error,
     fetchAssessments,
-    createAssessment,
+    createAssessment: createDiscAssessment,
   };
 }

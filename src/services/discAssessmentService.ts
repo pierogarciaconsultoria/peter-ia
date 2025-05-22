@@ -1,7 +1,10 @@
-import { supabase } from "@/integrations/supabase/client";
-import { toast as sonnerToast } from "sonner";
-import { v4 as uuidv4 } from 'uuid';
 
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+/**
+ * Types for DISC assessment functionality
+ */
 export type DiscType = 'D' | 'I' | 'S' | 'C';
 
 export interface DiscScore {
@@ -21,7 +24,7 @@ export interface DiscAssessment {
   date: string;
 }
 
-interface CreateDiscAssessmentInput {
+interface CreateDiscAssessmentParams {
   name: string;
   email: string;
   scores: DiscScore;
@@ -29,12 +32,22 @@ interface CreateDiscAssessmentInput {
   invited_by?: string;
 }
 
+interface AssessmentLink {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+  created_at: Date;
+  expires_at: Date;
+  used: boolean;
+}
+
 /**
  * Creates a new DISC assessment record
  * @param assessment The assessment data to create
  * @returns The created assessment
  */
-export const createAssessment = async (assessment: CreateDiscAssessmentInput): Promise<DiscAssessment> => {
+export const createAssessment = async (assessment: CreateDiscAssessmentParams): Promise<DiscAssessment> => {
   try {
     // Try to insert into the hr_disc_evaluations table (new structure)
     try {
@@ -178,7 +191,7 @@ export const fetchAllAssessments = async (): Promise<DiscAssessment[]> => {
     } catch (error) {
       console.error("Error fetching DISC assessments from Supabase:", error);
       // Show warning toast but continue with mock data
-      sonnerToast.warning("Usando dados locais", {
+      toast.warning("Usando dados locais", {
         description: "Não foi possível conectar ao banco de dados"
       });
       return [...localData, ...mockData];
@@ -245,3 +258,19 @@ export const markAssessmentLinkAsUsed = async (token: string): Promise<boolean> 
     return false;
   }
 };
+
+/**
+ * Generates an external assessment link
+ * @param name The name of the recipient
+ * @param email The email of the recipient
+ * @returns The generated link
+ */
+export async function generateAssessmentLink(name: string, email: string): Promise<string> {
+  // Generate a unique token
+  const token = crypto.randomUUID();
+  
+  // In a real implementation, would save to the database
+  // For now, simulate a link with the token
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/disc-assessment/${token}`;
+}

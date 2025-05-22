@@ -66,11 +66,12 @@ export async function generateTrainingsForEmployee(
           }
         ],
         type: 'required', // Default value for required field
+        company_id: (jobPosition as any).company_id // Adding the required company_id field
       };
       
       const { data, error } = await supabase
         .from('hr_trainings')
-        .insert([newTrainingData])
+        .insert(newTrainingData)
         .select()
         .single();
         
