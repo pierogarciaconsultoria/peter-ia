@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -28,7 +29,7 @@ export interface TrainingParticipant {
 
 export async function getTrainings(): Promise<Training[]> {
   const { data, error } = await supabase
-    .from('trainings')
+    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
     .select('*')
     .order('training_date', { ascending: false });
   
@@ -45,7 +46,7 @@ export async function getTrainings(): Promise<Training[]> {
 
 export async function getTrainingById(id: string): Promise<Training> {
   const { data, error } = await supabase
-    .from('trainings')
+    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
     .select('*')
     .eq('id', id)
     .single();
@@ -63,7 +64,7 @@ export async function getTrainingById(id: string): Promise<Training> {
 
 export async function createTraining(training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<Training> {
   const { data, error } = await supabase
-    .from('trainings')
+    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
     .insert([training])
     .select()
     .single();
@@ -81,7 +82,7 @@ export async function createTraining(training: Omit<Training, 'id' | 'created_at
 
 export async function updateTraining(id: string, training: Partial<Omit<Training, 'id' | 'created_at' | 'updated_at'>>): Promise<Training> {
   const { data, error } = await supabase
-    .from('trainings')
+    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
     .update({
       ...training,
       updated_at: new Date().toISOString()
@@ -103,7 +104,7 @@ export async function updateTraining(id: string, training: Partial<Omit<Training
 
 export async function deleteTraining(id: string): Promise<void> {
   const { error } = await supabase
-    .from('trainings')
+    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
     .delete()
     .eq('id', id);
   
@@ -176,7 +177,7 @@ export async function generateTrainingsForEmployee(
       };
       
       const { data, error } = await supabase
-        .from('trainings')
+        .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
         .insert([newTraining])
         .select()
         .single();

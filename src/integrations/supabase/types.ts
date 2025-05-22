@@ -906,6 +906,7 @@ export type Database = {
           attachments: Json | null
           created_at: string
           created_by: string
+          empresa_id: string | null
           id: string
           inputs: Json | null
           participants: string[]
@@ -919,6 +920,7 @@ export type Database = {
           attachments?: Json | null
           created_at?: string
           created_by: string
+          empresa_id?: string | null
           id?: string
           inputs?: Json | null
           participants: string[]
@@ -932,6 +934,7 @@ export type Database = {
           attachments?: Json | null
           created_at?: string
           created_by?: string
+          empresa_id?: string | null
           id?: string
           inputs?: Json | null
           participants?: string[]
@@ -952,6 +955,7 @@ export type Database = {
           created_at: string
           customer_name: string
           description: string
+          empresa_id: string | null
           id: string
           priority: string
           resolution: string | null
@@ -967,6 +971,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           description: string
+          empresa_id?: string | null
           id?: string
           priority?: string
           resolution?: string | null
@@ -982,6 +987,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           description?: string
+          empresa_id?: string | null
           id?: string
           priority?: string
           resolution?: string | null
@@ -995,6 +1001,7 @@ export type Database = {
           created_at: string
           customer_name: string
           delivery_satisfaction: number | null
+          empresa_id: string | null
           id: string
           overall_satisfaction: number | null
           product_quality: number | null
@@ -1009,6 +1016,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           delivery_satisfaction?: number | null
+          empresa_id?: string | null
           id?: string
           overall_satisfaction?: number | null
           product_quality?: number | null
@@ -1023,6 +1031,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           delivery_satisfaction?: number | null
+          empresa_id?: string | null
           id?: string
           overall_satisfaction?: number | null
           product_quality?: number | null
@@ -1429,6 +1438,7 @@ export type Database = {
           changes: string | null
           content: string
           document_id: string | null
+          empresa_id: string | null
           id: string
           revision_date: string
           version: string
@@ -1438,6 +1448,7 @@ export type Database = {
           changes?: string | null
           content: string
           document_id?: string | null
+          empresa_id?: string | null
           id?: string
           revision_date?: string
           version: string
@@ -1447,6 +1458,7 @@ export type Database = {
           changes?: string | null
           content?: string
           document_id?: string | null
+          empresa_id?: string | null
           id?: string
           revision_date?: string
           version?: string
@@ -1623,6 +1635,7 @@ export type Database = {
           calibration_entity: string
           certificate_number: string | null
           created_at: string
+          empresa_id: string | null
           equipment_id: string
           equipment_name: string
           id: string
@@ -1637,6 +1650,7 @@ export type Database = {
           calibration_entity: string
           certificate_number?: string | null
           created_at?: string
+          empresa_id?: string | null
           equipment_id: string
           equipment_name: string
           id?: string
@@ -1651,6 +1665,7 @@ export type Database = {
           calibration_entity?: string
           certificate_number?: string | null
           created_at?: string
+          empresa_id?: string | null
           equipment_id?: string
           equipment_name?: string
           id?: string
@@ -4000,6 +4015,7 @@ export type Database = {
           distribution_location: string | null
           document_code: string | null
           document_type: string
+          empresa_id: string | null
           id: string
           internal_external: string | null
           process: string | null
@@ -4025,6 +4041,7 @@ export type Database = {
           distribution_location?: string | null
           document_code?: string | null
           document_type: string
+          empresa_id?: string | null
           id?: string
           internal_external?: string | null
           process?: string | null
@@ -4050,6 +4067,7 @@ export type Database = {
           distribution_location?: string | null
           document_code?: string | null
           document_type?: string
+          empresa_id?: string | null
           id?: string
           internal_external?: string | null
           process?: string | null
@@ -4072,6 +4090,7 @@ export type Database = {
           created_by: string | null
           data: Json | null
           document_id: string | null
+          empresa_id: string | null
           id: string
           record_type: string
           title: string
@@ -4082,6 +4101,7 @@ export type Database = {
           created_by?: string | null
           data?: Json | null
           document_id?: string | null
+          empresa_id?: string | null
           id?: string
           record_type: string
           title: string
@@ -4092,6 +4112,7 @@ export type Database = {
           created_by?: string | null
           data?: Json | null
           document_id?: string | null
+          empresa_id?: string | null
           id?: string
           record_type?: string
           title?: string
@@ -4238,6 +4259,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string
+          empresa_id: string | null
           founded_date: string | null
           id: string
           is_active: boolean | null
@@ -4256,6 +4278,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email: string
+          empresa_id?: string | null
           founded_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -4274,6 +4297,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string
+          empresa_id?: string | null
           founded_date?: string | null
           id?: string
           is_active?: boolean | null
@@ -4490,6 +4514,7 @@ export type Database = {
           customer: string | null
           department: string
           description: string
+          empresa_id: string | null
           id: string
           immediate_action: string
           non_conformity_type: string
@@ -4505,6 +4530,7 @@ export type Database = {
           customer?: string | null
           department: string
           description: string
+          empresa_id?: string | null
           id?: string
           immediate_action: string
           non_conformity_type: string
@@ -4520,6 +4546,7 @@ export type Database = {
           customer?: string | null
           department?: string
           description?: string
+          empresa_id?: string | null
           id?: string
           immediate_action?: string
           non_conformity_type?: string
@@ -4615,6 +4642,7 @@ export type Database = {
           data_fim: string
           data_inicio: string
           descricao: string | null
+          empresa_id: string | null
           id: string
           progresso: number
           responsavel: string
@@ -4627,6 +4655,7 @@ export type Database = {
           data_fim: string
           data_inicio: string
           descricao?: string | null
+          empresa_id?: string | null
           id?: string
           progresso?: number
           responsavel: string
@@ -4639,6 +4668,7 @@ export type Database = {
           data_fim?: string
           data_inicio?: string
           descricao?: string | null
+          empresa_id?: string | null
           id?: string
           progresso?: number
           responsavel?: string
@@ -4763,6 +4793,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string
+          empresa_id: string | null
           id: string
           swot_category: string | null
           update_date: string
@@ -4774,6 +4805,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description: string
+          empresa_id?: string | null
           id?: string
           swot_category?: string | null
           update_date: string
@@ -4785,6 +4817,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string
+          empresa_id?: string | null
           id?: string
           swot_category?: string | null
           update_date?: string
@@ -4878,18 +4911,21 @@ export type Database = {
       perfis: {
         Row: {
           criado_em: string | null
+          empresa_id: string | null
           id: string
           nome: string | null
           user_id: string | null
         }
         Insert: {
           criado_em?: string | null
+          empresa_id?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
         }
         Update: {
           criado_em?: string | null
+          empresa_id?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
@@ -5443,6 +5479,7 @@ export type Database = {
         Row: {
           batch_number: string
           created_at: string
+          empresa_id: string | null
           id: string
           inspection_date: string
           inspection_result: string
@@ -5458,6 +5495,7 @@ export type Database = {
         Insert: {
           batch_number: string
           created_at?: string
+          empresa_id?: string | null
           id?: string
           inspection_date: string
           inspection_result?: string
@@ -5473,6 +5511,7 @@ export type Database = {
         Update: {
           batch_number?: string
           created_at?: string
+          empresa_id?: string | null
           id?: string
           inspection_date?: string
           inspection_result?: string
@@ -5549,6 +5588,7 @@ export type Database = {
           attendees: Json | null
           created_at: string
           description: string | null
+          empresa_id: string | null
           end_time: string
           id: string
           room_id: string
@@ -5560,6 +5600,7 @@ export type Database = {
           attendees?: Json | null
           created_at?: string
           description?: string | null
+          empresa_id?: string | null
           end_time: string
           id?: string
           room_id: string
@@ -5571,6 +5612,7 @@ export type Database = {
           attendees?: Json | null
           created_at?: string
           description?: string | null
+          empresa_id?: string | null
           end_time?: string
           id?: string
           room_id?: string
@@ -5841,6 +5883,7 @@ export type Database = {
           category: string
           created_at: string
           description: string
+          empresa_id: string | null
           id: string
           impact: number
           mitigation_plan: string | null
@@ -5856,6 +5899,7 @@ export type Database = {
           category: string
           created_at?: string
           description: string
+          empresa_id?: string | null
           id?: string
           impact: number
           mitigation_plan?: string | null
@@ -5871,6 +5915,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string
+          empresa_id?: string | null
           id?: string
           impact?: number
           mitigation_plan?: string | null
@@ -5967,6 +6012,7 @@ export type Database = {
           available: boolean | null
           capacity: number
           created_at: string
+          empresa_id: string | null
           id: string
           image_url: string | null
           location: string
@@ -5979,6 +6025,7 @@ export type Database = {
           available?: boolean | null
           capacity: number
           created_at?: string
+          empresa_id?: string | null
           id?: string
           image_url?: string | null
           location: string
@@ -5991,6 +6038,7 @@ export type Database = {
           available?: boolean | null
           capacity?: number
           created_at?: string
+          empresa_id?: string | null
           id?: string
           image_url?: string | null
           location?: string
@@ -6110,6 +6158,7 @@ export type Database = {
           comments: string | null
           created_at: string
           delivery_score: number | null
+          empresa_id: string | null
           evaluation_date: string
           evaluator: string
           id: string
@@ -6126,6 +6175,7 @@ export type Database = {
           comments?: string | null
           created_at?: string
           delivery_score?: number | null
+          empresa_id?: string | null
           evaluation_date: string
           evaluator: string
           id?: string
@@ -6142,6 +6192,7 @@ export type Database = {
           comments?: string | null
           created_at?: string
           delivery_score?: number | null
+          empresa_id?: string | null
           evaluation_date?: string
           evaluator?: string
           id?: string
@@ -6244,6 +6295,7 @@ export type Database = {
           department: string
           description: string | null
           duration: number
+          empresa_id: string | null
           evaluation_method: string | null
           id: string
           participants: Json | null
@@ -6258,6 +6310,7 @@ export type Database = {
           department: string
           description?: string | null
           duration: number
+          empresa_id?: string | null
           evaluation_method?: string | null
           id?: string
           participants?: Json | null
@@ -6272,6 +6325,7 @@ export type Database = {
           department?: string
           description?: string | null
           duration?: number
+          empresa_id?: string | null
           evaluation_method?: string | null
           id?: string
           participants?: Json | null
@@ -6358,6 +6412,7 @@ export type Database = {
           address: string
           city: string
           created_at: string | null
+          empresa_id: string | null
           id: string
           is_active: boolean | null
           is_rentable: boolean | null
@@ -6371,6 +6426,7 @@ export type Database = {
           address: string
           city: string
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           is_active?: boolean | null
           is_rentable?: boolean | null
@@ -6384,6 +6440,7 @@ export type Database = {
           address?: string
           city?: string
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           is_active?: boolean | null
           is_rentable?: boolean | null
@@ -6438,6 +6495,7 @@ export type Database = {
           cpf: string | null
           created_at: string
           email: string
+          empresa_id: string | null
           first_name: string | null
           id: string
           is_active: boolean | null
@@ -6448,6 +6506,7 @@ export type Database = {
           lgpd_consent: boolean | null
           lgpd_consent_date: string | null
           phone: string | null
+          projeto_id: string | null
           role: string
           role_id: string | null
           status: string | null
@@ -6459,6 +6518,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           email: string
+          empresa_id?: string | null
           first_name?: string | null
           id: string
           is_active?: boolean | null
@@ -6469,6 +6529,7 @@ export type Database = {
           lgpd_consent?: boolean | null
           lgpd_consent_date?: string | null
           phone?: string | null
+          projeto_id?: string | null
           role?: string
           role_id?: string | null
           status?: string | null
@@ -6480,6 +6541,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           email?: string
+          empresa_id?: string | null
           first_name?: string | null
           id?: string
           is_active?: boolean | null
@@ -6490,6 +6552,7 @@ export type Database = {
           lgpd_consent?: boolean | null
           lgpd_consent_date?: string | null
           phone?: string | null
+          projeto_id?: string | null
           role?: string
           role_id?: string | null
           status?: string | null
@@ -6521,6 +6584,7 @@ export type Database = {
           is_admin: boolean | null
           is_master: boolean | null
           nome: string
+          projeto_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -6531,6 +6595,7 @@ export type Database = {
           is_admin?: boolean | null
           is_master?: boolean | null
           nome: string
+          projeto_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -6541,6 +6606,7 @@ export type Database = {
           is_admin?: boolean | null
           is_master?: boolean | null
           nome?: string
+          projeto_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -6715,6 +6781,10 @@ export type Database = {
       }
       user_is_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      usuario_é_admin: {
+        Args: { uid: string }
         Returns: boolean
       }
     }

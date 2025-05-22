@@ -82,33 +82,33 @@ export function useDiscAssessments() {
       const localData = localAssessments ? JSON.parse(localAssessments) : [];
 
       try {
+        // Atualizado para usar a tabela hr_disc_evaluations
         const { data, error } = await supabase
-          .from("disc_assessments")
+          .from("hr_disc_evaluations")
           .select("*")
-          .order("date", { ascending: false });
+          .order("created_at", { ascending: false });
         
         if (error) throw error;
         
         if (data && data.length > 0) {
           // Transform the data to match our interface with proper type checking
           const formattedData: DiscAssessment[] = data.map(item => {
-            // Safely cast the scores from Json to DiscScore
-            const scoresData = item.scores as Record<string, number>;
+            // Criando objeto de scores a partir dos campos individuais
             const scores: DiscScore = {
-              D: scoresData.D || 0,
-              I: scoresData.I || 0,
-              S: scoresData.S || 0,
-              C: scoresData.C || 0
+              D: item.dominance_score || 0,
+              I: item.influence_score || 0,
+              S: item.steadiness_score || 0,
+              C: item.compliance_score || 0
             };
             
             return {
               id: item.id,
-              name: item.name,
-              email: item.email,
+              name: item.employee_id ? "Funcionário" : "Candidato", // Adaptar conforme estrutura
+              email: "email@exemplo.com", // Adaptar conforme estrutura
               scores: scores,
               primary_type: item.primary_type as DiscType,
-              invited_by: item.invited_by,
-              date: item.date
+              invited_by: null,
+              date: item.created_at
             };
           });
           
@@ -143,26 +143,21 @@ export function useDiscAssessments() {
 
   const createAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
-      // Convert DiscScore to a format acceptable by Supabase (plain object)
-      const scoresForDb = {
-        D: assessment.scores.D,
-        I: assessment.scores.I,
-        S: assessment.scores.S,
-        C: assessment.scores.C
-      };
-
+      // Adaptação para o formato da nova tabela hr_disc_evaluations
       try {
         const { data, error } = await supabase
-          .from("disc_assessments")
+          .from("hr_disc_evaluations")
           .insert({
-            name: assessment.name,
-            email: assessment.email,
-            scores: scoresForDb,  // Use the plain object which is compatible with Json type
+            employee_id: null, // Substituir pelo ID do funcionário se disponível
+            dominance_score: assessment.scores.D,
+            influence_score: assessment.scores.I,
+            steadiness_score: assessment.scores.S,
+            compliance_score: assessment.scores.C,
             primary_type: assessment.primary_type,
-            invited_by: assessment.invited_by,
-            date: new Date().toISOString()
+            evaluation_date: new Date().toISOString(),
+            company_id: 'default-company-id', // Substituir pelo ID da empresa
           })
-          .select("*")
+          .select()
           .single();
         
         if (error) throw error;
