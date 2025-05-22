@@ -6632,6 +6632,10 @@ export type Database = {
         Args: { company_uuid: string }
         Returns: boolean
       }
+      check_secret_existe: {
+        Args: { nome_secreto: string }
+        Returns: boolean
+      }
       check_secret_exists: {
         Args: { secret_name: string }
         Returns: boolean
@@ -6667,6 +6671,10 @@ export type Database = {
         Returns: string
       }
       generate_unique_disc_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      gerar_token_de_avaliação_único: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -6767,6 +6775,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      pertence_à_empresa: {
+        Args: { company_uuid: string }
+        Returns: boolean
+      }
+      set_assessment_link_token: {
+        Args: { token: string; user_id: string }
+        Returns: undefined
+      }
       user_belongs_to_company: {
         Args: { company_uuid: string }
         Returns: boolean
@@ -6785,6 +6801,10 @@ export type Database = {
       }
       usuario_é_admin: {
         Args: { uid: string }
+        Returns: boolean
+      }
+      verificar_acesso_do_usuário: {
+        Args: { user_id: string }
         Returns: boolean
       }
     }

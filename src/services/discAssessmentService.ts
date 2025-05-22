@@ -1,185 +1,191 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { toast as sonnerToast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
+
+export type DiscType = 'D' | 'I' | 'S' | 'C';
+
+export interface DiscScore {
+  D: number;
+  I: number;
+  S: number;
+  C: number;
+}
 
 export interface DiscAssessment {
   id: string;
   name: string;
   email: string;
-  date: string;
-  scores: {
-    D: number;
-    I: number;
-    S: number;
-    C: number;
-  };
-  primary_type: 'D' | 'I' | 'S' | 'C';
+  scores: DiscScore;
+  primary_type: DiscType;
   invited_by?: string | null;
+  date: string;
 }
 
-export interface AssessmentLink {
-  token: string;
+interface CreateDiscAssessmentInput {
   name: string;
   email: string;
-  expires_at: Date;
-  used: boolean;
+  scores: DiscScore;
+  primary_type: DiscType;
+  invited_by?: string;
 }
 
-export const createAssessment = async (assessment: Omit<DiscAssessment, "id" | "date">) => {
+/**
+ * Creates a new DISC assessment record
+ * @param assessment The assessment data to create
+ * @returns The created assessment
+ */
+export const createAssessment = async (assessment: CreateDiscAssessmentInput): Promise<DiscAssessment> => {
   try {
-    const { data, error } = await supabase
-      .from('disc_assessments')
-      .insert({
-        ...assessment,
-        date: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error creating DISC assessment:', error);
-    // Return mock data for demonstration
-    return {
-      id: `local-${Date.now()}`,
-      ...assessment,
-      date: new Date().toISOString()
-    };
-  }
-};
-
-export const generateAssessmentLink = async (name: string, email: string): Promise<string> => {
-  const token = uuidv4();
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // Link expires in 7 days
-
-  try {
-    // First check if we're able to use the database at all
+    // Try to insert into the hr_disc_evaluations table (new structure)
     try {
-      // Try to access a known table that exists to test connection
-      await supabase
-        .from('disc_assessments')
-        .select('id')
-        .limit(1);
-        
-      // If here, we have a working connection
-      console.log('Database connection working for generating assessment link');
+      const { data, error } = await supabase
+        .from("hr_disc_evaluations")
+        .insert({
+          employee_id: null,
+          dominance_score: assessment.scores.D,
+          influence_score: assessment.scores.I,
+          steadiness_score: assessment.scores.S,
+          compliance_score: assessment.scores.C,
+          primary_type: assessment.primary_type,
+          evaluation_date: new Date().toISOString(),
+          company_id: 'default-company-id', // Replace with actual company ID when available
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      // Store link information in localStorage as a fallback
-      const linkData = {
-        token,
-        name,
-        email,
-        expires_at: expiresAt.toISOString(),
-        used: false,
-        created_at: new Date().toISOString()
+      // Convert to our DiscAssessment format
+      return {
+        id: data.id,
+        name: assessment.name,
+        email: assessment.email,
+        scores: {
+          D: data.dominance_score,
+          I: data.influence_score,
+          S: data.steadiness_score,
+          C: data.compliance_score
+        },
+        primary_type: data.primary_type as DiscType,
+        invited_by: assessment.invited_by,
+        date: data.created_at
+      };
+    } catch (error) {
+      console.error("Error creating DISC assessment in Supabase:", error);
+      
+      // Create a local assessment as fallback
+      const localAssessment: DiscAssessment = {
+        id: `local-${Date.now()}`,
+        name: assessment.name,
+        email: assessment.email,
+        scores: assessment.scores,
+        primary_type: assessment.primary_type,
+        invited_by: assessment.invited_by,
+        date: new Date().toISOString()
       };
       
-      // Save to localStorage for fallback
-      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
-      storedLinks.push(linkData);
-      localStorage.setItem('disc_assessment_links', JSON.stringify(storedLinks));
-    } catch (error) {
-      console.error('Error testing database connection:', error);
+      // Store locally
+      const localAssessments = localStorage.getItem('local_disc_assessments');
+      const localData = localAssessments ? JSON.parse(localAssessments) : [];
+      localData.push(localAssessment);
+      localStorage.setItem('local_disc_assessments', JSON.stringify(localData));
+      
+      return localAssessment;
     }
-
-    // Return the assessment URL regardless of storage method
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/disc-assessment/${token}`;
   } catch (error) {
-    console.error('Error generating assessment link:', error);
+    console.error("Error in createAssessment:", error);
     throw error;
   }
 };
 
-export const validateAssessmentLink = async (token: string): Promise<AssessmentLink | null> => {
+/**
+ * Fetches all DISC assessments
+ * @returns An array of DISC assessments
+ */
+export const fetchAllAssessments = async (): Promise<DiscAssessment[]> => {
   try {
-    try {
-      // Try to access a known table that exists to test connection
-      await supabase
-        .from('disc_assessments')
-        .select('id')
-        .limit(1);
-        
-      // Try to get the link from localStorage
-      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
-      const linkData = storedLinks.find((link: any) => link.token === token);
-      
-      if (linkData) {
-        // Check if the link is expired or used
-        const expires = new Date(linkData.expires_at);
-        const now = new Date();
-        
-        if (expires < now || linkData.used) {
-          console.log('Link is expired or already used');
-          return null;
-        }
-        
-        return {
-          token: linkData.token,
-          name: linkData.name,
-          email: linkData.email,
-          expires_at: new Date(linkData.expires_at),
-          used: linkData.used
-        };
+    // Default mock data for development/fallback
+    const mockData: DiscAssessment[] = [
+      {
+        id: "1",
+        name: "João Silva",
+        email: "joao@example.com",
+        scores: { D: 8, I: 3, S: 2, C: 5 },
+        primary_type: "D",
+        invited_by: null,
+        date: new Date().toISOString()
+      },
+      {
+        id: "2",
+        name: "Maria Santos",
+        email: "maria@example.com",
+        scores: { D: 2, I: 7, S: 4, C: 3 },
+        primary_type: "I",
+        invited_by: null,
+        date: new Date().toISOString()
+      },
+      {
+        id: "3",
+        name: "Carlos Oliveira",
+        email: "carlos@example.com",
+        scores: { D: 3, I: 2, S: 8, C: 3 },
+        primary_type: "S",
+        invited_by: null,
+        date: new Date().toISOString()
       }
-      
-      console.log('Database connection working but using mock data for link validation');
-    } catch (dbError) {
-      console.error('Database validation failed:', dbError);
-    }
-    
-    // Simulate a valid token for demonstration
-    return {
-      token,
-      name: "Usuário de Demonstração",
-      email: "demo@example.com",
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      used: false
-    };
-  } catch (error) {
-    console.error('Error validating assessment link:', error);
-    
-    // Still return mock data even if there was an error
-    return {
-      token,
-      name: "Usuário de Demonstração",
-      email: "demo@example.com",
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      used: false
-    };
-  }
-};
+    ];
 
-export const markAssessmentLinkAsUsed = async (token: string): Promise<boolean> => {
-  try {
+    // Get local assessments
+    const localAssessments = localStorage.getItem('local_disc_assessments');
+    const localData = localAssessments ? JSON.parse(localAssessments) : [];
+
     try {
-      // Try to get the link from localStorage
-      const storedLinks = JSON.parse(localStorage.getItem('disc_assessment_links') || '[]');
-      const linkIndex = storedLinks.findIndex((link: any) => link.token === token);
+      // Try to fetch from Supabase
+      const { data, error } = await supabase
+        .from("hr_disc_evaluations")
+        .select("*")
+        .order("created_at", { ascending: false });
       
-      if (linkIndex >= 0) {
-        // Mark as used in localStorage
-        storedLinks[linkIndex].used = true;
-        localStorage.setItem('disc_assessment_links', JSON.stringify(storedLinks));
-        console.log('Marked link as used in localStorage');
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Transform to our DiscAssessment format
+        const formattedData: DiscAssessment[] = data.map(item => {
+          const scores: DiscScore = {
+            D: item.dominance_score || 0,
+            I: item.influence_score || 0,
+            S: item.steadiness_score || 0,
+            C: item.compliance_score || 0
+          };
+          
+          return {
+            id: item.id,
+            name: item.employee_id ? "Funcionário" : "Candidato",
+            email: "email@exemplo.com", // Adapt as needed
+            scores,
+            primary_type: item.primary_type as DiscType,
+            invited_by: null,
+            date: item.created_at
+          };
+        });
+        
+        return [...formattedData, ...localData];
+      } else {
+        // No data from Supabase, use local + mock
+        console.log("No data from Supabase, using local and mock data");
+        return [...localData, ...mockData];
       }
-      
-      // Try to access a known table that exists to test connection
-      await supabase
-        .from('disc_assessments')
-        .select('id')
-        .limit(1);
-      
-      console.log('Database connection working but not marking link as used in database');
-    } catch (dbError) {
-      console.error('Error checking database connection:', dbError);
+    } catch (error) {
+      console.error("Error fetching DISC assessments from Supabase:", error);
+      // Show warning toast but continue with mock data
+      sonnerToast.warning("Usando dados locais", {
+        description: "Não foi possível conectar ao banco de dados"
+      });
+      return [...localData, ...mockData];
     }
-    
-    return true;
   } catch (error) {
-    console.error('Error marking assessment link as used:', error);
-    return true; // Return true anyway for demonstration
+    console.error("Error fetching assessments:", error);
+    return [];
   }
 };
