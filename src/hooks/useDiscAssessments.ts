@@ -82,7 +82,7 @@ export function useDiscAssessments() {
       const localData = localAssessments ? JSON.parse(localAssessments) : [];
 
       try {
-        // Atualizado para usar a tabela hr_disc_evaluations
+        // Usar a tabela correta hr_disc_evaluations
         const { data, error } = await supabase
           .from("hr_disc_evaluations")
           .select("*")

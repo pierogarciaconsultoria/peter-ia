@@ -27,26 +27,63 @@ export interface TrainingParticipant {
   attended?: boolean;
 }
 
+// Helper function to map HR training database fields to our Training interface
+function mapHrTrainingToTraining(hrTraining: any): Training {
+  return {
+    id: hrTraining.id,
+    title: hrTraining.title,
+    description: hrTraining.description,
+    trainer: hrTraining.instructor || 'A definir',
+    training_date: hrTraining.start_date,
+    start_time: hrTraining.start_date,
+    end_time: hrTraining.end_date,
+    duration: hrTraining.duration || 0,
+    department: hrTraining.department || '',
+    participants: hrTraining.participants,
+    status: hrTraining.status as Training['status'],
+    procedure_id: hrTraining.procedure_id,
+    evaluation_method: hrTraining.evaluation_method,
+    created_at: hrTraining.created_at,
+    updated_at: hrTraining.updated_at
+  };
+}
+
+// Helper function to map our Training interface to HR training database fields
+function mapTrainingToHrTraining(training: Omit<Training, 'id' | 'created_at' | 'updated_at'>) {
+  return {
+    title: training.title,
+    description: training.description,
+    instructor: training.trainer,
+    start_date: training.training_date,
+    end_date: training.end_time,
+    duration: training.duration,
+    department: training.department,
+    participants: training.participants,
+    status: training.status,
+    procedure_id: training.procedure_id,
+    evaluation_method: training.evaluation_method,
+    type: 'standard', // Default value for required field
+    company_id: 'default' // This will be set by RLS
+  };
+}
+
 export async function getTrainings(): Promise<Training[]> {
   const { data, error } = await supabase
-    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
+    .from('hr_trainings')
     .select('*')
-    .order('training_date', { ascending: false });
+    .order('start_date', { ascending: false });
   
   if (error) {
     console.error("Error fetching trainings:", error);
     throw new Error(error.message);
   }
   
-  return (data || []).map(item => ({
-    ...item,
-    status: item.status as Training['status'],
-  }));
+  return (data || []).map(item => mapHrTrainingToTraining(item));
 }
 
 export async function getTrainingById(id: string): Promise<Training> {
   const { data, error } = await supabase
-    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
+    .from('hr_trainings')
     .select('*')
     .eq('id', id)
     .single();
@@ -56,16 +93,15 @@ export async function getTrainingById(id: string): Promise<Training> {
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as Training['status'],
-  };
+  return mapHrTrainingToTraining(data);
 }
 
 export async function createTraining(training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<Training> {
+  const hrTraining = mapTrainingToHrTraining(training);
+  
   const { data, error } = await supabase
-    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
-    .insert([training])
+    .from('hr_trainings')
+    .insert([hrTraining])
     .select()
     .single();
   
@@ -74,19 +110,31 @@ export async function createTraining(training: Omit<Training, 'id' | 'created_at
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as Training['status'],
-  };
+  return mapHrTrainingToTraining(data);
 }
 
 export async function updateTraining(id: string, training: Partial<Omit<Training, 'id' | 'created_at' | 'updated_at'>>): Promise<Training> {
+  // Create a mapping for partial training update
+  const updateData: any = {};
+  
+  if (training.title) updateData.title = training.title;
+  if (training.description !== undefined) updateData.description = training.description;
+  if (training.trainer) updateData.instructor = training.trainer;
+  if (training.training_date) updateData.start_date = training.training_date;
+  if (training.end_time) updateData.end_date = training.end_time;
+  if (training.duration !== undefined) updateData.duration = training.duration;
+  if (training.department) updateData.department = training.department;
+  if (training.participants !== undefined) updateData.participants = training.participants;
+  if (training.status) updateData.status = training.status;
+  if (training.procedure_id !== undefined) updateData.procedure_id = training.procedure_id;
+  if (training.evaluation_method !== undefined) updateData.evaluation_method = training.evaluation_method;
+  
+  // Always update the updated_at field
+  updateData.updated_at = new Date().toISOString();
+  
   const { data, error } = await supabase
-    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
-    .update({
-      ...training,
-      updated_at: new Date().toISOString()
-    })
+    .from('hr_trainings')
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
@@ -96,15 +144,12 @@ export async function updateTraining(id: string, training: Partial<Omit<Training
     throw new Error(error.message);
   }
   
-  return {
-    ...data,
-    status: data.status as Training['status'],
-  };
+  return mapHrTrainingToTraining(data);
 }
 
 export async function deleteTraining(id: string): Promise<void> {
   const { error } = await supabase
-    .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
+    .from('hr_trainings')
     .delete()
     .eq('id', id);
   
@@ -155,16 +200,15 @@ export async function generateTrainingsForEmployee(
     const trainings: Training[] = [];
     
     for (const doc of documents) {
-      const newTraining: Omit<Training, 'id' | 'created_at' | 'updated_at'> = {
+      const newTrainingData = {
         title: `Treinamento: ${doc.title}`,
         description: `Treinamento baseado no documento ${doc.document_code || doc.title}`,
-        trainer: "A definir",
-        training_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        start_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        end_time: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        instructor: "A definir", // Map to trainer in our interface
+        start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Map to training_date
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         duration: 2,
         department: departmentName,
-        status: 'planned',
+        status: 'planned' as const,
         procedure_id: doc.id,
         evaluation_method: "A definir",
         participants: [
@@ -173,12 +217,14 @@ export async function generateTrainingsForEmployee(
             name: employeeName,
             status: 'confirmed'
           }
-        ]
+        ],
+        type: 'required', // Default value for required field
+        company_id: 'default' // This will be set by RLS
       };
       
       const { data, error } = await supabase
-        .from('hr_trainings')  // Atualizado para usar a tabela hr_trainings
-        .insert([newTraining])
+        .from('hr_trainings')
+        .insert([newTrainingData])
         .select()
         .single();
         
@@ -187,10 +233,7 @@ export async function generateTrainingsForEmployee(
         continue;
       }
       
-      trainings.push({
-        ...data,
-        status: data.status as Training['status']
-      });
+      trainings.push(mapHrTrainingToTraining(data));
     }
     
     return trainings;

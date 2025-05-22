@@ -76,7 +76,7 @@ export const refreshQueryCache = () => {
   // Invalidate and refetch critical queries
   queryClient.invalidateQueries({ queryKey: ['audits-dashboard'] });
   queryClient.invalidateQueries({ queryKey: ['external-audits-dashboard'] });
-  queryClient.invalidateQueries({ queryKey: ['hr-trainings'] }); // Nova chave de consulta adicionada
+  queryClient.invalidateQueries({ queryKey: ['hr-trainings'] }); // Atualizado para usar a chave correta
   
   toast.success('Dados atualizados', {
     description: 'Os dados do sistema foram atualizados com sucesso.'
