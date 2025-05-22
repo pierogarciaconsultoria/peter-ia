@@ -1544,6 +1544,7 @@ export type Database = {
           created_at: string | null
           department: string
           email: string
+          empresa_id: string | null
           hire_date: string
           id: string
           name: string
@@ -1558,6 +1559,7 @@ export type Database = {
           created_at?: string | null
           department: string
           email: string
+          empresa_id?: string | null
           hire_date: string
           id?: string
           name: string
@@ -1572,6 +1574,7 @@ export type Database = {
           created_at?: string | null
           department?: string
           email?: string
+          empresa_id?: string | null
           hire_date?: string
           id?: string
           name?: string
@@ -1586,6 +1589,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
@@ -6631,6 +6641,10 @@ export type Database = {
       belongs_to_company: {
         Args: { company_uuid: string }
         Returns: boolean
+      }
+      check_schema_config: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       check_secret_existe: {
         Args: { nome_secreto: string }
