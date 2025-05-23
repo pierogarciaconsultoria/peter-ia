@@ -17,3 +17,6 @@ export type {
   UpdateTrainingInput,
   TrainingParticipant
 };
+
+// Re-export specific functions for backward compatibility
+export { fetchTrainings as getTrainings } from './training/trainingQueries';

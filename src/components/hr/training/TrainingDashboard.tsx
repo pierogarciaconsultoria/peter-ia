@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { getTrainings, Training } from "@/services/trainingService";
+import { fetchTrainings as getTrainings, Training } from "@/services/training";
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingStats } from "./TrainingStats";
 import { TrainingTable } from "./TrainingTable";

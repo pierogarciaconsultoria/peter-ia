@@ -28,6 +28,7 @@ export interface Training {
   evaluation_method?: string;
   created_at?: string;
   updated_at?: string;
+  company_id?: string;
 }
 
 /**

@@ -18,7 +18,7 @@ export function mapHrTrainingToTraining(item: HrTrainingRow): Training {
     start_time: item.start_date,
     end_time: item.end_date || undefined,
     duration: item.duration || 0,
-    department: item.department as string || '',
+    department: item.department || '',
     participants: item.participants ? processParticipants(item.participants as any) : undefined,
     status: (item.status as Training['status']) || 'planned',
     procedure_id: item.procedure_id as string | undefined,

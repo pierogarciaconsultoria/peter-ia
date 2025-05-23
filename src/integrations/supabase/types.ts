@@ -3799,13 +3799,17 @@ export type Database = {
           company_id: string
           cost: number | null
           created_at: string
+          department: string | null
           description: string | null
           duration: number | null
           end_date: string | null
+          evaluation_method: string | null
           id: string
           instructor: string | null
           location: string | null
           max_participants: number | null
+          participants: Json | null
+          procedure_id: string | null
           provider: string | null
           start_date: string
           status: string
@@ -3817,13 +3821,17 @@ export type Database = {
           company_id: string
           cost?: number | null
           created_at?: string
+          department?: string | null
           description?: string | null
           duration?: number | null
           end_date?: string | null
+          evaluation_method?: string | null
           id?: string
           instructor?: string | null
           location?: string | null
           max_participants?: number | null
+          participants?: Json | null
+          procedure_id?: string | null
           provider?: string | null
           start_date: string
           status?: string
@@ -3835,13 +3843,17 @@ export type Database = {
           company_id?: string
           cost?: number | null
           created_at?: string
+          department?: string | null
           description?: string | null
           duration?: number | null
           end_date?: string | null
+          evaluation_method?: string | null
           id?: string
           instructor?: string | null
           location?: string | null
           max_participants?: number | null
+          participants?: Json | null
+          procedure_id?: string | null
           provider?: string | null
           start_date?: string
           status?: string

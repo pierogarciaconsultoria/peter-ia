@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Training } from "@/types/training";
 import { mapHrTrainingToTraining } from "./trainingMappers";
@@ -89,6 +88,26 @@ export async function generateTrainingsForEmployee(
     return trainings;
   } catch (error) {
     console.error("Error generating trainings for employee:", error);
+    throw error;
+  }
+}
+
+/**
+ * Generate a certificate for a completed training
+ */
+export async function generateTrainingCertificate(trainingId: string, employeeId: string): Promise<string> {
+  try {
+    // This is a placeholder implementation
+    // In a real application, this would generate a PDF certificate and possibly store it
+    
+    // For now, we'll just return a mock URL
+    const certificateUrl = `https://example.com/certificates/${trainingId}_${employeeId}.pdf`;
+    
+    // In a real implementation, we would update the employee_trainings record with the certificate URL
+    
+    return certificateUrl;
+  } catch (error) {
+    console.error("Error generating training certificate:", error);
     throw error;
   }
 }
