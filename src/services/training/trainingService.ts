@@ -1,173 +1,113 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Training, TrainingFilters, CreateTrainingInput, UpdateTrainingInput } from "@/types/training";
-import { toast } from "sonner";
+import { Training } from "@/types/training";
 import { mapHrTrainingToTraining, mapTrainingToHrTraining } from "./trainingMappers";
+import { fetchTrainings, fetchTraining } from "./trainingQueries";
+import { generateTrainingCertificate } from "./trainingGeneration";
 
 /**
- * Get all trainings with optional filters
+ * Input for creating a training
  */
-export async function getTrainings(filters?: TrainingFilters): Promise<Training[]> {
-  try {
-    let query = supabase
-      .from('hr_trainings')
-      .select('*');
-    
-    // Apply filters
-    if (filters?.department) {
-      query = query.eq('department', filters.department);
-    }
-    
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    }
-    
-    if (filters?.startDate) {
-      query = query.gte('start_date', filters.startDate);
-    }
-    
-    if (filters?.endDate) {
-      query = query.lte('end_date', filters.endDate);
-    }
-    
-    if (filters?.searchQuery) {
-      query = query.ilike('title', `%${filters.searchQuery}%`);
-    }
-    
-    // Pagination
-    if (filters?.page !== undefined && filters?.pageSize) {
-      const start = filters.page * filters.pageSize;
-      const end = start + filters.pageSize - 1;
-      query = query.range(start, end);
-    }
-    
-    // Order by date
-    query = query.order('start_date', { ascending: false });
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      console.error("Error fetching trainings:", error);
-      throw error;
-    }
-    
-    // Map to our Training interface
-    return data.map(item => mapHrTrainingToTraining(item));
-  } catch (error) {
-    console.error("Error in getTrainings:", error);
-    toast.error("Erro ao carregar treinamentos", {
-      description: "Não foi possível buscar os treinamentos"
-    });
-    return [];
-  }
-}
-
-/**
- * Get a specific training by ID
- */
-export async function getTrainingById(id: string): Promise<Training | null> {
-  try {
-    const { data, error } = await supabase
-      .from('hr_trainings')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-    
-    if (error) {
-      console.error("Error fetching training:", error);
-      throw error;
-    }
-    
-    if (!data) return null;
-    
-    return mapHrTrainingToTraining(data);
-  } catch (error) {
-    console.error("Error in getTrainingById:", error);
-    toast.error("Erro ao carregar treinamento", {
-      description: "Não foi possível buscar o treinamento específico"
-    });
-    return null;
-  }
+interface CreateTrainingInput {
+  title: string;
+  description?: string;
+  trainer: string;
+  training_date: string;
+  end_time?: string;
+  duration: number;
+  department: string;
+  participants?: any[];
+  status?: string;
+  procedure_id?: string;
+  evaluation_method?: string;
+  company_id?: string;
 }
 
 /**
  * Create a new training
  */
-export async function createTraining(trainingData: CreateTrainingInput): Promise<Training> {
-  try {
-    if (!trainingData.company_id) {
-      trainingData.company_id = 'default-company-id'; // Ensure company_id is provided
-    }
+export const createTraining = async (trainingData: CreateTrainingInput): Promise<Training> => {
+  const { data, error } = await supabase
+    .from("hr_trainings")
+    .insert(mapTrainingToHrTraining({
+      ...trainingData,
+      company_id: trainingData.company_id || 'default-company-id'
+    }))
+    .select()
+    .single();
 
-    const { data, error } = await supabase
-      .from('hr_trainings')
-      .insert(mapTrainingToHrTraining(trainingData))
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error creating training:", error);
-      throw error;
-    }
-    
-    return mapHrTrainingToTraining(data);
-  } catch (error) {
-    console.error("Error in createTraining:", error);
-    toast.error("Erro ao criar treinamento", {
-      description: "Não foi possível criar o novo treinamento"
-    });
-    throw error;
-  }
-}
+  if (error) throw error;
+  
+  return mapHrTrainingToTraining(data);
+};
 
 /**
  * Update an existing training
  */
-export async function updateTraining(id: string, trainingData: UpdateTrainingInput): Promise<Training> {
-  try {
-    const { data, error } = await supabase
-      .from('hr_trainings')
-      .update(mapTrainingToHrTraining({ ...trainingData, title: trainingData.title || 'Untitled', training_date: trainingData.training_date || new Date().toISOString() }))
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error updating training:", error);
-      throw error;
-    }
-    
-    return mapHrTrainingToTraining(data);
-  } catch (error) {
-    console.error("Error in updateTraining:", error);
-    toast.error("Erro ao atualizar treinamento", {
-      description: "Não foi possível atualizar o treinamento"
-    });
-    throw error;
-  }
-}
+export const updateTraining = async (
+  id: string, 
+  trainingData: Partial<Training> & { training_date?: string }
+): Promise<Training> => {
+  // Only update fields that are provided
+  const updateData: any = {};
+  
+  if (trainingData.title) updateData.title = trainingData.title;
+  if (trainingData.description !== undefined) updateData.description = trainingData.description;
+  if (trainingData.trainer) updateData.instructor = trainingData.trainer;
+  if (trainingData.training_date) updateData.start_date = trainingData.training_date;
+  if (trainingData.end_time !== undefined) updateData.end_date = trainingData.end_time;
+  if (trainingData.duration !== undefined) updateData.duration = trainingData.duration;
+  if (trainingData.department) updateData.department = trainingData.department;
+  if (trainingData.participants) updateData.participants = trainingData.participants;
+  if (trainingData.status) updateData.status = trainingData.status;
+  if (trainingData.procedure_id !== undefined) updateData.procedure_id = trainingData.procedure_id;
+  if (trainingData.evaluation_method !== undefined) updateData.evaluation_method = trainingData.evaluation_method;
+
+  const { data, error } = await supabase
+    .from("hr_trainings")
+    .update(updateData)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  
+  return mapHrTrainingToTraining(data);
+};
 
 /**
- * Delete a training by ID
+ * Delete a training
  */
-export async function deleteTraining(id: string): Promise<boolean> {
-  try {
-    const { error } = await supabase
-      .from('hr_trainings')
-      .delete()
-      .eq('id', id);
+export const deleteTraining = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from("hr_trainings")
+    .delete()
+    .eq("id", id);
     
-    if (error) {
-      console.error("Error deleting training:", error);
-      throw error;
-    }
+  if (error) throw error;
+};
+
+/**
+ * Create a training in batch mode
+ */
+export const createTrainingBatch = async (trainingsData: CreateTrainingInput[]): Promise<number> => {
+  const { data, error } = await supabase
+    .from("hr_trainings")
+    .insert(
+      trainingsData.map(training => mapTrainingToHrTraining({
+        ...training,
+        company_id: training.company_id || 'default-company-id'
+      }))
+    );
     
-    return true;
-  } catch (error) {
-    console.error("Error in deleteTraining:", error);
-    toast.error("Erro ao excluir treinamento", {
-      description: "Não foi possível excluir o treinamento"
-    });
-    return false;
-  }
-}
+  if (error) throw error;
+  
+  return trainingsData.length;
+};
+
+// Re-export functions from other modules for convenience
+export {
+  fetchTrainings,
+  fetchTraining,
+  generateTrainingCertificate
+};
