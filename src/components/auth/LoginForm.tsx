@@ -23,6 +23,12 @@ export const LoginForm = () => {
   } = useLogin();
   const navigate = useNavigate();
 
+  // Helper function to set admin credentials
+  const fillAdminCredentials = () => {
+    setLoginEmail("contato@pierogarcia.com.br");
+    setLoginPassword("pi391500B@");
+  };
+
   if (bypassAuth) {
     return (
       <div>
@@ -95,6 +101,20 @@ export const LoginForm = () => {
             onChange={(e) => setLoginPassword(e.target.value)}
           />
         </div>
+        
+        {!process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? (
+          <div className="pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-xs"
+              onClick={fillAdminCredentials}
+            >
+              Preencher como Admin
+            </Button>
+          </div>
+        ) : null}
       </CardContent>
       
       <CardFooter>

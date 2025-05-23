@@ -10,7 +10,7 @@ export const useAdminCreation = () => {
       try {
         // Admin credentials
         const adminEmail = "contato@pierogarcia.com.br";
-        const adminPassword = "pi391500";
+        const adminPassword = "pi391500B@";
         
         // First check if admin account exists
         const { data: { users }, error: fetchError } = await supabase.auth.admin.listUsers();
