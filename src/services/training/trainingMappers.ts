@@ -19,10 +19,10 @@ export function mapHrTrainingToTraining(item: HrTrainingRow): Training {
     end_time: item.end_date || undefined,
     duration: item.duration || 0,
     department: item.department || '',
-    participants: processParticipants(item.participants),
+    participants: processParticipants(item.participants as any),
     status: (item.status as Training['status']) || 'planned',
-    procedure_id: item.procedure_id || undefined,
-    evaluation_method: item.evaluation_method || undefined,
+    procedure_id: item.procedure_id as string | undefined,
+    evaluation_method: item.evaluation_method as string | undefined,
     created_at: item.created_at,
     updated_at: item.updated_at
   };
@@ -41,12 +41,13 @@ export function mapTrainingToHrTraining(
     start_date: training.training_date,
     end_date: training.end_time,
     duration: training.duration,
-    department: training.department,
-    participants: training.participants,
+    department: training.department as string,
+    participants: training.participants as any,
     status: training.status,
-    procedure_id: training.procedure_id,
+    procedure_id: training.procedure_id as string | undefined,
     evaluation_method: training.evaluation_method,
-    type: 'standard' // Default value for required field
+    type: 'standard', // Default value for required field
+    company_id: training.company_id || 'default-company-id' // Ensure company_id is always provided
   };
 }
 

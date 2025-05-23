@@ -1,10 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { CreateTrainingInput, Training, TrainingFilters, UpdateTrainingInput } from "@/types/training";
+import { Training, TrainingFilters, CreateTrainingInput, UpdateTrainingInput } from "@/types/training";
+import { toast } from "sonner";
 import { mapHrTrainingToTraining, mapTrainingToHrTraining } from "./trainingMappers";
 
 /**
- * Fetch all trainings with optional filters
+ * Get all trainings with optional filters
  */
 export async function getTrainings(filters?: TrainingFilters): Promise<Training[]> {
   try {
@@ -12,83 +13,80 @@ export async function getTrainings(filters?: TrainingFilters): Promise<Training[
       .from('hr_trainings')
       .select('*');
     
-    // Apply filters if provided
-    if (filters) {
-      if (filters.department) {
-        query = query.eq('department', filters.department);
-      }
-      
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      
-      if (filters.startDate) {
-        query = query.gte('start_date', filters.startDate);
-      }
-      
-      if (filters.endDate) {
-        query = query.lte('start_date', filters.endDate);
-      }
-      
-      if (filters.searchQuery) {
-        query = query.or(`title.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%`);
-      }
-      
-      // Add pagination if specified
-      if (filters.page !== undefined && filters.pageSize) {
-        const from = filters.page * filters.pageSize;
-        const to = from + filters.pageSize - 1;
-        query = query.range(from, to);
-      }
+    // Apply filters
+    if (filters?.department) {
+      query = query.eq('department', filters.department);
     }
     
-    // Always order by start date descending
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+    
+    if (filters?.startDate) {
+      query = query.gte('start_date', filters.startDate);
+    }
+    
+    if (filters?.endDate) {
+      query = query.lte('end_date', filters.endDate);
+    }
+    
+    if (filters?.searchQuery) {
+      query = query.ilike('title', `%${filters.searchQuery}%`);
+    }
+    
+    // Pagination
+    if (filters?.page !== undefined && filters?.pageSize) {
+      const start = filters.page * filters.pageSize;
+      const end = start + filters.pageSize - 1;
+      query = query.range(start, end);
+    }
+    
+    // Order by date
     query = query.order('start_date', { ascending: false });
     
     const { data, error } = await query;
     
     if (error) {
       console.error("Error fetching trainings:", error);
-      throw new Error(error.message);
+      throw error;
     }
     
-    // Process the data to ensure it matches our Training interface
-    const trainings: Training[] = data.map(item => mapHrTrainingToTraining(item));
-    
-    return trainings;
+    // Map to our Training interface
+    return data.map(item => mapHrTrainingToTraining(item));
   } catch (error) {
     console.error("Error in getTrainings:", error);
-    throw error;
+    toast.error("Erro ao carregar treinamentos", {
+      description: "Não foi possível buscar os treinamentos"
+    });
+    return [];
   }
 }
 
 /**
- * Get a training by ID
+ * Get a specific training by ID
  */
-export async function getTrainingById(id: string): Promise<Training> {
+export async function getTrainingById(id: string): Promise<Training | null> {
   try {
     const { data, error } = await supabase
       .from('hr_trainings')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching training:", error);
-      throw new Error(error.message);
+      throw error;
     }
     
-    if (!data) {
-      throw new Error(`Training with ID ${id} not found`);
-    }
+    if (!data) return null;
     
-    // Convert the data to our Training interface
-    const training: Training = mapHrTrainingToTraining(data);
-    
-    return training;
+    return mapHrTrainingToTraining(data);
   } catch (error) {
     console.error("Error in getTrainingById:", error);
-    throw error;
+    toast.error("Erro ao carregar treinamento", {
+      description: "Não foi possível buscar o treinamento específico"
+    });
+    return null;
   }
 }
 
@@ -97,31 +95,27 @@ export async function getTrainingById(id: string): Promise<Training> {
  */
 export async function createTraining(trainingData: CreateTrainingInput): Promise<Training> {
   try {
-    // Validate required fields
-    if (!trainingData.title || !trainingData.training_date || !trainingData.trainer || !trainingData.department) {
-      throw new Error("Missing required training data");
+    if (!trainingData.company_id) {
+      trainingData.company_id = 'default-company-id'; // Ensure company_id is provided
     }
-    
-    // Format the data for the database
-    const dbData = mapTrainingToHrTraining(trainingData);
-    
+
     const { data, error } = await supabase
       .from('hr_trainings')
-      .insert([dbData])
+      .insert(mapTrainingToHrTraining(trainingData))
       .select()
       .single();
     
     if (error) {
       console.error("Error creating training:", error);
-      throw new Error(error.message);
+      throw error;
     }
     
-    // Convert the returned data to our Training interface
-    const newTraining: Training = mapHrTrainingToTraining(data);
-    
-    return newTraining;
+    return mapHrTrainingToTraining(data);
   } catch (error) {
     console.error("Error in createTraining:", error);
+    toast.error("Erro ao criar treinamento", {
+      description: "Não foi possível criar o novo treinamento"
+    });
     throw error;
   }
 }
@@ -131,30 +125,24 @@ export async function createTraining(trainingData: CreateTrainingInput): Promise
  */
 export async function updateTraining(id: string, trainingData: UpdateTrainingInput): Promise<Training> {
   try {
-    // Create update data object from our application model
-    const updateData = mapTrainingToHrTraining(trainingData as any);
-    
-    // Always update the updated_at field
-    updateData.updated_at = new Date().toISOString();
-    
     const { data, error } = await supabase
       .from('hr_trainings')
-      .update(updateData)
+      .update(mapTrainingToHrTraining({ ...trainingData, title: trainingData.title || 'Untitled', training_date: trainingData.training_date || new Date().toISOString() }))
       .eq('id', id)
       .select()
       .single();
     
     if (error) {
       console.error("Error updating training:", error);
-      throw new Error(error.message);
+      throw error;
     }
     
-    // Convert the returned data to our Training interface
-    const updatedTraining: Training = mapHrTrainingToTraining(data);
-    
-    return updatedTraining;
+    return mapHrTrainingToTraining(data);
   } catch (error) {
     console.error("Error in updateTraining:", error);
+    toast.error("Erro ao atualizar treinamento", {
+      description: "Não foi possível atualizar o treinamento"
+    });
     throw error;
   }
 }
@@ -162,7 +150,7 @@ export async function updateTraining(id: string, trainingData: UpdateTrainingInp
 /**
  * Delete a training by ID
  */
-export async function deleteTraining(id: string): Promise<void> {
+export async function deleteTraining(id: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('hr_trainings')
@@ -171,10 +159,15 @@ export async function deleteTraining(id: string): Promise<void> {
     
     if (error) {
       console.error("Error deleting training:", error);
-      throw new Error(error.message);
+      throw error;
     }
+    
+    return true;
   } catch (error) {
     console.error("Error in deleteTraining:", error);
-    throw error;
+    toast.error("Erro ao excluir treinamento", {
+      description: "Não foi possível excluir o treinamento"
+    });
+    return false;
   }
 }

@@ -4,10 +4,11 @@ import { useToast } from "./use-toast";
 import { 
   DiscAssessment, 
   DiscScore, 
-  DiscType, 
+  DiscType,
+  fetchAllAssessments,
   createAssessment,
-  fetchAllAssessments
-} from "@/services/discAssessmentService";
+  CreateDiscAssessmentParams
+} from "@/services/disc-assessment";
 
 export type { DiscType, DiscScore, DiscAssessment };
 
@@ -56,13 +57,15 @@ export function useDiscAssessments() {
    */
   const createDiscAssessment = async (assessment: CreateDiscAssessmentInput) => {
     try {
-      const newAssessment = await createAssessment({
+      const params: CreateDiscAssessmentParams = {
         name: assessment.name,
         email: assessment.email,
         scores: assessment.scores,
         primary_type: assessment.primary_type as DiscType,
         invited_by: assessment.invited_by
-      });
+      };
+      
+      const newAssessment = await createAssessment(params);
       
       // Update local state
       setAssessments(prev => [newAssessment, ...prev]);
