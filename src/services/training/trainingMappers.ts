@@ -24,7 +24,8 @@ export function mapHrTrainingToTraining(item: HrTrainingRow): Training {
     procedure_id: item.procedure_id as string | undefined,
     evaluation_method: item.evaluation_method as string | undefined,
     created_at: item.created_at,
-    updated_at: item.updated_at
+    updated_at: item.updated_at,
+    company_id: item.company_id
   };
 }
 
@@ -43,8 +44,8 @@ export function mapTrainingToHrTraining(
     duration: training.duration,
     department: training.department,
     participants: training.participants as any,
-    status: training.status,
-    procedure_id: training.procedure_id as string | undefined,
+    status: training.status as string,
+    procedure_id: training.procedure_id,
     evaluation_method: training.evaluation_method,
     type: 'standard', // Default value for required field
     company_id: training.company_id || 'default-company-id' // Ensure company_id is always provided

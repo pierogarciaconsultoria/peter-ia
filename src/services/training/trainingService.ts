@@ -1,27 +1,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Training } from "@/types/training";
+import { Training, CreateTrainingInput, UpdateTrainingInput } from "@/types/training";
 import { mapHrTrainingToTraining, mapTrainingToHrTraining } from "./trainingMappers";
 import { fetchTrainings, fetchTraining } from "./trainingQueries";
 import { generateTrainingCertificate } from "./trainingGeneration";
-
-/**
- * Input for creating a training
- */
-interface CreateTrainingInput {
-  title: string;
-  description?: string;
-  trainer: string;
-  training_date: string;
-  end_time?: string;
-  duration: number;
-  department: string;
-  participants?: any[];
-  status?: string;
-  procedure_id?: string;
-  evaluation_method?: string;
-  company_id?: string;
-}
 
 /**
  * Create a new training

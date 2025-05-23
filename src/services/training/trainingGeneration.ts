@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Training } from "@/types/training";
 import { mapHrTrainingToTraining } from "./trainingMappers";
