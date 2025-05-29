@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
@@ -148,12 +149,8 @@ function App() {
                 <Route path="ambiente" element={<Ambiente />} />
                 <Route path="tasks" element={<Tasks />} />
                 
-                {/* Admin route protected with requireAdmin flag */}
-                <Route path="admin/*" element={
-                  <AuthGuard requireAdmin={true}>
-                    <Navigate to="/dashboard" replace />
-                  </AuthGuard>
-                } />
+                {/* Admin route - agora carrega corretamente o componente Admin */}
+                <Route path="admin" element={<Admin />} />
               </Route>
 
               {/* Catch-all route for pages not found */}
