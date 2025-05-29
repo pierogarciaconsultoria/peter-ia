@@ -50,7 +50,7 @@ export const useVacations = () => {
 
     try {
       let query = supabase
-        .from('vacation_requests')
+        .from('vacation_requests' as any)
         .select(`
           *,
           employee:employees!inner(
@@ -97,7 +97,7 @@ export const useVacations = () => {
       };
 
       const { data, error } = await supabase
-        .from('vacation_requests')
+        .from('vacation_requests' as any)
         .insert([requestData])
         .select(`
           *,
@@ -135,7 +135,7 @@ export const useVacations = () => {
 
     try {
       const { data, error } = await supabase
-        .from('vacation_requests')
+        .from('vacation_requests' as any)
         .update(updates)
         .eq('id', requestId)
         .select(`
@@ -176,7 +176,7 @@ export const useVacations = () => {
 
     try {
       const { error } = await supabase
-        .from('vacation_requests')
+        .from('vacation_requests' as any)
         .delete()
         .eq('id', requestId);
 

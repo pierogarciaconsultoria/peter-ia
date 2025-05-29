@@ -179,7 +179,7 @@ export function EmployeeBoard() {
                       <Calendar className="h-4 w-4" />
                       <span>{formatDate(announcement.publish_date)}</span>
                       <span>•</span>
-                      <span>Por {announcement.author?.first_name} {announcement.author?.last_name}</span>
+                      <span>Por {announcement.author?.first_name || 'Usuário'} {announcement.author?.last_name || ''}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
