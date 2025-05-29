@@ -59,16 +59,26 @@ export const useDiscAssessments = () => {
       if (assessmentError) throw assessmentError;
 
       // Transform the data to match our interface
-      const transformedAssessments: DiscAssessment[] = (assessmentData || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        email: item.email,
-        scores: item.scores as DiscScore,
-        primary_type: item.primary_type,
-        date: item.date || item.created_at,
-        invited_by: item.invited_by,
-        created_at: item.created_at
-      }));
+      const transformedAssessments: DiscAssessment[] = (assessmentData || []).map(item => {
+        const rawScores = item.scores as any;
+        const normalizedScores: DiscScore = {
+          d: rawScores?.d ?? rawScores?.D ?? 0,
+          i: rawScores?.i ?? rawScores?.I ?? 0,
+          s: rawScores?.s ?? rawScores?.S ?? 0,
+          c: rawScores?.c ?? rawScores?.C ?? 0
+        };
+
+        return {
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          scores: normalizedScores,
+          primary_type: item.primary_type,
+          date: item.date || item.created_at,
+          invited_by: item.invited_by,
+          created_at: item.created_at
+        };
+      });
 
       // Fetch evaluation links
       const { data: linkData, error: linkError } = await (supabase as any)

@@ -16,14 +16,17 @@ export function useDiscQuestionnaire(onComplete: (scores: DiscScore) => void) {
 
   const calculateScores = (): DiscScore => {
     const scores = {
-      D: 0,
-      I: 0,
-      S: 0,
-      C: 0
+      d: 0,
+      i: 0,
+      s: 0,
+      c: 0
     };
     
     Object.values(answers).forEach(value => {
-      scores[value as keyof DiscScore] += 1;
+      const scoreKey = value.toLowerCase() as keyof DiscScore;
+      if (scoreKey in scores) {
+        scores[scoreKey] += 1;
+      }
     });
     
     return scores;

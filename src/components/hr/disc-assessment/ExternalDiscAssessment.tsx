@@ -65,15 +65,18 @@ export function ExternalDiscAssessment() {
       const scoreEntries = Object.entries(scores) as [keyof DiscScore, number][];
       const primaryType = scoreEntries.reduce(
         (max, [type, score]) => (score as number) > max.score ? { type, score } : max,
-        { type: 'D' as keyof DiscScore, score: -1 }
-      ).type as 'D' | 'I' | 'S' | 'C';
+        { type: 'd' as keyof DiscScore, score: -1 }
+      ).type;
+
+      // Convert to uppercase for the primary type field
+      const primaryTypeUpper = primaryType.toUpperCase() as 'D' | 'I' | 'S' | 'C';
 
       try {
         await createAssessment({
           name: assessmentData.name,
           email: assessmentData.email,
           scores,
-          primary_type: primaryType,
+          primary_type: primaryTypeUpper,
           invited_by: null
         });
 
