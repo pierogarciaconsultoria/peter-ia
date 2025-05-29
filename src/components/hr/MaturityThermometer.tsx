@@ -1,202 +1,311 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Thermometer, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Thermometer, TrendingUp, Target, Users, BarChart } from "lucide-react";
+
+interface MaturityCategory {
+  id: string;
+  name: string;
+  score: number;
+  maxScore: number;
+  description: string;
+  color: string;
+}
+
+interface MaturityIndicator {
+  id: string;
+  category: string;
+  name: string;
+  current: number;
+  target: number;
+  trend: 'up' | 'down' | 'stable';
+}
 
 export function MaturityThermometer() {
-  // Mock data para demonstração
-  const maturityAreas = [
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Dados mock para demonstração
+  const categories: MaturityCategory[] = [
     {
-      area: "Gestão de Pessoas",
-      score: 85,
-      trend: "up",
-      description: "Processos de RH bem estruturados",
-      level: "Avançado"
+      id: "leadership",
+      name: "Liderança",
+      score: 75,
+      maxScore: 100,
+      description: "Capacidade de liderança e gestão de equipes",
+      color: "bg-blue-500"
     },
     {
-      area: "Processos e Procedimentos",
-      score: 72,
-      trend: "up",
-      description: "Documentação em desenvolvimento",
-      level: "Intermediário"
+      id: "processes",
+      name: "Processos",
+      score: 82,
+      maxScore: 100,
+      description: "Maturidade dos processos organizacionais",
+      color: "bg-green-500"
     },
     {
-      area: "Tecnologia e Inovação",
+      id: "technology",
+      name: "Tecnologia",
       score: 68,
-      trend: "stable",
-      description: "Ferramentas básicas implementadas",
-      level: "Intermediário"
+      maxScore: 100,
+      description: "Adoção e uso de tecnologias",
+      color: "bg-purple-500"
     },
     {
-      area: "Cultura Organizacional",
-      score: 91,
-      trend: "up",
-      description: "Cultura forte e bem definida",
-      level: "Avançado"
+      id: "culture",
+      name: "Cultura",
+      score: 90,
+      maxScore: 100,
+      description: "Cultura organizacional e engajamento",
+      color: "bg-orange-500"
     },
     {
-      area: "Gestão Financeira",
-      score: 76,
-      trend: "down",
-      description: "Controles financeiros adequados",
-      level: "Intermediário"
-    },
-    {
-      area: "Qualidade e Excelência",
-      score: 64,
-      trend: "up",
-      description: "Implementando padrões de qualidade",
-      level: "Básico"
+      id: "innovation",
+      name: "Inovação",
+      score: 65,
+      maxScore: 100,
+      description: "Capacidade de inovação e adaptação",
+      color: "bg-red-500"
     }
   ];
 
-  const overallScore = Math.round(maturityAreas.reduce((sum, area) => sum + area.score, 0) / maturityAreas.length);
+  const indicators: MaturityIndicator[] = [
+    {
+      id: "1",
+      category: "leadership",
+      name: "Feedback Regular",
+      current: 78,
+      target: 85,
+      trend: 'up'
+    },
+    {
+      id: "2",
+      category: "leadership",
+      name: "Desenvolvimento de Talentos",
+      current: 72,
+      target: 80,
+      trend: 'up'
+    },
+    {
+      id: "3",
+      category: "processes",
+      name: "Documentação de Processos",
+      current: 85,
+      target: 90,
+      trend: 'stable'
+    },
+    {
+      id: "4",
+      category: "processes",
+      name: "Automação",
+      current: 79,
+      target: 85,
+      trend: 'up'
+    },
+    {
+      id: "5",
+      category: "technology",
+      name: "Ferramentas Digitais",
+      current: 70,
+      target: 85,
+      trend: 'up'
+    },
+    {
+      id: "6",
+      category: "culture",
+      name: "Engajamento dos Funcionários",
+      current: 88,
+      target: 90,
+      trend: 'stable'
+    }
+  ];
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
-  };
+  const overallScore = Math.round(categories.reduce((sum, cat) => sum + cat.score, 0) / categories.length);
 
-  const getScoreBackground = (score: number) => {
-    if (score >= 80) return "bg-green-100";
-    if (score >= 60) return "bg-yellow-100";
-    return "bg-red-100";
-  };
-
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
-  const getLevelBadge = (level: string) => {
-    const variants = {
-      "Avançado": "bg-green-100 text-green-800",
-      "Intermediário": "bg-yellow-100 text-yellow-800",
-      "Básico": "bg-red-100 text-red-800"
-    };
-    
-    return (
-      <Badge variant="outline" className={variants[level as keyof typeof variants]}>
-        {level}
-      </Badge>
-    );
+  const getMaturityLevel = (score: number) => {
+    if (score >= 90) return { level: "Excelente", color: "bg-green-100 text-green-800", description: "Organização madura" };
+    if (score >= 75) return { level: "Bom", color: "bg-blue-100 text-blue-800", description: "Em desenvolvimento" };
+    if (score >= 60) return { level: "Regular", color: "bg-yellow-100 text-yellow-800", description: "Precisa melhorar" };
+    return { level: "Baixo", color: "bg-red-100 text-red-800", description: "Ação urgente" };
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case "up":
+      case 'up':
         return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case "down":
-        return <TrendingDown className="h-4 w-4 text-red-600" />;
+      case 'down':
+        return <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-600" />;
+        return <div className="h-4 w-4 rounded-full bg-gray-400" />;
     }
   };
 
+  const maturityLevel = getMaturityLevel(overallScore);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Termômetro de Maturidade</h2>
-        <div className="flex items-center gap-2">
-          <Thermometer className="h-5 w-5" />
-          <span className="text-sm text-muted-foreground">Última atualização: hoje</span>
+      <div className="flex justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Termômetro de Maturidade Organizacional</h2>
+          <p className="text-muted-foreground">Avaliação da maturidade organizacional em diferentes dimensões</p>
         </div>
+        <Button>
+          <BarChart className="h-4 w-4 mr-2" />
+          Gerar Relatório
+        </Button>
       </div>
 
       {/* Score Geral */}
-      <Card className={`${getScoreBackground(overallScore)} border-2`}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center justify-between">
-            <span>Maturidade Geral da Organização</span>
-            <span className={`text-3xl font-bold ${getScoreColor(overallScore)}`}>
-              {overallScore}%
-            </span>
-          </CardTitle>
+      <Card className="border-2">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Thermometer className="h-8 w-8 text-blue-600 mr-2" />
+            <CardTitle className="text-2xl">Score de Maturidade Geral</CardTitle>
+          </div>
+          <div className="text-6xl font-bold text-blue-600 mb-2">
+            {overallScore}%
+          </div>
+          <Badge className={maturityLevel.color}>
+            {maturityLevel.level} - {maturityLevel.description}
+          </Badge>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <Progress 
-              value={overallScore} 
-              className="h-3"
-            />
-            <p className="text-sm text-muted-foreground">
-              Sua organização está no nível {overallScore >= 80 ? "Avançado" : overallScore >= 60 ? "Intermediário" : "Básico"} de maturidade organizacional
-            </p>
-          </div>
+          <Progress value={overallScore} className="h-6" />
         </CardContent>
       </Card>
 
-      {/* Áreas de Maturidade */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {maturityAreas.map((area, index) => (
-          <Card key={index} className="relative">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{area.area}</CardTitle>
-                {getTrendIcon(area.trend)}
-              </div>
+      {/* Categorias de Maturidade */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category) => (
+          <Card 
+            key={category.id} 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedCategory === category.id ? 'ring-2 ring-blue-500' : ''
+            }`}
+            onClick={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center justify-between">
+                {category.name}
+                <Badge variant="outline">{category.score}%</Badge>
+              </CardTitle>
+              <CardDescription>{category.description}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className={`text-2xl font-bold ${getScoreColor(area.score)}`}>
-                  {area.score}%
-                </span>
-                {getLevelBadge(area.level)}
+            <CardContent>
+              <Progress value={category.score} className="h-4 mb-2" />
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>0%</span>
+                <span>100%</span>
               </div>
-              
-              <Progress 
-                value={area.score} 
-                className="h-2"
-              />
-              
-              <p className="text-sm text-muted-foreground">
-                {area.description}
-              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Recomendações */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recomendações para Melhoria</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <h4 className="font-medium text-red-700">Áreas que Precisam de Atenção</h4>
-              <ul className="space-y-1 text-sm">
-                {maturityAreas
-                  .filter(area => area.score < 70)
-                  .map((area, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      {area.area} ({area.score}%)
-                    </li>
-                  ))}
-              </ul>
+      {/* Indicadores Detalhados */}
+      {selectedCategory && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Indicadores - {categories.find(c => c.id === selectedCategory)?.name}
+            </CardTitle>
+            <CardDescription>
+              Métricas específicas para esta categoria
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {indicators
+                .filter(indicator => indicator.category === selectedCategory)
+                .map((indicator) => (
+                  <div key={indicator.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-medium">{indicator.name}</h4>
+                        {getTrendIcon(indicator.trend)}
+                      </div>
+                      <Progress value={indicator.current} className="h-2" />
+                      <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                        <span>Atual: {indicator.current}%</span>
+                        <span>Meta: {indicator.target}%</span>
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <Badge variant="outline">
+                        {indicator.current}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
             </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium text-green-700">Pontos Fortes</h4>
-              <ul className="space-y-1 text-sm">
-                {maturityAreas
-                  .filter(area => area.score >= 80)
-                  .map((area, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      {area.area} ({area.score}%)
-                    </li>
-                  ))}
-              </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Estatísticas Resumidas */}
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              <div className="flex items-center">
+                <Target className="h-4 w-4 mr-2" />
+                Categorias Avaliadas
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{categories.length}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Em Melhoria
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {indicators.filter(i => i.trend === 'up').length}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              <div className="flex items-center">
+                <Users className="h-4 w-4 mr-2" />
+                Acima da Meta
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {indicators.filter(i => i.current >= i.target).length}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              <div className="flex items-center">
+                <Thermometer className="h-4 w-4 mr-2" />
+                Score Médio
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{overallScore}%</div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
