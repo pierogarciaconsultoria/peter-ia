@@ -1,5 +1,5 @@
 
-import { CreateDiscAssessmentParams, DiscAssessment, LocalStorageAssessments } from "./types";
+import { CreateDiscAssessmentParams, DiscAssessment } from "@/types/disc";
 
 const LOCAL_STORAGE_KEY = 'local_disc_assessments';
 
@@ -27,7 +27,8 @@ export function createLocalAssessment(assessment: CreateDiscAssessmentParams): D
     scores: assessment.scores,
     primary_type: assessment.primary_type,
     invited_by: assessment.invited_by,
-    date: new Date().toISOString()
+    date: new Date().toISOString(),
+    created_at: new Date().toISOString()
   };
   
   // Store locally
