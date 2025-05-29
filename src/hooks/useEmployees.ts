@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,13 +7,17 @@ import { toast } from "sonner";
 interface Employee {
   id: string;
   created_at: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   phone: string;
   position: string;
+  department: string;
+  hire_date: string;
   company_id: string;
-  is_active: boolean;
+  status: string;
+  avatar_url?: string;
+  empresa_id?: string;
+  updated_at: string;
 }
 
 export const useEmployees = () => {
@@ -57,14 +62,20 @@ export const useEmployees = () => {
     fetchEmployees();
   }, [userCompany, isSuperAdmin]);
 
-  const addEmployee = async (newEmployee: Omit<Employee, 'id' | 'created_at'>) => {
+  const addEmployee = async (newEmployee: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) => {
     setLoading(true);
     setError(null);
 
     try {
+      const employeeData = {
+        ...newEmployee,
+        company_id: userCompany?.id || '',
+        status: newEmployee.status || "active",
+      };
+
       const { data, error } = await supabase
         .from('employees')
-        .insert([newEmployee])
+        .insert([employeeData])
         .select('*')
         .single();
 
@@ -145,12 +156,19 @@ export const useEmployees = () => {
     }
   };
 
+  // Função helper para formatar datas
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
   return {
     employees,
     loading,
+    isLoading: loading, // Alias para compatibilidade
     error,
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    formatDate,
   };
 };

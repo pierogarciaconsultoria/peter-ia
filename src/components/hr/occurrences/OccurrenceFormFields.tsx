@@ -25,9 +25,9 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OccurrenceFormValues } from "./occurrenceTypes";
-import { useAuth } from "@/hooks/useAuth";  // Corrected import path
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
-import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";  // Corrected import path
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 interface OccurrenceFormFieldsProps {
   form: ReturnType<typeof useForm<OccurrenceFormValues>>;

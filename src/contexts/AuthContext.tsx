@@ -32,6 +32,7 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   userCompany: Company | null;
   loading: boolean;
+  isLoading: boolean; // Alias para compatibilidade
   connectionStatus: 'connected' | 'disconnected' | 'connecting';
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -40,10 +41,11 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isCompanyAdmin: boolean;
   isAdmin: boolean;
+  empresaId?: string; // Para compatibilidade com código legado
 }
 
 // Export the context so it can be imported
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -246,6 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userProfile,
     userCompany,
     loading,
+    isLoading: loading, // Alias para compatibilidade
     connectionStatus,
     signOut,
     signIn,
@@ -254,6 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isSuperAdmin,
     isCompanyAdmin,
     isAdmin,
+    empresaId: userProfile?.company_id, // Para compatibilidade com código legado
   };
 
   return (
@@ -264,9 +268,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 // Export the useAuth hook directly from this file
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

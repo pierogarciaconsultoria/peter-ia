@@ -5,7 +5,7 @@ import { PlusCircle, FileText } from "lucide-react";
 import { NewEmployeeDialog } from "./NewEmployeeDialog";
 import { EmployeeDossierGenerator } from "./employee/EmployeeDossierGenerator";
 import { BatchEmployeeImport } from "./employee/BatchEmployeeImport";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function HRHeader() {
   const { userCompany } = useAuth();

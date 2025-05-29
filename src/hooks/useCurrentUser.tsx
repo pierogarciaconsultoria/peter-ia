@@ -1,9 +1,10 @@
+
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 
 export const useCurrentUser = () => {
-  const { user, userProfile, userCompany, isSuperAdmin, isCompanyAdmin } = useAuth();
+  const { user, userProfile, userCompany, isSuperAdmin, isCompanyAdmin, loading } = useAuth();
 
   const isMaster = useMemo(() => {
     return isSuperAdminInLovable() || isSuperAdmin;
@@ -19,5 +20,7 @@ export const useCurrentUser = () => {
     userCompany,
     isMaster,
     isAdmin,
+    isLoading: loading,
+    empresaId: userProfile?.company_id,
   };
 };

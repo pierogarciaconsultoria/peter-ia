@@ -1,159 +1,94 @@
 
 import { useState, useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth } from "@/hooks/useAuth";  // Corrected import path
 
-export interface Employee {
+interface Employee {
   id: string;
   name: string;
   position: string;
   department: string;
-  email?: string;
-  status?: string;
 }
 
 interface EmployeeSelectorProps {
   employeeId: string;
   setEmployeeId: (value: string) => void;
-  error?: string;
-  isLoading?: boolean;
-  placeholder?: string;
-  label?: string;
-  required?: boolean;
-  showDepartment?: boolean;
-  showPosition?: boolean;
-  filterActive?: boolean;
-  className?: string;
-  // Para uso com react-hook-form
   field?: any;
   form?: any;
   name?: string;
+  required?: boolean;
+  label?: string;
 }
 
 export function EmployeeSelector({ 
   employeeId, 
   setEmployeeId, 
-  error, 
-  isLoading: externalLoading = false,
-  placeholder = "Selecione um colaborador",
-  label = "Colaborador",
+  field, 
+  form, 
+  name = "employee_id",
   required = false,
-  showDepartment = true,
-  showPosition = false,
-  filterActive = true,
-  className = "w-full",
-  field,
-  form,
-  name
+  label = "Funcionário"
 }: EmployeeSelectorProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, userCompany } = useAuth();
-  
+  const { userCompany } = useAuth();
+
   useEffect(() => {
     const fetchEmployees = async () => {
-      setLoading(true);
       try {
         let query = supabase
           .from('employees')
-          .select('id, name, position, department, email, status');
-        
-        if (filterActive) {
-          query = query.eq('status', 'active');
-        }
+          .select('id, name, position, department')
+          .eq('status', 'active')
+          .order('name');
 
         if (userCompany?.id) {
           query = query.eq('company_id', userCompany.id);
         }
-          
-        const { data, error } = await query.order('name');
-          
-        if (error) {
-          console.error('Error fetching employees:', error);
-          setEmployees([]);
-          return;
-        }
-        
+
+        const { data, error } = await query;
+
+        if (error) throw error;
         setEmployees(data || []);
       } catch (error) {
-        console.error('Error in employees fetch:', error);
-        setEmployees([]);
+        console.error('Erro ao buscar funcionários:', error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchEmployees();
-  }, [filterActive, userCompany?.id]);
-  
-  if (loading || externalLoading) {
-    return <Skeleton className="h-10 w-full" />;
-  }
 
-  const employeeOptions = employees.map(emp => ({
-    value: emp.id,
-    label: showDepartment 
-      ? `${emp.name} - ${emp.department}` 
-      : showPosition 
-        ? `${emp.name} - ${emp.position}` 
-        : emp.name
-  }));
-  
-  if (form && name) {
-    return (
-      <FormItem>
-        {label && <FormLabel>{label}{required && <span className="text-destructive"> *</span>}</FormLabel>}
-        <Select
-          onValueChange={(value) => {
-            if (field) field.onChange(value);
-            if (setEmployeeId) setEmployeeId(value);
-          }}
-          value={field?.value || ""}
-        >
-          <FormControl>
-            <SelectTrigger className={className}>
-              <SelectValue placeholder={placeholder} />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent>
-            {employeeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FormMessage />
-      </FormItem>
-    );
-  }
+    fetchEmployees();
+  }, [userCompany]);
 
   return (
-    <div className={className}>
-      {label && (
-        <div className="text-sm font-medium mb-2">
-          {label}{required && <span className="text-destructive"> *</span>}
-        </div>
-      )}
+    <FormItem>
+      <FormLabel>{label} {required && "*"}</FormLabel>
       <Select 
-        value={employeeId || ""} 
-        onValueChange={setEmployeeId}
+        onValueChange={setEmployeeId} 
+        value={employeeId}
+        disabled={loading}
       >
-        <SelectTrigger>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder={loading ? "Carregando..." : "Selecione um funcionário"} />
+          </SelectTrigger>
+        </FormControl>
         <SelectContent>
-          {employeeOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
+          {employees.map((employee) => (
+            <SelectItem key={employee.id} value={employee.id}>
+              <div className="flex flex-col">
+                <span>{employee.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {employee.position} - {employee.department}
+                </span>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {error && <p className="text-sm font-medium text-destructive mt-2">{error}</p>}
-    </div>
+      <FormMessage />
+    </FormItem>
   );
 }

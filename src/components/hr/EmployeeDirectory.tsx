@@ -6,7 +6,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { EmployeeTable } from "./components/EmployeeTable";
 
 export function EmployeeDirectory() {
-  const { employees, isLoading, formatDate } = useEmployees();
+  const { employees, loading, formatDate } = useEmployees();
 
   return (
     <div className="space-y-4">
@@ -23,7 +23,7 @@ export function EmployeeDirectory() {
       <EmployeeTable 
         employees={employees} 
         formatDate={formatDate}
-        isLoading={isLoading}
+        isLoading={loading}
       />
     </div>
   );
