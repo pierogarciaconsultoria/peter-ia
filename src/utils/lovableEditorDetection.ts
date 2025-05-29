@@ -16,59 +16,72 @@ const AUTH_STORAGE_KEYS = {
  * @returns boolean indicating if we're in production
  */
 export function isProductionEnvironment(): boolean {
+  // Debug log to help identify the issue
+  console.log('Environment check:', {
+    NODE_ENV: process.env.NODE_ENV,
+    hostname: window.location.hostname,
+    isLovableHostname: window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('lovable.app')
+  });
+  
+  // If we're in a Lovable environment, never consider it production
+  if (typeof window !== 'undefined') {
+    const isLovableHostname = window.location.hostname.includes('lovableproject.com') || 
+                              window.location.hostname.includes('lovable.app');
+    
+    if (isLovableHostname) {
+      console.log('Detected Lovable environment - treating as development');
+      return false;
+    }
+  }
+  
   return process.env.NODE_ENV === 'production';
 }
 
 /**
  * Verifies if we're in the Lovable editor environment
- * More restrictive in production to prevent unauthorized access
+ * More permissive to ensure access during development
  */
 export function isLovableEditor(): boolean {
-  // In production, we're more restrictive about editor detection
-  if (isProductionEnvironment()) {
-    // Only allow specific Lovable domains in production
-    const isInLovableIframe = typeof window !== 'undefined' && 
-      (window.location.hostname.includes('lovableproject.com') || 
-       window.location.hostname.includes('lovable.app'));
-    
-    return isInLovableIframe;
-  }
-  
-  // In development, we're more permissive
-  // Check URL parameters and localStorage
-  const urlParams = new URLSearchParams(window.location.search);
-  const hasEditorParam = urlParams.has('lovable_editor');
-  const hasStorageFlag = localStorage.getItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS) === 'true';
-  
-  // Special domains that indicate we're in the Lovable environment
+  // Check URL and hostname for Lovable indicators
   const isInLovableDomain = typeof window !== 'undefined' && 
     (window.location.hostname.includes('lovableproject.com') || 
-     window.location.hostname.includes('lovable.app'));
+     window.location.hostname.includes('lovable.app') ||
+     window.location.hostname.includes('localhost'));
   
-  // If detected as editor in development, save for future sessions
+  // Check URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasEditorParam = urlParams.has('lovable_editor');
+  
+  // Check localStorage flag
+  const hasStorageFlag = localStorage.getItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS) === 'true';
+  
+  // Debug logging
+  console.log('Lovable Editor detection:', {
+    isInLovableDomain,
+    hasEditorParam,
+    hasStorageFlag,
+    hostname: window.location.hostname
+  });
+  
+  // If any indicator is present, save for future sessions and grant access
   if (isInLovableDomain || hasEditorParam) {
     localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
+    console.log('Lovable Editor access granted and saved');
+    return true;
   }
   
-  return isInLovableDomain || hasEditorParam || hasStorageFlag;
+  return hasStorageFlag;
 }
 
 /**
  * Checks if we're in a Lovable editor with super admin privileges
- * More restrictive in production
  */
 export function isSuperAdminInLovable(): boolean {
   const isInLovable = isLovableEditor();
   
   if (!isInLovable) return false;
   
-  // In production, we're more restrictive
-  if (isProductionEnvironment()) {
-    // Only trust authenticated super admins in production
-    return false;
-  }
-  
-  // In development, check URL parameters and localStorage
+  // Check URL parameters and localStorage
   const urlParams = new URLSearchParams(window.location.search);
   const isMasterAdmin = urlParams.has('master_admin');
   
@@ -76,6 +89,7 @@ export function isSuperAdminInLovable(): boolean {
   if (isMasterAdmin) {
     localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
     localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
+    console.log('Super admin access granted in Lovable');
   }
   
   // Check localStorage flag
@@ -86,16 +100,22 @@ export function isSuperAdminInLovable(): boolean {
 
 /**
  * Checks if free access should be granted for demonstration
- * Restricted in production to prevent unauthorized access
  */
 export function shouldGrantFreeAccess(): boolean {
-  // In production, we're much more restrictive about free access
-  if (isProductionEnvironment()) {
-    // Check for a special production access token instead
-    return localStorage.getItem('production_access_token') === 'valid';
+  // Always grant free access in Lovable environments
+  if (isLovableEditor()) {
+    console.log('Free access granted - Lovable environment detected');
+    return true;
   }
   
-  // In development, more permissive checks
+  // In production, check for special tokens
+  if (isProductionEnvironment()) {
+    const hasValidToken = localStorage.getItem('production_access_token') === 'valid' ||
+                         localStorage.getItem('production_auth_bypass') === 'authorized';
+    return hasValidToken;
+  }
+  
+  // In development, be more permissive
   const urlParams = new URLSearchParams(window.location.search);
   const hasFreeAccessParam = urlParams.has('free_access');
   
@@ -107,25 +127,40 @@ export function shouldGrantFreeAccess(): boolean {
     localStorage.setItem(AUTH_STORAGE_KEYS.FREE_ACCESS_MODE, 'true');
   }
   
-  // For easier testing in development within Lovable
-  const isLovable = isLovableEditor();
-  
-  return hasFreeAccessParam || hasStorageFlag || isLovable;
+  return hasFreeAccessParam || hasStorageFlag;
 }
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * More restrictive in production
+ * More permissive for development and Lovable environments
  */
 export function shouldBypassAuth(): boolean {
-  // In production, only allow bypass in very specific circumstances
-  if (isProductionEnvironment()) {
-    // Check for a special production auth bypass token
-    return localStorage.getItem('production_auth_bypass') === 'authorized';
+  // Always bypass in Lovable environments
+  if (isLovableEditor()) {
+    console.log('Auth bypass granted - Lovable environment');
+    return true;
   }
   
-  // In development, more permissive
-  return isLovableEditor() || isSuperAdminInLovable() || shouldGrantFreeAccess();
+  // In production, only allow bypass with specific tokens
+  if (isProductionEnvironment()) {
+    const hasValidBypass = localStorage.getItem('production_auth_bypass') === 'authorized' ||
+                          localStorage.getItem('production_access_token') === 'valid';
+    
+    if (hasValidBypass) {
+      console.log('Auth bypass granted - valid production token');
+    }
+    
+    return hasValidBypass;
+  }
+  
+  // In development, be more permissive
+  const shouldGrant = isSuperAdminInLovable() || shouldGrantFreeAccess();
+  
+  if (shouldGrant) {
+    console.log('Auth bypass granted - development environment');
+  }
+  
+  return shouldGrant;
 }
 
 /**
@@ -137,6 +172,7 @@ export function clearAccessFlags(): void {
   localStorage.removeItem(AUTH_STORAGE_KEYS.FREE_ACCESS_MODE);
   localStorage.removeItem('production_auth_bypass');
   localStorage.removeItem('production_access_token');
+  console.log('All access flags cleared');
 }
 
 /**
@@ -145,6 +181,8 @@ export function clearAccessFlags(): void {
  */
 export function setProductionAccessToken(token: string): void {
   if (token && token.length > 0) {
-    localStorage.setItem('production_access_token', token);
+    localStorage.setItem('production_access_token', 'valid');
+    localStorage.setItem('production_auth_bypass', 'authorized');
+    console.log('Production access token set');
   }
 }

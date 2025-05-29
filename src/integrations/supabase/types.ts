@@ -156,6 +156,125 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_damage_reports: {
+        Row: {
+          assigned_to: string | null
+          auto_generated: boolean
+          company_id: string
+          created_at: string
+          description: string
+          detected_issues: Json
+          id: string
+          inspection_id: string | null
+          recommended_actions: Json | null
+          report_type: string
+          severity: string
+          status: string
+          updated_at: string
+          verification_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          company_id: string
+          created_at?: string
+          description: string
+          detected_issues: Json
+          id?: string
+          inspection_id?: string | null
+          recommended_actions?: Json | null
+          report_type: string
+          severity?: string
+          status?: string
+          updated_at?: string
+          verification_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          company_id?: string
+          created_at?: string
+          description?: string
+          detected_issues?: Json
+          id?: string
+          inspection_id?: string | null
+          recommended_actions?: Json | null
+          report_type?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+          verification_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_damage_reports_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_damage_reports_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "ai_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_verifications: {
+        Row: {
+          ai_response: Json | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string
+          discrepancies: Json | null
+          error_message: string | null
+          id: string
+          inspection_id: string | null
+          processed_at: string | null
+          processing_time: number | null
+          status: string
+          verification_stage: string
+        }
+        Insert: {
+          ai_response?: Json | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string
+          discrepancies?: Json | null
+          error_message?: string | null
+          id?: string
+          inspection_id?: string | null
+          processed_at?: string | null
+          processing_time?: number | null
+          status?: string
+          verification_stage: string
+        }
+        Update: {
+          ai_response?: Json | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          discrepancies?: Json | null
+          error_message?: string | null
+          id?: string
+          inspection_id?: string | null
+          processed_at?: string | null
+          processing_time?: number | null
+          status?: string
+          verification_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_verifications_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           author_id: string
@@ -603,6 +722,59 @@ export type Database = {
             columns: ["recruitment_process_id"]
             isOneToOne: false
             referencedRelation: "recruitment_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carriers: {
+        Row: {
+          address: string | null
+          cnpj: string
+          company_id: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          rating: number | null
+          specialties: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          cnpj: string
+          company_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          rating?: number | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          cnpj?: string
+          company_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carriers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1824,6 +1996,132 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      freight_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          reference_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          reference_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          reference_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      freight_quotes: {
+        Row: {
+          collection_date: string
+          company_id: string
+          created_at: string
+          created_by: string
+          delivery_date: string
+          destination_address: string
+          destination_city: string
+          destination_zip_code: string
+          id: string
+          observations: string | null
+          origin_address: string
+          origin_city: string
+          origin_zip_code: string
+          payment_method: string
+          payment_term: string
+          quote_number: string
+          selected_carrier_id: string | null
+          selected_response_id: string | null
+          status: string
+          total_volume: number | null
+          total_weight: number | null
+          updated_at: string
+        }
+        Insert: {
+          collection_date: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          delivery_date: string
+          destination_address: string
+          destination_city: string
+          destination_zip_code: string
+          id?: string
+          observations?: string | null
+          origin_address: string
+          origin_city: string
+          origin_zip_code: string
+          payment_method: string
+          payment_term: string
+          quote_number: string
+          selected_carrier_id?: string | null
+          selected_response_id?: string | null
+          status?: string
+          total_volume?: number | null
+          total_weight?: number | null
+          updated_at?: string
+        }
+        Update: {
+          collection_date?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          delivery_date?: string
+          destination_address?: string
+          destination_city?: string
+          destination_zip_code?: string
+          id?: string
+          observations?: string | null
+          origin_address?: string
+          origin_city?: string
+          origin_zip_code?: string
+          payment_method?: string
+          payment_term?: string
+          quote_number?: string
+          selected_carrier_id?: string | null
+          selected_response_id?: string | null
+          status?: string
+          total_volume?: number | null
+          total_weight?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "freight_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "freight_quotes_selected_carrier_id_fkey"
+            columns: ["selected_carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
             referencedColumns: ["id"]
           },
         ]
@@ -4025,6 +4323,128 @@ export type Database = {
           },
         ]
       }
+      inspection_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          inspection_id: string | null
+          upload_date: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          inspection_id?: string | null
+          upload_date?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          inspection_id?: string | null
+          upload_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_documents_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          ai_processing_completed_at: string | null
+          ai_processing_started_at: string | null
+          ai_verification_status: string | null
+          batch_number: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          has_discrepancies: boolean | null
+          id: string
+          inspection_criteria: Json | null
+          inspection_date: string
+          inspection_result: string
+          inspector: string
+          invoice_number: string | null
+          material_name: string
+          non_conformity: string | null
+          observations: string | null
+          purchase_order_number: string | null
+          quantity: number
+          supplier: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          ai_processing_completed_at?: string | null
+          ai_processing_started_at?: string | null
+          ai_verification_status?: string | null
+          batch_number: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          has_discrepancies?: boolean | null
+          id?: string
+          inspection_criteria?: Json | null
+          inspection_date: string
+          inspection_result: string
+          inspector: string
+          invoice_number?: string | null
+          material_name: string
+          non_conformity?: string | null
+          observations?: string | null
+          purchase_order_number?: string | null
+          quantity: number
+          supplier: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          ai_processing_completed_at?: string | null
+          ai_processing_started_at?: string | null
+          ai_verification_status?: string | null
+          batch_number?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          has_discrepancies?: boolean | null
+          id?: string
+          inspection_criteria?: Json | null
+          inspection_date?: string
+          inspection_result?: string
+          inspector?: string
+          invoice_number?: string | null
+          material_name?: string
+          non_conformity?: string | null
+          observations?: string | null
+          purchase_order_number?: string | null
+          quantity?: number
+          supplier?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       iso_documents: {
         Row: {
           approval_date: string | null
@@ -5497,6 +5917,161 @@ export type Database = {
           },
         ]
       }
+      quote_evaluations: {
+        Row: {
+          carrier_reputation_score: number
+          created_at: string
+          delivery_score: number
+          evaluator_id: string
+          id: string
+          notes: string | null
+          price_score: number
+          quote_id: string
+          response_id: string
+          total_score: number
+        }
+        Insert: {
+          carrier_reputation_score: number
+          created_at?: string
+          delivery_score: number
+          evaluator_id: string
+          id?: string
+          notes?: string | null
+          price_score: number
+          quote_id: string
+          response_id: string
+          total_score: number
+        }
+        Update: {
+          carrier_reputation_score?: number
+          created_at?: string
+          delivery_score?: number
+          evaluator_id?: string
+          id?: string
+          notes?: string | null
+          price_score?: number
+          quote_id?: string
+          response_id?: string
+          total_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_evaluations_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "freight_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_evaluations_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "quote_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_items: {
+        Row: {
+          cargo_type: string
+          created_at: string
+          description: string | null
+          id: string
+          quote_id: string
+          volume: number
+          weight: number
+        }
+        Insert: {
+          cargo_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          quote_id: string
+          volume: number
+          weight: number
+        }
+        Update: {
+          cargo_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          quote_id?: string
+          volume?: number
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "freight_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_responses: {
+        Row: {
+          access_token: string
+          additional_services: Json | null
+          carrier_id: string
+          conditions: string | null
+          created_at: string
+          delivery_time: number
+          id: string
+          price: number
+          quote_id: string
+          responded_at: string | null
+          status: string
+          updated_at: string
+          valid_until: string
+        }
+        Insert: {
+          access_token: string
+          additional_services?: Json | null
+          carrier_id: string
+          conditions?: string | null
+          created_at?: string
+          delivery_time: number
+          id?: string
+          price: number
+          quote_id: string
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+          valid_until: string
+        }
+        Update: {
+          access_token?: string
+          additional_services?: Json | null
+          carrier_id?: string
+          conditions?: string | null
+          created_at?: string
+          delivery_time?: number
+          id?: string
+          price?: number
+          quote_id?: string
+          responded_at?: string | null
+          status?: string
+          updated_at?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_responses_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_responses_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "freight_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       raw_material_inspections: {
         Row: {
           batch_number: string
@@ -6687,6 +7262,14 @@ export type Database = {
       exec_sql: {
         Args: { sql_statement: string }
         Returns: undefined
+      }
+      generate_access_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_quote_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_trial_evaluations: {
         Args: { employee_id: string; start_date: string }

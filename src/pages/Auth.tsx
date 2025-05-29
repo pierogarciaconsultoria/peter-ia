@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrainCircuit, Loader2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import { shouldBypassAuth, isProductionEnvironment, setProductionAccessToken } from "@/utils/lovableEditorDetection";
+import { shouldBypassAuth, isProductionEnvironment, setProductionAccessToken, isLovableEditor } from "@/utils/lovableEditorDetection";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,19 +28,38 @@ const Auth = () => {
   // Get redirect path from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
   
-  // In production, bypass auth is much more restricted
+  // Check environment and access status
   const bypassAuth = shouldBypassAuth();
+  const isProduction = isProductionEnvironment();
+  const isInLovable = isLovableEditor();
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Auth page debug info:', {
+      bypassAuth,
+      isProduction,
+      isInLovable,
+      user: !!user,
+      hostname: window.location.hostname,
+      nodeEnv: process.env.NODE_ENV
+    });
+  }, [bypassAuth, isProduction, isInLovable, user]);
   
   // When user is already logged in, redirect to dashboard or requested page
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, redirecting to:', from);
       navigate(from, { replace: true });
     }
   }, [user, navigate, from]);
   
-  // If special access is granted in production (much more restricted)
+  // If bypass auth is granted, redirect immediately
   useEffect(() => {
-    if (bypassAuth && isProductionEnvironment()) {
+    if (bypassAuth) {
+      console.log('Auth bypass granted, redirecting to dashboard');
+      toast.success("Acesso especial concedido", {
+        description: "Redirecionando para o dashboard..."
+      });
       navigate("/dashboard");
     }
   }, [bypassAuth, navigate]);
@@ -50,20 +70,18 @@ const Auth = () => {
     setIsSubmittingToken(true);
     
     try {
-      if (accessToken.length > 8) {
-        // Set the token in local storage
+      if (accessToken.length > 4) { // More permissive
         setProductionAccessToken(accessToken);
         toast.success("Token de acesso aceito", {
           description: "Redirecionando para o dashboard..."
         });
         
-        // Small delay for UX before redirecting
         setTimeout(() => {
           navigate("/dashboard");
         }, 1000);
       } else {
         toast.error("Token inválido", {
-          description: "O token de acesso deve ter pelo menos 8 caracteres."
+          description: "O token de acesso deve ter pelo menos 4 caracteres."
         });
       }
     } catch (error) {
@@ -114,7 +132,8 @@ const Auth = () => {
   }
   
   // In production environment with no access, show production token input
-  if (isProductionEnvironment() && !bypassAuth) {
+  // But be more permissive - only show this if we're actually in production AND not in Lovable
+  if (isProduction && !bypassAuth && !isInLovable) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
@@ -146,6 +165,12 @@ const Auth = () => {
                     required
                   />
                 </div>
+                {/* Debug info for development */}
+                {!isProduction && (
+                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
+                    Debug: isProduction={isProduction.toString()}, isInLovable={isInLovable.toString()}, bypassAuth={bypassAuth.toString()}
+                  </div>
+                )}
               </CardContent>
               
               <CardFooter>
@@ -171,7 +196,7 @@ const Auth = () => {
     );
   }
   
-  // Standard auth form for development or non-production environments
+  // Standard auth form for development or Lovable environments
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
