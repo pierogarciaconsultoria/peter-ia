@@ -5,18 +5,18 @@ import type { DiscQuestion } from "../data/discQuestions";
 
 interface QuestionFormProps {
   question: DiscQuestion;
-  value: string;
-  onAnswer: (value: string) => void;
+  selectedAnswer: string;
+  onAnswer: (value: string, questionId: string) => void;
 }
 
-export function QuestionForm({ question, value, onAnswer }: QuestionFormProps) {
+export function QuestionForm({ question, selectedAnswer, onAnswer }: QuestionFormProps) {
   return (
     <div className="py-2">
       <h3 className="text-lg font-medium mb-4">{question.question}</h3>
       
       <RadioGroup 
-        value={value}
-        onValueChange={onAnswer}
+        value={selectedAnswer}
+        onValueChange={(value) => onAnswer(value, question.id)}
         className="space-y-3"
       >
         {question.options.map(option => (

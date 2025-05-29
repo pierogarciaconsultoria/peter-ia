@@ -3,4 +3,4 @@
 export * from './api';
 export * from './links';
 export * from './storage';
-export * from './types';
+export * from './utils';

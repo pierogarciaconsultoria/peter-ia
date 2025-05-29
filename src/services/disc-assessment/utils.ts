@@ -1,25 +1,25 @@
 
-import { DiscScore, DiscType } from "./types";
+import { DiscScore } from "@/types/disc";
 
 /**
  * Determine the primary DISC type based on scores
  * @param scores The DISC scores
  * @returns The primary DISC type
  */
-export function determinePrimaryType(scores: DiscScore): DiscType {
-  const { D, I, S, C } = scores;
-  const maxScore = Math.max(D, I, S, C);
+export function determinePrimaryType(scores: DiscScore): string {
+  const { d, i, s, c } = scores;
+  const maxScore = Math.max(d, i, s, c);
   
-  if (maxScore === D) return 'D';
-  if (maxScore === I) return 'I';
-  if (maxScore === S) return 'S';
+  if (maxScore === d) return 'D';
+  if (maxScore === i) return 'I';
+  if (maxScore === s) return 'S';
   return 'C';
 }
 
 /**
  * Get a description of the DISC profile based on the primary type
  */
-export function getDiscProfileDescription(primaryType: DiscType): string {
+export function getDiscProfileDescription(primaryType: string): string {
   switch (primaryType) {
     case 'D':
       return 'Dominante, direto, decisivo, orientado a resultados';
@@ -39,18 +39,18 @@ export function getDiscProfileDescription(primaryType: DiscType): string {
  * Higher scores indicate a more balanced profile
  */
 export function calculateProfileBalance(scores: DiscScore): number {
-  const { D, I, S, C } = scores;
-  const total = D + I + S + C;
+  const { d, i, s, c } = scores;
+  const total = d + i + s + c;
   
   if (total === 0) return 0;
   
   // Calculate how evenly distributed the scores are
   const idealPerType = total / 4;
   const deviations = [
-    Math.abs(D - idealPerType),
-    Math.abs(I - idealPerType),
-    Math.abs(S - idealPerType),
-    Math.abs(C - idealPerType)
+    Math.abs(d - idealPerType),
+    Math.abs(i - idealPerType),
+    Math.abs(s - idealPerType),
+    Math.abs(c - idealPerType)
   ];
   
   const totalDeviation = deviations.reduce((sum, val) => sum + val, 0);

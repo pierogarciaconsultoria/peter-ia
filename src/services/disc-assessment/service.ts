@@ -2,7 +2,7 @@
 import { createAssessment, fetchAllAssessments } from './api';
 import { validateAssessmentLink, markAssessmentLinkAsUsed, generateAssessmentLink } from './links';
 import { getDiscProfileDescription, determinePrimaryType, calculateProfileBalance } from './utils';
-import { DiscAssessment, DiscScore, DiscType, CreateDiscAssessmentParams } from './types';
+import { DiscAssessment, DiscScore, CreateDiscAssessmentParams } from '@/types/disc';
 
 /**
  * Comprehensive DISC Assessment Service that combines all functionality
@@ -31,11 +31,11 @@ class DiscAssessmentService {
   }
   
   // Utility functions
-  getPrimaryType(scores: DiscScore): DiscType {
+  getPrimaryType(scores: DiscScore): string {
     return determinePrimaryType(scores);
   }
   
-  getProfileDescription(primaryType: DiscType): string {
+  getProfileDescription(primaryType: string): string {
     return getDiscProfileDescription(primaryType);
   }
   

@@ -12,7 +12,7 @@ export const createAssessment = async (assessment: CreateDiscAssessmentParams): 
       .insert([{
         name: assessment.name,
         email: assessment.email,
-        scores: assessment.scores,
+        scores: assessment.scores as any,
         primary_type: assessment.primary_type,
         invited_by: assessment.invited_by,
         date: new Date().toISOString()
