@@ -76,7 +76,8 @@ export const useMedicalCertificates = () => {
           // Transform the data to ensure type compatibility
           const transformedData: MedicalCertificate[] = (data || []).map((row: any) => ({
             ...row,
-            type: (['sickness', 'appointment', 'surgery', 'other'].includes(row.type) ? row.type : 'other') as MedicalCertificate['type']
+            type: (['sickness', 'appointment', 'surgery', 'other'].includes(row.type) ? row.type : 'other') as MedicalCertificate['type'],
+            status: (['pending', 'approved', 'rejected'].includes(row.status) ? row.status : 'pending') as MedicalCertificate['status']
           }));
           setCertificates(transformedData);
         }
@@ -126,7 +127,8 @@ export const useMedicalCertificates = () => {
         // Transform the data to ensure type compatibility
         const transformedData: MedicalCertificate = {
           ...data,
-          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type']
+          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type'],
+          status: (['pending', 'approved', 'rejected'].includes(data.status) ? data.status : 'pending') as MedicalCertificate['status']
         };
         setCertificates(prevCertificates => [transformedData, ...prevCertificates]);
         toast.success("Atestado médico adicionado com sucesso");
@@ -170,7 +172,8 @@ export const useMedicalCertificates = () => {
         // Transform the data to ensure type compatibility
         const transformedData: MedicalCertificate = {
           ...data,
-          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type']
+          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type'],
+          status: (['pending', 'approved', 'rejected'].includes(data.status) ? data.status : 'pending') as MedicalCertificate['status']
         };
         setCertificates(prevCertificates =>
           prevCertificates.map(certificate => (certificate.id === certificateId ? transformedData : certificate))
