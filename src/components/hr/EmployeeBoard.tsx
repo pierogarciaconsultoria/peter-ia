@@ -22,7 +22,7 @@ export function EmployeeBoard() {
         .from('hr_announcements')
         .select(`
           *,
-          author:user_profiles!hr_announcements_author_id_fkey(
+          created_by_profile:user_profiles!hr_announcements_author_id_fkey(
             id,
             first_name,
             last_name
@@ -179,7 +179,7 @@ export function EmployeeBoard() {
                       <Calendar className="h-4 w-4" />
                       <span>{formatDate(announcement.publish_date)}</span>
                       <span>•</span>
-                      <span>Por {announcement.author?.first_name || 'Usuário'} {announcement.author?.last_name || ''}</span>
+                      <span>Por {announcement.created_by_profile?.first_name || 'Usuário'} {announcement.created_by_profile?.last_name || ''}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

@@ -50,10 +50,10 @@ export const useVacations = () => {
 
     try {
       let query = supabase
-        .from('vacation_requests' as any)
+        .from('vacation_requests')
         .select(`
           *,
-          employee:employees!inner(
+          employee:employees!vacation_requests_employee_id_fkey(
             id,
             name,
             email,
@@ -75,7 +75,7 @@ export const useVacations = () => {
         setError(error.message || "Failed to load vacation requests");
         toast.error("Erro ao carregar solicitações de férias");
       } else {
-        setVacationRequests(data || []);
+        setVacationRequests((data as any) || []);
       }
     } catch (error: any) {
       console.error("Unexpected error fetching vacation requests:", error);
@@ -97,11 +97,11 @@ export const useVacations = () => {
       };
 
       const { data, error } = await supabase
-        .from('vacation_requests' as any)
+        .from('vacation_requests')
         .insert([requestData])
         .select(`
           *,
-          employee:employees!inner(
+          employee:employees!vacation_requests_employee_id_fkey(
             id,
             name,
             email,
@@ -117,7 +117,7 @@ export const useVacations = () => {
         setError(error.message || "Failed to add vacation request");
         toast.error("Erro ao adicionar solicitação de férias");
       } else {
-        setVacationRequests(prev => [data, ...prev]);
+        setVacationRequests(prev => [(data as any), ...prev]);
         toast.success("Solicitação de férias adicionada com sucesso");
       }
     } catch (error: any) {
@@ -135,12 +135,12 @@ export const useVacations = () => {
 
     try {
       const { data, error } = await supabase
-        .from('vacation_requests' as any)
+        .from('vacation_requests')
         .update(updates)
         .eq('id', requestId)
         .select(`
           *,
-          employee:employees!inner(
+          employee:employees!vacation_requests_employee_id_fkey(
             id,
             name,
             email,
@@ -157,7 +157,7 @@ export const useVacations = () => {
         toast.error("Erro ao atualizar solicitação de férias");
       } else {
         setVacationRequests(prev =>
-          prev.map(request => (request.id === requestId ? data : request))
+          prev.map(request => (request.id === requestId ? (data as any) : request))
         );
         toast.success("Solicitação de férias atualizada com sucesso");
       }
@@ -176,7 +176,7 @@ export const useVacations = () => {
 
     try {
       const { error } = await supabase
-        .from('vacation_requests' as any)
+        .from('vacation_requests')
         .delete()
         .eq('id', requestId);
 
