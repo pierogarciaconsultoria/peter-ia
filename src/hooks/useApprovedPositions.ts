@@ -83,8 +83,8 @@ export const useApprovedPositions = () => {
         // Transform the data to ensure type compatibility
         const transformedData: ApprovedPosition[] = (data || []).map((item: any) => ({
           ...item,
-          // Ensure department has the correct structure
-          department: (item.department && typeof item.department === 'object' && 'id' in item.department) 
+          // Ensure department has the correct structure with null check
+          department: item.department && typeof item.department === 'object' && 'id' in item.department
             ? item.department 
             : { id: '', name: '' }
         }));
@@ -136,10 +136,10 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to add approved position");
         toast.error("Erro ao adicionar posição aprovada");
       } else {
-        // Transform the data to ensure type compatibility
+        // Transform the data to ensure type compatibility with null check
         const transformedData: ApprovedPosition = {
           ...data,
-          department: (data.department && typeof data.department === 'object' && 'id' in data.department) 
+          department: data.department && typeof data.department === 'object' && 'id' in data.department
             ? data.department 
             : { id: '', name: '' }
         };
@@ -184,10 +184,10 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to update approved position");
         toast.error("Erro ao atualizar posição aprovada");
       } else {
-        // Transform the data to ensure type compatibility
+        // Transform the data to ensure type compatibility with null check
         const transformedData: ApprovedPosition = {
           ...data,
-          department: (data.department && typeof data.department === 'object' && 'id' in data.department) 
+          department: data.department && typeof data.department === 'object' && 'id' in data.department
             ? data.department 
             : { id: '', name: '' }
         };
@@ -239,7 +239,7 @@ export const useApprovedPositions = () => {
     const summary: { [key: string]: ApprovedPositionSummary } = {};
     
     positions.forEach(position => {
-      const deptName = position.department?.name || 'Sem Departamento';
+      const deptName = position.department?.name ?? 'Sem Departamento';
       
       if (!summary[deptName]) {
         summary[deptName] = {

@@ -36,9 +36,9 @@ export function JobPositionSelector({ onSelect, selectedPosition }: JobPositionS
           status: (['approved', 'draft', 'in_review', 'distributed'].includes(job.status) 
             ? job.status as "approved" | "draft" | "in_review" | "distributed"
             : 'draft' as const),
-          // Ensure required_procedures is always an array
+          // Ensure required_procedures is always a string array
           required_procedures: Array.isArray(job.required_procedures) 
-            ? job.required_procedures 
+            ? job.required_procedures.map(String)
             : []
         }));
 

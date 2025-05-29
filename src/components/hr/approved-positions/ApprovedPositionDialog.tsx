@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,8 +71,8 @@ export function ApprovedPositionDialog({
     setFormData(prev => ({
       ...prev,
       job_position_id: jobPositionId,
-      // Use department_id from job position if available
-      department_id: selectedJob?.department_id || prev.department_id
+      // Use department from job position if available
+      department_id: selectedJob?.department || prev.department_id
     }));
   };
 
