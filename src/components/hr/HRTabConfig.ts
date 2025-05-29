@@ -97,7 +97,7 @@ export const hrTabGroups: TabGroup[] = [
   },
   {
     id: "daily-management",
-    name: "Gestão do Dia a Dia",
+    name: "Gestão Operacional",
     icon: createIcon(icons.Calendar),
     subTabs: [
       { 

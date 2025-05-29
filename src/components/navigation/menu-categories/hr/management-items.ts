@@ -4,10 +4,10 @@ import { MenuItem } from "../../types";
 
 export const managementItems: MenuItem[] = [
   {
-    title: "Gestão do Dia a Dia",
+    title: "Gestão Operacional",
     icon: BriefcaseBusiness,
     href: "#",
-    modulo: "gestao_dia_dia",
+    modulo: "gestao_operacional",
     children: [
       { 
         title: "Férias", 
