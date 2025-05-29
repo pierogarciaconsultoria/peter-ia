@@ -1,45 +1,40 @@
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle, RefreshCcw } from "lucide-react";
-import { ExternalDiscAssessmentLink } from "./ExternalDiscAssessmentLink";
+import { Plus, RefreshCw } from "lucide-react";
 
 interface DiscAssessmentHeaderProps {
   onOpenDialog: () => void;
-  onRefresh: () => Promise<void>;
+  onRefresh: () => void;
   isRetrying: boolean;
   isLoading: boolean;
 }
 
 export function DiscAssessmentHeader({ 
-  onOpenDialog,
-  onRefresh,
-  isRetrying,
-  isLoading
+  onOpenDialog, 
+  onRefresh, 
+  isRetrying, 
+  isLoading 
 }: DiscAssessmentHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex justify-between items-center">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Avaliação DISC</h2>
+        <h2 className="text-2xl font-bold">Avaliação de Perfil DISC</h2>
         <p className="text-muted-foreground">
-          Gerencie avaliações DISC de colaboradores e candidatos
+          Gerencie avaliações DISC para funcionários e candidatos
         </p>
       </div>
-      
-      <div className="flex items-center space-x-2">
+      <div className="flex gap-2">
         <Button 
           variant="outline" 
           onClick={onRefresh}
-          disabled={isLoading || isRetrying}
+          disabled={isRetrying || isLoading}
         >
-          <RefreshCcw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-          {isRetrying ? 'Atualizando...' : 'Atualizar'}
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+          Atualizar
         </Button>
-        
-        <ExternalDiscAssessmentLink />
-        
         <Button onClick={onOpenDialog}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Nova Avaliação
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Link de Avaliação
         </Button>
       </div>
     </div>

@@ -1,97 +1,143 @@
 
-import { useState, useCallback } from "react";
-import { useToast } from "./use-toast";
-import { 
-  DiscAssessment, 
-  DiscScore, 
-  DiscType,
-  fetchAllAssessments,
-  createAssessment,
-  CreateDiscAssessmentParams
-} from "@/services/disc-assessment";
+import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
-export type { DiscType, DiscScore, DiscAssessment };
-
-interface CreateDiscAssessmentInput {
+export interface DiscAssessment {
+  id: string;
   name: string;
   email: string;
-  scores: DiscScore;
+  scores: {
+    d: number;
+    i: number;
+    s: number;
+    c: number;
+  };
   primary_type: string;
+  date: string;
   invited_by?: string;
+  created_at: string;
 }
 
-/**
- * Hook for managing DISC assessments
- * @returns Object with assessments, loading state, error, and methods to fetch and create assessments
- */
-export function useDiscAssessments() {
-  const [assessments, setAssessments] = useState<DiscAssessment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+export interface DiscEvaluationLink {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+  expires_at: string;
+  is_used: boolean;
+  entity_type: string;
+  entity_id: string;
+  company_id: string;
+  created_by?: string;
+  created_at: string;
+}
 
-  /**
-   * Fetches all DISC assessments
-   */
+export const useDiscAssessments = () => {
+  const [assessments, setAssessments] = useState<DiscAssessment[]>([]);
+  const [evaluationLinks, setEvaluationLinks] = useState<DiscEvaluationLink[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { userCompany } = useAuth();
+
   const fetchAssessments = useCallback(async () => {
+    if (!userCompany?.id) return;
+    
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const data = await fetchAllAssessments();
-      setAssessments(data);
-    } catch (err: any) {
-      console.error("Error in fetchAssessments:", err);
-      setError(err.message || "Erro ao carregar avaliações DISC");
-      // Don't stop the UI from rendering - provide empty data
-      setAssessments([]);
+      // Fetch DISC assessments
+      const { data: assessmentData, error: assessmentError } = await supabase
+        .from('disc_assessments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (assessmentError) throw assessmentError;
+
+      // Fetch evaluation links
+      const { data: linkData, error: linkError } = await (supabase as any)
+        .from('disc_evaluation_links')
+        .select('*')
+        .eq('company_id', userCompany.id)
+        .order('created_at', { ascending: false });
+
+      if (linkError) throw linkError;
+
+      setAssessments(assessmentData || []);
+      setEvaluationLinks(linkData || []);
+    } catch (error: any) {
+      console.error('Error fetching DISC assessments:', error);
+      setError(error.message);
+      toast.error('Erro ao carregar avaliações DISC');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userCompany?.id]);
 
-  /**
-   * Creates a new DISC assessment
-   * @param assessment The assessment data to create
-   * @returns The created assessment
-   */
-  const createDiscAssessment = async (assessment: CreateDiscAssessmentInput) => {
+  const createEvaluationLink = async (data: {
+    name: string;
+    email: string;
+    entity_type: string;
+    entity_id: string;
+  }) => {
+    if (!userCompany?.id) return;
+
     try {
-      const params: CreateDiscAssessmentParams = {
-        name: assessment.name,
-        email: assessment.email,
-        scores: assessment.scores,
-        primary_type: assessment.primary_type as DiscType,
-        invited_by: assessment.invited_by
-      };
+      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const expires_at = new Date();
+      expires_at.setDate(expires_at.getDate() + 7); // 7 days from now
+
+      const { data: linkData, error } = await (supabase as any)
+        .from('disc_evaluation_links')
+        .insert([{
+          ...data,
+          token,
+          expires_at: expires_at.toISOString(),
+          company_id: userCompany.id,
+          is_used: false,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEvaluationLinks(prev => [linkData, ...prev]);
+      toast.success('Link de avaliação criado com sucesso');
       
-      const newAssessment = await createAssessment(params);
-      
-      // Update local state
-      setAssessments(prev => [newAssessment, ...prev]);
-      
-      toast({
-        title: "Avaliação DISC criada",
-        description: "A avaliação DISC foi criada com sucesso.",
-      });
-      
-      return newAssessment;
-    } catch (err: any) {
-      console.error("Error in createAssessment:", err);
-      toast({
-        title: "Erro ao criar avaliação DISC",
-        description: err.message || "Não foi possível criar a avaliação DISC.",
-        variant: "destructive",
-      });
-      throw err;
+      return linkData;
+    } catch (error: any) {
+      console.error('Error creating evaluation link:', error);
+      toast.error('Erro ao criar link de avaliação');
+      throw error;
+    }
+  };
+
+  const deleteEvaluationLink = async (linkId: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('disc_evaluation_links')
+        .delete()
+        .eq('id', linkId);
+
+      if (error) throw error;
+
+      setEvaluationLinks(prev => prev.filter(link => link.id !== linkId));
+      toast.success('Link de avaliação removido');
+    } catch (error: any) {
+      console.error('Error deleting evaluation link:', error);
+      toast.error('Erro ao remover link de avaliação');
     }
   };
 
   return {
     assessments,
+    evaluationLinks,
     isLoading,
     error,
     fetchAssessments,
-    createAssessment: createDiscAssessment,
+    createEvaluationLink,
+    deleteEvaluationLink,
   };
-}
+};
