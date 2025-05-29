@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { AlertTriangle, Check } from "lucide-react";
 import { validateAssessmentLink, createAssessment, markAssessmentLinkAsUsed } from "@/services/discAssessmentService";
 import { useToast } from "@/hooks/use-toast";
-import { DiscScore } from "@/hooks/useDiscAssessments";
+import { DiscScore } from "@/types/disc";
 import { Button } from "@/components/ui/button";
 import { toast as sonnerToast } from "sonner";
 

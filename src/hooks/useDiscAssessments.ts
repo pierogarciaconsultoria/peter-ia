@@ -1,26 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-
-export interface DiscScore {
-  d: number;
-  i: number;
-  s: number;
-  c: number;
-}
-
-export interface DiscAssessment {
-  id: string;
-  name: string;
-  email: string;
-  scores: DiscScore;
-  primary_type: string;
-  date: string;
-  invited_by?: string;
-  created_at: string;
-}
+import { DiscScore, DiscAssessment } from '@/types/disc';
 
 export interface DiscEvaluationLink {
   id: string;
@@ -165,3 +147,6 @@ export const useDiscAssessments = () => {
     deleteEvaluationLink,
   };
 };
+
+// Re-export the types for backward compatibility
+export type { DiscScore, DiscAssessment };

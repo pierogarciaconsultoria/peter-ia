@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import type { DiscScore } from "@/hooks/useDiscAssessments";
+import { DiscScore } from '@/types/disc';
 
 export function useDiscQuestionnaire(onComplete: (scores: DiscScore) => void) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
