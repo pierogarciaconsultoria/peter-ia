@@ -73,7 +73,12 @@ export const useMedicalCertificates = () => {
           setError(error.message || "Failed to load medical certificates");
           toast.error("Erro ao carregar atestados médicos");
         } else {
-          setCertificates(data || []);
+          // Transform the data to ensure type compatibility
+          const transformedData: MedicalCertificate[] = (data || []).map((row: any) => ({
+            ...row,
+            type: (['sickness', 'appointment', 'surgery', 'other'].includes(row.type) ? row.type : 'other') as MedicalCertificate['type']
+          }));
+          setCertificates(transformedData);
         }
       } catch (error: any) {
         console.error("Unexpected error fetching medical certificates:", error);
@@ -118,7 +123,12 @@ export const useMedicalCertificates = () => {
         setError(error.message || "Failed to add medical certificate");
         toast.error("Erro ao adicionar atestado médico");
       } else {
-        setCertificates(prevCertificates => [data, ...prevCertificates]);
+        // Transform the data to ensure type compatibility
+        const transformedData: MedicalCertificate = {
+          ...data,
+          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type']
+        };
+        setCertificates(prevCertificates => [transformedData, ...prevCertificates]);
         toast.success("Atestado médico adicionado com sucesso");
       }
     } catch (error: any) {
@@ -157,8 +167,13 @@ export const useMedicalCertificates = () => {
         setError(error.message || "Failed to update medical certificate");
         toast.error("Erro ao atualizar atestado médico");
       } else {
+        // Transform the data to ensure type compatibility
+        const transformedData: MedicalCertificate = {
+          ...data,
+          type: (['sickness', 'appointment', 'surgery', 'other'].includes(data.type) ? data.type : 'other') as MedicalCertificate['type']
+        };
         setCertificates(prevCertificates =>
-          prevCertificates.map(certificate => (certificate.id === certificateId ? data : certificate))
+          prevCertificates.map(certificate => (certificate.id === certificateId ? transformedData : certificate))
         );
         toast.success("Atestado médico atualizado com sucesso");
       }
