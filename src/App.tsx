@@ -53,32 +53,36 @@ import { Toaster as SonnerToaster } from 'sonner';
 import './App.css';
 
 function App() {
-  // We're not using shadcn/ui toast here since we're using sonner toast in checkSupabaseConnection
-  // Remove the useToast hook import for shadcn as it's not being used here
+  console.log('🚀 App: Componente inicializado');
   
   // Test Supabase connection once on startup
   useEffect(() => {
+    console.log('🔧 App: useEffect para conexão Supabase iniciado');
     let connectionChecked = false;
     
     const checkSupabaseConnection = async () => {
-      if (connectionChecked) return;
+      if (connectionChecked) {
+        console.log('🔍 App: Conexão já verificada, pulando');
+        return;
+      }
       
+      console.log('🔌 App: Testando conexão com Supabase...');
       try {
         const { data, error } = await supabase.from('connection_test').select('*').limit(1);
         
         if (error) {
-          console.error('Database connection error:', error);
+          console.error('❌ App: Erro de conexão com banco de dados:', error);
           if (isProductionEnvironment()) {
             toast.error("Erro de conexão com o banco de dados", {
               description: "Verifique sua conexão com a internet",
             });
           }
         } else {
-          console.log('Database connection successful');
+          console.log('✅ App: Conexão com banco de dados bem-sucedida');
           connectionChecked = true;
         }
       } catch (err) {
-        console.error('Failed to test database connection:', err);
+        console.error('❌ App: Falha ao testar conexão com banco de dados:', err);
       }
     };
     
@@ -86,18 +90,26 @@ function App() {
     
     // Setup reconnection check on window focus
     const handleFocus = () => {
+      console.log('👁️ App: Window focus detectado');
       // Only recheck connection if previously failed
       if (!connectionChecked) {
+        console.log('🔄 App: Reconectando após falha anterior');
         checkSupabaseConnection();
       }
     };
     
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    return () => {
+      console.log('🧹 App: Removendo event listener');
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
   
   // Initialize admin account
+  console.log('👨‍💼 App: Inicializando criação de admin');
   useAdminCreation();
+
+  console.log('🎨 App: Renderizando componente principal');
 
   return (
     <AuthProvider>
@@ -165,5 +177,7 @@ function App() {
     </AuthProvider>
   );
 }
+
+console.log('📁 App: Arquivo carregado e função exportada');
 
 export default App;
