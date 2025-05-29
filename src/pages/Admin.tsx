@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -373,45 +374,20 @@ const Admin = () => {
     }
     
     return (
-      <Tabs defaultValue={isSuperAdmin ? "companies" : "users"}>
+      <Tabs defaultValue="cadastros">
         <TabsList className="mb-4">
-          {isSuperAdmin && <TabsTrigger value="companies">Empresas</TabsTrigger>}
-          <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="roles">Papéis</TabsTrigger>
+          <TabsTrigger value="cadastros">Cadastros</TabsTrigger>
           {(isSuperAdmin || isEditorSuperAdmin) && <TabsTrigger value="assistants">Assistentes</TabsTrigger>}
         </TabsList>
         
-        {isSuperAdmin && (
-          <TabsContent value="companies" className="space-y-4">
-            <CompanyManagement
-              companies={companies}
-              loading={loading}
-              fetchCompanies={fetchCompanies}
-              setItemToDelete={setItemToDelete}
-              setDeleteDialogOpen={setDeleteDialogOpen}
-              isSuperAdmin={isSuperAdmin}
-            />
-          </TabsContent>
-        )}
-        
-        <TabsContent value="users" className="space-y-4">
-          <UserManagement
+        <TabsContent value="cadastros" className="space-y-4">
+          <CentralizedRegistration
+            companies={companies}
             users={users}
-            companies={companies}
-            loading={loading}
-            fetchUsers={fetchUsers}
-            setItemToDelete={setItemToDelete}
-            setDeleteDialogOpen={setDeleteDialogOpen}
-            isSuperAdmin={isSuperAdmin}
-            userCompany={userCompany}
-          />
-        </TabsContent>
-        
-        <TabsContent value="roles" className="space-y-4">
-          <RoleManagement
             roles={roles}
-            companies={companies}
             loading={loading}
+            fetchCompanies={fetchCompanies}
+            fetchUsers={fetchUsers}
             fetchRoles={fetchRoles}
             setItemToDelete={setItemToDelete}
             setDeleteDialogOpen={setDeleteDialogOpen}
