@@ -93,38 +93,25 @@ const Admin = () => {
 
   const fetchCompanies = async () => {
     try {
-      if (isEditorSuperAdmin || isFreeAccessEnabled) {
-        const result = await executeQuery('SELECT * FROM public.companies ORDER BY name');
+      let query = supabase.from('companies').select('*');
+      
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('name');
         
-        if (!result.success) {
-          console.error("Error executing SQL for companies:", result.error);
-          toast.error("Erro ao carregar empresas");
-          setCompanies([]);
-          return;
-        }
-        
-        setCompanies(result.data || []);
+      if (error) {
+        console.error("Error fetching companies:", error);
+        toast.error("Erro ao carregar empresas");
+        setCompanies([]);
       } else {
-        let query = supabase.from('companies').select('*');
+        const formattedCompanies = (data || []).map(company => ({
+          ...company,
+          active: company.active !== undefined ? company.active : true
+        }));
         
-        if (!isSuperAdmin && userCompany) {
-          query = query.eq('id', userCompany.id);
-        }
-        
-        const { data, error } = await query.order('name');
-          
-        if (error) {
-          console.error("Error fetching companies:", error);
-          toast.error("Erro ao carregar empresas");
-          setCompanies([]);
-        } else {
-          const formattedCompanies = (data || []).map(company => ({
-            ...company,
-            active: company.active !== undefined ? company.active : true
-          }));
-          
-          setCompanies(formattedCompanies);
-        }
+        setCompanies(formattedCompanies);
       }
     } catch (error) {
       console.error("Error in fetchCompanies:", error);
@@ -134,48 +121,30 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      if (isEditorSuperAdmin || isFreeAccessEnabled) {
-        const result = await executeQuery(`
-          SELECT p.*, c.name as company_name
-          FROM public.user_profiles p
-          LEFT JOIN public.companies c ON p.company_id = c.id
-          ORDER BY p.created_at DESC
+      let query = supabase
+        .from('user_profiles')
+        .select(`
+          *,
+          companies:company_id (name)
         `);
+      
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('company_id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
         
-        if (!result.success) {
-          console.error("Error executing SQL for users:", result.error);
-          toast.error("Erro ao carregar usuários");
-          setUsers([]);
-          return;
-        }
-        
-        setUsers(result.data || []);
+      if (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Erro ao carregar usuários");
+        setUsers([]);
       } else {
-        let query = supabase
-          .from('user_profiles')
-          .select(`
-            *,
-            companies:company_id (name)
-          `);
+        const formattedUsers = data?.map(user => ({
+          ...user,
+          company_name: user.companies?.name
+        }));
         
-        if (!isSuperAdmin && userCompany) {
-          query = query.eq('company_id', userCompany.id);
-        }
-        
-        const { data, error } = await query.order('created_at', { ascending: false });
-          
-        if (error) {
-          console.error("Error fetching users:", error);
-          toast.error("Erro ao carregar usuários");
-          setUsers([]);
-        } else {
-          const formattedUsers = data?.map(user => ({
-            ...user,
-            company_name: user.companies?.name
-          }));
-          
-          setUsers(formattedUsers || []);
-        }
+        setUsers(formattedUsers || []);
       }
     } catch (error) {
       console.error("Error in fetchUsers:", error);
@@ -185,53 +154,35 @@ const Admin = () => {
 
   const fetchRoles = async () => {
     try {
-      if (isEditorSuperAdmin || isFreeAccessEnabled) {
-        const result = await executeQuery(`
-          SELECT r.*, c.name as company_name
-          FROM public.roles r
-          LEFT JOIN public.companies c ON r.company_id = c.id
-          ORDER BY r.name
+      let query = supabase
+        .from('roles')
+        .select(`
+          *,
+          companies:company_id (name)
         `);
+      
+      if (!isSuperAdmin && userCompany) {
+        query = query.eq('company_id', userCompany.id);
+      }
+      
+      const { data, error } = await query.order('name');
         
-        if (!result.success) {
-          console.error("Error executing SQL for roles:", result.error);
-          toast.error("Erro ao carregar papéis");
-          setRoles([]);
-          return;
-        }
-        
-        setRoles(result.data || []);
+      if (error) {
+        console.error("Error fetching roles:", error);
+        toast.error("Erro ao carregar papéis");
+        setRoles([]);
       } else {
-        let query = supabase
-          .from('roles')
-          .select(`
-            *,
-            companies:company_id (name)
-          `);
-        
-        if (!isSuperAdmin && userCompany) {
-          query = query.eq('company_id', userCompany.id);
-        }
-        
-        const { data, error } = await query.order('name');
+        const formattedRoles = (data || []).map(role => {
+          const typedRole: Role = {
+            ...role as any,
+            company_name: role.companies?.name,
+            is_admin: false
+          };
           
-        if (error) {
-          console.error("Error fetching roles:", error);
-          toast.error("Erro ao carregar papéis");
-          setRoles([]);
-        } else {
-          const formattedRoles = (data || []).map(role => {
-            const typedRole: Role = {
-              ...role as any,
-              company_name: role.companies?.name,
-              is_admin: false
-            };
-            
-            return typedRole;
-          });
-          
-          setRoles(formattedRoles);
-        }
+          return typedRole;
+        });
+        
+        setRoles(formattedRoles);
       }
     } catch (error) {
       console.error("Error in fetchRoles:", error);
@@ -244,66 +195,46 @@ const Admin = () => {
     
     setLoading(true);
     try {
-      if (isEditorSuperAdmin) {
-        let sqlQuery = "";
-        
-        if (itemToDelete.type === 'user') {
-          sqlQuery = `DELETE FROM auth.users WHERE id = '${itemToDelete.id}';`;
-        } else if (itemToDelete.type === 'company') {
-          sqlQuery = `DELETE FROM public.companies WHERE id = '${itemToDelete.id}';`;
-        } else if (itemToDelete.type === 'role') {
-          sqlQuery = `DELETE FROM public.roles WHERE id = '${itemToDelete.id}';`;
+      if (itemToDelete.type === 'user') {
+        if (!isSuperAdmin) {
+          const userToDelete = users.find(u => u.id === itemToDelete.id);
+          if (userToDelete?.is_super_admin) {
+            throw new Error("Você não tem permissão para excluir um Super Admin");
+          }
+          if (userToDelete?.company_id !== userCompany?.id) {
+            throw new Error("Você só pode excluir usuários da sua empresa");
+          }
         }
         
-        const result = await executeQuery(sqlQuery);
-        
-        if (!result.success) throw new Error(result.error);
-        
-        if (itemToDelete.type === 'user') fetchUsers();
-        else if (itemToDelete.type === 'company') fetchCompanies();
-        else if (itemToDelete.type === 'role') fetchRoles();
-      } else {
-        if (itemToDelete.type === 'user') {
-          if (!isSuperAdmin) {
-            const userToDelete = users.find(u => u.id === itemToDelete.id);
-            if (userToDelete?.is_super_admin) {
-              throw new Error("Você não tem permissão para excluir um Super Admin");
-            }
-            if (userToDelete?.company_id !== userCompany?.id) {
-              throw new Error("Você só pode excluir usuários da sua empresa");
-            }
-          }
-          
-          const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
-          if (error) throw error;
-          fetchUsers();
-        } else if (itemToDelete.type === 'company') {
-          if (!isSuperAdmin) {
-            throw new Error("Apenas administradores do sistema podem excluir empresas");
-          }
-          
-          const { error } = await supabase
-            .from('companies')
-            .delete()
-            .eq('id', itemToDelete.id);
-            
-          if (error) throw error;
-          fetchCompanies();
-        } else if (itemToDelete.type === 'role') {
-          const roleToDelete = roles.find(r => r.id === itemToDelete.id);
-          
-          if (!isSuperAdmin && roleToDelete?.company_id !== userCompany?.id) {
-            throw new Error("Você só pode excluir papéis da sua empresa");
-          }
-          
-          const { error } = await supabase
-            .from('roles')
-            .delete()
-            .eq('id', itemToDelete.id);
-            
-          if (error) throw error;
-          fetchRoles();
+        const { error } = await supabase.auth.admin.deleteUser(itemToDelete.id);
+        if (error) throw error;
+        fetchUsers();
+      } else if (itemToDelete.type === 'company') {
+        if (!isSuperAdmin) {
+          throw new Error("Apenas administradores do sistema podem excluir empresas");
         }
+        
+        const { error } = await supabase
+          .from('companies')
+          .delete()
+          .eq('id', itemToDelete.id);
+          
+        if (error) throw error;
+        fetchCompanies();
+      } else if (itemToDelete.type === 'role') {
+        const roleToDelete = roles.find(r => r.id === itemToDelete.id);
+        
+        if (!isSuperAdmin && roleToDelete?.company_id !== userCompany?.id) {
+          throw new Error("Você só pode excluir papéis da sua empresa");
+        }
+        
+        const { error } = await supabase
+          .from('roles')
+          .delete()
+          .eq('id', itemToDelete.id);
+          
+        if (error) throw error;
+        fetchRoles();
       }
       
       toast.success(`${

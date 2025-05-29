@@ -1,168 +1,209 @@
 
-import React, { createContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { isProductionEnvironment } from '@/utils/lovableEditorDetection';
+import { isSuperAdminInLovable } from '@/utils/lovableEditorDetection';
 
-// Define the AuthContext type
-type AuthContextType = {
-  user: any | null;
-  userCompany: any | null;
-  userTeams: any[] | null;
-  userRoles: string[] | null;
-  isAdmin: boolean;
-  isSuperAdmin: boolean;
-  isCompanyAdmin: boolean;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: Error | null;
-  connectionStatus: 'connected' | 'connecting' | 'disconnected';
-  signIn: (email: string, password: string) => Promise<any>;
-  signOut: () => Promise<void>;
-  refetchUserData: () => Promise<void>;
-  reconnect: () => Promise<void>;
-};
-
-// Create the context with a default value
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  userCompany: null,
-  userTeams: null,
-  userRoles: null,
-  isAdmin: false,
-  isSuperAdmin: false,
-  isCompanyAdmin: false,
-  isAuthenticated: false,
-  loading: true,
-  error: null,
-  connectionStatus: 'connecting',
-  signIn: async () => null,
-  signOut: async () => {},
-  refetchUserData: async () => {},
-  reconnect: async () => {},
-});
-
-export interface AuthProviderProps {
-  children: React.ReactNode;
+interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+  active_modules: string[];
+  active: boolean;
 }
 
-const MAX_RETRIES = 3;
+interface UserProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  company_id: string;
+  is_super_admin: boolean;
+  is_company_admin: boolean;
+  created_at: string;
+  last_login: string;
+  is_active: boolean;
+}
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
-  const [userCompany, setUserCompany] = useState<any | null>(null);
-  const [userTeams, setUserTeams] = useState<any[] | null>(null);
-  const [userRoles, setUserRoles] = useState<string[] | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
-  const [isCompanyAdmin, setIsCompanyAdmin] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('connecting');
-  const [retryCount, setRetryCount] = useState(0);
+interface AuthContextType {
+  user: User | null;
+  userProfile: UserProfile | null;
+  userCompany: Company | null;
+  loading: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'connecting';
+  signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, metadata?: any) => Promise<void>;
+  reconnect: () => void;
+  isSuperAdmin: boolean;
+  isCompanyAdmin: boolean;
+  isAdmin: boolean;
+}
 
-  const fetchUserData = useCallback(async (userId: string, attempt = 1) => {
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userCompany, setUserCompany] = useState<Company | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+
+  // Detecta se é super admin no Lovable Editor
+  const isLovableEditor = isSuperAdminInLovable();
+
+  const fetchUserProfile = async (userId: string) => {
     try {
-      setConnectionStatus('connecting');
-      setError(null);
-      
-      // Get user profile
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (profileError) {
-        if (attempt <= MAX_RETRIES) {
-          console.log(`Retry attempt ${attempt} for fetching user data`);
-          setTimeout(() => fetchUserData(userId, attempt + 1), 1000 * attempt);
-          return;
-        }
-        throw profileError;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar perfil do usuário:', error);
+        return null;
       }
 
-      // Get user company
-      const { data: companyData, error: companyError } = await supabase
+      return profile;
+    } catch (error) {
+      console.error('Erro inesperado ao buscar perfil:', error);
+      return null;
+    }
+  };
+
+  const fetchUserCompany = async (companyId: string) => {
+    try {
+      const { data: company, error } = await supabase
         .from('companies')
         .select('*')
-        .eq('id', profileData?.company_id)
-        .maybeSingle();
+        .eq('id', companyId)
+        .single();
 
-      if (companyError && attempt <= MAX_RETRIES) {
-        setTimeout(() => fetchUserData(userId, attempt + 1), 1000 * attempt);
-        return;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar empresa:', error);
+        return null;
       }
-      
-      // Get user roles from user_profiles
-      // Check if this is our master admin
-      const isMasterAdmin = userId === profileData?.id && profileData?.email === "contato@pierogarcia.com.br";
-      const roles = profileData?.role ? [profileData.role] : [];
-      
-      if (isMasterAdmin && !roles.includes('super_admin')) {
-        roles.push('super_admin');
-      }
-      
-      // Determine admin status
-      const isUserAdmin = roles.includes('admin') || isMasterAdmin;
-      const isUserCompanyAdmin = roles.includes('company_admin') || isMasterAdmin;
-      const isUserSuperAdmin = roles.includes('super_admin') || isMasterAdmin;
-      
-      // Update state with fetched data
-      setUserCompany(companyData);
-      setUserTeams([]); // Initialize with empty array since user_teams table might not exist yet
-      setUserRoles(roles);
-      setIsAdmin(isUserAdmin || isUserCompanyAdmin || isUserSuperAdmin);
-      setIsSuperAdmin(isUserSuperAdmin);
-      setIsCompanyAdmin(isUserCompanyAdmin);
-      setConnectionStatus('connected');
-      setRetryCount(0);
 
-    } catch (error: any) {
-      console.error('Error fetching user data:', error);
-      setConnectionStatus('disconnected');
-      setError(error);
-      
-      if (isProductionEnvironment()) {
-        toast.error('Erro de conexão', {
-          description: 'Houve um problema ao carregar seus dados. Tente novamente.',
-        });
-      }
+      return company;
+    } catch (error) {
+      console.error('Erro inesperado ao buscar empresa:', error);
+      return null;
     }
+  };
+
+  const initializeUser = async (user: User | null) => {
+    if (!user) {
+      setUserProfile(null);
+      setUserCompany(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Buscar perfil do usuário
+      const profile = await fetchUserProfile(user.id);
+      setUserProfile(profile);
+
+      // Se o perfil tem uma empresa, buscar os dados da empresa
+      if (profile?.company_id) {
+        const company = await fetchUserCompany(profile.company_id);
+        setUserCompany(company);
+      }
+
+      setConnectionStatus('connected');
+    } catch (error) {
+      console.error('Erro ao inicializar usuário:', error);
+      setConnectionStatus('disconnected');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Verificar sessão atual
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Erro ao verificar sessão:', error);
+          setConnectionStatus('disconnected');
+        } else {
+          setUser(session?.user || null);
+          await initializeUser(session?.user || null);
+        }
+      } catch (error) {
+        console.error('Erro inesperado ao verificar sessão:', error);
+        setConnectionStatus('disconnected');
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+
+    // Escutar mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
+      
+      setUser(session?.user || null);
+      await initializeUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      setConnectionStatus('connecting');
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      setUser(data.user);
-      
+      // Atualizar last_login se o perfil existir
       if (data.user) {
-        await fetchUserData(data.user.id);
+        await supabase
+          .from('user_profiles')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', data.user.id);
       }
 
-      if (isProductionEnvironment()) {
-        toast.success('Login realizado com sucesso!');
-      }
-
-      return data;
+      toast.success('Login realizado com sucesso');
     } catch (error: any) {
-      setError(error);
-      setConnectionStatus('disconnected');
-      
-      toast.error("Falha no login", {
-        description: error.message || "Ocorreu um erro ao realizar o login",
+      console.error('Erro no login:', error);
+      toast.error(error.message || 'Erro ao fazer login');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string, metadata?: any) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+        },
       });
-      
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Conta criada com sucesso! Verifique seu email.');
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error);
+      toast.error(error.message || 'Erro ao criar conta');
       throw error;
     } finally {
       setLoading(false);
@@ -170,141 +211,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setUserCompany(null);
-      setUserTeams(null);
-      setUserRoles(null);
-      setIsAdmin(false);
-      setIsSuperAdmin(false);
-      setIsCompanyAdmin(false);
-    } catch (error: any) {
-      setError(error);
-      
-      toast.error("Erro ao sair", {
-        description: error.message || "Ocorreu um erro ao encerrar a sessão",
-      });
-    }
-  };
-
-  const reconnect = async () => {
-    if (!user) return;
-    
     setLoading(true);
-    setConnectionStatus('connecting');
-    
     try {
-      // Try to reestablish connection
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) throw error;
-      
-      if (data.session?.user) {
-        setUser(data.session.user);
-        await fetchUserData(data.session.user.id);
-        toast.success('Conexão reestabelecida!');
-      } else {
-        // No valid session, redirect to login
-        toast.error('Sessão expirada', {
-          description: 'Por favor, faça login novamente.'
-        });
-        await signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
       }
+      
+      setUser(null);
+      setUserProfile(null);
+      setUserCompany(null);
     } catch (error: any) {
-      setError(error);
-      toast.error('Falha ao reconectar', {
-        description: error.message || 'Não foi possível reconectar ao servidor'
-      });
+      console.error('Erro no logout:', error);
+      toast.error('Erro ao fazer logout');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const refetchUserData = async () => {
-    if (user) {
-      setLoading(true);
-      await fetchUserData(user.id);
-      setLoading(false);
-    }
+  const reconnect = () => {
+    setConnectionStatus('connecting');
+    window.location.reload();
   };
 
-  useEffect(() => {
-    const initAuth = async () => {
-      setLoading(true);
-      setConnectionStatus('connecting');
-      
-      try {
-        // Get current session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
-        
-        if (session?.user) {
-          setUser(session.user);
-          await fetchUserData(session.user.id);
-        } else {
-          setConnectionStatus('connected'); // Still connected, just no user
-        }
-      } catch (error: any) {
-        console.error('Error initializing auth:', error);
-        setConnectionStatus('disconnected');
-        setError(error);
-        
-        if (isProductionEnvironment()) {
-          toast.error('Erro de conexão', {
-            description: 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.',
-          });
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Calcular permissões
+  const isSuperAdmin = isLovableEditor || (userProfile?.is_super_admin ?? false);
+  const isCompanyAdmin = isLovableEditor || (userProfile?.is_company_admin ?? false);
+  const isAdmin = isSuperAdmin || isCompanyAdmin;
 
-    initAuth();
-
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (session?.user) {
-          setUser(session.user);
-          await fetchUserData(session.user.id);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setUserCompany(null);
-        setUserTeams(null);
-        setUserRoles(null);
-        setIsAdmin(false);
-        setIsSuperAdmin(false);
-        setIsCompanyAdmin(false);
-      }
-    });
-
-    return () => {
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
-  }, [fetchUserData]);
-
-  const value = {
+  const value: AuthContextType = {
     user,
+    userProfile,
     userCompany,
-    userTeams,
-    userRoles,
-    isAdmin,
+    loading,
+    connectionStatus,
+    signOut,
+    signIn,
+    signUp,
+    reconnect,
     isSuperAdmin,
     isCompanyAdmin,
-    isAuthenticated: !!user,
-    loading,
-    error,
-    connectionStatus,
-    signIn,
-    signOut,
-    refetchUserData,
-    reconnect,
+    isAdmin,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
