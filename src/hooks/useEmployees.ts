@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Employee } from "@/components/hr/types/employee";
+import { Employee, EmployeeStatus } from "@/components/hr/types/employee";
 
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -33,13 +33,13 @@ export const useEmployees = () => {
           setError(error.message || "Failed to load employees");
           toast.error("Erro ao carregar funcionários");
         } else {
-          // Garantir que o status seja válido
-          const validatedEmployees = (data || []).map(emp => ({
+          // Garantir que o status seja válido e converter para Employee
+          const validatedEmployees: Employee[] = (data || []).map(emp => ({
             ...emp,
-            status: emp.status && ['active', 'inactive', 'on_leave'].includes(emp.status) 
-              ? emp.status as "active" | "inactive" | "on_leave"
-              : "active" as const
-          }));
+            status: (['active', 'inactive', 'on_leave'].includes(emp.status) 
+              ? emp.status 
+              : "active") as EmployeeStatus
+          } as Employee));
           setEmployees(validatedEmployees);
         }
       } catch (error: any) {
@@ -76,7 +76,13 @@ export const useEmployees = () => {
         setError(error.message || "Failed to add employee");
         toast.error("Erro ao adicionar funcionário");
       } else {
-        setEmployees(prevEmployees => [...prevEmployees, data]);
+        const validatedEmployee: Employee = {
+          ...data,
+          status: (['active', 'inactive', 'on_leave'].includes(data.status) 
+            ? data.status 
+            : "active") as EmployeeStatus
+        } as Employee;
+        setEmployees(prevEmployees => [...prevEmployees, validatedEmployee]);
         toast.success("Funcionário adicionado com sucesso");
       }
     } catch (error: any) {
@@ -105,8 +111,14 @@ export const useEmployees = () => {
         setError(error.message || "Failed to update employee");
         toast.error("Erro ao atualizar funcionário");
       } else {
+        const validatedEmployee: Employee = {
+          ...data,
+          status: (['active', 'inactive', 'on_leave'].includes(data.status) 
+            ? data.status 
+            : "active") as EmployeeStatus
+        } as Employee;
         setEmployees(prevEmployees =>
-          prevEmployees.map(employee => (employee.id === employeeId ? data : employee))
+          prevEmployees.map(employee => (employee.id === employeeId ? validatedEmployee : employee))
         );
         toast.success("Funcionário atualizado com sucesso");
       }

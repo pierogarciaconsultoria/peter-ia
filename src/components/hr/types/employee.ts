@@ -6,6 +6,8 @@ export type JobPosition = {
   description: string;
 };
 
+export type EmployeeStatus = "active" | "inactive" | "on_leave";
+
 export type Employee = {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ export type Employee = {
   position: string;
   position_id?: string;
   position_details?: JobPosition;
-  status: "active" | "inactive" | "on_leave";
+  status: EmployeeStatus;
   hire_date: string;
   avatar_url?: string;
   company_id?: string;
