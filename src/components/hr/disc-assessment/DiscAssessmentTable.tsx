@@ -59,10 +59,10 @@ export function DiscAssessmentTable({ assessments }: DiscAssessmentTableProps) {
     // Calcula as porcentagens para visualização
     const totalPoints = Object.values(assessment.scores).reduce((a, b) => a + b, 0);
     const percentages = {
-      D: (assessment.scores.D / totalPoints) * 100,
-      I: (assessment.scores.I / totalPoints) * 100,
-      S: (assessment.scores.S / totalPoints) * 100,
-      C: (assessment.scores.C / totalPoints) * 100,
+      d: (assessment.scores.d / totalPoints) * 100,
+      i: (assessment.scores.i / totalPoints) * 100,
+      s: (assessment.scores.s / totalPoints) * 100,
+      c: (assessment.scores.c / totalPoints) * 100,
     };
     
     return (
@@ -70,13 +70,13 @@ export function DiscAssessmentTable({ assessments }: DiscAssessmentTableProps) {
         <div className="grid grid-cols-4 gap-2">
           {Object.entries(percentages).map(([type, percentage]) => (
             <div key={type} className="flex flex-col items-center">
-              <Badge className={`${getTypeColor(type)} w-full text-center py-1`}>
-                {type}
+              <Badge className={`${getTypeColor(type.toUpperCase())} w-full text-center py-1`}>
+                {type.toUpperCase()}
               </Badge>
               <div className="mt-1 text-sm font-medium">{Math.round(percentage)}%</div>
               <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
                 <div 
-                  className={`h-2.5 rounded-full ${type === 'D' ? 'bg-red-500' : type === 'I' ? 'bg-yellow-500' : type === 'S' ? 'bg-green-500' : 'bg-blue-500'}`}
+                  className={`h-2.5 rounded-full ${type === 'd' ? 'bg-red-500' : type === 'i' ? 'bg-yellow-500' : type === 's' ? 'bg-green-500' : 'bg-blue-500'}`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -117,10 +117,10 @@ export function DiscAssessmentTable({ assessments }: DiscAssessmentTableProps) {
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
-                  <Badge variant="outline" className="bg-red-50">D: {assessment.scores.D}</Badge>
-                  <Badge variant="outline" className="bg-yellow-50">I: {assessment.scores.I}</Badge>
-                  <Badge variant="outline" className="bg-green-50">S: {assessment.scores.S}</Badge>
-                  <Badge variant="outline" className="bg-blue-50">C: {assessment.scores.C}</Badge>
+                  <Badge variant="outline" className="bg-red-50">D: {assessment.scores.d}</Badge>
+                  <Badge variant="outline" className="bg-yellow-50">I: {assessment.scores.i}</Badge>
+                  <Badge variant="outline" className="bg-green-50">S: {assessment.scores.s}</Badge>
+                  <Badge variant="outline" className="bg-blue-50">C: {assessment.scores.c}</Badge>
                 </div>
               </TableCell>
               <TableCell>

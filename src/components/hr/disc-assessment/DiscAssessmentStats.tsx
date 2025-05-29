@@ -33,20 +33,20 @@ export function DiscAssessmentStats({ assessments }: DiscAssessmentStatsProps) {
   const averageScores = useMemo((): ChartDataPoint[] => {
     if (assessments.length === 0) return [];
     
-    const totals = { D: 0, I: 0, S: 0, C: 0 };
+    const totals = { d: 0, i: 0, s: 0, c: 0 };
     
     assessments.forEach(assessment => {
-      totals.D += assessment.scores.D;
-      totals.I += assessment.scores.I;
-      totals.S += assessment.scores.S;
-      totals.C += assessment.scores.C;
+      totals.d += assessment.scores.d;
+      totals.i += assessment.scores.i;
+      totals.s += assessment.scores.s;
+      totals.c += assessment.scores.c;
     });
     
     return [
-      { name: "D", value: totals.D / assessments.length, color: "#ef4444" },
-      { name: "I", value: totals.I / assessments.length, color: "#eab308" },
-      { name: "S", value: totals.S / assessments.length, color: "#22c55e" },
-      { name: "C", value: totals.C / assessments.length, color: "#3b82f6" }
+      { name: "D", value: totals.d / assessments.length, color: "#ef4444" },
+      { name: "I", value: totals.i / assessments.length, color: "#eab308" },
+      { name: "S", value: totals.s / assessments.length, color: "#22c55e" },
+      { name: "C", value: totals.c / assessments.length, color: "#3b82f6" }
     ];
   }, [assessments]);
   

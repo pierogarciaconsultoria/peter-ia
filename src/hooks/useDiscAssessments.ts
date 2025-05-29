@@ -4,16 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export interface DiscScore {
+  d: number;
+  i: number;
+  s: number;
+  c: number;
+}
+
 export interface DiscAssessment {
   id: string;
   name: string;
   email: string;
-  scores: {
-    d: number;
-    i: number;
-    s: number;
-    c: number;
-  };
+  scores: DiscScore;
   primary_type: string;
   date: string;
   invited_by?: string;
@@ -56,6 +58,18 @@ export const useDiscAssessments = () => {
 
       if (assessmentError) throw assessmentError;
 
+      // Transform the data to match our interface
+      const transformedAssessments: DiscAssessment[] = (assessmentData || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        scores: item.scores as DiscScore,
+        primary_type: item.primary_type,
+        date: item.date || item.created_at,
+        invited_by: item.invited_by,
+        created_at: item.created_at
+      }));
+
       // Fetch evaluation links
       const { data: linkData, error: linkError } = await (supabase as any)
         .from('disc_evaluation_links')
@@ -65,7 +79,7 @@ export const useDiscAssessments = () => {
 
       if (linkError) throw linkError;
 
-      setAssessments(assessmentData || []);
+      setAssessments(transformedAssessments);
       setEvaluationLinks(linkData || []);
     } catch (error: any) {
       console.error('Error fetching DISC assessments:', error);
