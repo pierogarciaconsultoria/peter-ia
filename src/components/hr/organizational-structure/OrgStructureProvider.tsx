@@ -18,11 +18,15 @@ export interface JobPositionWithHierarchy extends Partial<JobPosition> {
 interface OrgStructureContextType {
   positions: JobPositionWithHierarchy[];
   loading: boolean;
+  error: string | null;
+  refetch: () => void;
 }
 
 const OrgStructureContext = createContext<OrgStructureContextType>({
   positions: [],
-  loading: true
+  loading: true,
+  error: null,
+  refetch: () => {}
 });
 
 export const useOrgStructure = () => useContext(OrgStructureContext);
@@ -31,133 +35,236 @@ interface OrgStructureProviderProps {
   children: ReactNode;
 }
 
+// Helper function to determine position level based on title and hierarchy
+const getPositionLevel = (title: string, isDepartmentHead?: boolean, hasSuperior?: boolean): string => {
+  const lowerTitle = title.toLowerCase();
+  
+  // Department heads are always Senior level
+  if (isDepartmentHead) {
+    return 'Senior';
+  }
+  
+  // Check for explicit senior keywords
+  if (lowerTitle.includes('gerente') || lowerTitle.includes('diretor') || lowerTitle.includes('coordenador geral')) {
+    return 'Senior';
+  }
+  
+  // Check for mid-level keywords
+  if (lowerTitle.includes('coordenador') || lowerTitle.includes('supervisor') || lowerTitle.includes('líder')) {
+    return 'Pleno';
+  }
+  
+  // If has a superior and no clear indicators, likely Junior
+  if (hasSuperior) {
+    return 'Junior';
+  }
+  
+  // Default for analysts and specialists
+  return 'Junior';
+};
+
+// Generate demo positions based on real departments
+const generatePositionsFromDepartments = (departments: any[]): JobPositionWithHierarchy[] => {
+  const positions: JobPositionWithHierarchy[] = [];
+  
+  departments.forEach((dept, deptIndex) => {
+    const deptName = dept.name;
+    const baseId = `dept-${dept.id}`;
+    
+    // Department head (always Senior)
+    const headId = `${baseId}-head`;
+    positions.push({
+      id: headId,
+      title: `Gerente de ${deptName}`,
+      department: deptName,
+      level: "Senior",
+      description: `Responsável pelo departamento de ${deptName}`,
+      isDepartmentHead: true,
+      parentPosition: null
+    });
+    
+    // Add mid-level positions based on department type
+    const isOperationalDept = ["Produção", "Manutenção", "Logística", "Operações"].includes(deptName);
+    
+    if (isOperationalDept) {
+      // Supervisor level
+      const supervisorId = `${baseId}-supervisor`;
+      positions.push({
+        id: supervisorId,
+        title: `Supervisor de ${deptName}`,
+        department: deptName,
+        level: "Pleno",
+        description: `Supervisiona as operações do departamento de ${deptName}`,
+        parentPosition: headId,
+        isDepartmentHead: false
+      });
+      
+      // Analyst/Operator level
+      const analystId = `${baseId}-analyst`;
+      positions.push({
+        id: analystId,
+        title: `Operador de ${deptName}`,
+        department: deptName,
+        level: "Junior",
+        description: `Executa atividades operacionais no departamento de ${deptName}`,
+        parentPosition: supervisorId,
+        isDepartmentHead: false
+      });
+    } else {
+      // Coordinator level for administrative departments
+      const coordinatorId = `${baseId}-coordinator`;
+      positions.push({
+        id: coordinatorId,
+        title: `Coordenador de ${deptName}`,
+        department: deptName,
+        level: "Pleno",
+        description: `Coordena as atividades do departamento de ${deptName}`,
+        parentPosition: headId,
+        isDepartmentHead: false
+      });
+      
+      // Analyst level
+      const analystId = `${baseId}-analyst`;
+      positions.push({
+        id: analystId,
+        title: `Analista de ${deptName}`,
+        department: deptName,
+        level: "Junior",
+        description: `Executa análises e processos no departamento de ${deptName}`,
+        parentPosition: coordinatorId,
+        isDepartmentHead: false
+      });
+    }
+  });
+  
+  return positions;
+};
+
 export function OrgStructureProvider({ children }: OrgStructureProviderProps) {
   const [positions, setPositions] = useState<JobPositionWithHierarchy[]>([]);
   const [loading, setLoading] = useState(true);
-  const { departments } = useDepartments();
+  const [error, setError] = useState<string | null>(null);
+  const { departments, isLoading: departmentsLoading } = useDepartments();
   const { toast } = useToast();
 
-  // Determine position level based on title
-  const getPositionLevel = (title: string): string => {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('gerente') || lowerTitle.includes('diretor')) {
-      return 'Senior';
-    } else if (lowerTitle.includes('coordenador') || lowerTitle.includes('supervisor')) {
-      return 'Pleno';
-    } else {
-      return 'Junior';
-    }
-  };
-
-  const generatePositionsFromDepartments = (departments: any[]): JobPositionWithHierarchy[] => {
-    const positions: JobPositionWithHierarchy[] = [];
-    
-    departments.forEach((dept) => {
-      positions.push({
-        id: `head-${dept.id}`,
-        title: `Gerente de ${dept.name}`,
-        department: dept.name,
-        level: "Senior",
-        description: `Responsável pelo departamento de ${dept.name}`,
-        isDepartmentHead: true
-      });
+  // Fetch job positions from the database with proper joins
+  const fetchJobPositions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
       
-      if (dept.name === "Produção" || dept.name === "Manutenção" || dept.name === "Logística") {
-        positions.push({
-          id: `supervisor-${dept.id}`,
-          title: `Supervisor de ${dept.name}`,
-          department: dept.name,
-          level: "Pleno",
-          description: `Supervisiona operações no departamento de ${dept.name}`,
-          parentPosition: `head-${dept.id}`
-        });
-        
-        positions.push({
-          id: `analyst-${dept.id}`,
-          title: `Analista de ${dept.name}`,
-          department: dept.name,
-          level: "Junior",
-          description: `Analisa processos no departamento de ${dept.name}`,
-          parentPosition: `supervisor-${dept.id}`
-        });
-      } else {
-        positions.push({
-          id: `coordinator-${dept.id}`,
-          title: `Coordenador de ${dept.name}`,
-          department: dept.name,
-          level: "Pleno",
-          description: `Coordena atividades no departamento de ${dept.name}`,
-          parentPosition: `head-${dept.id}`
-        });
-        
-        positions.push({
-          id: `analyst-${dept.id}`,
-          title: `Analista de ${dept.name}`,
-          department: dept.name,
-          level: "Junior",
-          description: `Analisa processos no departamento de ${dept.name}`,
-          parentPosition: `coordinator-${dept.id}`
-        });
+      const { data, error } = await supabase
+        .from('job_positions')
+        .select(`
+          *,
+          departments!job_positions_department_fkey (
+            id,
+            name
+          )
+        `);
+      
+      if (error) {
+        console.error("Error fetching job positions:", error);
+        throw error;
       }
-    });
-    
-    return positions;
-  };
 
-  // Fetch job positions from the database
-  useEffect(() => {
-    async function fetchJobPositions() {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('job_positions')
-          .select('*');
-        
-        if (error) throw error;
-
+      if (data && data.length > 0) {
         // Map database positions to our format
         const formattedPositions: JobPositionWithHierarchy[] = data.map((pos: any) => ({
-          ...pos,
-          level: getPositionLevel(pos.title),
+          id: pos.id,
+          title: pos.title,
+          department: pos.departments?.name || pos.department || 'Departamento Desconhecido',
+          level: getPositionLevel(pos.title, pos.is_department_head, !!pos.superior_position_id),
+          description: pos.description || `Descrição do cargo ${pos.title}`,
           parentPosition: pos.superior_position_id || null,
-          isDepartmentHead: pos.is_department_head || false
+          isDepartmentHead: pos.is_department_head || false,
+          ...pos
         }));
 
+        console.log("Loaded job positions from database:", formattedPositions.length);
         setPositions(formattedPositions);
-      } catch (error) {
-        console.error("Error fetching job positions:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os dados do organograma.",
-          variant: "destructive"
-        });
-        
-        // Use departments to generate demo positions
+      } else {
+        // No job positions in database, use departments to generate demo
         if (departments.length > 0) {
+          console.log("No job positions found, generating from departments:", departments.length);
           const generatedPositions = generatePositionsFromDepartments(departments);
           setPositions(generatedPositions);
         } else {
-          // Fallback to default demo positions
+          // Ultimate fallback - basic demo positions
+          console.log("Using fallback demo positions");
           setPositions([
-            { id: "1", title: "Gerente de Produção", department: "Produção", level: "Senior", description: "Gerencia o departamento de produção", isDepartmentHead: true },
-            { id: "2", title: "Supervisor de Produção", department: "Produção", level: "Pleno", description: "Supervisiona a produção", parentPosition: "1" },
-            { id: "3", title: "Analista de Produção", department: "Produção", level: "Junior", description: "Analisa processos de produção", parentPosition: "2" },
-            { id: "4", title: "Gerente de Qualidade", department: "Qualidade", level: "Senior", description: "Gerencia o departamento de qualidade", isDepartmentHead: true },
-            { id: "5", title: "Analista de Qualidade", department: "Qualidade", level: "Junior", description: "Analisa qualidade", parentPosition: "4" },
-            { id: "6", title: "Gerente de RH", department: "Recursos Humanos", level: "Senior", description: "Gerencia o RH", isDepartmentHead: true },
-            { id: "7", title: "Analista de RH", department: "Recursos Humanos", level: "Junior", description: "Analisa processos de RH", parentPosition: "6" }
+            { 
+              id: "demo-1", 
+              title: "Diretor Geral", 
+              department: "Diretoria", 
+              level: "Senior", 
+              description: "Responsável pela gestão geral da empresa", 
+              isDepartmentHead: true 
+            },
+            { 
+              id: "demo-2", 
+              title: "Gerente de Produção", 
+              department: "Produção", 
+              level: "Senior", 
+              description: "Gerencia o departamento de produção", 
+              isDepartmentHead: true, 
+              parentPosition: "demo-1" 
+            },
+            { 
+              id: "demo-3", 
+              title: "Supervisor de Produção", 
+              department: "Produção", 
+              level: "Pleno", 
+              description: "Supervisiona a produção", 
+              parentPosition: "demo-2" 
+            },
+            { 
+              id: "demo-4", 
+              title: "Operador de Produção", 
+              department: "Produção", 
+              level: "Junior", 
+              description: "Executa operações de produção", 
+              parentPosition: "demo-3" 
+            }
           ]);
         }
-      } finally {
-        setLoading(false);
       }
+    } catch (error: any) {
+      console.error("Error in fetchJobPositions:", error);
+      setError(error.message || "Erro ao carregar dados do organograma");
+      
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados do organograma. Usando dados de demonstração.",
+        variant: "destructive"
+      });
+      
+      // Even on error, try to show something useful
+      if (departments.length > 0) {
+        const generatedPositions = generatePositionsFromDepartments(departments);
+        setPositions(generatedPositions);
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    fetchJobPositions();
-  }, [departments, toast]);
+  // Trigger fetch when departments are loaded
+  useEffect(() => {
+    if (!departmentsLoading) {
+      fetchJobPositions();
+    }
+  }, [departments, departmentsLoading, toast]);
+
+  const contextValue: OrgStructureContextType = {
+    positions,
+    loading: loading || departmentsLoading,
+    error,
+    refetch: fetchJobPositions
+  };
 
   return (
-    <OrgStructureContext.Provider value={{ positions, loading }}>
+    <OrgStructureContext.Provider value={contextValue}>
       {children}
     </OrgStructureContext.Provider>
   );
