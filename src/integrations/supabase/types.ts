@@ -1218,8 +1218,10 @@ export type Database = {
       }
       departments: {
         Row: {
+          approved_headcount: number | null
           company_id: string | null
           created_at: string | null
+          current_headcount: number | null
           description: string | null
           id: string
           name: string
@@ -1228,8 +1230,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          approved_headcount?: number | null
           company_id?: string | null
           created_at?: string | null
+          current_headcount?: number | null
           description?: string | null
           id?: string
           name: string
@@ -1238,8 +1242,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          approved_headcount?: number | null
           company_id?: string | null
           created_at?: string | null
+          current_headcount?: number | null
           description?: string | null
           id?: string
           name?: string
@@ -1715,6 +1721,7 @@ export type Database = {
           company_id: string
           created_at: string | null
           department: string
+          department_id: string | null
           email: string
           empresa_id: string | null
           hire_date: string
@@ -1730,6 +1737,7 @@ export type Database = {
           company_id: string
           created_at?: string | null
           department: string
+          department_id?: string | null
           email: string
           empresa_id?: string | null
           hire_date: string
@@ -1745,6 +1753,7 @@ export type Database = {
           company_id?: string
           created_at?: string | null
           department?: string
+          department_id?: string | null
           email?: string
           empresa_id?: string | null
           hire_date?: string
@@ -1761,6 +1770,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
           {
@@ -2394,7 +2410,7 @@ export type Database = {
             foreignKeyName: "hr_approved_positions_job_position_id_fkey"
             columns: ["job_position_id"]
             isOneToOne: false
-            referencedRelation: "hr_job_positions"
+            referencedRelation: "job_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -4572,36 +4588,96 @@ export type Database = {
       }
       job_positions: {
         Row: {
+          approval_date: string | null
+          approver: string | null
+          cbo_code: string | null
+          code: string | null
           company_id: string
           created_at: string | null
           department: string
+          department_id: string | null
           description: string
+          education_requirements: string | null
+          experience_requirements: string | null
           id: string
+          immediate_supervisor_position: string | null
+          is_department_head: boolean | null
+          is_supervisor: boolean | null
+          main_responsibilities: string | null
+          norm: string | null
+          required_ppe: Json | null
+          required_procedures: Json | null
+          required_resources: Json | null
           requirements: string | null
           responsibilities: string | null
+          revision: string | null
+          skill_requirements: string | null
+          status: string | null
+          superior_position_id: string | null
           title: string
+          training_requirements: string | null
           updated_at: string | null
         }
         Insert: {
+          approval_date?: string | null
+          approver?: string | null
+          cbo_code?: string | null
+          code?: string | null
           company_id: string
           created_at?: string | null
           department: string
+          department_id?: string | null
           description: string
+          education_requirements?: string | null
+          experience_requirements?: string | null
           id?: string
+          immediate_supervisor_position?: string | null
+          is_department_head?: boolean | null
+          is_supervisor?: boolean | null
+          main_responsibilities?: string | null
+          norm?: string | null
+          required_ppe?: Json | null
+          required_procedures?: Json | null
+          required_resources?: Json | null
           requirements?: string | null
           responsibilities?: string | null
+          revision?: string | null
+          skill_requirements?: string | null
+          status?: string | null
+          superior_position_id?: string | null
           title: string
+          training_requirements?: string | null
           updated_at?: string | null
         }
         Update: {
+          approval_date?: string | null
+          approver?: string | null
+          cbo_code?: string | null
+          code?: string | null
           company_id?: string
           created_at?: string | null
           department?: string
+          department_id?: string | null
           description?: string
+          education_requirements?: string | null
+          experience_requirements?: string | null
           id?: string
+          immediate_supervisor_position?: string | null
+          is_department_head?: boolean | null
+          is_supervisor?: boolean | null
+          main_responsibilities?: string | null
+          norm?: string | null
+          required_ppe?: Json | null
+          required_procedures?: Json | null
+          required_resources?: Json | null
           requirements?: string | null
           responsibilities?: string | null
+          revision?: string | null
+          skill_requirements?: string | null
+          status?: string | null
+          superior_position_id?: string | null
           title?: string
+          training_requirements?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -4610,6 +4686,20 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_positions_superior_position_id_fkey"
+            columns: ["superior_position_id"]
+            isOneToOne: false
+            referencedRelation: "job_positions"
             referencedColumns: ["id"]
           },
         ]
