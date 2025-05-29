@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -84,9 +83,7 @@ export const useApprovedPositions = () => {
         const transformedData: ApprovedPosition[] = (data || []).map((item: any) => ({
           ...item,
           // Ensure department has the correct structure with null check
-          department: item.department && typeof item.department === 'object' && 'id' in item.department
-            ? item.department 
-            : { id: '', name: 'Departamento desconhecido' }
+          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
         }));
         setPositions(transformedData);
       }
@@ -139,9 +136,7 @@ export const useApprovedPositions = () => {
         // Transform the data to ensure type compatibility with null check
         const transformedData: ApprovedPosition = {
           ...data,
-          department: data.department && typeof data.department === 'object' && 'id' in data.department
-            ? data.department 
-            : { id: '', name: 'Departamento desconhecido' }
+          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions => [transformedData, ...prevPositions]);
         toast.success("Posição aprovada adicionada com sucesso");
@@ -187,9 +182,7 @@ export const useApprovedPositions = () => {
         // Transform the data to ensure type compatibility with null check
         const transformedData: ApprovedPosition = {
           ...data,
-          department: data.department && typeof data.department === 'object' && 'id' in data.department
-            ? data.department 
-            : { id: '', name: 'Departamento desconhecido' }
+          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions =>
           prevPositions.map(position => (position.id === positionId ? transformedData : position))

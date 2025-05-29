@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -43,6 +42,10 @@ export function JobPositionSelector({ onSelect, selectedPosition }: JobPositionS
           // Ensure required_resources is always a string array
           required_resources: Array.isArray(job.required_resources)
             ? job.required_resources.map(String)
+            : [],
+          // Ensure required_ppe is always a string array
+          required_ppe: Array.isArray(job.required_ppe)
+            ? job.required_ppe.map(String)
             : []
         }));
 
