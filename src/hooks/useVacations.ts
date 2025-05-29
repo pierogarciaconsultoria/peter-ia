@@ -49,7 +49,7 @@ export const useVacations = () => {
     setError(null);
 
     try {
-      let query = supabase
+      let query = (supabase as any)
         .from('vacation_requests')
         .select(`
           *,
@@ -96,7 +96,7 @@ export const useVacations = () => {
         company_id: userCompany?.id || '',
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('vacation_requests')
         .insert([requestData])
         .select(`
@@ -134,7 +134,7 @@ export const useVacations = () => {
     setError(null);
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('vacation_requests')
         .update(updates)
         .eq('id', requestId)
@@ -175,7 +175,7 @@ export const useVacations = () => {
     setError(null);
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('vacation_requests')
         .delete()
         .eq('id', requestId);
