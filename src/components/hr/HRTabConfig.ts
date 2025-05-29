@@ -96,6 +96,41 @@ export const hrTabGroups: TabGroup[] = [
     ]
   },
   {
+    id: "daily-management",
+    name: "Gestão do Dia a Dia",
+    icon: createIcon(icons.Calendar),
+    subTabs: [
+      { 
+        id: "vacation", 
+        name: "Férias", 
+        component: "VacationManagement",
+        icon: createIcon(icons.Calendar),
+        href: "/human-resources?activeTab=vacation"
+      },
+      { 
+        id: "occurrences", 
+        name: "Ocorrências", 
+        component: "OccurrenceManagement",
+        icon: createIcon(icons.AlertCircle),
+        href: "/human-resources?activeTab=occurrences"
+      },
+      { 
+        id: "medical", 
+        name: "Atestados Médicos", 
+        component: "MedicalCertificateManagement",
+        icon: createIcon(icons.FileHeart),
+        href: "/human-resources?activeTab=medical"
+      },
+      { 
+        id: "board", 
+        name: "Mural do Colaborador", 
+        component: "EmployeeBoard",
+        icon: createIcon(icons.FileText),
+        href: "/human-resources?activeTab=board"
+      }
+    ]
+  },
+  {
     id: "development",
     name: "Desenvolvimento Profissional",
     icon: createIcon(icons.Award),

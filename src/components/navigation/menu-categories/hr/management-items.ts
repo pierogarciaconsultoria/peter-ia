@@ -1,36 +1,35 @@
 
-import { BriefcaseBusiness, Calendar, AlertCircle, FileHeart, FileText, Thermometer } from "lucide-react";
+import { BriefcaseBusiness, Thermometer } from "lucide-react";
 import { MenuItem } from "../../types";
 
-// Removo a movimentação de pessoal daqui, pois ela agora está em estrutura organizacional
 export const managementItems: MenuItem[] = [
   {
-    title: "Gestão",
+    title: "Gestão do Dia a Dia",
     icon: BriefcaseBusiness,
     href: "#",
-    modulo: "gestao",
+    modulo: "gestao_dia_dia",
     children: [
       { 
         title: "Férias", 
-        icon: Calendar, 
+        icon: BriefcaseBusiness, 
         href: "/human-resources?activeTab=vacation", 
         modulo: "ferias" 
       },
       { 
         title: "Ocorrências", 
-        icon: AlertCircle, 
+        icon: BriefcaseBusiness, 
         href: "/human-resources?activeTab=occurrences", 
         modulo: "ocorrencias" 
       },
       { 
-        title: "Atestados", 
-        icon: FileHeart, 
+        title: "Atestados Médicos", 
+        icon: BriefcaseBusiness, 
         href: "/human-resources?activeTab=medical", 
         modulo: "atestados" 
       },
       { 
         title: "Mural do Colaborador", 
-        icon: FileText, 
+        icon: BriefcaseBusiness, 
         href: "/human-resources?activeTab=board", 
         modulo: "mural" 
       },

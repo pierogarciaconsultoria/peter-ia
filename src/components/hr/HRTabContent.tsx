@@ -43,6 +43,8 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <JobSalaryPlan />;
       case "organizational-structure":
         return <DepartmentOrgChart />;
+      case "personnel":
+        return <PersonnelMovement />;
       case "recruitment-selection":
         return <RecruitmentSelection />;
       case "interview":
@@ -59,6 +61,14 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <PerformanceEvaluation />;
       case "employee-costs":
         return <EmployeeCostManagement />;
+      case "vacation":
+        return <VacationManagement />;
+      case "occurrences":
+        return <OccurrenceManagement />;
+      case "medical":
+        return <MedicalCertificateManagement />;
+      case "board":
+        return <EmployeeBoard />;
       case "disc-assessment":
         return <DiscAssessment />;
       case "development-plans":
@@ -69,16 +79,6 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <ClimateResearch />;
       case "feedback":
         return <FeedbackManagement />;
-      case "personnel":
-        return <PersonnelMovement />;
-      case "vacation":
-        return <VacationManagement />;
-      case "occurrences":
-        return <OccurrenceManagement />;
-      case "medical":
-        return <MedicalCertificateManagement />;
-      case "board":
-        return <EmployeeBoard />;
       case "exit-interviews":
         return <ExitInterviews />;
       default:
