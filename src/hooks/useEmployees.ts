@@ -1,87 +1,156 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { Employee, JobPosition } from "@/components/hr/types/employee";
-import { generateMockEmployees } from "@/utils/mockEmployeeData";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-export function useEmployees() {
+interface Employee {
+  id: string;
+  created_at: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  position: string;
+  company_id: string;
+  is_active: boolean;
+}
+
+export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [jobPositions, setJobPositions] = useState<JobPosition[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { userCompany } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { userCompany, isSuperAdmin } = useAuth();
 
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("pt-BR").format(date);
-  };
-
-  // Fetch job positions and employees
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        setIsLoading(true);
-        
-        if (!userCompany?.id) {
-          console.log("No company ID available, waiting...");
-          return;
-        }
-        
-        // Fetch job positions
-        const { data: positionsData, error: positionsError } = await supabase
-          .from('job_positions')
-          .select('id, title, department, description')
-          .eq('company_id', userCompany.id);
-        
-        if (positionsError) {
-          console.error('Error fetching job positions:', positionsError);
-        } else {
-          setJobPositions(positionsData || []);
-        }
-        
-        // Fetch employees from the company
-        const { data: employeesData, error: employeesError } = await supabase
+        let query = supabase
           .from('employees')
           .select('*')
-          .eq('company_id', userCompany.id)
-          .order('name');
-        
-        if (employeesError) {
-          console.error('Error fetching employees:', employeesError);
-          return;
+          .order('created_at', { ascending: false });
+
+        if (userCompany && !isSuperAdmin) {
+          query = query.eq('company_id', userCompany.id);
         }
-        
-        // If we got employees, use those. Otherwise fall back to mock data for demo purposes
-        if (employeesData && employeesData.length > 0) {
-          const enrichedEmployees = employeesData.map(employee => {
-            const positionDetails = positionsData?.find(p => p.title === employee.position);
-            return {
-              ...employee,
-              status: employee.status as "active" | "inactive" | "on_leave",
-              position_details: positionDetails
-            };
-          });
-          
-          setEmployees(enrichedEmployees);
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error("Error fetching employees:", error);
+          setError(error.message || "Failed to load employees");
+          toast.error("Erro ao carregar funcionários");
         } else {
-          // For demo, we'll use mock data
-          setEmployees(generateMockEmployees());
+          setEmployees(data || []);
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch (error: any) {
+        console.error("Unexpected error fetching employees:", error);
+        setError(error.message || "An unexpected error occurred");
+        toast.error("Erro inesperado ao carregar funcionários");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    fetchData();
-  }, [userCompany?.id]);
+
+    fetchEmployees();
+  }, [userCompany, isSuperAdmin]);
+
+  const addEmployee = async (newEmployee: Omit<Employee, 'id' | 'created_at'>) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .insert([newEmployee])
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error("Error adding employee:", error);
+        setError(error.message || "Failed to add employee");
+        toast.error("Erro ao adicionar funcionário");
+      } else {
+        setEmployees(prevEmployees => [...prevEmployees, data]);
+        toast.success("Funcionário adicionado com sucesso");
+      }
+    } catch (error: any) {
+      console.error("Unexpected error adding employee:", error);
+      setError(error.message || "An unexpected error occurred");
+      toast.error("Erro inesperado ao adicionar funcionário");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateEmployee = async (employeeId: string, updates: Partial<Employee>) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .update(updates)
+        .eq('id', employeeId)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error("Error updating employee:", error);
+        setError(error.message || "Failed to update employee");
+        toast.error("Erro ao atualizar funcionário");
+      } else {
+        setEmployees(prevEmployees =>
+          prevEmployees.map(employee => (employee.id === employeeId ? data : employee))
+        );
+        toast.success("Funcionário atualizado com sucesso");
+      }
+    } catch (error: any) {
+      console.error("Unexpected error updating employee:", error);
+      setError(error.message || "An unexpected error occurred");
+      toast.error("Erro inesperado ao atualizar funcionário");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteEmployee = async (employeeId: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', employeeId);
+
+      if (error) {
+        console.error("Error deleting employee:", error);
+        setError(error.message || "Failed to delete employee");
+        toast.error("Erro ao excluir funcionário");
+      } else {
+        setEmployees(prevEmployees =>
+          prevEmployees.filter(employee => employee.id !== employeeId)
+        );
+        toast.success("Funcionário excluído com sucesso");
+      }
+    } catch (error: any) {
+      console.error("Unexpected error deleting employee:", error);
+      setError(error.message || "An unexpected error occurred");
+      toast.error("Erro inesperado ao excluir funcionário");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     employees,
-    jobPositions,
-    isLoading,
-    formatDate
+    loading,
+    error,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
   };
-}
+};

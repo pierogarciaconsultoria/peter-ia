@@ -1,7 +1,7 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { LogOut, User, Settings, Building2, Shield, AlertTriangle } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { 
   DropdownMenu,

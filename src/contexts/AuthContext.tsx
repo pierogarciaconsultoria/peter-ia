@@ -42,7 +42,8 @@ interface AuthContextType {
   isAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Export the context so it can be imported
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -262,6 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
+// Export the useAuth hook directly from this file
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

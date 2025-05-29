@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { shouldBypassAuth, isProductionEnvironment } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";

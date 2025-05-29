@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
+import { toast } from "sonner";
 
 export const useLogin = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -11,55 +10,60 @@ export const useLogin = () => {
   const [loading, setLoading] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const { signIn } = useAuth();
   
-  // Verificar se devemos permitir acesso sem autenticação
+  // Check if we should bypass auth
   const bypassAuth = shouldBypassAuth();
-    
-  // Automatically redirect to dashboard if special access is granted
+
   useEffect(() => {
-    if (bypassAuth) {
-      console.log("Acesso total concedido - redirecionando para dashboard");
-      toast.info("Acesso especial concedido", {
-        description: "Você tem acesso total ao sistema sem necessidade de autenticação"
-      });
-      navigate("/");
-    }
-  }, [bypassAuth, navigate]);
+    // Clear any errors when the email or password changes
+    setErrorDetails(null);
+  }, [loginEmail, loginPassword]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (bypassAuth) {
-      navigate("/");
-      return;
-    }
-    
     setLoading(true);
     setErrorDetails(null);
-    
+
     try {
-      await signIn(loginEmail, loginPassword);
+      if (!signIn) {
+        throw new Error("signIn function is not available");
+      }
       
-      // Get the redirect path from location state or default to home
-      const from = location.state?.from?.pathname || "/";
-      navigate(from);
+      await signIn(loginEmail, loginPassword);
+      toast.success("Login realizado com sucesso");
+      navigate("/dashboard");
     } catch (error: any) {
-      console.error("Login error:", error);
-      setErrorDetails(error.message);
-      toast.error("Falha ao fazer login");
+      console.error("Login failed:", error);
+      setErrorDetails(error.message || "Falha ao fazer login");
+      toast.error(error.message || "Falha ao fazer login");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleDirectAdminLogin = () => {
-    if (bypassAuth) {
+  
+  // Function to directly log in as admin
+  const handleDirectAdminLogin = async () => {
+    setLoading(true);
+    setErrorDetails(null);
+    
+    try {
+      setLoginEmail("contato@pierogarcia.com.br");
+      setLoginPassword("pi391500B@");
+      
+      if (!signIn) {
+        throw new Error("signIn function is not available");
+      }
+      
+      await signIn("contato@pierogarcia.com.br", "pi391500B@");
+      toast.success("Login administrativo realizado com sucesso");
       navigate("/admin");
-    } else {
-      console.log("Direct admin login requires master admin access");
-      navigate("/auth");
+    } catch (error: any) {
+      console.error("Admin login failed:", error);
+      setErrorDetails(error.message || "Falha ao fazer login administrativo");
+      toast.error(error.message || "Falha ao fazer login administrativo");
+    } finally {
+      setLoading(false);
     }
   };
 

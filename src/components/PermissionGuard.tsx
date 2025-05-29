@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 

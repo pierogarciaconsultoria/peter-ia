@@ -6,7 +6,7 @@ import { Navigation } from "@/components/Navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import CentralizedRegistration from "@/components/admin/CentralizedRegistration";
 import DeleteConfirmDialog from "@/components/admin/DeleteConfirmDialog";
 import { isSuperAdminInLovable, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";

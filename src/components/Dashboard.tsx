@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -16,7 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardProps {
   requirements: ISORequirement[];

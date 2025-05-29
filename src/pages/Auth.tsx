@@ -7,7 +7,7 @@ import { BrainCircuit, Loader2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { shouldBypassAuth, isProductionEnvironment, setProductionAccessToken, isLovableEditor } from "@/utils/lovableEditorDetection";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

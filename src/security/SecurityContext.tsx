@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useMemo } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 import { supabase } from "@/integrations/supabase/client";
