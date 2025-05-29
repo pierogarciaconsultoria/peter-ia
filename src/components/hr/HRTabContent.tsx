@@ -23,6 +23,7 @@ import { OccurrenceManagement } from "./OccurrenceManagement";
 import { MedicalCertificateManagement } from "./MedicalCertificateManagement";
 import { EmployeeBoard } from "./EmployeeBoard";
 import { ExitInterviews } from "./ExitInterviews";
+import { MaturityThermometer } from "./MaturityThermometer";
 
 interface HRTabContentProps {
   activeTab: string;
@@ -69,6 +70,8 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <MedicalCertificateManagement />;
       case "board":
         return <EmployeeBoard />;
+      case "thermometer":
+        return <MaturityThermometer />;
       case "disc-assessment":
         return <DiscAssessment />;
       case "development-plans":

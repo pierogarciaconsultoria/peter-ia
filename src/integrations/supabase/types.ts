@@ -4754,6 +4754,85 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_certificates: {
+        Row: {
+          cid: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          days: number
+          description: string | null
+          doctor: string
+          document_url: string | null
+          employee_id: string
+          end_date: string
+          id: string
+          notes: string | null
+          start_date: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cid?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          days?: number
+          description?: string | null
+          doctor: string
+          document_url?: string | null
+          employee_id: string
+          end_date: string
+          id?: string
+          notes?: string | null
+          start_date: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          cid?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          days?: number
+          description?: string | null
+          doctor?: string
+          document_url?: string | null
+          employee_id?: string
+          end_date?: string
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_certificates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meetings: {
         Row: {
           attendance_count: number | null
