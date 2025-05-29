@@ -20,7 +20,7 @@ export function useJobPositions() {
         
         if (error) throw error;
         
-        // Transform the data to ensure required_procedures exists and status is properly typed
+        // Transform the data to ensure required_procedures and required_resources exist and status is properly typed
         const transformedData = (data || []).map(job => ({
           ...job,
           // Ensure status is one of the allowed literal types
@@ -30,6 +30,10 @@ export function useJobPositions() {
           // Ensure required_procedures is always a string array
           required_procedures: Array.isArray((job as any).required_procedures) 
             ? (job as any).required_procedures.map(String)
+            : [],
+          // Ensure required_resources is always a string array
+          required_resources: Array.isArray((job as any).required_resources)
+            ? (job as any).required_resources.map(String)
             : []
         })) as JobPosition[];
         

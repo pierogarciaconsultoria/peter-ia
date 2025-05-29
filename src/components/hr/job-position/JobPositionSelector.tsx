@@ -39,6 +39,10 @@ export function JobPositionSelector({ onSelect, selectedPosition }: JobPositionS
           // Ensure required_procedures is always a string array
           required_procedures: Array.isArray(job.required_procedures) 
             ? job.required_procedures.map(String)
+            : [],
+          // Ensure required_resources is always a string array
+          required_resources: Array.isArray(job.required_resources)
+            ? job.required_resources.map(String)
             : []
         }));
 

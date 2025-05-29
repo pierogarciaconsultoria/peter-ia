@@ -86,7 +86,7 @@ export const useApprovedPositions = () => {
           // Ensure department has the correct structure with null check
           department: item.department && typeof item.department === 'object' && 'id' in item.department
             ? item.department 
-            : { id: '', name: '' }
+            : { id: '', name: 'Departamento desconhecido' }
         }));
         setPositions(transformedData);
       }
@@ -141,7 +141,7 @@ export const useApprovedPositions = () => {
           ...data,
           department: data.department && typeof data.department === 'object' && 'id' in data.department
             ? data.department 
-            : { id: '', name: '' }
+            : { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions => [transformedData, ...prevPositions]);
         toast.success("Posição aprovada adicionada com sucesso");
@@ -189,7 +189,7 @@ export const useApprovedPositions = () => {
           ...data,
           department: data.department && typeof data.department === 'object' && 'id' in data.department
             ? data.department 
-            : { id: '', name: '' }
+            : { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions =>
           prevPositions.map(position => (position.id === positionId ? transformedData : position))
