@@ -29,7 +29,20 @@ export function JobPositionSelector({ onSelect, selectedPosition }: JobPositionS
           throw error;
         }
 
-        setJobPositions(data || []);
+        // Transform the data to match JobPosition interface
+        const transformedData: JobPosition[] = (data || []).map(job => ({
+          ...job,
+          // Ensure status is one of the allowed literal types
+          status: (['approved', 'draft', 'in_review', 'distributed'].includes(job.status) 
+            ? job.status as "approved" | "draft" | "in_review" | "distributed"
+            : 'draft' as const),
+          // Ensure required_procedures is always an array
+          required_procedures: Array.isArray(job.required_procedures) 
+            ? job.required_procedures 
+            : []
+        }));
+
+        setJobPositions(transformedData);
       } catch (error) {
         console.error('Error fetching job positions:', error);
       } finally {

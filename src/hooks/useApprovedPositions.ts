@@ -80,7 +80,15 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to load approved positions");
         toast.error("Erro ao carregar posições aprovadas");
       } else {
-        setPositions(data || []);
+        // Transform the data to ensure type compatibility
+        const transformedData: ApprovedPosition[] = (data || []).map((item: any) => ({
+          ...item,
+          // Ensure department has the correct structure
+          department: (item.department && typeof item.department === 'object' && 'id' in item.department) 
+            ? item.department 
+            : { id: '', name: '' }
+        }));
+        setPositions(transformedData);
       }
     } catch (error: any) {
       console.error("Unexpected error fetching approved positions:", error);
@@ -128,7 +136,14 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to add approved position");
         toast.error("Erro ao adicionar posição aprovada");
       } else {
-        setPositions(prevPositions => [data, ...prevPositions]);
+        // Transform the data to ensure type compatibility
+        const transformedData: ApprovedPosition = {
+          ...data,
+          department: (data.department && typeof data.department === 'object' && 'id' in data.department) 
+            ? data.department 
+            : { id: '', name: '' }
+        };
+        setPositions(prevPositions => [transformedData, ...prevPositions]);
         toast.success("Posição aprovada adicionada com sucesso");
       }
     } catch (error: any) {
@@ -169,8 +184,15 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to update approved position");
         toast.error("Erro ao atualizar posição aprovada");
       } else {
+        // Transform the data to ensure type compatibility
+        const transformedData: ApprovedPosition = {
+          ...data,
+          department: (data.department && typeof data.department === 'object' && 'id' in data.department) 
+            ? data.department 
+            : { id: '', name: '' }
+        };
         setPositions(prevPositions =>
-          prevPositions.map(position => (position.id === positionId ? data : position))
+          prevPositions.map(position => (position.id === positionId ? transformedData : position))
         );
         toast.success("Posição aprovada atualizada com sucesso");
       }
