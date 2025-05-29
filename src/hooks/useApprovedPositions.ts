@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +37,11 @@ export interface ApprovedPositionSummary {
 
 type ApprovedPositionInsert = Omit<ApprovedPosition, 'id' | 'created_at' | 'updated_at' | 'job_position' | 'department'>;
 type ApprovedPositionUpdate = Partial<Omit<ApprovedPosition, 'id' | 'created_at' | 'updated_at' | 'job_position' | 'department'>>;
+
+// Helper function to check if value is a select query error
+function isSelectQueryError(value: any): value is { error: true } {
+  return value && typeof value === 'object' && value.error === true;
+}
 
 export const useApprovedPositions = () => {
   const [positions, setPositions] = useState<ApprovedPosition[]>([]);
@@ -82,8 +88,10 @@ export const useApprovedPositions = () => {
         // Transform the data to ensure type compatibility
         const transformedData: ApprovedPosition[] = (data || []).map((item: any) => ({
           ...item,
-          // Ensure department has the correct structure with null check
-          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
+          // Ensure department has the correct structure with error handling
+          department: isSelectQueryError(item.department)
+            ? { id: '', name: 'Desconhecido' }
+            : item.department ?? { id: '', name: 'Departamento desconhecido' }
         }));
         setPositions(transformedData);
       }
@@ -133,10 +141,12 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to add approved position");
         toast.error("Erro ao adicionar posição aprovada");
       } else {
-        // Transform the data to ensure type compatibility with null check
+        // Transform the data to ensure type compatibility with error handling
         const transformedData: ApprovedPosition = {
           ...data,
-          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
+          department: isSelectQueryError(data.department)
+            ? { id: '', name: 'Desconhecido' }
+            : data.department ?? { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions => [transformedData, ...prevPositions]);
         toast.success("Posição aprovada adicionada com sucesso");
@@ -179,10 +189,12 @@ export const useApprovedPositions = () => {
         setError(error.message || "Failed to update approved position");
         toast.error("Erro ao atualizar posição aprovada");
       } else {
-        // Transform the data to ensure type compatibility with null check
+        // Transform the data to ensure type compatibility with error handling
         const transformedData: ApprovedPosition = {
           ...data,
-          department: data.department ?? { id: '', name: 'Departamento desconhecido' }
+          department: isSelectQueryError(data.department)
+            ? { id: '', name: 'Desconhecido' }
+            : data.department ?? { id: '', name: 'Departamento desconhecido' }
         };
         setPositions(prevPositions =>
           prevPositions.map(position => (position.id === positionId ? transformedData : position))

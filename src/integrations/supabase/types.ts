@@ -2393,6 +2393,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_approved_positions_department"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hr_approved_positions_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
