@@ -1,16 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import CompanyManagement from "@/components/admin/CompanyManagement";
-import UserManagement from "@/components/admin/UserManagement";
-import RoleManagement from "@/components/admin/RoleManagement";
+import CentralizedRegistration from "@/components/admin/CentralizedRegistration";
 import DeleteConfirmDialog from "@/components/admin/DeleteConfirmDialog";
 import { isSuperAdminInLovable, shouldGrantFreeAccess } from "@/utils/lovableEditorDetection";
 import { executeQuery } from "@/utils/databaseHelpers";
