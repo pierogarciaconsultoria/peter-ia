@@ -3,22 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-
-interface Employee {
-  id: string;
-  created_at: string;
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  department: string;
-  hire_date: string;
-  company_id: string;
-  status: string;
-  avatar_url?: string;
-  empresa_id?: string;
-  updated_at: string;
-}
+import { Employee } from "@/components/hr/types/employee";
 
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -48,7 +33,14 @@ export const useEmployees = () => {
           setError(error.message || "Failed to load employees");
           toast.error("Erro ao carregar funcionários");
         } else {
-          setEmployees(data || []);
+          // Garantir que o status seja válido
+          const validatedEmployees = (data || []).map(emp => ({
+            ...emp,
+            status: emp.status && ['active', 'inactive', 'on_leave'].includes(emp.status) 
+              ? emp.status as "active" | "inactive" | "on_leave"
+              : "active" as const
+          }));
+          setEmployees(validatedEmployees);
         }
       } catch (error: any) {
         console.error("Unexpected error fetching employees:", error);
