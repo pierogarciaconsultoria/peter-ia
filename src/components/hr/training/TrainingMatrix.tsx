@@ -10,6 +10,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { TrainingMatrixTable } from "./TrainingMatrixTable";
 import { TrainingMatrixFilters } from "./TrainingMatrixFilters";
 
+interface FilterState {
+  department?: string;
+  jobPosition?: string;
+  status?: string;
+}
+
 export function TrainingMatrix() {
   const [matrixData, setMatrixData] = useState<TrainingMatrixData[]>([]);
   const [filteredData, setFilteredData] = useState<TrainingMatrixData[]>([]);
@@ -25,7 +31,7 @@ export function TrainingMatrix() {
   const [departments, setDepartments] = useState<any[]>([]);
   const [jobPositions, setJobPositions] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<FilterState>({});
   const { toast } = useToast();
 
   // Mock company ID - em produção, vem do contexto
