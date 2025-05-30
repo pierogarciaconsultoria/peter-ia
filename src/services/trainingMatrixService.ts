@@ -102,7 +102,12 @@ export class TrainingMatrixService {
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Type the data properly to ensure status field conforms to our union type
+    return (data || []).map(item => ({
+      ...item,
+      status: item.status as EmployeeTrainingCompliance['status']
+    }));
   }
 
   // Atualizar status de compliance
@@ -124,7 +129,12 @@ export class TrainingMatrixService {
       .single();
 
     if (error) throw error;
-    return data;
+    
+    // Type the data properly to ensure status field conforms to our union type
+    return {
+      ...data,
+      status: data.status as EmployeeTrainingCompliance['status']
+    };
   }
 
   // Gerar compliance automático para funcionário baseado no cargo
