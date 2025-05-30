@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, FileText } from "lucide-react";
@@ -6,29 +5,19 @@ import { NewEmployeeDialog } from "./NewEmployeeDialog";
 import { EmployeeDossierGenerator } from "./employee/EmployeeDossierGenerator";
 import { BatchEmployeeImport } from "./employee/BatchEmployeeImport";
 import { useAuth } from "@/contexts/AuthContext";
-
 export function HRHeader() {
-  const { userCompany } = useAuth();
-
-  return (
-    <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between">
+  const {
+    userCompany
+  } = useAuth();
+  return <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Gente e Gestão</h2>
-        <p className="text-muted-foreground">
-          {userCompany?.name ? (
-            <>
-              Gerencie os colaboradores e processos de RH da <span className="font-medium">{userCompany.name}</span>
-            </>
-          ) : (
-            "Gerencie seus colaboradores, recrutamento e todo o ciclo de vida do colaborador"
-          )}
-        </p>
+        
       </div>
       <div className="flex space-x-2">
         <BatchEmployeeImport />
         <EmployeeDossierGenerator />
         <NewEmployeeDialog />
       </div>
-    </div>
-  );
+    </div>;
 }

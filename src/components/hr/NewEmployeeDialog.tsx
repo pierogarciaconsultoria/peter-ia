@@ -1,37 +1,21 @@
-
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EmployeeForm } from "./EmployeeForm";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-
 type NewEmployeeDialogProps = {
   triggerButton?: React.ReactNode;
 };
-
-export function NewEmployeeDialog({ triggerButton }: NewEmployeeDialogProps) {
+export function NewEmployeeDialog({
+  triggerButton
+}: NewEmployeeDialogProps) {
   const [open, setOpen] = useState(false);
-  
   const handleClose = () => {
     setOpen(false);
   };
-  
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
+  return <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {triggerButton || (
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Funcionário
-          </Button>
-        )}
+        {triggerButton}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -42,6 +26,5 @@ export function NewEmployeeDialog({ triggerButton }: NewEmployeeDialogProps) {
         </DialogHeader>
         <EmployeeForm onCancel={handleClose} />
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 }
