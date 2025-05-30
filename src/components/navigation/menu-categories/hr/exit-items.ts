@@ -1,5 +1,5 @@
 
-import { LogOut, FileText } from "lucide-react";
+import { LogOut, FileText, MessageSquare } from "lucide-react";
 import { MenuItem } from "../../types";
 
 export const exitItems: MenuItem[] = [
@@ -11,7 +11,7 @@ export const exitItems: MenuItem[] = [
     children: [
       { 
         title: "Entrevistas de Desligamento", 
-        icon: FileText, 
+        icon: MessageSquare, 
         href: "/human-resources?activeTab=exit-interviews", 
         modulo: "entrevistas_desligamento" 
       }

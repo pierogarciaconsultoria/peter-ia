@@ -3373,62 +3373,101 @@ export type Database = {
       }
       hr_exit_interviews: {
         Row: {
-          colleagues_feedback: string | null
-          company_feedback: string | null
+          additional_comments: string | null
           company_id: string
-          created_at: string
+          compensation_rating: number | null
+          completed_at: string | null
+          created_at: string | null
           employee_id: string
-          exit_date: string
+          employee_name: string
+          employee_phone: string | null
+          growth_opportunities_rating: number | null
           id: string
           interview_date: string | null
-          interviewer_id: string | null
-          manager_feedback: string | null
-          reason_for_leaving: string
+          link_expires_at: string | null
+          management_rating: number | null
+          overall_satisfaction: number | null
+          reason_for_leaving: string | null
           status: string
-          suggestions: string | null
-          updated_at: string
-          would_return: boolean | null
+          suggestions_for_improvement: string | null
+          termination_date: string
+          termination_reason: string | null
+          token: string | null
+          updated_at: string | null
+          what_liked_least: string | null
+          what_liked_most: string | null
+          whatsapp_message_id: string | null
+          whatsapp_sent_at: string | null
+          work_environment_rating: number | null
+          would_consider_returning: boolean | null
+          would_recommend_company: boolean | null
         }
         Insert: {
-          colleagues_feedback?: string | null
-          company_feedback?: string | null
+          additional_comments?: string | null
           company_id: string
-          created_at?: string
+          compensation_rating?: number | null
+          completed_at?: string | null
+          created_at?: string | null
           employee_id: string
-          exit_date: string
+          employee_name: string
+          employee_phone?: string | null
+          growth_opportunities_rating?: number | null
           id?: string
           interview_date?: string | null
-          interviewer_id?: string | null
-          manager_feedback?: string | null
-          reason_for_leaving: string
+          link_expires_at?: string | null
+          management_rating?: number | null
+          overall_satisfaction?: number | null
+          reason_for_leaving?: string | null
           status?: string
-          suggestions?: string | null
-          updated_at?: string
-          would_return?: boolean | null
+          suggestions_for_improvement?: string | null
+          termination_date: string
+          termination_reason?: string | null
+          token?: string | null
+          updated_at?: string | null
+          what_liked_least?: string | null
+          what_liked_most?: string | null
+          whatsapp_message_id?: string | null
+          whatsapp_sent_at?: string | null
+          work_environment_rating?: number | null
+          would_consider_returning?: boolean | null
+          would_recommend_company?: boolean | null
         }
         Update: {
-          colleagues_feedback?: string | null
-          company_feedback?: string | null
+          additional_comments?: string | null
           company_id?: string
-          created_at?: string
+          compensation_rating?: number | null
+          completed_at?: string | null
+          created_at?: string | null
           employee_id?: string
-          exit_date?: string
+          employee_name?: string
+          employee_phone?: string | null
+          growth_opportunities_rating?: number | null
           id?: string
           interview_date?: string | null
-          interviewer_id?: string | null
-          manager_feedback?: string | null
-          reason_for_leaving?: string
+          link_expires_at?: string | null
+          management_rating?: number | null
+          overall_satisfaction?: number | null
+          reason_for_leaving?: string | null
           status?: string
-          suggestions?: string | null
-          updated_at?: string
-          would_return?: boolean | null
+          suggestions_for_improvement?: string | null
+          termination_date?: string
+          termination_reason?: string | null
+          token?: string | null
+          updated_at?: string | null
+          what_liked_least?: string | null
+          what_liked_most?: string | null
+          whatsapp_message_id?: string | null
+          whatsapp_sent_at?: string | null
+          work_environment_rating?: number | null
+          would_consider_returning?: boolean | null
+          would_recommend_company?: boolean | null
         }
         Relationships: [
           {
-            foreignKeyName: "hr_exit_interviews_company_id_fkey"
-            columns: ["company_id"]
+            foreignKeyName: "hr_exit_interviews_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -7571,6 +7610,10 @@ export type Database = {
         Returns: undefined
       }
       generate_access_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_exit_interview_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
