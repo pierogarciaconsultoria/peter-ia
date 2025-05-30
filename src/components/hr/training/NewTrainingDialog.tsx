@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import { EmployeeSelector } from "../shared/EmployeeSelector";
 import { createTraining } from "@/services/trainingService";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   trainingName: z.string().min(2, {
@@ -145,341 +146,342 @@ export function NewTrainingDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[825px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Novo Treinamento</DialogTitle>
           <DialogDescription>
             Crie um novo treinamento para sua empresa.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-8">
-            <div className="grid grid-cols-2 gap-4">
+        
+        <ScrollArea className="flex-1 pr-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmitForm)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="trainingName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome do Treinamento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome do treinamento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descrição do treinamento"
+                          className="resize-none h-20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col space-y-2">
+                      <FormLabel>Data de Início</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            locale={ptBR}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col space-y-2">
+                      <FormLabel>Data de Término</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            locale={ptBR}
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < form.getValues("startDate")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Local</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Local do treinamento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="trainingCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Custo do Treinamento</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0.00" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="trainerType">Tipo de Instrutor</Label>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Button
+                    type="button"
+                    variant={trainerType === "internal" ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 rounded-md"
+                    onClick={() => handleTrainerTypeChange("internal")}
+                  >
+                    Interno
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={trainerType === "external" ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 rounded-md"
+                    onClick={() => handleTrainerTypeChange("external")}
+                  >
+                    Externo
+                  </Button>
+                </div>
+              </div>
+              
+              {trainerType === "internal" ? (
+                <FormField
+                  control={form.control}
+                  name="internalTrainerEmployeeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instrutor Interno</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ""}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione o instrutor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {employees.map((employee) => (
+                              <SelectItem key={employee.id} value={employee.id}>
+                                {employee.name} - {employee.position}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="externalTrainerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Instrutor Externo</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome do instrutor externo" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="externalTrainerContact"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contato do Instrutor Externo</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contato do instrutor externo" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="targetAudience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Público-Alvo</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ""}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o departamento alvo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Todos">Todos os Departamentos</SelectItem>
+                            {departments.map((department) => (
+                              <SelectItem key={department} value={department}>
+                                {department}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="trainingCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria de Treinamento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Categoria de treinamento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               <FormField
                 control={form.control}
-                name="trainingName"
+                name="isMandatory"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome do Treinamento</FormLabel>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3">
                     <FormControl>
-                      <Input placeholder="Nome do treinamento" {...field} />
-                    </FormControl>
-                    <FormDescription>Este é o nome do treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descrição do treinamento"
-                        className="resize-none"
-                        {...field}
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormDescription>Escreva uma breve descrição do treinamento.</FormDescription>
-                    <FormMessage />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>É Obrigatório</FormLabel>
+                      <FormDescription>Marque se o treinamento é obrigatório para todos os funcionários.</FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+              
               <FormField
                 control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col space-y-3">
-                    <FormLabel>Data de Início</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ptBR })
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          locale={ptBR}
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>Selecione a data de início do treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col space-y-3">
-                    <FormLabel>Data de Término</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ptBR })
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          locale={ptBR}
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date < form.getValues("startDate")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>Selecione a data de término do treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="location"
+                name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Local</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Local do treinamento" {...field} />
-                    </FormControl>
-                    <FormDescription>Informe o local onde o treinamento será realizado.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="trainingCost"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Custo do Treinamento</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0.00" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                    </FormControl>
-                    <FormDescription>Informe o custo do treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div>
-              <Label htmlFor="trainerType">Tipo de Instrutor</Label>
-              <div className="flex items-center space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant={trainerType === "internal" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 rounded-md"
-                  onClick={() => handleTrainerTypeChange("internal")}
-                >
-                  Interno
-                </Button>
-                <Button
-                  type="button"
-                  variant={trainerType === "external" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 rounded-md"
-                  onClick={() => handleTrainerTypeChange("external")}
-                >
-                  Externo
-                </Button>
-              </div>
-            </div>
-            {trainerType === "internal" ? (
-              <FormField
-                control={form.control}
-                name="internalTrainerEmployeeId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Instrutor Interno</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value || ""}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o instrutor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {employees.map((employee) => (
-                            <SelectItem key={employee.id} value={employee.id}>
-                              {employee.name} - {employee.position}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription>Selecione o instrutor interno para o treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="externalTrainerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do Instrutor Externo</FormLabel>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <Input placeholder="Nome do instrutor externo" {...field} />
-                      </FormControl>
-                      <FormDescription>Informe o nome do instrutor externo.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="externalTrainerContact"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contato do Instrutor Externo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contato do instrutor externo" {...field} />
-                      </FormControl>
-                      <FormDescription>Informe as informações de contato do instrutor externo.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="targetAudience"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Público-Alvo</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value || ""}
-                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o departamento alvo" />
+                          <SelectValue placeholder="Selecione um status" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Todos">Todos os Departamentos</SelectItem>
-                          {departments.map((department) => (
-                            <SelectItem key={department} value={department}>
-                              {department}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormDescription>Especifique o público-alvo do treinamento.</FormDescription>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="planned">Planejado</SelectItem>
+                        <SelectItem value="in_progress">Em Andamento</SelectItem>
+                        <SelectItem value="completed">Concluído</SelectItem>
+                        <SelectItem value="canceled">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="trainingCategory"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria de Treinamento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Categoria de treinamento" {...field} />
-                    </FormControl>
-                    <FormDescription>Informe a categoria do treinamento.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="isMandatory"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>É Obrigatório</FormLabel>
-                    <FormDescription>Marque se o treinamento é obrigatório para todos os funcionários.</FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="planned">Planejado</SelectItem>
-                      <SelectItem value="in_progress">Em Andamento</SelectItem>
-                      <SelectItem value="completed">Concluído</SelectItem>
-                      <SelectItem value="canceled">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Selecione o status do treinamento.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">Criar</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </ScrollArea>
+        
+        <DialogFooter className="flex-shrink-0 pt-4">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button type="submit" onClick={form.handleSubmit(onSubmitForm)}>
+            Criar
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
