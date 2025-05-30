@@ -14,7 +14,8 @@ export const useCurrentUser = () => {
     return isSuperAdminInLovable() || isSuperAdmin || isCompanyAdmin;
   }, [isSuperAdmin, isCompanyAdmin]);
 
-  return {
+  // Cache dos dados para evitar múltiplas consultas
+  const cachedData = useMemo(() => ({
     user,
     userProfile,
     userCompany,
@@ -22,5 +23,7 @@ export const useCurrentUser = () => {
     isAdmin,
     isLoading: loading,
     empresaId: userProfile?.company_id,
-  };
+  }), [user, userProfile, userCompany, isMaster, isAdmin, loading]);
+
+  return cachedData;
 };

@@ -7701,6 +7701,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      current_user_belongs_to_company: {
+        Args: { target_company_id: string }
+        Returns: boolean
+      }
       exec_sql: {
         Args: { sql_statement: string }
         Returns: undefined
@@ -7744,6 +7748,14 @@ export type Database = {
           nome: string
           cnpj: string
         }[]
+      }
+      get_current_user_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_db_version: {
         Args: Record<PropertyKey, never>
@@ -7813,6 +7825,14 @@ export type Database = {
       }
       is_company_admin_for: {
         Args: { company_uuid: string }
+        Returns: boolean
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_usuario_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_super_admin: {

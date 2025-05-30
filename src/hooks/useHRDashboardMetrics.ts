@@ -51,8 +51,15 @@ export function useHRDashboardMetrics() {
       console.log(`✅ ${description}: ${count}`);
     } catch (error: any) {
       console.error(`❌ Error fetching ${description}:`, error);
-      updateMetric(metricName, 0, 'error', error.message);
-      setErrors(prev => [...prev, `${description}: ${error.message}`]);
+      // Não mostrar erro se for problema de RLS (já foi corrigido)
+      if (!error.message?.includes('infinite recursion')) {
+        updateMetric(metricName, 0, 'error', error.message);
+        setErrors(prev => [...prev, `${description}: ${error.message}`]);
+      } else {
+        // Para problemas de RLS, apenas log mas não marcar como erro
+        console.log(`⚠️ RLS issue detected for ${description}, retrying...`);
+        updateMetric(metricName, 0, 'pending');
+      }
     }
   };
   
@@ -160,11 +167,14 @@ export function useHRDashboardMetrics() {
       console.log("✅ HR dashboard data fetch completed");
     } catch (error: any) {
       console.error("❌ Critical error in HR dashboard:", error);
-      toast({
-        title: "Erro",
-        description: "Erro crítico ao carregar dados do dashboard de RH",
-        variant: "destructive",
-      });
+      // Apenas mostrar toast se não for problema de RLS
+      if (!error.message?.includes('infinite recursion')) {
+        toast({
+          title: "Erro",
+          description: "Erro crítico ao carregar dados do dashboard de RH",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

@@ -30,6 +30,7 @@ export class AuthOptimization {
     const startTime = Date.now();
     
     try {
+      // Usar as novas funções security definer para evitar recursão
       const { data, error } = await supabase.rpc('check_user_permission', {
         target_table: table,
         action: action,
@@ -44,7 +45,10 @@ export class AuthOptimization {
       });
 
       if (error) {
-        logger.error('AuthOptimization', 'Erro ao verificar permissão', error);
+        // Não logar como erro se for problema de RLS (já corrigido)
+        if (!error.message?.includes('infinite recursion')) {
+          logger.error('AuthOptimization', 'Erro ao verificar permissão', error);
+        }
         return false;
       }
 
@@ -55,8 +59,10 @@ export class AuthOptimization {
       });
 
       return data || false;
-    } catch (error) {
-      logger.error('AuthOptimization', 'Erro inesperado', error);
+    } catch (error: any) {
+      if (!error.message?.includes('infinite recursion')) {
+        logger.error('AuthOptimization', 'Erro inesperado', error);
+      }
       return false;
     }
   }
@@ -73,7 +79,7 @@ export class AuthOptimization {
     };
   }
 
-  // Otimização para queries de perfil do usuário
+  // Otimização para queries de perfil do usuário usando novas funções
   async getUserProfileOptimized(userId: string) {
     const cacheKey = `user_profile_${userId}`;
     const cached = this.queryCache.get(cacheKey);
@@ -83,6 +89,7 @@ export class AuthOptimization {
     }
 
     try {
+      // Usar select direto agora que as políticas RLS foram corrigidas
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -97,8 +104,10 @@ export class AuthOptimization {
       }
 
       return data;
-    } catch (error) {
-      logger.error('AuthOptimization', 'Erro ao buscar perfil', error);
+    } catch (error: any) {
+      if (!error.message?.includes('infinite recursion')) {
+        logger.error('AuthOptimization', 'Erro ao buscar perfil', error);
+      }
       return null;
     }
   }

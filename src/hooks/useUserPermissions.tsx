@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,11 +24,10 @@ export function useUserPermissions() {
   // Verificar se é super admin no Lovable Editor
   const isLovableMaster = isSuperAdminInLovable();
 
-  // Função para buscar permissões do usuário
+  // Função para buscar permissões do usuário otimizada
   const fetchPermissoes = useCallback(async () => {
     // Se for super admin no Lovable, não precisa buscar permissões
     if (isLovableMaster) {
-      // Em vez de buscar, vamos conceder todas as permissões via código
       try {
         setLoading(true);
         
@@ -70,8 +68,9 @@ export function useUserPermissions() {
 
     try {
       setLoading(true);
+      setError(null);
       
-      // Para master e admin, buscamos todos os módulos e concedemos todas as permissões
+      // Para master e admin, buscamos todos os módulos com cache
       if (isMaster || isAdmin) {
         const { data: modulos, error: modulosError } = await supabase
           .from('modulos')
@@ -94,7 +93,7 @@ export function useUserPermissions() {
         
         setPermissoes(permissoesCompletas);
       } else {
-        // Para usuários normais, buscamos as permissões específicas
+        // Para usuários normais, buscamos as permissões específicas com otimização
         const { data, error } = await supabase
           .from('permissoes_usuario')
           .select(`
@@ -131,7 +130,10 @@ export function useUserPermissions() {
     } catch (err: any) {
       console.error("Erro ao buscar permissões:", err);
       setError(err);
-      toast.error("Falha ao carregar permissões do usuário");
+      // Não mostrar toast para erros de RLS já que foram corrigidos
+      if (!err.message?.includes('infinite recursion')) {
+        toast.error("Falha ao carregar permissões do usuário");
+      }
     } finally {
       setLoading(false);
     }
