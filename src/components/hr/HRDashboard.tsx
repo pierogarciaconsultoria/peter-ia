@@ -22,7 +22,7 @@ export function HRDashboard() {
   const { metrics, isLoading, errors, refetch } = useHRDashboardMetrics();
   
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Dashboard de RH</h2>
         <Button 
@@ -52,7 +52,8 @@ export function HRDashboard() {
         </Alert>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid de métricas com responsividade melhorada */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
         <MetricCard
           title="Total de Colaboradores"
           icon={Users}
@@ -96,12 +97,12 @@ export function HRDashboard() {
         />
       </div>
       
-      <Tabs defaultValue="analytics" className="space-y-4">
+      <Tabs defaultValue="analytics" className="space-y-4 w-full">
         <TabsList>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="analytics" className="space-y-4">
-          <Card>
+          <Card className="w-full">
             <CardHeader>
               <CardTitle>Métricas de RH</CardTitle>
               <CardDescription>

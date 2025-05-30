@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { HRFilters } from "@/components/hr/HRFilters";
 import { HRHeader } from "@/components/hr/HRHeader";
@@ -51,8 +52,8 @@ const HumanResources = () => {
 
   return (
     <AuthenticationRequired>
-      <div className="min-h-screen bg-background">
-        <div className="w-full px-4 sm:px-6 py-6 space-y-6">
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <HRHeader />
           
           {activeTab !== "ambiente" && <HRFilters />}
@@ -70,10 +71,12 @@ const HumanResources = () => {
               <p className="ml-2 text-muted-foreground">Carregando...</p>
             </div>
           ) : (
-            <HRTabContent 
-              activeTab={activeTab} 
-              onTabChange={handleTabChange} 
-            />
+            <div className="w-full max-w-full">
+              <HRTabContent 
+                activeTab={activeTab} 
+                onTabChange={handleTabChange} 
+              />
+            </div>
           )}
           
           {/* Add the Stark Corp demo button */}

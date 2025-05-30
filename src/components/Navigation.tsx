@@ -18,9 +18,9 @@ export function Navigation() {
       {/* Sidebar */}
       <Sidebar />
       
-      {/* Main content */}
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
-        <header className="fixed top-0 right-0 z-30 w-full h-16 bg-background/95 backdrop-blur-sm border-b">
+      {/* Main content - ajustado para não sobrepor */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'} min-w-0`}>
+        <header className="flex-shrink-0 h-16 bg-background/95 backdrop-blur-sm border-b">
           <div className="flex h-full items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <MenuToggle 
@@ -37,9 +37,11 @@ export function Navigation() {
           </div>
         </header>
         
-        {/* Main content padding to account for fixed header */}
-        <main className="pt-16 h-screen overflow-auto pb-16">
-          <Outlet />
+        {/* Main content com overflow controlado */}
+        <main className="flex-1 overflow-auto pb-4">
+          <div className="w-full max-w-full">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
