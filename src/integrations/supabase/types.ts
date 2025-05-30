@@ -1651,6 +1651,69 @@ export type Database = {
           },
         ]
       }
+      employee_training_compliance: {
+        Row: {
+          assigned_date: string | null
+          certificate_url: string | null
+          company_id: string
+          completion_date: string | null
+          created_at: string
+          due_date: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          requirement_id: string
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_date?: string | null
+          certificate_url?: string | null
+          company_id: string
+          completion_date?: string | null
+          created_at?: string
+          due_date?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          requirement_id: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_date?: string | null
+          certificate_url?: string | null
+          company_id?: string
+          completion_date?: string | null
+          created_at?: string
+          due_date?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          requirement_id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_training_compliance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_training_compliance_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "job_position_training_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_trainings: {
         Row: {
           certificate_url: string | null
@@ -4589,6 +4652,74 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "iso_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_position_training_requirements: {
+        Row: {
+          company_id: string
+          completion_deadline_days: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_mandatory: boolean
+          job_position_id: string
+          procedure_id: string | null
+          training_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completion_deadline_days?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_mandatory?: boolean
+          job_position_id: string
+          procedure_id?: string | null
+          training_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completion_deadline_days?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_mandatory?: boolean
+          job_position_id?: string
+          procedure_id?: string | null
+          training_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_position_training_requirements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_position_training_requirements_job_position_id_fkey"
+            columns: ["job_position_id"]
+            isOneToOne: false
+            referencedRelation: "job_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_position_training_requirements_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "iso_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_position_training_requirements_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "hr_trainings"
             referencedColumns: ["id"]
           },
         ]

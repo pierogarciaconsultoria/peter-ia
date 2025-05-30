@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchTrainings as getTrainings } from "@/services/training";
 import { Training } from "@/types/training";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +11,7 @@ import { TrainingStats } from "./TrainingStats";
 import { TrainingTable } from "./TrainingTable";
 import { TrainingFilterBar } from "./TrainingFilterBar";
 import { NewTrainingDialog } from "./NewTrainingDialog";
+import { TrainingMatrix } from "./TrainingMatrix";
 import { useToast } from "@/components/ui/use-toast";
 
 export function TrainingDashboard() {
@@ -143,33 +145,69 @@ export function TrainingDashboard() {
         </Button>
       </div>
 
-      <TrainingFilterBar 
-        departments={departments}
-        employees={employees}
-        procedures={procedures}
-        onFilterChange={handleFilterChange}
-      />
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="matrix">Matriz por Cargo</TabsTrigger>
+          <TabsTrigger value="trainings">Lista de Treinamentos</TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Estatísticas de Treinamentos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TrainingStats trainings={trainings} />
-        </CardContent>
-      </Card>
+        <TabsContent value="overview" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Estatísticas de Treinamentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrainingStats trainings={trainings} />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Treinamentos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TrainingTable 
-            trainings={filteredTrainings} 
-            isLoading={isLoading} 
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Treinamentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrainingFilterBar 
+                departments={departments}
+                employees={employees}
+                procedures={procedures}
+                onFilterChange={handleFilterChange}
+              />
+              <div className="mt-4">
+                <TrainingTable 
+                  trainings={filteredTrainings.slice(0, 10)} 
+                  isLoading={isLoading} 
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="matrix">
+          <TrainingMatrix />
+        </TabsContent>
+
+        <TabsContent value="trainings" className="space-y-6">
+          <TrainingFilterBar 
+            departments={departments}
+            employees={employees}
+            procedures={procedures}
+            onFilterChange={handleFilterChange}
           />
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista Completa de Treinamentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TrainingTable 
+                trainings={filteredTrainings} 
+                isLoading={isLoading} 
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <NewTrainingDialog
         isOpen={isDialogOpen}
