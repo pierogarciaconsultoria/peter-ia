@@ -7571,6 +7571,15 @@ export type Database = {
         Args: { table_name: string }
         Returns: undefined
       }
+      audit_access_log: {
+        Args: {
+          table_name: string
+          action_type: string
+          record_id: string
+          additional_data?: Json
+        }
+        Returns: undefined
+      }
       belongs_to_company: {
         Args: { company_uuid: string }
         Returns: boolean
@@ -7595,6 +7604,15 @@ export type Database = {
       }
       check_user_access: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      check_user_permission: {
+        Args: {
+          target_table: string
+          action: string
+          target_company_id?: string
+          target_user_id?: string
+        }
         Returns: boolean
       }
       create_check_table_exists_function: {

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { isSuperAdminInLovable } from '@/utils/lovableEditorDetection';
 import { logger } from '@/utils/logger';
+import { authOptimization } from '@/utils/authOptimization';
 
 interface Company {
   id: string;
@@ -99,18 +100,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     logger.debug('AuthProvider', 'Buscando perfil do usuário', { userId: userId.substring(0, 8) + '...' });
     try {
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          logger.info('AuthProvider', 'Perfil não encontrado para usuário');
-          return null;
-        }
-        handleError(error, 'fetchUserProfile');
+      // Usar otimização de cache para buscar perfil
+      const profile = await authOptimization.getUserProfileOptimized(userId);
+      
+      if (!profile) {
+        logger.info('AuthProvider', 'Perfil não encontrado para usuário');
         return null;
       }
 
@@ -167,7 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       logger.debug('AuthProvider', 'Buscando dados do usuário');
       
-      // Buscar perfil do usuário
+      // Buscar perfil do usuário com otimização
       const profile = await fetchUserProfile(user.id);
       setUserProfile(profile);
 
