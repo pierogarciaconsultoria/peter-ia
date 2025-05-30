@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
@@ -12,18 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAdminCreation } from "@/hooks/useAdminCreation";
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Agora o useAuth deve funcionar porque está dentro do AuthProvider
   const { user, loading, connectionStatus, reconnect } = useAuth();
+  
   const [activeTab, setActiveTab] = useState("login");
   const [accessToken, setAccessToken] = useState("");
   const [isSubmittingToken, setIsSubmittingToken] = useState(false);
-  
-  // Initialize the admin user
-  useAdminCreation();
   
   // Get redirect path from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";

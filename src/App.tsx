@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
@@ -105,77 +106,75 @@ function App() {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
-  
-  // Initialize admin account
-  console.log('👨‍💼 App: Inicializando criação de admin');
-  useAdminCreation();
 
   console.log('🎨 App: Renderizando componente principal');
 
   return (
     <ErrorBoundary>
-      <SidebarProvider>
-        <Router>
-          <Routes>
-            {/* Página inicial sem requisitos de login */}
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/landing" element={<Navigate to="/" replace />} />
-            
-            {/* Rotas de autenticação */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/external-disc-assessment/:token" element={<Navigate to="/auth" replace />} />
-            
-            {/* Rotas protegidas por autenticação com AuthGuard */}
-            <Route element={<AuthGuard><Navigation /></AuthGuard>}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="profile" element={<Navigate to="/dashboard" replace />} />
-              <Route path="documents" element={<Navigate to="/dashboard" replace />} />
-              <Route path="document-upload" element={<Navigate to="/dashboard" replace />} />
+      <AuthProvider>
+        <SidebarProvider>
+          <Router>
+            <Routes>
+              {/* Página inicial sem requisitos de login */}
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
               
-              {/* Corrigir a rota de recursos humanos para aceitar query params */}
-              <Route path="human-resources" element={<HumanResources />} />
+              {/* Rotas de autenticação - agora dentro do AuthProvider */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/external-disc-assessment/:token" element={<Navigate to="/auth" replace />} />
               
-              <Route path="process-form" element={<ProcessFormPage />} />
-              <Route path="processo" element={<ProcessoPage />} />
-              <Route path="processo/:id" element={<ProcessFormPage />} />
-              <Route path="non-compliance" element={<NonCompliance />} />
-              <Route path="action-schedule" element={<ActionSchedule />} />
-              <Route path="audit-schedule" element={<AuditSchedule />} />
-              <Route path="external-audit" element={<ExternalAudit />} />
-              <Route path="strategic-planning" element={<StrategicPlanning />} />
-              <Route path="strategic-planning/:tab" element={<StrategicPlanning />} />
-              <Route path="critical-analysis" element={<CriticalAnalysis />} />
-              <Route path="organization-context" element={<OrganizationContext />} />
-              <Route path="risk-management" element={<RiskManagement />} />
-              <Route path="customer-complaints" element={<CustomerComplaints />} />
-              <Route path="performance-indicators" element={<PerformanceIndicators />} />
-              <Route path="quality-control" element={<QualityControl />} />
-              <Route path="supplier-evaluation" element={<SupplierEvaluation />} />
-              <Route path="reunioes" element={<Reunioes />} />
-              <Route path="training-control" element={<TrainingControl />} />
-              <Route path="non-conforming-products" element={<NonConformingProducts />} />
-              <Route path="equipment-calibration" element={<EquipmentCalibration />} />
-              <Route path="raw-material-inspection" element={<RawMaterialInspection />} />
-              <Route path="satisfaction-survey" element={<SatisfactionSurvey />} />
-              <Route path="ambiente" element={<Ambiente />} />
-              <Route path="tasks" element={<Tasks />} />
-              
-              {/* Admin route - agora carrega corretamente o componente Admin */}
-              <Route path="admin" element={<Admin />} />
-            </Route>
+              {/* Rotas protegidas por autenticação com AuthGuard */}
+              <Route element={<AuthGuard><Navigation /></AuthGuard>}>
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="profile" element={<Navigate to="/dashboard" replace />} />
+                <Route path="documents" element={<Navigate to="/dashboard" replace />} />
+                <Route path="document-upload" element={<Navigate to="/dashboard" replace />} />
+                
+                {/* Corrigir a rota de recursos humanos para aceitar query params */}
+                <Route path="human-resources" element={<HumanResources />} />
+                
+                <Route path="process-form" element={<ProcessFormPage />} />
+                <Route path="processo" element={<ProcessoPage />} />
+                <Route path="processo/:id" element={<ProcessFormPage />} />
+                <Route path="non-compliance" element={<NonCompliance />} />
+                <Route path="action-schedule" element={<ActionSchedule />} />
+                <Route path="audit-schedule" element={<AuditSchedule />} />
+                <Route path="external-audit" element={<ExternalAudit />} />
+                <Route path="strategic-planning" element={<StrategicPlanning />} />
+                <Route path="strategic-planning/:tab" element={<StrategicPlanning />} />
+                <Route path="critical-analysis" element={<CriticalAnalysis />} />
+                <Route path="organization-context" element={<OrganizationContext />} />
+                <Route path="risk-management" element={<RiskManagement />} />
+                <Route path="customer-complaints" element={<CustomerComplaints />} />
+                <Route path="performance-indicators" element={<PerformanceIndicators />} />
+                <Route path="quality-control" element={<QualityControl />} />
+                <Route path="supplier-evaluation" element={<SupplierEvaluation />} />
+                <Route path="reunioes" element={<Reunioes />} />
+                <Route path="training-control" element={<TrainingControl />} />
+                <Route path="non-conforming-products" element={<NonConformingProducts />} />
+                <Route path="equipment-calibration" element={<EquipmentCalibration />} />
+                <Route path="raw-material-inspection" element={<RawMaterialInspection />} />
+                <Route path="satisfaction-survey" element={<SatisfactionSurvey />} />
+                <Route path="ambiente" element={<Ambiente />} />
+                <Route path="tasks" element={<Tasks />} />
+                
+                {/* Admin route - agora carrega corretamente o componente Admin */}
+                <Route path="admin" element={<Admin />} />
+              </Route>
 
-            {/* Rota pública para entrevista de desligamento */}
-            <Route path="/exit-interview/:token" element={<ExitInterviewPage />} />
+              {/* Rota pública para entrevista de desligamento */}
+              <Route path="/exit-interview/:token" element={<ExitInterviewPage />} />
+              
+              {/* Catch-all route for pages not found */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
             
-            {/* Catch-all route for pages not found */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          
-          <Toaster />
-          <SonnerToaster position="top-right" />
-        </Router>
-      </SidebarProvider>
+            <Toaster />
+            <SonnerToaster position="top-right" />
+          </Router>
+        </SidebarProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
