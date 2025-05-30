@@ -3,14 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompanyManagement from '@/components/admin/CompanyManagement';
 import UserManagement from '@/components/admin/UserManagement';
-import RoleManagement from '@/components/admin/RoleManagement';
 import { PermissoesUsuarios } from '@/components/admin/PermissoesUsuarios';
-import CentralizedRegistration from '@/components/admin/CentralizedRegistration';
-import { DatabaseConnectionStatus } from '@/components/admin/DatabaseConnectionStatus';
-import { ModuleAssistantSettings } from '@/components/admin/ModuleAssistantSettings';
-import { PerformanceDashboard } from '@/components/admin/PerformanceDashboard';
+import { AdminAdvancedSettings } from '@/components/admin/AdminAdvancedSettings';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Users, Building2, Settings, Database, Bot, Gauge, UserCog } from 'lucide-react';
+import { Shield, Building2, Users, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -59,7 +55,7 @@ interface Role {
 
 const Admin = () => {
   const { isSuperAdmin, isCompanyAdmin, userCompany } = useAuth();
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState(isSuperAdmin ? 'empresas' : 'usuarios');
   const [loading, setLoading] = useState(false);
   
   // State for data
@@ -218,65 +214,70 @@ const Admin = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="container mx-auto p-4 md:p-6 max-w-7xl">
+      <div className="flex items-center gap-3 mb-8">
         <Shield className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">Administração do Sistema</h1>
-          <p className="text-gray-600">Gerencie usuários, empresas e configurações do sistema</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Administração do Sistema</h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            Gerencie empresas, usuários e configurações do sistema
+          </p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Usuários</span>
-          </TabsTrigger>
-          
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 gap-2 h-auto p-2 bg-muted">
           {isSuperAdmin && (
-            <TabsTrigger value="companies" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Empresas</span>
+            <TabsTrigger 
+              value="empresas" 
+              className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Building2 className="h-5 w-5" />
+              <span className="text-xs md:text-sm font-medium">Empresas</span>
             </TabsTrigger>
           )}
           
-          <TabsTrigger value="roles" className="flex items-center gap-2">
-            <UserCog className="h-4 w-4" />
-            <span className="hidden sm:inline">Roles</span>
+          <TabsTrigger 
+            value="usuarios" 
+            className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Users className="h-5 w-5" />
+            <span className="text-xs md:text-sm font-medium">Usuários</span>
           </TabsTrigger>
           
-          <TabsTrigger value="permissions" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Permissões</span>
-          </TabsTrigger>
-          
-          {isSuperAdmin && (
-            <TabsTrigger value="registration" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Cadastros</span>
-            </TabsTrigger>
-          )}
-          
-          <TabsTrigger value="database" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Database</span>
-          </TabsTrigger>
-          
-          <TabsTrigger value="assistants" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">Assistentes</span>
+          <TabsTrigger 
+            value="acesso" 
+            className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Lock className="h-5 w-5" />
+            <span className="text-xs md:text-sm font-medium">Acesso</span>
           </TabsTrigger>
 
           {isSuperAdmin && (
-            <TabsTrigger value="performance" className="flex items-center gap-2">
-              <Gauge className="h-4 w-4" />
-              <span className="hidden sm:inline">Performance</span>
+            <TabsTrigger 
+              value="avancado" 
+              className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Shield className="h-5 w-5" />
+              <span className="text-xs md:text-sm font-medium">Avançado</span>
             </TabsTrigger>
           )}
         </TabsList>
 
-        <TabsContent value="users" className="space-y-6">
+        {isSuperAdmin && (
+          <TabsContent value="empresas" className="space-y-6">
+            <CompanyManagement
+              companies={companies}
+              loading={loading}
+              fetchCompanies={fetchCompanies}
+              setItemToDelete={setItemToDelete}
+              setDeleteDialogOpen={setDeleteDialogOpen}
+              isSuperAdmin={isSuperAdmin}
+            />
+          </TabsContent>
+        )}
+
+        <TabsContent value="usuarios" className="space-y-6">
           <UserManagement
             users={users}
             companies={companies}
@@ -289,65 +290,25 @@ const Admin = () => {
           />
         </TabsContent>
 
-        {isSuperAdmin && (
-          <TabsContent value="companies" className="space-y-6">
-            <CompanyManagement
-              companies={companies}
-              loading={loading}
-              fetchCompanies={fetchCompanies}
-              setItemToDelete={setItemToDelete}
-              setDeleteDialogOpen={setDeleteDialogOpen}
-              isSuperAdmin={isSuperAdmin}
-            />
-          </TabsContent>
-        )}
-
-        <TabsContent value="roles" className="space-y-6">
-          <RoleManagement
-            roles={roles}
-            companies={companies}
-            loading={loading}
-            fetchRoles={fetchRoles}
-            setItemToDelete={setItemToDelete}
-            setDeleteDialogOpen={setDeleteDialogOpen}
-            isSuperAdmin={isSuperAdmin}
-            userCompany={userCompany}
-          />
-        </TabsContent>
-
-        <TabsContent value="permissions" className="space-y-6">
+        <TabsContent value="acesso" className="space-y-6">
           <PermissoesUsuarios />
         </TabsContent>
 
         {isSuperAdmin && (
-          <TabsContent value="registration" className="space-y-6">
-            <CentralizedRegistration
+          <TabsContent value="avancado" className="space-y-6">
+            <AdminAdvancedSettings 
+              roles={roles}
               companies={companies}
               users={users}
-              roles={roles}
               loading={loading}
+              fetchRoles={fetchRoles}
               fetchCompanies={fetchCompanies}
               fetchUsers={fetchUsers}
-              fetchRoles={fetchRoles}
               setItemToDelete={setItemToDelete}
               setDeleteDialogOpen={setDeleteDialogOpen}
               isSuperAdmin={isSuperAdmin}
               userCompany={userCompany}
             />
-          </TabsContent>
-        )}
-
-        <TabsContent value="database" className="space-y-6">
-          <DatabaseConnectionStatus />
-        </TabsContent>
-
-        <TabsContent value="assistants" className="space-y-6">
-          <ModuleAssistantSettings isAdmin={isSuperAdmin || isCompanyAdmin} />
-        </TabsContent>
-
-        {isSuperAdmin && (
-          <TabsContent value="performance" className="space-y-6">
-            <PerformanceDashboard />
           </TabsContent>
         )}
       </Tabs>
