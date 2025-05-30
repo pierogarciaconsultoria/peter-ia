@@ -85,7 +85,7 @@ export class TrainingMatrixService {
           *,
           job_position:job_positions(id, title, department_id),
           training:hr_trainings(id, title),
-          procedure:iso_documents(id, title)
+          procedure:iso_documents(id, title, document_type)
         )
       `)
       .eq('company_id', companyId);
@@ -122,7 +122,7 @@ export class TrainingMatrixService {
           *,
           job_position:job_positions(id, title, department_id),
           training:hr_trainings(id, title),
-          procedure:iso_documents(id, title)
+          procedure:iso_documents(id, title, document_type)
         )
       `)
       .single();
