@@ -1,13 +1,13 @@
 
-import { BarChartBig, Building2, Users, DollarSign } from "lucide-react";
+import { BarChartBig, Building2, Users, DollarSign, ArrowRightLeft } from "lucide-react";
 import { MenuItem } from "../../types";
 
 export const structureItems: MenuItem[] = [
   {
-    title: "Estrutura Organizacional",
+    title: "Organização",
     icon: BarChartBig,
     href: "#",
-    modulo: "estrutura_org",
+    modulo: "organizacao",
     children: [
       { 
         title: "Departamentos", 
@@ -16,20 +16,20 @@ export const structureItems: MenuItem[] = [
         modulo: "departamentos" 
       },
       { 
-        title: "Quadro de Posições Aprovadas", 
+        title: "Posições Aprovadas", 
         icon: Users, 
         href: "/human-resources?activeTab=positions", 
         modulo: "posicoes" 
       },
       { 
-        title: "Plano de Cargos e Salários", 
+        title: "Cargos e Salários", 
         icon: DollarSign, 
         href: "/human-resources?activeTab=salary", 
         modulo: "cargos_salarios" 
       },
       { 
         title: "Movimentação de Pessoal", 
-        icon: Users, 
+        icon: ArrowRightLeft, 
         href: "/human-resources?activeTab=personnel", 
         modulo: "movimentacao_pessoal" 
       },

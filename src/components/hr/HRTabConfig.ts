@@ -32,121 +32,67 @@ export const hrTabGroups: TabGroup[] = [
     component: "HRDashboard"
   },
   {
-    id: "structure",
-    name: "Estrutura Organizacional",
-    icon: createIcon(icons.BarChartBig),
+    id: "organization",
+    name: "Organização",
+    icon: createIcon(icons.Building2),
     subTabs: [
-      { id: "departments", name: "Departamentos", component: "DepartmentManagement", icon: createIcon(icons.Building2), href: "/human-resources?activeTab=departments" },
-      { id: "positions", name: "Quadro de Posições Aprovadas", component: "ApprovedPositions", icon: createIcon(icons.Users), href: "/human-resources?activeTab=positions" },
-      { id: "salary", name: "Plano de Cargos e Salários", component: "JobSalaryPlan", icon: createIcon(icons.DollarSign), href: "/human-resources?activeTab=salary" },
-      { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement", icon: createIcon(icons.Users), href: "/human-resources?activeTab=personnel" }
+      { id: "departments", name: "Departamentos", component: "DepartmentManagement", icon: createIcon(icons.Building), href: "/human-resources?activeTab=departments" },
+      { id: "positions", name: "Posições Aprovadas", component: "ApprovedPositions", icon: createIcon(icons.Users), href: "/human-resources?activeTab=positions" },
+      { id: "salary", name: "Cargos e Salários", component: "JobSalaryPlan", icon: createIcon(icons.DollarSign), href: "/human-resources?activeTab=salary" }
     ]
   },
   {
-    id: "recruitment",
-    name: "Recrutamento",
+    id: "talent",
+    name: "Talentos",
     icon: createIcon(icons.UserPlus),
     subTabs: [
-      { id: "recruitment-selection", name: "Recrutamento e Seleção", component: "RecruitmentSelection", icon: createIcon(icons.UserPlus), href: "/human-resources?activeTab=recruitment-selection" },
-      { id: "interview", name: "Entrevista de admissão", component: "AdmissionInterview", icon: createIcon(icons.FileText), href: "/human-resources?activeTab=interview" },
-      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission", icon: createIcon(icons.UserPlus), href: "/human-resources?activeTab=online-admission" }
+      { id: "recruitment-selection", name: "Recrutamento", component: "RecruitmentSelection", icon: createIcon(icons.Search), href: "/human-resources?activeTab=recruitment-selection" },
+      { id: "interview", name: "Entrevistas", component: "AdmissionInterview", icon: createIcon(icons.MessageSquare), href: "/human-resources?activeTab=interview" },
+      { id: "online-admission", name: "Admissão Online", component: "OnlineAdmission", icon: createIcon(icons.Globe), href: "/human-resources?activeTab=online-admission" }
     ]
   },
   {
-    id: "employees",
-    name: "Colaboradores",
+    id: "people",
+    name: "Pessoas",
     icon: createIcon(icons.Users),
     subTabs: [
-      { 
-        id: "directory", 
-        name: "Colaboradores", 
-        component: "EmployeeDirectory",
-        icon: createIcon(icons.UserCircle),
-        href: "/human-resources?activeTab=directory"
-      },
-      { 
-        id: "onboarding", 
-        name: "Integração", 
-        component: "EmployeeOnboarding",
-        icon: createIcon(icons.UserPlus),
-        href: "/human-resources?activeTab=onboarding"
-      },
-      { 
-        id: "trial-evaluation", 
-        name: "Avaliação de Experiência", 
-        component: "NewTrialEvaluation",
-        icon: createIcon(icons.ClipboardCheck),
-        href: "/human-resources?activeTab=trial-evaluation"
-      },
-      { 
-        id: "performance", 
-        name: "Avaliação de Desempenho", 
-        component: "PerformanceEvaluation",
-        icon: createIcon(icons.BarChart2),
-        href: "/human-resources?activeTab=performance"
-      },
-      { 
-        id: "employee-costs", 
-        name: "Custos de Pessoal", 
-        component: "EmployeeCostManagement",
-        icon: createIcon(icons.DollarSign),
-        href: "/human-resources?activeTab=employee-costs"
-      }
+      { id: "directory", name: "Colaboradores", component: "EmployeeDirectory", icon: createIcon(icons.UserCircle), href: "/human-resources?activeTab=directory" },
+      { id: "onboarding", name: "Integração", component: "EmployeeOnboarding", icon: createIcon(icons.UserCheck), href: "/human-resources?activeTab=onboarding" },
+      { id: "personnel", name: "Movimentação", component: "PersonnelMovement", icon: createIcon(icons.ArrowRightLeft), href: "/human-resources?activeTab=personnel" },
+      { id: "employee-costs", name: "Custos", component: "EmployeeCostManagement", icon: createIcon(icons.Calculator), href: "/human-resources?activeTab=employee-costs" }
     ]
   },
   {
-    id: "daily-management",
-    name: "Gestão Operacional",
-    icon: createIcon(icons.Calendar),
+    id: "performance",
+    name: "Performance",
+    icon: createIcon(icons.TrendingUp),
     subTabs: [
-      { 
-        id: "vacation", 
-        name: "Férias", 
-        component: "VacationManagement",
-        icon: createIcon(icons.Calendar),
-        href: "/human-resources?activeTab=vacation"
-      },
-      { 
-        id: "occurrences", 
-        name: "Ocorrências", 
-        component: "OccurrenceManagement",
-        icon: createIcon(icons.AlertCircle),
-        href: "/human-resources?activeTab=occurrences"
-      },
-      { 
-        id: "medical", 
-        name: "Atestados Médicos", 
-        component: "MedicalCertificateManagement",
-        icon: createIcon(icons.FileHeart),
-        href: "/human-resources?activeTab=medical"
-      },
-      { 
-        id: "board", 
-        name: "Mural do Colaborador", 
-        component: "EmployeeBoard",
-        icon: createIcon(icons.FileText),
-        href: "/human-resources?activeTab=board"
-      }
+      { id: "trial-evaluation", name: "Experiência", component: "NewTrialEvaluation", icon: createIcon(icons.ClipboardCheck), href: "/human-resources?activeTab=trial-evaluation" },
+      { id: "performance", name: "Desempenho", component: "PerformanceEvaluation", icon: createIcon(icons.BarChart3), href: "/human-resources?activeTab=performance" },
+      { id: "disc-assessment", name: "Perfil DISC", component: "DiscAssessment", icon: createIcon(icons.Target), href: "/human-resources?activeTab=disc-assessment" },
+      { id: "development-plans", name: "Desenvolvimento", component: "DevelopmentPlans", icon: createIcon(icons.GraduationCap), href: "/human-resources?activeTab=development-plans" }
     ]
   },
   {
-    id: "development",
-    name: "Desenvolvimento Profissional",
-    icon: createIcon(icons.Award),
+    id: "operations",
+    name: "Operações",
+    icon: createIcon(icons.Settings),
     subTabs: [
-      { id: "disc-assessment", name: "Avaliação de Perfil DISC", component: "DiscAssessment", icon: createIcon(icons.Award), href: "/human-resources?activeTab=disc-assessment" },
-      { id: "development-plans", name: "Planos de Desenvolvimento Individual", component: "DevelopmentPlans", icon: createIcon(icons.Award), href: "/human-resources?activeTab=development-plans" },
-      { id: "training", name: "Treinamentos", component: "TrainingControl", icon: createIcon(icons.Award), href: "/human-resources?activeTab=training" },
-      { id: "climate", name: "Pesquisa de Clima Organizacional", component: "ClimateResearch", icon: createIcon(icons.Award), href: "/human-resources?activeTab=climate" },
-      { id: "feedback", name: "Feedback", component: "FeedbackManagement", icon: createIcon(icons.Award), href: "/human-resources?activeTab=feedback" }
+      { id: "vacation", name: "Férias", component: "VacationManagement", icon: createIcon(icons.Calendar), href: "/human-resources?activeTab=vacation" },
+      { id: "occurrences", name: "Ocorrências", component: "OccurrenceManagement", icon: createIcon(icons.AlertTriangle), href: "/human-resources?activeTab=occurrences" },
+      { id: "medical", name: "Atestados", component: "MedicalCertificateManagement", icon: createIcon(icons.FileHeart), href: "/human-resources?activeTab=medical" },
+      { id: "training", name: "Treinamentos", component: "TrainingControl", icon: createIcon(icons.BookOpen), href: "/human-resources?activeTab=training" }
     ]
   },
   {
-    id: "exit",
-    name: "Desligamento",
-    icon: createIcon(icons.LogOut),
+    id: "insights",
+    name: "Insights",
+    icon: createIcon(icons.BarChart),
     subTabs: [
-      { id: "exit-interviews", name: "Entrevistas de Desligamento", component: "ExitInterviews", icon: createIcon(icons.FileText), href: "/human-resources?activeTab=exit-interviews" }
+      { id: "climate", name: "Clima Organizacional", component: "ClimateResearch", icon: createIcon(icons.Thermometer), href: "/human-resources?activeTab=climate" },
+      { id: "feedback", name: "Feedback", component: "FeedbackManagement", icon: createIcon(icons.MessageCircle), href: "/human-resources?activeTab=feedback" },
+      { id: "board", name: "Mural", component: "EmployeeBoard", icon: createIcon(icons.Newspaper), href: "/human-resources?activeTab=board" },
+      { id: "exit-interviews", name: "Desligamento", component: "ExitInterviews", icon: createIcon(icons.LogOut), href: "/human-resources?activeTab=exit-interviews" }
     ]
   }
 ];
