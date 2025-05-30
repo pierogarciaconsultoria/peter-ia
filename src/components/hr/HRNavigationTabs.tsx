@@ -3,15 +3,13 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { hrTabGroups } from "./HRTabConfig";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { 
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
 type HRNavigationTabsProps = {
@@ -31,74 +29,62 @@ export function HRNavigationTabs({ activeTab, onTabChange }: HRNavigationTabsPro
     <div className="w-full border-b bg-background">
       {/* Main Groups Navigation */}
       <ScrollArea className="w-full">
-        <div className="flex items-center px-4 py-3">
-          <NavigationMenu className="w-full">
-            <NavigationMenuList className="flex gap-1">
-              <TooltipProvider>
-                {hrTabGroups.map(group => {
-                  const isActiveGroup = group.id === activeGroup?.id;
-                  
-                  // If group has no subTabs, render a simple button
-                  if (!group.subTabs || group.subTabs.length === 0) {
-                    return (
-                      <Tooltip key={group.id}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant={activeTab === group.id ? "default" : "ghost"}
-                            size="sm"
-                            onClick={() => onTabChange(group.id)}
-                            className="flex items-center gap-2 h-9"
-                          >
-                            {group.icon}
-                            <span className="hidden sm:inline">{group.name}</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          <p>{group.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  }
+        <div className="flex items-center gap-2 px-4 py-3">
+          {hrTabGroups.map(group => {
+            const isActiveGroup = group.id === activeGroup?.id;
+            
+            // If group has no subTabs, render a simple button
+            if (!group.subTabs || group.subTabs.length === 0) {
+              return (
+                <Button
+                  key={group.id}
+                  variant={activeTab === group.id ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => onTabChange(group.id)}
+                  className="flex items-center gap-2 h-9 whitespace-nowrap"
+                >
+                  {group.icon}
+                  <span className="hidden sm:inline">{group.name}</span>
+                </Button>
+              );
+            }
 
-                  // Render navigation item with dropdown
-                  return (
-                    <NavigationMenuItem key={group.id}>
-                      <NavigationMenuTrigger
-                        className={cn(
-                          "h-9 px-3 py-2 text-sm font-medium transition-colors",
-                          isActiveGroup
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent hover:text-accent-foreground"
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          {group.icon}
-                          <span className="hidden sm:inline">{group.name}</span>
-                        </div>
-                      </NavigationMenuTrigger>
-                      
-                      <NavigationMenuContent className="min-w-[200px] p-2">
-                        <div className="grid gap-1">
-                          {group.subTabs?.map(tab => (
-                            <Button
-                              key={tab.id}
-                              variant={activeTab === tab.id ? "secondary" : "ghost"}
-                              size="sm"
-                              onClick={() => onTabChange(tab.id)}
-                              className="justify-start gap-2 h-9"
-                            >
-                              {tab.icon}
-                              <span>{tab.name}</span>
-                            </Button>
-                          ))}
-                        </div>
-                      </NavigationMenuContent>
-                    </NavigationMenuItem>
-                  );
-                })}
-              </TooltipProvider>
-            </NavigationMenuList>
-          </NavigationMenu>
+            // Render dropdown for groups with subTabs
+            return (
+              <DropdownMenu key={group.id}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={isActiveGroup ? "default" : "ghost"}
+                    size="sm"
+                    className="flex items-center gap-2 h-9 whitespace-nowrap"
+                  >
+                    {group.icon}
+                    <span className="hidden sm:inline">{group.name}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                
+                <DropdownMenuContent 
+                  className="min-w-[200px] bg-background border shadow-lg z-50"
+                  align="start"
+                >
+                  {group.subTabs?.map(tab => (
+                    <DropdownMenuItem
+                      key={tab.id}
+                      onClick={() => onTabChange(tab.id)}
+                      className={cn(
+                        "flex items-center gap-2 cursor-pointer",
+                        activeTab === tab.id && "bg-accent text-accent-foreground font-medium"
+                      )}
+                    >
+                      {tab.icon}
+                      <span>{tab.name}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
         </div>
       </ScrollArea>
 
