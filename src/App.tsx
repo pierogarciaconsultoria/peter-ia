@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from './integrations/supabase/client';
 import { isProductionEnvironment } from './utils/lovableEditorDetection';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Import pages 
 import Home from '@/pages/Home';

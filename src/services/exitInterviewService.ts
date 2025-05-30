@@ -12,7 +12,7 @@ export class ExitInterviewService {
       .single();
 
     if (error) throw error;
-    return result;
+    return result as ExitInterview;
   }
 
   // Buscar entrevistas por empresa
@@ -24,7 +24,7 @@ export class ExitInterviewService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as ExitInterview[];
   }
 
   // Buscar entrevista por token (acesso público)
@@ -36,7 +36,7 @@ export class ExitInterviewService {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as ExitInterview | null;
   }
 
   // Submeter respostas da entrevista
