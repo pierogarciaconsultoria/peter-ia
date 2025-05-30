@@ -4,7 +4,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useSecurity } from "./SecurityContext";
 import { PermissionCheck } from "./SecurityTypes";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { shouldBypassAuth } from "@/utils/lovableEditorDetection";
 
 interface SecureRouteProps {
