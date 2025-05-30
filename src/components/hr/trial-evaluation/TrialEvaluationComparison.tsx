@@ -24,24 +24,24 @@ export function TrialEvaluationComparison({ evaluations, criteria }: TrialEvalua
   const employee = evaluations[0].employee;
 
   // Preparar dados para gráficos
-  const evolutionData = evaluations.map(eval => {
-    const criteriaScores = eval.evaluation_criteria_scores || {};
+  const evolutionData = evaluations.map(evaluation => {
+    const criteriaScores = evaluation.evaluation_criteria_scores || {};
     const scoresArray = Object.values(criteriaScores).filter(score => typeof score === 'number') as number[];
     const average = scoresArray.length > 0 ? scoresArray.reduce((sum, score) => sum + score, 0) / scoresArray.length : 0;
     
     return {
-      period: `${eval.evaluation_period_number}º Período`,
+      period: `${evaluation.evaluation_period_number}º Período`,
       average: Number(average.toFixed(1)),
-      date: new Date(eval.evaluation_date).toLocaleDateString('pt-BR'),
-      decision: eval.final_decision
+      date: new Date(evaluation.evaluation_date).toLocaleDateString('pt-BR'),
+      decision: evaluation.final_decision
     };
   });
 
   // Comparação por critério
   const criteriaComparison = criteria.map(criterion => {
-    const scores = evaluations.map(eval => ({
-      period: `${eval.evaluation_period_number}º`,
-      score: eval.evaluation_criteria_scores?.[criterion.name] || 0
+    const scores = evaluations.map(evaluation => ({
+      period: `${evaluation.evaluation_period_number}º`,
+      score: evaluation.evaluation_criteria_scores?.[criterion.name] || 0
     }));
 
     return {
