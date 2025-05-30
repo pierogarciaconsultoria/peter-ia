@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { ReunioesHeader } from "@/components/reunioes/ReunioesHeader";
 import { ReunioesTabSelect } from "@/components/reunioes/ReunioesTabSelect";
 import { ReunioesTabContent } from "@/components/reunioes/ReunioesTabContent";
@@ -12,26 +10,13 @@ import { toast } from "sonner";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const Reunioes = () => {
   const [activeTab, setActiveTab] = useState("agendadas");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [diagnosticResults, setDiagnosticResults] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-
-  // Detectar se a barra lateral está recolhida
-  useState(() => {
-    const checkSidebarState = () => {
-      const sidebar = document.querySelector('[class*="md:w-20"]');
-      setSidebarCollapsed(!!sidebar);
-    };
-    
-    checkSidebarState();
-    const interval = setInterval(checkSidebarState, 500);
-    
-    return () => clearInterval(interval);
-  });
 
   // Função para verificar as tabelas do sistema de reuniões
   const checkReunioesTables = async () => {
@@ -92,12 +77,10 @@ const Reunioes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
-        <PermissionGuard modulo="reunioes">
-          <div className="max-w-7xl mx-auto w-full space-y-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
+          <PermissionGuard modulo="reunioes">
             <ReunioesHeader />
             
             <div className="flex justify-end">
@@ -166,12 +149,10 @@ const Reunioes = () => {
             <ReunioesTabSelect activeTab={activeTab} setActiveTab={setActiveTab} />
             
             <ReunioesTabContent activeTab={activeTab} />
-          </div>
-        </PermissionGuard>
-      </main>
-      
-      <Footer />
-    </div>
+          </PermissionGuard>
+        </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

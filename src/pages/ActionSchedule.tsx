@@ -1,7 +1,5 @@
 
 import { Dialog } from "@/components/ui/dialog";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { AlertCircle, Download } from "lucide-react";
 import { ActionTable } from "@/components/actions/ActionTable";
 import { ActionForm } from "@/components/actions/ActionForm";
@@ -15,6 +13,7 @@ import { ActionGantt } from "@/components/actions/gantt/ActionGantt";
 import { ActionsByResponsible } from "@/components/actions/responsible/ActionsByResponsible";
 import { Button } from "@/components/ui/button";
 import { useActionSchedule } from "@/hooks/useActionSchedule";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const ActionSchedule = () => {
   const {
@@ -45,11 +44,9 @@ const ActionSchedule = () => {
   } = useActionSchedule();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-7xl mx-auto">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <ActionHeader onAddAction={() => setIsAddDialogOpen(true)} title="Plano de Ação" />
             <ActionForm 
@@ -137,35 +134,33 @@ const ActionSchedule = () => {
             </>
           )}
         </div>
-      </main>
-      
-      <Footer />
-      
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        {selectedAction && (
-          <ActionForm 
-            action={selectedAction}
-            onClose={() => setIsEditDialogOpen(false)}
-            afterSubmit={invalidateActions}
-          />
-        )}
-      </Dialog>
-      
-      {/* View Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        {selectedAction && (
-          <ActionDetails 
-            action={selectedAction}
-            onClose={() => setIsViewDialogOpen(false)}
-            onEdit={() => {
-              setIsViewDialogOpen(false);
-              setIsEditDialogOpen(true);
-            }}
-          />
-        )}
-      </Dialog>
-    </div>
+        
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          {selectedAction && (
+            <ActionForm 
+              action={selectedAction}
+              onClose={() => setIsEditDialogOpen(false)}
+              afterSubmit={invalidateActions}
+            />
+          )}
+        </Dialog>
+        
+        {/* View Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          {selectedAction && (
+            <ActionDetails 
+              action={selectedAction}
+              onClose={() => setIsViewDialogOpen(false)}
+              onEdit={() => {
+                setIsViewDialogOpen(false);
+                setIsEditDialogOpen(true);
+              }}
+            />
+          )}
+        </Dialog>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

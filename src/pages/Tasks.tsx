@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Task } from "@/types/tasks";
 import { useQuery } from '@tanstack/react-query';
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 // This is a placeholder component that shows a basic tasks page
 export default function Tasks() {
@@ -23,11 +22,9 @@ export default function Tasks() {
   });
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-7xl mx-auto space-y-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Tarefas</h1>
           </div>
@@ -88,9 +85,7 @@ export default function Tasks() {
             </CardContent>
           </Card>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 }
