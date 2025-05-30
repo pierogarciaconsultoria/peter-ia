@@ -1,8 +1,6 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { useProcesses } from "@/hooks/useProcesses";
 import { ProcessHeader } from "@/components/processes/ProcessHeader";
@@ -10,6 +8,7 @@ import { ProcessSearchFilter } from "@/components/processes/ProcessSearchFilter"
 import { ProcessList } from "@/components/processes/ProcessList";
 import { MacroProcessDialog } from "@/components/processes/MacroProcessDialog";
 import { Process } from "@/types/processes";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const ProcessoPage = () => {
   const navigate = useNavigate();
@@ -52,11 +51,9 @@ const ProcessoPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-7xl mx-auto">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <ProcessHeader 
             handleNewProcess={handleNewProcess} 
             handleMacroProcess={handleMacroProcess}
@@ -85,10 +82,8 @@ const ProcessoPage = () => {
             processType={selectedProcessType}
           />
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

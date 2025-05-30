@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { DocumentsList } from "@/components/DocumentsList";
 import { DocumentForm } from "@/components/DocumentForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { ISODocument } from "@/utils/isoTypes";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<ISODocument[]>([]);
@@ -110,12 +109,10 @@ const Documents = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
+          <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">Lista Mestra de Documentos ISO 9001</h1>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleExportToExcel}>
@@ -135,7 +132,7 @@ const Documents = () => {
             onEditDocument={handleEditDocument}
           />
         </div>
-      </main>
+      </div>
       
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -145,9 +142,7 @@ const Documents = () => {
           />
         </DialogContent>
       </Dialog>
-      
-      <Footer />
-    </div>
+    </AuthenticationRequired>
   );
 };
 

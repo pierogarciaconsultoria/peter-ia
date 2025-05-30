@@ -1,22 +1,20 @@
 
 import { useState } from "react";
-import { Navigation } from "@/components/Navigation";
 import { RiskManagementDashboard } from "@/components/risks/RiskManagementDashboard";
 import { RiskForm } from "@/components/risks/RiskForm";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const RiskManagement = () => {
   const [addRiskOpen, setAddRiskOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Gestão de Riscos</h1>
               <p className="text-muted-foreground mt-1">
@@ -43,8 +41,8 @@ const RiskManagement = () => {
             </DialogContent>
           </Dialog>
         </div>
-      </main>
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

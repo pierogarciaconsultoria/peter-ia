@@ -1,5 +1,4 @@
 
-import { Navigation } from "@/components/Navigation";
 import { AuditHeader } from "@/components/audit/AuditHeader";
 import { NextAuditCard } from "@/components/audit/NextAuditCard";
 import { AuditStatusCards } from "@/components/audit/AuditStatusCards";
@@ -8,6 +7,7 @@ import { useAuditSchedule } from "@/hooks/useAuditSchedule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const AuditSchedule = () => {
   const {
@@ -24,14 +24,12 @@ const AuditSchedule = () => {
   } = useAuditSchedule();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className={`transition-all duration-300 pt-16 p-6 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-64'}`}>
-        <div className="max-w-6xl mx-auto">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <AuditHeader />
           
-          <Card className="mb-6 border-blue-100">
+          <Card className="border-blue-100">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-base">
                 <InfoIcon className="mr-2 h-4 w-4 text-blue-500" />
@@ -83,8 +81,8 @@ const AuditSchedule = () => {
             isLoading={isLoading}
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

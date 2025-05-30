@@ -1,7 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Navigation } from '@/components/Navigation';
-import { Footer } from '@/components/Footer';
 import { IndicatorDialog } from '@/components/indicators/IndicatorDialog';
 import { IndicatorContentTabs } from '@/components/indicators/IndicatorContentTabs';
 import { IndicatorsHeader } from '@/components/indicators/IndicatorsHeader';
@@ -9,6 +8,7 @@ import { ProcessSelector } from '@/components/indicators/ProcessSelector';
 import { useIndicators } from '@/hooks/useIndicators';
 import { useProcesses } from '@/hooks/useProcesses';
 import { IndicatorType } from '@/types/indicators';
+import { AuthenticationRequired } from '@/components/auth/AuthenticationRequired';
 
 const PerformanceIndicators = () => {
   const [showIndicatorForm, setShowIndicatorForm] = useState(false);
@@ -103,11 +103,9 @@ const PerformanceIndicators = () => {
   const isStrategicProcess = selectedProcess === "Estratégico";
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-7xl mx-auto">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <IndicatorsHeader 
             isStrategicProcess={isStrategicProcess}
             onCreateIndicator={handleCreateIndicator}
@@ -143,10 +141,8 @@ const PerformanceIndicators = () => {
             defaultProcess={selectedProcess || undefined}
           />
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

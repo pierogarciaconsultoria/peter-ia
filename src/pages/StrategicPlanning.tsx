@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StrategicIdentityForm } from "@/components/strategic-planning/StrategicIdentityForm";
 import { SwotAnalysis } from "@/components/strategic-planning/SwotAnalysis";
@@ -17,6 +15,7 @@ import { StrategicIdentity } from "@/types/strategic-planning";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const StrategicPlanning = () => {
   const { tab } = useParams();
@@ -25,7 +24,6 @@ const StrategicPlanning = () => {
   const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const fetchIdentity = async () => {
     setLoading(true);
@@ -38,19 +36,6 @@ const StrategicPlanning = () => {
       setLoading(false);
     }
   };
-
-  // Detect if sidebar is collapsed
-  useEffect(() => {
-    const checkSidebarState = () => {
-      const sidebar = document.querySelector('[class*="md:w-20"]');
-      setSidebarCollapsed(!!sidebar);
-    };
-    
-    // Check sidebar state periodically
-    const interval = setInterval(checkSidebarState, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
 
   // Update URL when tab changes
   useEffect(() => {
@@ -89,11 +74,9 @@ const StrategicPlanning = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
-        <div className="max-w-6xl mx-auto space-y-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>
@@ -150,10 +133,8 @@ const StrategicPlanning = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </AuthenticationRequired>
   );
 };
 

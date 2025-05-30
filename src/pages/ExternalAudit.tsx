@@ -1,7 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { ExternalAuditHeader } from "@/components/external-audit/ExternalAuditHeader";
 import { ExternalAuditStatusCards } from "@/components/external-audit/ExternalAuditStatusCards";
 import { ExternalAuditTable } from "@/components/external-audit/ExternalAuditTable";
@@ -12,12 +10,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getExternalAudits } from "@/services/externalAuditService";
 import { toast } from "sonner";
 import { differenceInDays, isAfter } from "date-fns";
+import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const ExternalAudit = () => {
   const [isNewAuditOpen, setIsNewAuditOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [selectedAudit, setSelectedAudit] = useState<ExternalAuditType | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Fetch audits data with proper error handling
   const { 
@@ -76,30 +74,15 @@ const ExternalAudit = () => {
     setIsNewAuditOpen(true);
   };
 
-  // Detect if sidebar is collapsed
-  useEffect(() => {
-    const checkSidebarState = () => {
-      const sidebar = document.querySelector('[class*="md:w-20"]');
-      setSidebarCollapsed(!!sidebar);
-    };
-    
-    // Check sidebar state periodically
-    const interval = setInterval(checkSidebarState, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   // Get counts by status
   const getStatusCount = (status: string) => {
     return audits.filter(audit => audit.status === status).length;
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className={`transition-all duration-300 pt-16 p-6 flex-1 ${sidebarCollapsed ? 'md:pl-24' : 'md:pl-72'}`}>
-        <div className="max-w-7xl mx-auto w-full space-y-6">
+    <AuthenticationRequired>
+      <div className="min-h-screen bg-background w-full">
+        <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <ExternalAuditHeader 
             onNewAudit={handleNewAudit} 
             nextAudit={nextAudit}
@@ -120,7 +103,7 @@ const ExternalAudit = () => {
             onEditAudit={handleEditAudit}
           />
         </div>
-      </main>
+      </div>
       
       <ExternalAuditDialog 
         open={isNewAuditOpen}
@@ -136,9 +119,7 @@ const ExternalAudit = () => {
           audit={selectedAudit}
         />
       )}
-      
-      <Footer />
-    </div>
+    </AuthenticationRequired>
   );
 };
 
