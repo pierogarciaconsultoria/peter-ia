@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { isSuperAdminInLovable } from '@/utils/lovableEditorDetection';
+import { logger } from '@/utils/logger';
 
 interface Company {
   id: string;
@@ -58,30 +58,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasAuthError, setHasAuthError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Debug logs
-  console.log('🔄 AuthProvider: Renderizando componente');
-  console.log('🔄 AuthProvider: Estado atual:', {
-    user: user ? 'presente' : 'null',
-    userProfile: userProfile ? 'presente' : 'null',
-    userCompany: userCompany ? 'presente' : 'null',
-    loading,
-    connectionStatus,
-    hasAuthError,
-    retryCount
-  });
-
+  // Replace console.log with secure logger
+  logger.debug('AuthProvider', 'Componente inicializado');
+  
   // Detecta se é super admin no Lovable Editor
   const isLovableEditor = isSuperAdminInLovable();
-  console.log('🔍 AuthProvider: isLovableEditor =', isLovableEditor);
+  logger.debug('AuthProvider', 'Super admin detection', { isLovableEditor });
 
   const clearAuthError = () => {
-    console.log('🧹 AuthProvider: Limpando erro de autenticação');
+    logger.debug('AuthProvider', 'Limpando erro de autenticação');
     setHasAuthError(false);
     setRetryCount(0);
   };
 
   const handleError = (error: any, context: string) => {
-    console.error(`❌ AuthProvider: Erro em ${context}:`, error);
+    logger.error('AuthProvider', `Erro em ${context}`, { 
+      errorCode: error?.code,
+      errorMessage: error?.message,
+      context 
+    });
     setHasAuthError(true);
     
     // Se for erro de permissão, não mostrar toast repetidamente
@@ -91,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Auto-recovery para certos tipos de erro
     if (error?.message?.includes('JWT expired') || error?.code === 'PGRST301') {
-      console.log('🔄 AuthProvider: Tentando recuperação automática...');
+      logger.info('AuthProvider', 'Tentando recuperação automática');
       setTimeout(() => {
         if (retryCount < 3) {
           setRetryCount(prev => prev + 1);
@@ -102,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
-    console.log('📥 AuthProvider: Buscando perfil do usuário:', userId);
+    logger.debug('AuthProvider', 'Buscando perfil do usuário', { userId: userId.substring(0, 8) + '...' });
     try {
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -112,14 +107,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         if (error.code === 'PGRST116') {
-          console.log('ℹ️ AuthProvider: Perfil não encontrado para usuário:', userId);
+          logger.info('AuthProvider', 'Perfil não encontrado para usuário');
           return null;
         }
         handleError(error, 'fetchUserProfile');
         return null;
       }
 
-      console.log('✅ AuthProvider: Perfil do usuário encontrado');
+      logger.debug('AuthProvider', 'Perfil do usuário encontrado');
       return profile;
     } catch (error) {
       handleError(error, 'fetchUserProfile');
@@ -128,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchUserCompany = async (companyId: string): Promise<Company | null> => {
-    console.log('🏢 AuthProvider: Buscando empresa:', companyId);
+    logger.debug('AuthProvider', 'Buscando empresa', { companyId });
     try {
       const { data: company, error } = await supabase
         .from('companies')
@@ -138,14 +133,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         if (error.code === 'PGRST116') {
-          console.log('ℹ️ AuthProvider: Empresa não encontrada:', companyId);
+          logger.info('AuthProvider', 'Empresa não encontrada');
           return null;
         }
         handleError(error, 'fetchUserCompany');
         return null;
       }
 
-      console.log('✅ AuthProvider: Empresa encontrada');
+      logger.debug('AuthProvider', 'Empresa encontrada');
       return company;
     } catch (error) {
       handleError(error, 'fetchUserCompany');
@@ -154,10 +149,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const initializeUser = async (user: User | null) => {
-    console.log('🚀 AuthProvider: Inicializando usuário:', user ? user.email : 'null');
+    logger.debug('AuthProvider', 'Inicializando usuário', { 
+      hasUser: !!user,
+      userId: user?.id?.substring(0, 8) + '...' || 'none'
+    });
     
     if (!user) {
-      console.log('👤 AuthProvider: Usuário null, limpando estado');
+      logger.debug('AuthProvider', 'Usuário null, limpando estado');
       setUserProfile(null);
       setUserCompany(null);
       setLoading(false);
@@ -167,57 +165,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      console.log('📊 AuthProvider: Buscando dados do usuário...');
+      logger.debug('AuthProvider', 'Buscando dados do usuário');
       
       // Buscar perfil do usuário
       const profile = await fetchUserProfile(user.id);
-      console.log('📊 AuthProvider: Perfil obtido:', profile ? 'sucesso' : 'falhou');
       setUserProfile(profile);
 
       // Se o perfil tem uma empresa, buscar os dados da empresa
       if (profile?.company_id) {
-        console.log('🏢 AuthProvider: Buscando dados da empresa:', profile.company_id);
+        logger.debug('AuthProvider', 'Buscando dados da empresa');
         const company = await fetchUserCompany(profile.company_id);
-        console.log('🏢 AuthProvider: Empresa obtida:', company ? 'sucesso' : 'falhou');
         setUserCompany(company);
       } else {
-        console.log('🏢 AuthProvider: Usuário sem empresa');
+        logger.debug('AuthProvider', 'Usuário sem empresa');
         setUserCompany(null);
       }
 
-      console.log('✅ AuthProvider: Inicialização concluída com sucesso');
+      logger.debug('AuthProvider', 'Inicialização concluída com sucesso');
       setConnectionStatus('connected');
       clearAuthError();
     } catch (error) {
-      console.error('❌ AuthProvider: Erro ao inicializar usuário:', error);
+      logger.error('AuthProvider', 'Erro ao inicializar usuário', error);
       handleError(error, 'initializeUser');
       setConnectionStatus('disconnected');
     } finally {
-      console.log('🏁 AuthProvider: Finalizando inicialização, setLoading(false)');
+      logger.debug('AuthProvider', 'Finalizando inicialização');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('🔧 AuthProvider: useEffect iniciado');
+    logger.debug('AuthProvider', 'useEffect iniciado');
     
     // Verificar sessão atual
     const checkSession = async () => {
-      console.log('🔍 AuthProvider: Verificando sessão atual...');
+      logger.debug('AuthProvider', 'Verificando sessão atual');
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('❌ AuthProvider: Erro ao verificar sessão:', error);
+          logger.error('AuthProvider', 'Erro ao verificar sessão', error);
           handleError(error, 'checkSession');
           setConnectionStatus('disconnected');
         } else {
-          console.log('📋 AuthProvider: Sessão encontrada:', session ? 'sim' : 'não');
+          logger.debug('AuthProvider', 'Sessão verificada', { hasSession: !!session });
           setUser(session?.user || null);
           await initializeUser(session?.user || null);
         }
       } catch (error) {
-        console.error('❌ AuthProvider: Erro inesperado ao verificar sessão:', error);
+        logger.error('AuthProvider', 'Erro inesperado ao verificar sessão', error);
         handleError(error, 'checkSession');
         setConnectionStatus('disconnected');
         setLoading(false);
@@ -227,9 +223,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkSession();
 
     // Escutar mudanças de autenticação
-    console.log('👂 AuthProvider: Configurando listener de auth state');
+    logger.debug('AuthProvider', 'Configurando listener de auth state');
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 AuthProvider: Auth state changed:', event, session?.user?.email || 'no user');
+      logger.debug('AuthProvider', 'Auth state changed', { 
+        event, 
+        hasUser: !!session?.user 
+      });
       
       setUser(session?.user || null);
       
@@ -240,13 +239,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
-      console.log('🧹 AuthProvider: Limpando subscription');
+      logger.debug('AuthProvider', 'Limpando subscription');
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔐 AuthProvider: Iniciando login para:', email);
+    logger.debug('AuthProvider', 'Iniciando login');
     setLoading(true);
     clearAuthError();
     
@@ -257,30 +256,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('❌ AuthProvider: Erro no login:', error);
+        logger.error('AuthProvider', 'Erro no login', error);
         handleError(error, 'signIn');
         throw error;
       }
 
-      console.log('✅ AuthProvider: Login realizado com sucesso');
+      logger.info('AuthProvider', 'Login realizado com sucesso');
 
       // Atualizar last_login se o perfil existir
       if (data.user) {
-        console.log('📝 AuthProvider: Atualizando last_login');
+        logger.debug('AuthProvider', 'Atualizando last_login');
         try {
           await supabase
             .from('user_profiles')
             .update({ last_login: new Date().toISOString() })
             .eq('id', data.user.id);
         } catch (updateError) {
-          console.warn('⚠️ AuthProvider: Erro ao atualizar last_login:', updateError);
+          logger.warn('AuthProvider', 'Erro ao atualizar last_login', updateError);
           // Não falhar o login por causa disso
         }
       }
 
       toast.success('Login realizado com sucesso');
     } catch (error: any) {
-      console.error('❌ AuthProvider: Erro no login:', error);
+      logger.error('AuthProvider', 'Erro no login', error);
       handleError(error, 'signIn');
       throw error;
     } finally {
@@ -289,7 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    console.log('📝 AuthProvider: Iniciando cadastro para:', email);
+    logger.debug('AuthProvider', 'Iniciando cadastro');
     setLoading(true);
     clearAuthError();
     
@@ -303,15 +302,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('❌ AuthProvider: Erro no cadastro:', error);
+        logger.error('AuthProvider', 'Erro no cadastro', error);
         handleError(error, 'signUp');
         throw error;
       }
 
-      console.log('✅ AuthProvider: Cadastro realizado com sucesso');
+      logger.info('AuthProvider', 'Cadastro realizado com sucesso');
       toast.success('Conta criada com sucesso! Verifique seu email.');
     } catch (error: any) {
-      console.error('❌ AuthProvider: Erro no cadastro:', error);
+      logger.error('AuthProvider', 'Erro no cadastro', error);
       handleError(error, 'signUp');
       throw error;
     } finally {
@@ -320,25 +319,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    console.log('🚪 AuthProvider: Iniciando logout');
+    logger.debug('AuthProvider', 'Iniciando logout');
     setLoading(true);
     clearAuthError();
     
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('❌ AuthProvider: Erro no logout:', error);
+        logger.error('AuthProvider', 'Erro no logout', error);
         handleError(error, 'signOut');
         throw error;
       }
       
-      console.log('✅ AuthProvider: Logout realizado com sucesso');
+      logger.info('AuthProvider', 'Logout realizado com sucesso');
       setUser(null);
       setUserProfile(null);
       setUserCompany(null);
       toast.success('Logout realizado com sucesso');
     } catch (error: any) {
-      console.error('❌ AuthProvider: Erro no logout:', error);
+      logger.error('AuthProvider', 'Erro no logout', error);
       handleError(error, 'signOut');
       // Mesmo com erro, limpar estado local
       setUser(null);
@@ -350,7 +349,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const reconnect = () => {
-    console.log('🔄 AuthProvider: Reconectando...');
+    logger.debug('AuthProvider', 'Reconectando');
     setConnectionStatus('connecting');
     clearAuthError();
     
@@ -365,7 +364,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setConnectionStatus('disconnected');
         }
       } catch (error) {
-        console.error('❌ AuthProvider: Erro na reconexão:', error);
+        logger.error('AuthProvider', 'Erro na reconexão', error);
         setConnectionStatus('disconnected');
       }
     }, 1000);
@@ -376,7 +375,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isCompanyAdmin = isLovableEditor || (userProfile?.is_company_admin ?? false);
   const isAdmin = isSuperAdmin || isCompanyAdmin;
 
-  console.log('🔑 AuthProvider: Permissões calculadas:', {
+  logger.debug('AuthProvider', 'Permissões calculadas', {
     isSuperAdmin,
     isCompanyAdmin,
     isAdmin,
@@ -401,15 +400,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasAuthError,
     clearAuthError,
   };
-
-  console.log('📦 AuthProvider: Retornando provider com value:', {
-    hasUser: !!value.user,
-    hasProfile: !!value.userProfile,
-    hasCompany: !!value.userCompany,
-    loading: value.loading,
-    connectionStatus: value.connectionStatus,
-    hasAuthError: value.hasAuthError
-  });
 
   return (
     <AuthContext.Provider value={value}>
