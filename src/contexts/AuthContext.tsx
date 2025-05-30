@@ -47,8 +47,8 @@ interface AuthContextType {
   clearAuthError: () => void;
 }
 
-// Export the context so it can be imported
-export const AuthContext = createContext<AuthContextType | null>(null);
+// Create and export the context
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -59,12 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasAuthError, setHasAuthError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Replace console.log with secure logger
-  logger.debug('AuthProvider', 'Componente inicializado');
+  // Debug logging for context creation
+  logger.debug('AuthContext', 'AuthProvider inicializado');
   
   // Detecta se é super admin no Lovable Editor
   const isLovableEditor = isSuperAdminInLovable();
-  logger.debug('AuthProvider', 'Super admin detection', { isLovableEditor });
+  logger.debug('AuthContext', 'Super admin detection', { isLovableEditor });
 
   const clearAuthError = () => {
     logger.debug('AuthProvider', 'Limpando erro de autenticação');
@@ -395,6 +395,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearAuthError,
   };
 
+  logger.debug('AuthContext', 'Providing context value', { 
+    hasUser: !!user, 
+    hasProfile: !!userProfile,
+    loading 
+  });
+
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -404,12 +410,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 // Export the useAuth hook directly from this file
 export const useAuth = (): AuthContextType => {
-  console.log('🪝 useAuth: Hook chamado');
+  logger.debug('useAuth', 'Hook called');
   const context = useContext(AuthContext);
   if (!context) {
-    console.error('❌ useAuth: Context não encontrado! useAuth deve ser usado dentro de AuthProvider');
+    logger.error('useAuth', 'Context not found! useAuth must be used within AuthProvider');
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  console.log('✅ useAuth: Context encontrado');
+  logger.debug('useAuth', 'Context found successfully');
   return context;
 };
