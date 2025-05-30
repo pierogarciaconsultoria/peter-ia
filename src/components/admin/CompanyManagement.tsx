@@ -5,8 +5,6 @@ import { toast } from "sonner";
 import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
 import { executeQuery, verificarEmpresaSalva } from "@/utils/databaseHelpers";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -18,7 +16,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,7 +28,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Loader2, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Loader2, Plus, Trash2, Edit, Phone, Mail, MapPin } from "lucide-react";
+import { CompanyForm } from "./CompanyForm";
 
 interface Company {
   id: string;
@@ -68,21 +67,13 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
   isSuperAdmin
 }) => {
   const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanySlug, setNewCompanySlug] = useState("");
   const [creatingCompany, setCreatingCompany] = useState(false);
   
   const isEditorSuperAdmin = isSuperAdminInLovable();
 
-  const handleCreateCompany = async () => {
+  const handleCreateCompany = async (formData: any) => {
     setCreatingCompany(true);
     try {
-      if (!newCompanyName.trim()) {
-        throw new Error("O nome da empresa é obrigatório");
-      }
-      
-      let companySlug = newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, '-');
-      
       if (!isSuperAdmin && !isEditorSuperAdmin) {
         throw new Error("Apenas administradores do sistema podem criar empresas");
       }
@@ -94,11 +85,25 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
           INSERT INTO public.companies (
             name, 
             slug, 
+            cnpj,
+            email,
+            phone,
+            address,
+            responsible,
+            plan,
+            active_modules,
             active,
             created_at
           ) VALUES (
-            '${newCompanyName}',
-            '${companySlug}',
+            '${formData.name}',
+            '${formData.slug}',
+            ${formData.cnpj ? `'${formData.cnpj}'` : 'NULL'},
+            ${formData.email ? `'${formData.email}'` : 'NULL'},
+            ${formData.phone ? `'${formData.phone}'` : 'NULL'},
+            ${formData.address ? `'${formData.address}'` : 'NULL'},
+            ${formData.responsible ? `'${formData.responsible}'` : 'NULL'},
+            '${formData.plan}',
+            '{${formData.active_modules.join(',')}}',
             true,
             NOW()
           ) RETURNING *;
@@ -127,33 +132,27 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
         toast.success("Empresa criada com sucesso");
         setCompanyDialogOpen(false);
         await fetchCompanies();
-        
-        setNewCompanyName("");
-        setNewCompanySlug("");
       } else {
         try {
           const { data, error } = await supabase
             .from('companies')
             .insert({
-              name: newCompanyName,
-              slug: companySlug,
+              name: formData.name,
+              slug: formData.slug,
+              cnpj: formData.cnpj || null,
+              email: formData.email || null,
+              phone: formData.phone || null,
+              address: formData.address || null,
+              responsible: formData.responsible || null,
+              plan: formData.plan,
+              active_modules: formData.active_modules,
               active: true
             })
             .select();
             
           if (error) {
             console.error("Erro no Supabase ao criar empresa:", error);
-            
-            let errorMessage = "Erro ao criar empresa";
-            if (error.message) {
-              errorMessage = error.message;
-            } else if (error.details) {
-              errorMessage = error.details;
-            } else if (typeof error === 'object') {
-              errorMessage = JSON.stringify(error);
-            }
-            
-            throw new Error(errorMessage);
+            throw new Error(error.message || "Erro ao criar empresa");
           }
           
           if (data && data.length > 0) {
@@ -167,9 +166,6 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
           
           setCompanyDialogOpen(false);
           await fetchCompanies();
-          
-          setNewCompanyName("");
-          setNewCompanySlug("");
         } catch (supabaseError: any) {
           console.error("Erro completo do Supabase:", supabaseError);
           throw supabaseError;
@@ -194,6 +190,21 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
     }
   };
 
+  const getPlanBadgeVariant = (plan: string) => {
+    switch (plan) {
+      case 'enterprise': return 'default';
+      case 'professional': return 'secondary';
+      case 'basic': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  const formatModules = (modules: string[]) => {
+    if (!modules || modules.length === 0) return 'Nenhum módulo';
+    if (modules.length > 3) return `${modules.slice(0, 3).join(', ')} +${modules.length - 3}`;
+    return modules.join(', ');
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -208,50 +219,18 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
               Nova Empresa
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Criar Nova Empresa</DialogTitle>
               <DialogDescription>
-                Preencha os dados para criar uma nova empresa no sistema
+                Preencha todas as informações da empresa
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Nome da Empresa</Label>
-                <Input
-                  id="companyName"
-                  placeholder="Nome da Empresa"
-                  value={newCompanyName}
-                  onChange={(e) => {
-                    setNewCompanyName(e.target.value);
-                    setNewCompanySlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companySlug">Identificador Único (Slug)</Label>
-                <Input
-                  id="companySlug"
-                  placeholder="identificador-unico"
-                  value={newCompanySlug}
-                  onChange={(e) => setNewCompanySlug(e.target.value)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  O identificador único será usado para URLs e identificação da empresa.
-                </p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={handleCreateCompany} disabled={creatingCompany}>
-                {creatingCompany ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processando...
-                  </>
-                ) : 'Criar Empresa'}
-              </Button>
-            </DialogFooter>
+            <CompanyForm
+              onSubmit={handleCreateCompany}
+              isLoading={creatingCompany}
+              onCancel={() => setCompanyDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </CardHeader>
@@ -266,17 +245,18 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Identificador</TableHead>
-                  <TableHead>Módulos Ativos</TableHead>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Plano</TableHead>
+                  <TableHead>Módulos</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
+                  <TableHead className="w-[120px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {companies.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       Nenhuma empresa encontrada.
                     </TableCell>
                   </TableRow>
@@ -284,16 +264,60 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
                   companies.map((company) => (
                     <TableRow key={company.id}>
                       <TableCell>
-                        <div className="flex items-center">
-                          <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
-                          {company.name}
+                        <div className="space-y-1">
+                          <div className="flex items-center">
+                            <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{company.name}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {company.slug}
+                            {company.cnpj && ` • ${company.cnpj}`}
+                          </div>
+                          {company.responsible && (
+                            <div className="text-xs text-muted-foreground">
+                              Resp.: {company.responsible}
+                            </div>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell>{company.slug}</TableCell>
                       <TableCell>
-                        {(company.active_modules || []).length > 0 
-                          ? company.active_modules.join(', ') 
-                          : 'Todos'}
+                        <div className="space-y-1">
+                          {company.email && (
+                            <div className="flex items-center text-xs">
+                              <Mail className="mr-1 h-3 w-3" />
+                              {company.email}
+                            </div>
+                          )}
+                          {company.phone && (
+                            <div className="flex items-center text-xs">
+                              <Phone className="mr-1 h-3 w-3" />
+                              {company.phone}
+                            </div>
+                          )}
+                          {company.address && (
+                            <div className="flex items-center text-xs">
+                              <MapPin className="mr-1 h-3 w-3" />
+                              <span className="truncate max-w-[150px]" title={company.address}>
+                                {company.address}
+                              </span>
+                            </div>
+                          )}
+                          {!company.email && !company.phone && !company.address && (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getPlanBadgeVariant(company.plan || 'free')}>
+                          {company.plan === 'enterprise' ? 'Enterprise' :
+                           company.plan === 'professional' ? 'Profissional' :
+                           company.plan === 'basic' ? 'Básico' : 'Gratuito'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs" title={(company.active_modules || []).join(', ')}>
+                          {formatModules(company.active_modules || [])}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -303,16 +327,28 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setItemToDelete({ id: company.id, type: 'company' });
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              // TODO: Implementar edição
+                              toast.info("Funcionalidade de edição em desenvolvimento");
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setItemToDelete({ id: company.id, type: 'company' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
