@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,14 +13,18 @@ import { NewTrainingDialog } from "./NewTrainingDialog";
 import { TrainingMatrix } from "./TrainingMatrix";
 import { ComplianceDashboard } from "./ComplianceDashboard";
 import { TrainingReports } from "./TrainingReports";
+import { TrainingRequirementDialog } from "./TrainingRequirementDialog";
 import { TrainingMatrixService } from "@/services/trainingMatrixService";
-import { TrainingMatrixData } from "@/types/trainingMatrix";
+import { TrainingMatrixData, JobPositionTrainingRequirement } from "@/types/trainingMatrix";
 import { useToast } from "@/components/ui/use-toast";
 
 export function TrainingDashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRequirementDialogOpen, setIsRequirementDialogOpen] = useState(false);
+  const [editingRequirement, setEditingRequirement] = useState<JobPositionTrainingRequirement | null>(null);
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [filteredTrainings, setFilteredTrainings] = useState<Training[]>([]);
+  const [requirements, setRequirements] = useState<JobPositionTrainingRequirement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [departments, setDepartments] = useState<string[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -90,9 +93,14 @@ export function TrainingDashboard() {
         setProcedures(procedureData);
       }
 
-      // Fetch matrix data
-      const matrixResult = await TrainingMatrixService.getTrainingMatrix(profileData.company_id);
+      // Fetch matrix data and requirements
+      const [matrixResult, requirementsResult] = await Promise.all([
+        TrainingMatrixService.getTrainingMatrix(profileData.company_id),
+        TrainingMatrixService.getJobPositionRequirements(profileData.company_id)
+      ]);
+      
       setMatrixData(matrixResult);
+      setRequirements(requirementsResult);
       
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -112,6 +120,44 @@ export function TrainingDashboard() {
       description: "Treinamento criado com sucesso",
     });
     await fetchData();
+  };
+
+  const handleRequirementSaved = async () => {
+    setIsRequirementDialogOpen(false);
+    setEditingRequirement(null);
+    toast({
+      title: "Sucesso",
+      description: "Requisito de treinamento salvo com sucesso.",
+    });
+    await fetchData();
+  };
+
+  const handleCreateRequirement = () => {
+    setEditingRequirement(null);
+    setIsRequirementDialogOpen(true);
+  };
+
+  const handleEditRequirement = (requirement: JobPositionTrainingRequirement) => {
+    setEditingRequirement(requirement);
+    setIsRequirementDialogOpen(true);
+  };
+
+  const handleDeleteRequirement = async (id: string) => {
+    try {
+      await TrainingMatrixService.deleteJobPositionRequirement(id);
+      toast({
+        title: "Sucesso",
+        description: "Requisito de treinamento removido com sucesso.",
+      });
+      await fetchData();
+    } catch (error) {
+      console.error("Error deleting requirement:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o requisito de treinamento.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFilterChange = (filters: any) => {
@@ -256,21 +302,83 @@ export function TrainingDashboard() {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Configurações da Matriz de Treinamento</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Gerenciar Requisitos de Treinamento</CardTitle>
+                <Button onClick={handleCreateRequirement}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Requisito
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Configure os requisitos de treinamento por cargo e gerencie as configurações do sistema.
-              </p>
               <div className="space-y-4">
-                <Button variant="outline">
-                  Gerenciar Requisitos por Cargo
-                </Button>
+                {requirements.map(requirement => (
+                  <div key={requirement.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{requirement.job_position?.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {requirement.training?.title || requirement.procedure?.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant={requirement.is_mandatory ? "default" : "secondary"}>
+                            {requirement.is_mandatory ? "Obrigatório" : "Opcional"}
+                          </Badge>
+                          <Badge variant="outline">
+                            {requirement.completion_deadline_days} dias para conclusão
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditRequirement(requirement)}
+                        >
+                          Editar
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteRequirement(requirement.id)}
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {requirements.length === 0 && (
+                  <div className="text-center py-8">
+                    <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Nenhum requisito cadastrado</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Comece criando requisitos de treinamento para os cargos da empresa.
+                    </p>
+                    <Button onClick={handleCreateRequirement}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar Primeiro Requisito
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Outras Configurações</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
                 <Button variant="outline">
                   Configurar Notificações
                 </Button>
                 <Button variant="outline">
                   Importar/Exportar Dados
+                </Button>
+                <Button variant="outline">
+                  Configurações Gerais
                 </Button>
               </div>
             </CardContent>
@@ -285,6 +393,14 @@ export function TrainingDashboard() {
         employees={employees}
         procedures={procedures}
         onTrainingCreated={handleTrainingCreated}
+      />
+
+      <TrainingRequirementDialog
+        isOpen={isRequirementDialogOpen}
+        onOpenChange={setIsRequirementDialogOpen}
+        requirement={editingRequirement}
+        onSaved={handleRequirementSaved}
+        companyId={companyId}
       />
     </div>
   );
