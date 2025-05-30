@@ -66,7 +66,9 @@ export function isLovableEditor(): boolean {
   // If any indicator is present, save for future sessions and grant access
   if (isInLovableDomain || hasEditorParam) {
     localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
-    console.log('Lovable Editor access granted and saved');
+    // NOVO: Automaticamente conceder privilégios de Super Admin no Lovable
+    localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
+    console.log('Lovable Editor access granted and saved with Super Admin privileges');
     return true;
   }
   
@@ -84,6 +86,14 @@ export function isSuperAdminInLovable(): boolean {
   // Check URL parameters and localStorage
   const urlParams = new URLSearchParams(window.location.search);
   const isMasterAdmin = urlParams.has('master_admin');
+  
+  // NOVO: Automaticamente conceder se estiver no Lovable
+  if (isInLovable) {
+    localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
+    localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
+    console.log('Super admin access automatically granted in Lovable Editor');
+    return true;
+  }
   
   // If master_admin parameter is present, save to localStorage
   if (isMasterAdmin) {

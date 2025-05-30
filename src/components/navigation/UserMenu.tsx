@@ -23,6 +23,7 @@ export function UserMenu() {
   
   // Check if access is via Lovable editor with super admin privileges
   const isMasterAdminAccess = isSuperAdminInLovable();
+  const isInLovableEditor = isLovableEditor();
 
   const handleSignOut = async () => {
     try {
@@ -44,6 +45,33 @@ export function UserMenu() {
     
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "U";
   };
+
+  // NOVO: Mostrar status do usuário atual
+  const getUserDisplayInfo = () => {
+    if (isMasterAdminAccess) {
+      return {
+        name: "Super Admin (Lovable)",
+        email: "Acesso via Lovable Editor",
+        showWarning: true
+      };
+    }
+    
+    if (user?.user_metadata) {
+      return {
+        name: `${user.user_metadata.first_name || ''} ${user.user_metadata.last_name || ''}`.trim(),
+        email: user.email || '',
+        showWarning: false
+      };
+    }
+    
+    return {
+      name: "Usuário não identificado",
+      email: "",
+      showWarning: false
+    };
+  };
+
+  const userInfo = getUserDisplayInfo();
 
   return (
     <div className="fixed top-5 right-5 z-50">
@@ -71,31 +99,32 @@ export function UserMenu() {
           >
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                {isMasterAdminAccess ? (
+                {userInfo.showWarning ? (
                   <>
                     <div className="flex items-center gap-1">
                       <AlertTriangle className="h-4 w-4 text-destructive" />
                       <p className="text-sm font-medium text-destructive">Acesso Super Admin</p>
                     </div>
                     <p className="text-xs text-muted-foreground">Acesso total via Lovable Editor</p>
+                    <p className="text-xs text-yellow-600">Usuário atual tem poderes de Super Admin</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-sm font-medium">
-                      {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-sm font-medium">{userInfo.name}</p>
+                    <p className="text-xs text-muted-foreground">{userInfo.email}</p>
                     {userCompany && (
                       <div className="flex items-center gap-1 mt-1">
                         <Building2 className="h-3 w-3 text-muted-foreground" />
                         <p className="text-xs font-medium">{userCompany.name}</p>
                       </div>
                     )}
-                    {isAdmin && (
+                    {(isAdmin || isMasterAdminAccess) && (
                       <div className="flex items-center gap-1 mt-1">
                         <Shield className="h-3 w-3 text-primary" />
                         <p className="text-xs text-primary font-medium">
-                          {isSuperAdmin ? 'Super Admin' : isCompanyAdmin ? 'Admin da Empresa' : ''}
+                          {isMasterAdminAccess ? 'Super Admin (Lovable)' : 
+                           isSuperAdmin ? 'Super Admin' : 
+                           isCompanyAdmin ? 'Admin da Empresa' : ''}
                         </p>
                       </div>
                     )}
@@ -105,27 +134,20 @@ export function UserMenu() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             
-            {isMasterAdminAccess ? (
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => navigate("/admin")}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Administração</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            ) : (
-              <DropdownMenuGroup>
+            <DropdownMenuGroup>
+              {!isMasterAdminAccess && (
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Perfil</span>
                 </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem onClick={() => navigate("/admin")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Administração</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuGroup>
-            )}
+              )}
+              {(isAdmin || isMasterAdminAccess) && (
+                <DropdownMenuItem onClick={() => navigate("/admin")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Administração</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
             
             <DropdownMenuSeparator />
             
@@ -141,6 +163,7 @@ export function UserMenu() {
                 const url = new URL(window.location.href);
                 url.searchParams.delete('master_admin');
                 localStorage.removeItem('lovableEditorAccess');
+                localStorage.removeItem('lovableSuperAdminAccess');
                 sessionStorage.removeItem('lovableEditorAccessNotified');
                 window.location.href = url.toString();
               }}>
