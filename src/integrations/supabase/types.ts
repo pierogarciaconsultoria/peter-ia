@@ -1789,9 +1789,13 @@ export type Database = {
           empresa_id: string | null
           hire_date: string
           id: string
+          immediate_supervisor_id: string | null
+          job_position_id: string | null
           name: string
           phone: string | null
           position: string
+          salary: number | null
+          sector: string | null
           status: string
           updated_at: string | null
         }
@@ -1805,9 +1809,13 @@ export type Database = {
           empresa_id?: string | null
           hire_date: string
           id?: string
+          immediate_supervisor_id?: string | null
+          job_position_id?: string | null
           name: string
           phone?: string | null
           position: string
+          salary?: number | null
+          sector?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -1821,9 +1829,13 @@ export type Database = {
           empresa_id?: string | null
           hire_date?: string
           id?: string
+          immediate_supervisor_id?: string | null
+          job_position_id?: string | null
           name?: string
           phone?: string | null
           position?: string
+          salary?: number | null
+          sector?: string | null
           status?: string
           updated_at?: string | null
         }
@@ -7280,6 +7292,39 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_evaluation_configs: {
+        Row: {
+          company_id: string
+          created_at: string
+          evaluation_criteria: Json
+          evaluation_periods: Json
+          id: string
+          scale_max: number
+          scale_min: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          evaluation_criteria?: Json
+          evaluation_periods?: Json
+          id?: string
+          scale_max?: number
+          scale_min?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          evaluation_criteria?: Json
+          evaluation_periods?: Json
+          id?: string
+          scale_max?: number
+          scale_min?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trial_period_evaluations: {
         Row: {
           adaptation_score: number
@@ -7288,12 +7333,23 @@ export type Database = {
           comments: string | null
           company_id: string
           created_at: string | null
+          decision_justification: string | null
           employee_id: string
+          employee_signature_date: string | null
+          evaluation_criteria_scores: Json | null
           evaluation_date: string
+          evaluation_period_number: number | null
           evaluation_type: string
           evaluator_id: string
+          final_decision: string | null
+          hr_signature_date: string | null
           id: string
+          immediate_supervisor_id: string | null
+          immediate_supervisor_name: string | null
           performance_score: number
+          sector: string | null
+          supervisor_signature_date: string | null
+          total_evaluation_periods: number | null
           updated_at: string | null
         }
         Insert: {
@@ -7303,12 +7359,23 @@ export type Database = {
           comments?: string | null
           company_id: string
           created_at?: string | null
+          decision_justification?: string | null
           employee_id: string
+          employee_signature_date?: string | null
+          evaluation_criteria_scores?: Json | null
           evaluation_date: string
+          evaluation_period_number?: number | null
           evaluation_type: string
           evaluator_id: string
+          final_decision?: string | null
+          hr_signature_date?: string | null
           id?: string
+          immediate_supervisor_id?: string | null
+          immediate_supervisor_name?: string | null
           performance_score: number
+          sector?: string | null
+          supervisor_signature_date?: string | null
+          total_evaluation_periods?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -7318,12 +7385,23 @@ export type Database = {
           comments?: string | null
           company_id?: string
           created_at?: string | null
+          decision_justification?: string | null
           employee_id?: string
+          employee_signature_date?: string | null
+          evaluation_criteria_scores?: Json | null
           evaluation_date?: string
+          evaluation_period_number?: number | null
           evaluation_type?: string
           evaluator_id?: string
+          final_decision?: string | null
+          hr_signature_date?: string | null
           id?: string
+          immediate_supervisor_id?: string | null
+          immediate_supervisor_name?: string | null
           performance_score?: number
+          sector?: string | null
+          supervisor_signature_date?: string | null
+          total_evaluation_periods?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -7641,6 +7719,10 @@ export type Database = {
       }
       generate_trial_evaluations: {
         Args: { employee_id: string; start_date: string }
+        Returns: undefined
+      }
+      generate_trial_evaluations_br: {
+        Args: { employee_id: string; hire_date: string }
         Returns: undefined
       }
       generate_unique_assessment_token: {
