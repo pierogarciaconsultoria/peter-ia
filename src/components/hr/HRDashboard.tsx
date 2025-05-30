@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -93,23 +92,29 @@ export function HRDashboard() {
           // Active employees count
           fetchMetricSafely(
             'employeeCount',
-            () => supabase
-              .from('employees')
-              .select('id', { count: 'exact' })
-              .eq('status', 'active'),
+            async () => {
+              const { data, error } = await supabase
+                .from('employees')
+                .select('id', { count: 'exact' })
+                .eq('status', 'active');
+              if (error) throw error;
+              return { data };
+            },
             'Active employees'
           ),
 
           // New employees (hired in the last 30 days)
           fetchMetricSafely(
             'newEmployees',
-            () => {
+            async () => {
               const thirtyDaysAgo = new Date();
               thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-              return supabase
+              const { data, error } = await supabase
                 .from('employees')
                 .select('id', { count: 'exact' })
                 .gte('hire_date', thirtyDaysAgo.toISOString().split('T')[0]);
+              if (error) throw error;
+              return { data };
             },
             'New employees (last 30 days)'
           ),
@@ -117,40 +122,56 @@ export function HRDashboard() {
           // Open job positions
           fetchMetricSafely(
             'openPositions',
-            () => supabase
-              .from('hr_job_openings')
-              .select('id', { count: 'exact' })
-              .eq('status', 'open'),
+            async () => {
+              const { data, error } = await supabase
+                .from('hr_job_openings')
+                .select('id', { count: 'exact' })
+                .eq('status', 'open');
+              if (error) throw error;
+              return { data };
+            },
             'Open job positions'
           ),
 
           // Pending onboardings
           fetchMetricSafely(
             'pendingOnboarding',
-            () => supabase
-              .from('onboarding_processes')
-              .select('id', { count: 'exact' })
-              .eq('status', 'in_progress'),
+            async () => {
+              const { data, error } = await supabase
+                .from('onboarding_processes')
+                .select('id', { count: 'exact' })
+                .eq('status', 'in_progress');
+              if (error) throw error;
+              return { data };
+            },
             'Pending onboarding processes'
           ),
 
           // Pending evaluations
           fetchMetricSafely(
             'pendingEvaluations',
-            () => supabase
-              .from('trial_period_evaluations')
-              .select('id', { count: 'exact' })
-              .is('approved', null),
+            async () => {
+              const { data, error } = await supabase
+                .from('trial_period_evaluations')
+                .select('id', { count: 'exact' })
+                .is('approved', null);
+              if (error) throw error;
+              return { data };
+            },
             'Pending trial evaluations'
           ),
 
           // Development plans
           fetchMetricSafely(
             'developmentPlans',
-            () => supabase
-              .from('development_plans')
-              .select('id', { count: 'exact' })
-              .eq('status', 'active'),
+            async () => {
+              const { data, error } = await supabase
+                .from('development_plans')
+                .select('id', { count: 'exact' })
+                .eq('status', 'active');
+              if (error) throw error;
+              return { data };
+            },
             'Active development plans'
           ),
         ]);
