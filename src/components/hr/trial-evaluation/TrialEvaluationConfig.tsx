@@ -16,7 +16,7 @@ interface TrialEvaluationConfigProps {
 }
 
 interface FormData {
-  evaluation_periods: number[];
+  evaluation_periods: { value: number }[];
   evaluation_criteria: { name: string; description: string; }[];
   scale_min: number;
   scale_max: number;
@@ -29,7 +29,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
 
   const form = useForm<FormData>({
     defaultValues: {
-      evaluation_periods: [30, 90],
+      evaluation_periods: [{ value: 30 }, { value: 90 }],
       evaluation_criteria: [
         { name: "Assiduidade", description: "Comparecimento regular ao trabalho" },
         { name: "Pontualidade", description: "Cumprimento de horários estabelecidos" },
@@ -66,7 +66,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
       const config = await getTrialEvaluationConfig(companyId);
       if (config) {
         form.reset({
-          evaluation_periods: config.evaluation_periods,
+          evaluation_periods: config.evaluation_periods.map(period => ({ value: period })),
           evaluation_criteria: config.evaluation_criteria,
           scale_min: config.scale_min,
           scale_max: config.scale_max
@@ -84,7 +84,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
     try {
       const success = await upsertTrialEvaluationConfig({
         company_id: companyId,
-        evaluation_periods: data.evaluation_periods,
+        evaluation_periods: data.evaluation_periods.map(period => period.value),
         evaluation_criteria: data.evaluation_criteria,
         scale_min: data.scale_min,
         scale_max: data.scale_max
@@ -142,7 +142,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendPeriod(30)}
+                    onClick={() => appendPeriod({ value: 30 })}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Período
@@ -154,7 +154,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
                     <div key={field.id} className="flex items-center gap-2">
                       <FormField
                         control={form.control}
-                        name={`evaluation_periods.${index}`}
+                        name={`evaluation_periods.${index}.value`}
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormControl>
