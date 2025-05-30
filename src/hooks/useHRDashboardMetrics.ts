@@ -31,7 +31,7 @@ export function useHRDashboardMetrics() {
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   
-  const updateMetric = (key: keyof DashboardMetrics, value: number, status: 'success' | 'error', error?: string) => {
+  const updateMetric = (key: keyof DashboardMetrics, value: number, status: 'success' | 'error' | 'pending', error?: string) => {
     setMetrics(prev => ({
       ...prev,
       [key]: { value, status, error }
