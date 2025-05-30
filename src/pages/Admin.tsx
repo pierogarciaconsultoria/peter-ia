@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CompanyManagement } from '@/components/admin/CompanyManagement';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { RoleManagement } from '@/components/admin/RoleManagement';
+import CompanyManagement from '@/components/admin/CompanyManagement';
+import UserManagement from '@/components/admin/UserManagement';
+import RoleManagement from '@/components/admin/RoleManagement';
 import { PermissoesUsuarios } from '@/components/admin/PermissoesUsuarios';
-import { CentralizedRegistration } from '@/components/admin/CentralizedRegistration';
+import CentralizedRegistration from '@/components/admin/CentralizedRegistration';
 import { DatabaseConnectionStatus } from '@/components/admin/DatabaseConnectionStatus';
 import { ModuleAssistantSettings } from '@/components/admin/ModuleAssistantSettings';
 import { PerformanceDashboard } from '@/components/admin/PerformanceDashboard';
@@ -116,7 +116,7 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="assistants" className="space-y-6">
-          <ModuleAssistantSettings />
+          <ModuleAssistantSettings isAdmin={isSuperAdmin || isCompanyAdmin} />
         </TabsContent>
 
         {isSuperAdmin && (
