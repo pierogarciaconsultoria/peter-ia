@@ -39,7 +39,6 @@ export const hrTabGroups: TabGroup[] = [
       { id: "departments", name: "Departamentos", component: "DepartmentManagement", icon: createIcon(icons.Building2), href: "/human-resources?activeTab=departments" },
       { id: "positions", name: "Quadro de Posições Aprovadas", component: "ApprovedPositions", icon: createIcon(icons.Users), href: "/human-resources?activeTab=positions" },
       { id: "salary", name: "Plano de Cargos e Salários", component: "JobSalaryPlan", icon: createIcon(icons.DollarSign), href: "/human-resources?activeTab=salary" },
-      { id: "organizational-structure", name: "Organograma", component: "DepartmentOrgChart", icon: createIcon(icons.BarChartBig), href: "/human-resources?activeTab=organizational-structure" },
       { id: "personnel", name: "Movimentação de Pessoal", component: "PersonnelMovement", icon: createIcon(icons.Users), href: "/human-resources?activeTab=personnel" }
     ]
   },

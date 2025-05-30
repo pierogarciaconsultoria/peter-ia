@@ -255,7 +255,7 @@ export function JobSalaryPlan() {
           <TabsTrigger value="positions">Cargos</TabsTrigger>
           <TabsTrigger value="market">Análise de Mercado</TabsTrigger>
           <TabsTrigger value="career">Planos de Carreira</TabsTrigger>
-          <TabsTrigger value="orgchart">Organograma</TabsTrigger>
+          <TabsTrigger value="orgchart">Organograma Corporativo</TabsTrigger>
         </TabsList>
         
         <TabsContent value="positions">
@@ -277,15 +277,23 @@ export function JobSalaryPlan() {
         </TabsContent>
         
         <TabsContent value="orgchart">
-          <DepartmentOrgChart 
-            positions={jobPositions.map(job => ({
-              id: job.id,
-              title: job.title,
-              department: job.department,
-              level: job.status,
-              parentPosition: job.immediate_supervisor_position
-            }))}
-          />
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Organograma Corporativo</h3>
+              <p className="text-muted-foreground">
+                Estrutura organizacional completa com cargos, departamentos e hierarquia
+              </p>
+            </div>
+            <DepartmentOrgChart 
+              positions={jobPositions.map(job => ({
+                id: job.id,
+                title: job.title,
+                department: job.department,
+                level: job.status,
+                parentPosition: job.immediate_supervisor_position
+              }))}
+            />
+          </div>
         </TabsContent>
       </Tabs>
       

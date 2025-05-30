@@ -3,7 +3,6 @@ import { HRDashboard } from "./HRDashboard";
 import { DepartmentManagement } from "./DepartmentManagement";
 import { ApprovedPositions } from "./ApprovedPositions";
 import { JobSalaryPlan } from "./JobSalaryPlan";
-import { DepartmentOrgChart } from "./DepartmentOrgChart";
 import { RecruitmentSelection } from "./RecruitmentSelection";
 import { AdmissionInterview } from "./AdmissionInterview";
 import { OnlineAdmission } from "./OnlineAdmission";
@@ -42,8 +41,6 @@ export function HRTabContent({ activeTab, onTabChange }: HRTabContentProps) {
         return <ApprovedPositions />;
       case "salary":
         return <JobSalaryPlan />;
-      case "organizational-structure":
-        return <DepartmentOrgChart />;
       case "personnel":
         return <PersonnelMovement />;
       case "recruitment-selection":

@@ -28,12 +28,6 @@ export const structureItems: MenuItem[] = [
         modulo: "cargos_salarios" 
       },
       { 
-        title: "Organograma", 
-        icon: BarChartBig, 
-        href: "/human-resources?activeTab=organizational-structure", 
-        modulo: "organograma" 
-      },
-      { 
         title: "Movimentação de Pessoal", 
         icon: Users, 
         href: "/human-resources?activeTab=personnel", 
