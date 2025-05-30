@@ -102,9 +102,9 @@ export function isSuperAdminInLovable(): boolean {
  * Checks if free access should be granted for demonstration
  */
 export function shouldGrantFreeAccess(): boolean {
-  // Always grant free access in Lovable environments
-  if (isLovableEditor()) {
-    console.log('Free access granted - Lovable environment detected');
+  // Only grant free access in development with Lovable editor
+  if (process.env.NODE_ENV === 'development' && isLovableEditor()) {
+    console.log('Free access granted - Development environment with Lovable editor detected');
     return true;
   }
   
@@ -115,29 +115,18 @@ export function shouldGrantFreeAccess(): boolean {
     return hasValidToken;
   }
   
-  // In development, be more permissive
-  const urlParams = new URLSearchParams(window.location.search);
-  const hasFreeAccessParam = urlParams.has('free_access');
-  
-  // Check localStorage flag
-  const hasStorageFlag = localStorage.getItem(AUTH_STORAGE_KEYS.FREE_ACCESS_MODE) === 'true';
-  
-  // Save to localStorage if URL parameter present
-  if (hasFreeAccessParam) {
-    localStorage.setItem(AUTH_STORAGE_KEYS.FREE_ACCESS_MODE, 'true');
-  }
-  
-  return hasFreeAccessParam || hasStorageFlag;
+  // More restrictive for non-development environments
+  return false;
 }
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * More permissive for development and Lovable environments
+ * More restrictive - only in development with Lovable editor
  */
 export function shouldBypassAuth(): boolean {
-  // Always bypass in Lovable environments
-  if (isLovableEditor()) {
-    console.log('Auth bypass granted - Lovable environment');
+  // Only bypass in development environment with Lovable editor
+  if (process.env.NODE_ENV === 'development' && isLovableEditor()) {
+    console.log('Auth bypass granted - Development environment with Lovable editor');
     return true;
   }
   
@@ -153,14 +142,8 @@ export function shouldBypassAuth(): boolean {
     return hasValidBypass;
   }
   
-  // In development, be more permissive
-  const shouldGrant = isSuperAdminInLovable() || shouldGrantFreeAccess();
-  
-  if (shouldGrant) {
-    console.log('Auth bypass granted - development environment');
-  }
-  
-  return shouldGrant;
+  // No bypass for other environments
+  return false;
 }
 
 /**
