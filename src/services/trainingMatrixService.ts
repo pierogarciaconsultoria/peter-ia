@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { JobPositionTrainingRequirement, EmployeeTrainingCompliance, TrainingMatrixData, ComplianceStats } from "@/types/trainingMatrix";
 
@@ -84,7 +83,7 @@ export class TrainingMatrixService {
         employee:employees(id, name, position, department),
         requirement:job_position_training_requirements(
           *,
-          job_position:job_positions(id, title),
+          job_position:job_positions(id, title, department_id),
           training:hr_trainings(id, title),
           procedure:iso_documents(id, title)
         )
@@ -121,7 +120,7 @@ export class TrainingMatrixService {
         employee:employees(id, name, position, department),
         requirement:job_position_training_requirements(
           *,
-          job_position:job_positions(id, title),
+          job_position:job_positions(id, title, department_id),
           training:hr_trainings(id, title),
           procedure:iso_documents(id, title)
         )
