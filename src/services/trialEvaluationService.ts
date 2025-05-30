@@ -93,8 +93,8 @@ export async function upsertTrialEvaluationConfig(config: Partial<TrialEvaluatio
     .from('trial_evaluation_configs')
     .upsert({
       company_id: config.company_id!,
-      evaluation_periods: config.evaluation_periods,
-      evaluation_criteria: config.evaluation_criteria,
+      evaluation_periods: JSON.stringify(config.evaluation_periods),
+      evaluation_criteria: JSON.stringify(config.evaluation_criteria),
       scale_min: config.scale_min,
       scale_max: config.scale_max
     });
@@ -156,7 +156,7 @@ export async function getTrialEvaluations(): Promise<TrialEvaluationWithEmployee
 export async function createTrialEvaluation(evaluation: Partial<TrialEvaluation>): Promise<boolean> {
   const { error } = await supabase
     .from('trial_period_evaluations')
-    .insert(evaluation);
+    .insert(evaluation as any);
 
   if (error) {
     console.error("Error creating trial evaluation:", error);
@@ -176,7 +176,7 @@ export async function updateTrialEvaluation(
     .update({
       ...evaluation,
       updated_at: new Date().toISOString()
-    })
+    } as any)
     .eq('id', id);
 
   if (error) {

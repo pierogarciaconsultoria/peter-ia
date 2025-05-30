@@ -15,12 +15,19 @@ interface TrialEvaluationConfigProps {
   onSave?: () => void;
 }
 
+interface FormData {
+  evaluation_periods: number[];
+  evaluation_criteria: { name: string; description: string; }[];
+  scale_min: number;
+  scale_max: number;
+}
+
 export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvaluationConfigProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const form = useForm({
+  const form = useForm<FormData>({
     defaultValues: {
       evaluation_periods: [30, 90],
       evaluation_criteria: [
@@ -72,7 +79,7 @@ export function TrialEvaluationConfigComponent({ companyId, onSave }: TrialEvalu
     }
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: FormData) => {
     setIsSaving(true);
     try {
       const success = await upsertTrialEvaluationConfig({
