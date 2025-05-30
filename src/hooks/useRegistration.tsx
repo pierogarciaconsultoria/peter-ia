@@ -12,11 +12,51 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
   const [lastName, setLastName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+  
+  // Company fields
   const [companyName, setCompanyName] = useState("");
+  const [companyCnpj, setCompanyCnpj] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyPhone, setCompanyPhone] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [companyResponsible, setCompanyResponsible] = useState("");
+  
   const [lgpdConsent, setLgpdConsent] = useState(false);
 
   // Verifica se é modo de acesso gratuito
   const isFreeAccess = shouldGrantFreeAccess();
+
+  // Auto-fill company responsible when name changes
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value);
+    if (!companyResponsible && lastName) {
+      setCompanyResponsible(`${value} ${lastName}`);
+    } else if (!companyResponsible) {
+      setCompanyResponsible(value);
+    }
+  };
+
+  const handleLastNameChange = (value: string) => {
+    setLastName(value);
+    if (!companyResponsible && firstName) {
+      setCompanyResponsible(`${firstName} ${value}`);
+    }
+  };
+
+  // Format CNPJ
+  const formatCNPJ = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  };
+
+  // Format phone
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +80,16 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
         console.log("Creating company:", companyName);
         const companySlug = companyName.toLowerCase().replace(/\s+/g, '-');
         
-        // Modificação: Simplificar a criação de empresa e melhorar o tratamento de erros
         const { data, error } = await supabase
           .from("companies")
           .insert({
             name: companyName,
             slug: companySlug,
+            cnpj: companyCnpj || null,
+            address: companyAddress || null,
+            phone: companyPhone || null,
+            email: companyEmail || null,
+            responsible: companyResponsible || null,
             active: true
           })
           .select();
@@ -89,9 +133,6 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
       
       console.log("Registration successful:", authData);
       
-      // No need to update user_profiles separately as this will be handled by the trigger
-      // that creates the user_profiles entry based on the auth.users metadata
-      
       toast.success("Cadastro realizado com sucesso! Verifique seu email.");
       setActiveTab("login");
     } catch (error: any) {
@@ -105,15 +146,25 @@ export const useRegistration = (setActiveTab: (tab: string) => void) => {
 
   return {
     firstName,
-    setFirstName,
+    setFirstName: handleFirstNameChange,
     lastName,
-    setLastName,
+    setLastName: handleLastNameChange,
     registerEmail,
     setRegisterEmail,
     registerPassword,
     setRegisterPassword,
     companyName,
     setCompanyName,
+    companyCnpj,
+    setCompanyCnpj: (value: string) => setCompanyCnpj(formatCNPJ(value)),
+    companyAddress,
+    setCompanyAddress,
+    companyPhone,
+    setCompanyPhone: (value: string) => setCompanyPhone(formatPhone(value)),
+    companyEmail,
+    setCompanyEmail,
+    companyResponsible,
+    setCompanyResponsible,
     lgpdConsent,
     setLgpdConsent,
     loading,

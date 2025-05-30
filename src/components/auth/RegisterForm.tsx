@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, Building2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Mail, Lock, User, Building2, Phone, MapPin, FileText, UserCheck } from "lucide-react";
 import { useRegistration } from "@/hooks/useRegistration";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,16 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
     setRegisterPassword,
     companyName,
     setCompanyName,
+    companyCnpj,
+    setCompanyCnpj,
+    companyAddress,
+    setCompanyAddress,
+    companyPhone,
+    setCompanyPhone,
+    companyEmail,
+    setCompanyEmail,
+    companyResponsible,
+    setCompanyResponsible,
     lgpdConsent,
     setLgpdConsent,
     loading,
@@ -60,86 +71,183 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
     );
   }
 
+  const showCompanyFields = companyName.trim().length > 0;
+
   return (
     <form onSubmit={handleRegister}>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {errorDetails && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
             {errorDetails}
           </div>
         )}
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Nome</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        {/* Dados Pessoais */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+            <User className="h-4 w-4 text-primary" />
+            <h3 className="font-medium text-sm">Dados Pessoais</h3>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Nome *</Label>
               <Input
                 id="firstName"
                 placeholder="Nome"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Sobrenome *</Label>
+              <Input
+                id="lastName"
+                placeholder="Sobrenome"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="registerEmail">Email *</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="registerEmail"
+                placeholder="seu@email.com"
+                type="email"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                required
                 className="pl-10"
               />
             </div>
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="lastName">Sobrenome</Label>
-            <Input
-              id="lastName"
-              placeholder="Sobrenome"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-            />
+            <Label htmlFor="registerPassword">Senha *</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="registerPassword"
+                type="password"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                required
+                className="pl-10"
+                minLength={6}
+              />
+            </div>
           </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="registerEmail">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="registerEmail"
-              placeholder="seu@email.com"
-              type="email"
-              value={registerEmail}
-              onChange={(e) => setRegisterEmail(e.target.value)}
-              required
-              className="pl-10"
-            />
+
+        {/* Dados da Empresa */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Building2 className="h-4 w-4 text-primary" />
+            <h3 className="font-medium text-sm">Dados da Empresa (opcional)</h3>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="registerPassword">Senha</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="registerPassword"
-              type="password"
-              value={registerPassword}
-              onChange={(e) => setRegisterPassword(e.target.value)}
-              required
-              className="pl-10"
-              minLength={6}
-            />
+          
+          <div className="space-y-2">
+            <Label htmlFor="companyName">Nome da Empresa</Label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="companyName"
+                placeholder="Nome da sua empresa"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Preencha se você representa uma empresa
+            </p>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="companyName">Nome da Empresa (opcional)</Label>
-          <div className="relative">
-            <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="companyName"
-              placeholder="Nome da sua empresa"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Se você for o administrador de uma empresa, digite o nome aqui.
-          </p>
+
+          {showCompanyFields && (
+            <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="companyCnpj">CNPJ</Label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="companyCnpj"
+                      placeholder="00.000.000/0000-00"
+                      value={companyCnpj}
+                      onChange={(e) => setCompanyCnpj(e.target.value)}
+                      className="pl-10"
+                      maxLength={18}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="companyPhone">Telefone</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="companyPhone"
+                      placeholder="(11) 99999-9999"
+                      value={companyPhone}
+                      onChange={(e) => setCompanyPhone(e.target.value)}
+                      className="pl-10"
+                      maxLength={15}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyEmail">Email Corporativo</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="companyEmail"
+                    placeholder="contato@empresa.com.br"
+                    type="email"
+                    value={companyEmail}
+                    onChange={(e) => setCompanyEmail(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyResponsible">Responsável</Label>
+                <div className="relative">
+                  <UserCheck className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="companyResponsible"
+                    placeholder="Nome do responsável"
+                    value={companyResponsible}
+                    onChange={(e) => setCompanyResponsible(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyAddress">Endereço Completo</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Textarea
+                    id="companyAddress"
+                    placeholder="Rua, número, complemento, bairro, cidade - UF, CEP"
+                    value={companyAddress}
+                    onChange={(e) => setCompanyAddress(e.target.value)}
+                    className="pl-10 min-h-[80px]"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center space-x-2">
@@ -156,7 +264,7 @@ export const RegisterForm = ({ setActiveTab }: RegisterFormProps) => {
             Concordo com a <a href="#" className="text-primary hover:underline" onClick={(e) => {
               e.preventDefault();
               window.open("/privacy-policy", "_blank");
-            }}>Política de Privacidade</a> e o uso dos meus dados pessoais de acordo com a LGPD.
+            }}>Política de Privacidade</a> e o uso dos meus dados pessoais de acordo com a LGPD. *
           </Label>
         </div>
       </CardContent>
