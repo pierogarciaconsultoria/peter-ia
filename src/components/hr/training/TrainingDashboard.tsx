@@ -12,6 +12,10 @@ import { TrainingTable } from "./TrainingTable";
 import { TrainingFilterBar } from "./TrainingFilterBar";
 import { NewTrainingDialog } from "./NewTrainingDialog";
 import { TrainingMatrix } from "./TrainingMatrix";
+import { ComplianceDashboard } from "./ComplianceDashboard";
+import { TrainingReports } from "./TrainingReports";
+import { TrainingMatrixService } from "@/services/trainingMatrixService";
+import { TrainingMatrixData } from "@/types/trainingMatrix";
 import { useToast } from "@/components/ui/use-toast";
 
 export function TrainingDashboard() {
@@ -22,6 +26,8 @@ export function TrainingDashboard() {
   const [departments, setDepartments] = useState<string[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [procedures, setProcedures] = useState<any[]>([]);
+  const [matrixData, setMatrixData] = useState<TrainingMatrixData[]>([]);
+  const [companyId, setCompanyId] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,6 +37,21 @@ export function TrainingDashboard() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
+      
+      // Get user's company ID
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) return;
+
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('company_id')
+        .eq('id', userData.user.id)
+        .single();
+
+      if (!profileData?.company_id) return;
+      
+      setCompanyId(profileData.company_id);
+
       // Fetch trainings
       const trainingData = await getTrainings();
       setTrainings(trainingData);
@@ -40,6 +61,7 @@ export function TrainingDashboard() {
       const { data: deptData } = await supabase
         .from('departments')
         .select('name')
+        .eq('company_id', profileData.company_id)
         .order('name');
       
       if (deptData) {
@@ -51,7 +73,8 @@ export function TrainingDashboard() {
       const { data: employeeData } = await supabase
         .from('employees')
         .select('id, name, department')
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .eq('company_id', profileData.company_id);
       
       if (employeeData) {
         setEmployees(employeeData);
@@ -66,6 +89,11 @@ export function TrainingDashboard() {
       if (procedureData) {
         setProcedures(procedureData);
       }
+
+      // Fetch matrix data
+      const matrixResult = await TrainingMatrixService.getTrainingMatrix(profileData.company_id);
+      setMatrixData(matrixResult);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
@@ -145,14 +173,17 @@ export function TrainingDashboard() {
         </Button>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+      <Tabs defaultValue="dashboard" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="matrix">Matriz por Cargo</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
           <TabsTrigger value="trainings">Lista de Treinamentos</TabsTrigger>
+          <TabsTrigger value="reports">Relatórios</TabsTrigger>
+          <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="dashboard" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Estatísticas de Treinamentos</CardTitle>
@@ -164,7 +195,7 @@ export function TrainingDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Lista de Treinamentos</CardTitle>
+              <CardTitle>Resumo Recente</CardTitle>
             </CardHeader>
             <CardContent>
               <TrainingFilterBar 
@@ -175,7 +206,7 @@ export function TrainingDashboard() {
               />
               <div className="mt-4">
                 <TrainingTable 
-                  trainings={filteredTrainings.slice(0, 10)} 
+                  trainings={filteredTrainings.slice(0, 5)} 
                   isLoading={isLoading} 
                 />
               </div>
@@ -185,6 +216,13 @@ export function TrainingDashboard() {
 
         <TabsContent value="matrix">
           <TrainingMatrix />
+        </TabsContent>
+
+        <TabsContent value="compliance">
+          <ComplianceDashboard 
+            companyId={companyId}
+            onRefresh={fetchData}
+          />
         </TabsContent>
 
         <TabsContent value="trainings" className="space-y-6">
@@ -204,6 +242,37 @@ export function TrainingDashboard() {
                 trainings={filteredTrainings} 
                 isLoading={isLoading} 
               />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <TrainingReports 
+            companyId={companyId}
+            matrixData={matrixData}
+          />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configurações da Matriz de Treinamento</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Configure os requisitos de treinamento por cargo e gerencie as configurações do sistema.
+              </p>
+              <div className="space-y-4">
+                <Button variant="outline">
+                  Gerenciar Requisitos por Cargo
+                </Button>
+                <Button variant="outline">
+                  Configurar Notificações
+                </Button>
+                <Button variant="outline">
+                  Importar/Exportar Dados
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
