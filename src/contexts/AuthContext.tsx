@@ -42,6 +42,8 @@ interface AuthContextType {
   isCompanyAdmin: boolean;
   isAdmin: boolean;
   empresaId?: string; // Para compatibilidade com código legado
+  hasAuthError: boolean;
+  clearAuthError: () => void;
 }
 
 // Export the context so it can be imported
@@ -53,6 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  const [hasAuthError, setHasAuthError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Debug logs
   console.log('🔄 AuthProvider: Renderizando componente');
@@ -61,14 +65,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userProfile: userProfile ? 'presente' : 'null',
     userCompany: userCompany ? 'presente' : 'null',
     loading,
-    connectionStatus
+    connectionStatus,
+    hasAuthError,
+    retryCount
   });
 
   // Detecta se é super admin no Lovable Editor
   const isLovableEditor = isSuperAdminInLovable();
   console.log('🔍 AuthProvider: isLovableEditor =', isLovableEditor);
 
-  const fetchUserProfile = async (userId: string) => {
+  const clearAuthError = () => {
+    console.log('🧹 AuthProvider: Limpando erro de autenticação');
+    setHasAuthError(false);
+    setRetryCount(0);
+  };
+
+  const handleError = (error: any, context: string) => {
+    console.error(`❌ AuthProvider: Erro em ${context}:`, error);
+    setHasAuthError(true);
+    
+    // Se for erro de permissão, não mostrar toast repetidamente
+    if (error?.code !== 'PGRST301' && error?.message !== 'JWT expired') {
+      toast.error(`Erro de autenticação: ${error.message || 'Erro desconhecido'}`);
+    }
+    
+    // Auto-recovery para certos tipos de erro
+    if (error?.message?.includes('JWT expired') || error?.code === 'PGRST301') {
+      console.log('🔄 AuthProvider: Tentando recuperação automática...');
+      setTimeout(() => {
+        if (retryCount < 3) {
+          setRetryCount(prev => prev + 1);
+          reconnect();
+        }
+      }, 2000);
+    }
+  };
+
+  const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
     console.log('📥 AuthProvider: Buscando perfil do usuário:', userId);
     try {
       const { data: profile, error } = await supabase
@@ -77,20 +110,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ AuthProvider: Erro ao buscar perfil do usuário:', error);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('ℹ️ AuthProvider: Perfil não encontrado para usuário:', userId);
+          return null;
+        }
+        handleError(error, 'fetchUserProfile');
         return null;
       }
 
-      console.log('✅ AuthProvider: Perfil do usuário encontrado:', profile ? 'sim' : 'não');
+      console.log('✅ AuthProvider: Perfil do usuário encontrado');
       return profile;
     } catch (error) {
-      console.error('❌ AuthProvider: Erro inesperado ao buscar perfil:', error);
+      handleError(error, 'fetchUserProfile');
       return null;
     }
   };
 
-  const fetchUserCompany = async (companyId: string) => {
+  const fetchUserCompany = async (companyId: string): Promise<Company | null> => {
     console.log('🏢 AuthProvider: Buscando empresa:', companyId);
     try {
       const { data: company, error } = await supabase
@@ -99,15 +136,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', companyId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ AuthProvider: Erro ao buscar empresa:', error);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('ℹ️ AuthProvider: Empresa não encontrada:', companyId);
+          return null;
+        }
+        handleError(error, 'fetchUserCompany');
         return null;
       }
 
-      console.log('✅ AuthProvider: Empresa encontrada:', company ? 'sim' : 'não');
+      console.log('✅ AuthProvider: Empresa encontrada');
       return company;
     } catch (error) {
-      console.error('❌ AuthProvider: Erro inesperado ao buscar empresa:', error);
+      handleError(error, 'fetchUserCompany');
       return null;
     }
   };
@@ -120,6 +161,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserProfile(null);
       setUserCompany(null);
       setLoading(false);
+      setConnectionStatus('connected');
+      clearAuthError();
       return;
     }
 
@@ -144,8 +187,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('✅ AuthProvider: Inicialização concluída com sucesso');
       setConnectionStatus('connected');
+      clearAuthError();
     } catch (error) {
       console.error('❌ AuthProvider: Erro ao inicializar usuário:', error);
+      handleError(error, 'initializeUser');
       setConnectionStatus('disconnected');
     } finally {
       console.log('🏁 AuthProvider: Finalizando inicialização, setLoading(false)');
@@ -164,6 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('❌ AuthProvider: Erro ao verificar sessão:', error);
+          handleError(error, 'checkSession');
           setConnectionStatus('disconnected');
         } else {
           console.log('📋 AuthProvider: Sessão encontrada:', session ? 'sim' : 'não');
@@ -172,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error) {
         console.error('❌ AuthProvider: Erro inesperado ao verificar sessão:', error);
+        handleError(error, 'checkSession');
         setConnectionStatus('disconnected');
         setLoading(false);
       }
@@ -201,6 +248,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     console.log('🔐 AuthProvider: Iniciando login para:', email);
     setLoading(true);
+    clearAuthError();
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -209,6 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('❌ AuthProvider: Erro no login:', error);
+        handleError(error, 'signIn');
         throw error;
       }
 
@@ -217,16 +267,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Atualizar last_login se o perfil existir
       if (data.user) {
         console.log('📝 AuthProvider: Atualizando last_login');
-        await supabase
-          .from('user_profiles')
-          .update({ last_login: new Date().toISOString() })
-          .eq('id', data.user.id);
+        try {
+          await supabase
+            .from('user_profiles')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', data.user.id);
+        } catch (updateError) {
+          console.warn('⚠️ AuthProvider: Erro ao atualizar last_login:', updateError);
+          // Não falhar o login por causa disso
+        }
       }
 
       toast.success('Login realizado com sucesso');
     } catch (error: any) {
       console.error('❌ AuthProvider: Erro no login:', error);
-      toast.error(error.message || 'Erro ao fazer login');
+      handleError(error, 'signIn');
       throw error;
     } finally {
       setLoading(false);
@@ -236,6 +291,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, metadata?: any) => {
     console.log('📝 AuthProvider: Iniciando cadastro para:', email);
     setLoading(true);
+    clearAuthError();
+    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -247,6 +304,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('❌ AuthProvider: Erro no cadastro:', error);
+        handleError(error, 'signUp');
         throw error;
       }
 
@@ -254,7 +312,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Conta criada com sucesso! Verifique seu email.');
     } catch (error: any) {
       console.error('❌ AuthProvider: Erro no cadastro:', error);
-      toast.error(error.message || 'Erro ao criar conta');
+      handleError(error, 'signUp');
       throw error;
     } finally {
       setLoading(false);
@@ -264,10 +322,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     console.log('🚪 AuthProvider: Iniciando logout');
     setLoading(true);
+    clearAuthError();
+    
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('❌ AuthProvider: Erro no logout:', error);
+        handleError(error, 'signOut');
         throw error;
       }
       
@@ -275,10 +336,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserProfile(null);
       setUserCompany(null);
+      toast.success('Logout realizado com sucesso');
     } catch (error: any) {
       console.error('❌ AuthProvider: Erro no logout:', error);
-      toast.error('Erro ao fazer logout');
-      throw error;
+      handleError(error, 'signOut');
+      // Mesmo com erro, limpar estado local
+      setUser(null);
+      setUserProfile(null);
+      setUserCompany(null);
     } finally {
       setLoading(false);
     }
@@ -287,7 +352,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const reconnect = () => {
     console.log('🔄 AuthProvider: Reconectando...');
     setConnectionStatus('connecting');
-    window.location.reload();
+    clearAuthError();
+    
+    // Tentar recarregar a sessão
+    setTimeout(async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!error && session) {
+          setUser(session.user);
+          await initializeUser(session.user);
+        } else {
+          setConnectionStatus('disconnected');
+        }
+      } catch (error) {
+        console.error('❌ AuthProvider: Erro na reconexão:', error);
+        setConnectionStatus('disconnected');
+      }
+    }, 1000);
   };
 
   // Calcular permissões com fallbacks seguros
@@ -317,6 +398,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isCompanyAdmin,
     isAdmin,
     empresaId: userProfile?.company_id, // Para compatibilidade com código legado
+    hasAuthError,
+    clearAuthError,
   };
 
   console.log('📦 AuthProvider: Retornando provider com value:', {
@@ -324,7 +407,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasProfile: !!value.userProfile,
     hasCompany: !!value.userCompany,
     loading: value.loading,
-    connectionStatus: value.connectionStatus
+    connectionStatus: value.connectionStatus,
+    hasAuthError: value.hasAuthError
   });
 
   return (

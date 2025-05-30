@@ -2,9 +2,11 @@
 import { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wifi, WifiOff } from "lucide-react";
 import { shouldBypassAuth, isProductionEnvironment } from "@/utils/lovableEditorDetection";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface AuthGuardProps {
   children?: React.ReactNode;
@@ -19,7 +21,16 @@ export const AuthGuard = ({
   requireSuperAdmin = false,
   bypassForMasterAdmin = true
 }: AuthGuardProps) => {
-  const { user, loading, isAdmin, isSuperAdmin, connectionStatus, reconnect } = useAuth();
+  const { 
+    user, 
+    loading, 
+    isAdmin, 
+    isSuperAdmin, 
+    connectionStatus, 
+    reconnect, 
+    hasAuthError, 
+    clearAuthError 
+  } = useAuth();
   const location = useLocation();
   
   // Check if we should bypass auth (more restricted in production)
@@ -48,8 +59,51 @@ export const AuthGuard = ({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Carregando...</span>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <span className="text-lg">Carregando...</span>
+          <p className="text-sm text-muted-foreground mt-2">
+            Verificando autenticação
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle auth errors
+  if (hasAuthError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <WifiOff className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <CardTitle className="text-red-700">Erro de Autenticação</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600 text-center">
+              Houve um problema com a autenticação. Tente novamente ou faça login.
+            </p>
+            <div className="space-y-2">
+              <Button 
+                onClick={() => {
+                  clearAuthError();
+                  reconnect();
+                }}
+                className="w-full"
+              >
+                <Wifi className="h-4 w-4 mr-2" />
+                Tentar Novamente
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/auth'}
+                variant="outline"
+                className="w-full"
+              >
+                Fazer Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -58,16 +112,25 @@ export const AuthGuard = ({
   if (connectionStatus === 'disconnected' && !bypassAuth) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md text-center">
-          <h2 className="text-lg font-semibold text-red-700 mb-2">Problema de conexão</h2>
-          <p className="text-red-600 mb-4">Não foi possível conectar ao servidor. Verifique sua conexão com a internet.</p>
-          <button 
-            onClick={() => reconnect()}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          >
-            Tentar novamente
-          </button>
-        </div>
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <WifiOff className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <CardTitle className="text-red-700">Problema de conexão</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600 text-center">
+              Não foi possível conectar ao servidor. Verifique sua conexão com a internet.
+            </p>
+            <Button 
+              onClick={() => reconnect()}
+              className="w-full"
+              variant="destructive"
+            >
+              <Wifi className="h-4 w-4 mr-2" />
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
