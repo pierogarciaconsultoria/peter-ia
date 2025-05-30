@@ -19,15 +19,15 @@ import { TrainingRequirementDialog } from "./TrainingRequirementDialog";
 import { TrainingMatrixService } from "@/services/trainingMatrixService";
 import { TrainingMatrixData, JobPositionTrainingRequirement } from "@/types/trainingMatrix";
 import { useToast } from "@/components/ui/use-toast";
+import { debounce } from "@/utils/performanceUtils";
+import { useQuery } from "@tanstack/react-query";
 
 export function TrainingDashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isRequirementDialogOpen, setIsRequirementDialogOpen] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<JobPositionTrainingRequirement | null>(null);
-  const [trainings, setTrainings] = useState<Training[]>([]);
   const [filteredTrainings, setFilteredTrainings] = useState<Training[]>([]);
   const [requirements, setRequirements] = useState<JobPositionTrainingRequirement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [departments, setDepartments] = useState<string[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [procedures, setProcedures] = useState<any[]>([]);
@@ -35,14 +35,23 @@ export function TrainingDashboard() {
   const [companyId, setCompanyId] = useState<string>("");
   const { toast } = useToast();
 
+  // Usar React Query para otimizar carregamento de treinamentos
+  const { data: trainings = [], isLoading, refetch } = useQuery({
+    queryKey: ['trainings'],
+    queryFn: getTrainings,
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+  });
+
+  useEffect(() => {
+    setFilteredTrainings(trainings);
+  }, [trainings]);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
-      
       // Get user's company ID
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) return;
@@ -57,12 +66,7 @@ export function TrainingDashboard() {
       
       setCompanyId(profileData.company_id);
 
-      // Fetch trainings
-      const trainingData = await getTrainings();
-      setTrainings(trainingData);
-      setFilteredTrainings(trainingData);
-
-      // Fetch departments
+      // Fetch departments usando índice otimizado
       const { data: deptData } = await supabase
         .from('departments')
         .select('name')
@@ -74,7 +78,7 @@ export function TrainingDashboard() {
         setDepartments(deptNames);
       }
 
-      // Fetch employees
+      // Fetch employees usando índice otimizado
       const { data: employeeData } = await supabase
         .from('employees')
         .select('id, name, department')
@@ -111,8 +115,6 @@ export function TrainingDashboard() {
         description: "Não foi possível carregar os dados de treinamentos.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -121,7 +123,7 @@ export function TrainingDashboard() {
       title: "Sucesso",
       description: "Treinamento criado com sucesso",
     });
-    await fetchData();
+    await refetch();
   };
 
   const handleRequirementSaved = async () => {
@@ -162,10 +164,10 @@ export function TrainingDashboard() {
     }
   };
 
-  const handleFilterChange = (filters: any) => {
+  // Debounce otimizado para filtros
+  const debouncedFilterChange = debounce((filters: any) => {
     let filtered = [...trainings];
 
-    // Filter by search query
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       filtered = filtered.filter(training => 
@@ -174,12 +176,10 @@ export function TrainingDashboard() {
       );
     }
 
-    // Filter by department
     if (filters.department && filters.department !== 'all') {
       filtered = filtered.filter(training => training.department === filters.department);
     }
 
-    // Filter by employee
     if (filters.employeeId && filters.employeeId !== 'all') {
       filtered = filtered.filter(training => {
         if (!training.participants) return false;
@@ -187,7 +187,6 @@ export function TrainingDashboard() {
       });
     }
 
-    // Filter by procedure
     if (filters.procedure && filters.procedure !== 'all') {
       filtered = filtered.filter(training => 
         training.procedure_id === filters.procedure || 
@@ -195,7 +194,6 @@ export function TrainingDashboard() {
       );
     }
 
-    // Filter by date range
     if (filters.startDate) {
       filtered = filtered.filter(training => 
         new Date(training.training_date) >= new Date(filters.startDate)
@@ -209,7 +207,7 @@ export function TrainingDashboard() {
     }
 
     setFilteredTrainings(filtered);
-  };
+  }, 300);
 
   return (
     <div className="space-y-6">
@@ -250,7 +248,7 @@ export function TrainingDashboard() {
                 departments={departments}
                 employees={employees}
                 procedures={procedures}
-                onFilterChange={handleFilterChange}
+                onFilterChange={debouncedFilterChange}
               />
               <div className="mt-4">
                 <TrainingTable 
@@ -278,7 +276,7 @@ export function TrainingDashboard() {
             departments={departments}
             employees={employees}
             procedures={procedures}
-            onFilterChange={handleFilterChange}
+            onFilterChange={debouncedFilterChange}
           />
 
           <Card>
