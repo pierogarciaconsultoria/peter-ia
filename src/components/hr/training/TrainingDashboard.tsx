@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Target } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchTrainings as getTrainings } from "@/services/training";
-import { Training } from "@/types/training";
+import { Training, TrainingFilters } from "@/types/training";
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingStats } from "./TrainingStats";
 import { TrainingTable } from "./TrainingTable";
@@ -20,7 +20,13 @@ import { TrainingMatrixService } from "@/services/trainingMatrixService";
 import { TrainingMatrixData, JobPositionTrainingRequirement } from "@/types/trainingMatrix";
 import { useToast } from "@/components/ui/use-toast";
 import { debounce } from "@/utils/performanceUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, QueryFunctionContext } from "@tanstack/react-query";
+
+// Função otimizada para fetch de treinamentos com React Query
+const fetchTrainingsOptimized = async ({ queryKey }: QueryFunctionContext): Promise<Training[]> => {
+  const [, filters] = queryKey as [string, TrainingFilters | undefined];
+  return getTrainings(filters);
+};
 
 export function TrainingDashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -33,12 +39,13 @@ export function TrainingDashboard() {
   const [procedures, setProcedures] = useState<any[]>([]);
   const [matrixData, setMatrixData] = useState<TrainingMatrixData[]>([]);
   const [companyId, setCompanyId] = useState<string>("");
+  const [currentFilters, setCurrentFilters] = useState<TrainingFilters | undefined>(undefined);
   const { toast } = useToast();
 
   // Usar React Query para otimizar carregamento de treinamentos
   const { data: trainings = [], isLoading, refetch } = useQuery({
-    queryKey: ['trainings'],
-    queryFn: getTrainings,
+    queryKey: ['trainings', currentFilters],
+    queryFn: fetchTrainingsOptimized,
     staleTime: 5 * 60 * 1000, // 5 minutos de cache
   });
 
@@ -207,6 +214,11 @@ export function TrainingDashboard() {
     }
 
     setFilteredTrainings(filtered);
+    
+    // Atualizar filtros para React Query quando necessário
+    if (filters.searchQuery || filters.department !== 'all' || filters.startDate || filters.endDate) {
+      setCurrentFilters(filters);
+    }
   }, 300);
 
   return (
