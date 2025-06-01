@@ -1008,11 +1008,16 @@ export type Database = {
           active: boolean
           active_modules: string[]
           address: string | null
+          business_objectives: string | null
           cnpj: string | null
+          company_description: string | null
+          company_sector: string | null
+          company_size: string | null
           created_at: string
           email: string | null
           id: string
           name: string
+          operational_problems: string | null
           phone: string | null
           plan: string
           potency: string | null
@@ -1024,11 +1029,16 @@ export type Database = {
           active?: boolean
           active_modules?: string[]
           address?: string | null
+          business_objectives?: string | null
           cnpj?: string | null
+          company_description?: string | null
+          company_sector?: string | null
+          company_size?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name: string
+          operational_problems?: string | null
           phone?: string | null
           plan?: string
           potency?: string | null
@@ -1040,11 +1050,16 @@ export type Database = {
           active?: boolean
           active_modules?: string[]
           address?: string | null
+          business_objectives?: string | null
           cnpj?: string | null
+          company_description?: string | null
+          company_sector?: string | null
+          company_size?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string
+          operational_problems?: string | null
           phone?: string | null
           plan?: string
           potency?: string | null
@@ -1053,6 +1068,50 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      company_analysis: {
+        Row: {
+          ai_suggestions: Json
+          analysis_type: string
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          input_data: Json
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_suggestions: Json
+          analysis_type: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          input_data: Json
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_suggestions?: Json
+          analysis_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          input_data?: Json
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       connection_test: {
         Row: {
@@ -7704,6 +7763,10 @@ export type Database = {
       current_user_belongs_to_company: {
         Args: { target_company_id: string }
         Returns: boolean
+      }
+      ensure_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       exec_sql: {
         Args: { sql_statement: string }

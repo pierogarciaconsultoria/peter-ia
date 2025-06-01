@@ -1,12 +1,16 @@
 
-import { Home } from "lucide-react";
+import { LayoutDashboard, Brain } from "lucide-react";
 import { MenuItem } from "../types";
 
 export const dashboardItems: MenuItem[] = [
   {
     title: "Dashboard",
-    icon: Home,
-    href: "/dashboard",
-    modulo: "dashboard",
+    icon: LayoutDashboard,
+    href: "/dashboard"
+  },
+  {
+    title: "Análise Inteligente",
+    icon: Brain,
+    href: "/analise-inteligente"
   }
 ];

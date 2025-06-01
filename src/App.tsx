@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -43,6 +42,7 @@ import Admin from '@/pages/Admin';
 import Ambiente from '@/pages/Ambiente';
 import Tasks from '@/pages/Tasks';
 import ExitInterviewPage from "./pages/ExitInterviewPage";
+import IntelligentAnalysisPage from "@/pages/IntelligentAnalysisPage";
 
 import './App.css';
 
@@ -151,6 +151,7 @@ function AppContent() {
               <Route path="ambiente" element={<Ambiente />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="admin" element={<Admin />} />
+              <Route path="/analise-inteligente" element={<IntelligentAnalysisPage />} />
             </Route>
             
             {/* Catch-all route for pages not found */}
