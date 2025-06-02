@@ -7739,6 +7739,10 @@ export type Database = {
           table_exists: boolean
         }[]
       }
+      check_table_exists_in_schema: {
+        Args: { schema_name: string; table_name: string }
+        Returns: boolean
+      }
       check_user_access: {
         Args: { user_id: string }
         Returns: boolean
@@ -7760,6 +7764,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_schema_if_not_exists: {
+        Args: { schema_name: string }
+        Returns: boolean
+      }
       current_user_belongs_to_company: {
         Args: { target_company_id: string }
         Returns: boolean
@@ -7771,6 +7779,10 @@ export type Database = {
       exec_sql: {
         Args: { sql_statement: string }
         Returns: undefined
+      }
+      execute_sql_with_schema: {
+        Args: { sql_statement: string; target_schema?: string }
+        Returns: Json
       }
       generate_access_token: {
         Args: Record<PropertyKey, never>
@@ -7823,6 +7835,12 @@ export type Database = {
       get_db_version: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_schema_tables: {
+        Args: { schema_name: string }
+        Returns: {
+          table_name: string
+        }[]
       }
       get_security_logs: {
         Args: {

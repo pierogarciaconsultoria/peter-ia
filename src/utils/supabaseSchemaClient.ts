@@ -27,15 +27,15 @@ export class SupabaseSchemaClient {
 
     // Se a tabela já tem o schema prefixado, usar diretamente
     if (contextualTableName.includes('.')) {
-      return supabase.from(contextualTableName);
+      return (supabase as any).from(contextualTableName);
     }
     
     // Se não é o schema padrão, adicionar o prefixo
     if (currentSchema !== 'public') {
-      return supabase.from(`${currentSchema}.${contextualTableName}`);
+      return (supabase as any).from(`${currentSchema}.${contextualTableName}`);
     }
     
-    return supabase.from(contextualTableName);
+    return (supabase as any).from(contextualTableName);
   }
 
   // Método para executar RPC com contexto
@@ -53,26 +53,32 @@ export class SupabaseSchemaClient {
       });
     }
     
-    return supabase.rpc(functionName, params);
+    return (supabase as any).rpc(functionName, params);
   }
 
   // Método para executar queries SQL diretas com contexto
   async executeQuery(query: string, params?: any[]) {
     const currentSchema = schemaContext.getCurrentSchema();
     
-    // Adicionar SET search_path se não for o schema padrão
-    let contextualQuery = query;
-    if (currentSchema !== 'public') {
-      contextualQuery = `SET search_path TO ${currentSchema}, public; ${query}`;
+    // Usar a nova função execute_sql_with_schema
+    try {
+      const { data, error } = await supabase.rpc('execute_sql_with_schema', {
+        sql_statement: query,
+        target_schema: currentSchema
+      });
+      
+      if (error) throw error;
+      
+      logger.debug('SupabaseSchemaClient', 'Query SQL executada', {
+        originalQuery: query,
+        schema: currentSchema
+      });
+      
+      return { data, error: null };
+    } catch (error) {
+      logger.error('SupabaseSchemaClient', 'Erro ao executar query', error);
+      return { data: null, error };
     }
-    
-    logger.debug('SupabaseSchemaClient', 'Query SQL executada', {
-      originalQuery: query,
-      contextualQuery,
-      schema: currentSchema
-    });
-    
-    return supabase.rpc('exec_sql', { sql_statement: contextualQuery });
   }
 
   // Getter para acesso direto ao cliente Supabase original (quando necessário)
@@ -86,7 +92,8 @@ export class SupabaseSchemaClient {
     const currentSchema = schemaContext.getCurrentSchema();
     
     try {
-      const { data, error } = await supabase.rpc('check_table_exists', {
+      const { data, error } = await supabase.rpc('check_table_exists_in_schema', {
+        schema_name: currentSchema,
         table_name: contextualTableName.replace(`${currentSchema}.`, '')
       });
       
@@ -95,7 +102,7 @@ export class SupabaseSchemaClient {
         return false;
       }
       
-      return data?.table_exists || false;
+      return data || false;
     } catch (error) {
       logger.error('SupabaseSchemaClient', 'Erro inesperado ao verificar tabela', error);
       return false;
@@ -112,11 +119,13 @@ export class SupabaseSchemaClient {
     // Validar se o schema existe e é acessível
     try {
       const currentSchema = schemaContext.getCurrentSchema();
-      const { data, error } = await this.executeQuery(
-        `SELECT schema_name FROM information_schema.schemata WHERE schema_name = '${currentSchema}'`
-      );
       
-      if (error || !data) {
+      // Usar a função nativa para verificar se o schema existe
+      const { data, error } = await supabase.rpc('create_schema_if_not_exists', {
+        schema_name: currentSchema
+      });
+      
+      if (error) {
         logger.error('SupabaseSchemaClient', 'Schema não acessível', { schema: currentSchema, error });
         schemaContext.resetToDefault();
         return false;
@@ -137,6 +146,27 @@ export class SupabaseSchemaClient {
       return false;
     }
   }
+
+  // Método para listar tabelas do schema atual
+  async getSchemaTableList(): Promise<string[]> {
+    const currentSchema = schemaContext.getCurrentSchema();
+    
+    try {
+      const { data, error } = await supabase.rpc('get_schema_tables', {
+        schema_name: currentSchema
+      });
+      
+      if (error) {
+        logger.error('SupabaseSchemaClient', 'Erro ao listar tabelas', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (error) {
+      logger.error('SupabaseSchemaClient', 'Erro inesperado ao listar tabelas', error);
+      return [];
+    }
+  }
 }
 
 // Instância singleton
@@ -148,6 +178,7 @@ export const useSupabaseSchema = () => {
     client: supabaseSchema,
     context: schemaContext.getCurrentContext(),
     switchContext: supabaseSchema.switchContext.bind(supabaseSchema),
-    tableExists: supabaseSchema.tableExists.bind(supabaseSchema)
+    tableExists: supabaseSchema.tableExists.bind(supabaseSchema),
+    getSchemaTableList: supabaseSchema.getSchemaTableList.bind(supabaseSchema)
   };
 };
