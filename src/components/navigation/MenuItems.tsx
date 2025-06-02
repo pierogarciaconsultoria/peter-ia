@@ -1,6 +1,7 @@
 
 import { MenuItem } from "./types";
 import { dashboardItems } from "./menu-categories/dashboard-items";
+import { diagnosticItems } from "./menu-categories/diagnostic-items";
 import { isoItems } from "./menu-categories/iso-items";
 import { strategicItems } from "./menu-categories/strategic-items";
 import { processItems } from "./menu-categories/process-items";
@@ -18,6 +19,7 @@ export type { MenuItem };
 // Combine all menu items, but we'll filter out duplicates in the Sidebar component
 export const menuItems: MenuItem[] = [
   ...dashboardItems,
+  ...diagnosticItems,
   ...isoItems,
   ...strategicItems,
   ...processItems,

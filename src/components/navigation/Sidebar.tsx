@@ -14,6 +14,7 @@ import menuItems from "./MenuItems";
 // Define our menu categories with labels
 const menuCategories = [
   { label: "Principal", items: menuItems.filter(item => item.modulo === "dashboard") },
+  { label: "Diagnóstico", items: menuItems.filter(item => item.modulo === "diagnostico") },
   { label: "ISO 9001:2015", items: menuItems.filter(item => item.modulo === "iso") },
   { label: "Planejamento Estratégico", items: menuItems.filter(item => item.modulo === "planejamento_estrategico") },
   { label: "Processos", items: menuItems.filter(item => item.modulo === "processos") },
