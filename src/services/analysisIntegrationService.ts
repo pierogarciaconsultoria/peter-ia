@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   AnalysisIntegrationOptions, 
@@ -15,6 +14,11 @@ import { createOrganizationContext } from '@/services/organizationContextService
 import { createIndicator } from '@/services/indicatorService';
 import { updateStrategicIdentity } from '@/services/strategic-planning/strategicIdentityService';
 import { createSwotItem } from '@/services/strategic-planning/swotService';
+
+// Type guard to validate calculation_type
+function isValidCalculationType(value: string): value is "sum" | "average" {
+  return value === "sum" || value === "average";
+}
 
 export class AnalysisIntegrationService {
   
@@ -48,15 +52,21 @@ export class AnalysisIntegrationService {
   static mapIndicators(aiSuggestions: any): IndicatorMapping[] {
     const kpis = aiSuggestions.kpis || [];
     
-    return kpis.map((kpi: any) => ({
-      name: kpi.name || kpi.title || kpi.indicator,
-      description: kpi.description || kpi.objective || `Indicador para ${kpi.name}`,
-      process: kpi.process || 'Estratégico',
-      goal_type: 'higher_better' as const,
-      goal_value: kpi.target || kpi.goal || 100,
-      calculation_type: 'average' as const,
-      unit: kpi.unit || '%'
-    }));
+    return kpis.map((kpi: any) => {
+      // Validate and apply fallback for calculation_type
+      const rawCalculationType = kpi.calculation_type || 'average';
+      const calculationType = isValidCalculationType(rawCalculationType) ? rawCalculationType : 'average';
+
+      return {
+        name: kpi.name || kpi.title || kpi.indicator,
+        description: kpi.description || kpi.objective || `Indicador para ${kpi.name}`,
+        process: kpi.process || 'Estratégico',
+        goal_type: 'higher_better' as const,
+        goal_value: kpi.target || kpi.goal || 100,
+        calculation_type: calculationType,
+        unit: kpi.unit || '%'
+      };
+    });
   }
 
   static mapOrganizationContext(aiSuggestions: any): OrganizationContextMapping[] {
