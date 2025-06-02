@@ -54,7 +54,7 @@ export interface IndicatorMapping {
   process: string;
   goal_type: 'higher_better' | 'lower_better' | 'target';
   goal_value: number;
-  calculation_type: 'sum' | 'average' | 'percentage';
+  calculation_type: 'sum' | 'average';
   unit: string;
 }
 
