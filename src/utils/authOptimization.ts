@@ -31,11 +31,7 @@ export class AuthOptimization {
     
     try {
       // Usar as novas funções security definer para evitar recursão
-      const { data, error } = await supabase.rpc('check_user_permission', {
-        target_table: table,
-        action: action,
-        target_company_id: targetId ? targetId : null,
-      });
+      const { data, error } = await supabase.rpc('is_current_user_admin');
 
       const queryTime = Date.now() - startTime;
       logger.debug('AuthOptimization', 'Query executada', { 
@@ -45,10 +41,7 @@ export class AuthOptimization {
       });
 
       if (error) {
-        // Não logar como erro se for problema de RLS (já corrigido)
-        if (!error.message?.includes('infinite recursion')) {
-          logger.error('AuthOptimization', 'Erro ao verificar permissão', error);
-        }
+        logger.error('AuthOptimization', 'Erro ao verificar permissão', error);
         return false;
       }
 
@@ -60,9 +53,7 @@ export class AuthOptimization {
 
       return data || false;
     } catch (error: any) {
-      if (!error.message?.includes('infinite recursion')) {
-        logger.error('AuthOptimization', 'Erro inesperado', error);
-      }
+      logger.error('AuthOptimization', 'Erro inesperado', error);
       return false;
     }
   }
@@ -105,9 +96,7 @@ export class AuthOptimization {
 
       return data;
     } catch (error: any) {
-      if (!error.message?.includes('infinite recursion')) {
-        logger.error('AuthOptimization', 'Erro ao buscar perfil', error);
-      }
+      logger.error('AuthOptimization', 'Erro ao buscar perfil', error);
       return null;
     }
   }

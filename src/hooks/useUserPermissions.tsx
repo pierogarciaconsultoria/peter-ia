@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,7 +71,7 @@ export function useUserPermissions() {
       setLoading(true);
       setError(null);
       
-      // Para master e admin, buscamos todos os módulos com cache
+      // Para master e admin, buscamos todos os módulos
       if (isMaster || isAdmin) {
         const { data: modulos, error: modulosError } = await supabase
           .from('modulos')
@@ -93,7 +94,7 @@ export function useUserPermissions() {
         
         setPermissoes(permissoesCompletas);
       } else {
-        // Para usuários normais, buscamos as permissões específicas com otimização
+        // Para usuários normais, buscamos as permissões específicas
         const { data, error } = await supabase
           .from('permissoes_usuario')
           .select(`
@@ -130,8 +131,8 @@ export function useUserPermissions() {
     } catch (err: any) {
       console.error("Erro ao buscar permissões:", err);
       setError(err);
-      // Não mostrar toast para erros de RLS já que foram corrigidos
-      if (!err.message?.includes('infinite recursion')) {
+      // Só mostrar toast se não for erro conhecido das políticas RLS
+      if (!err.message?.includes('policy')) {
         toast.error("Falha ao carregar permissões do usuário");
       }
     } finally {
