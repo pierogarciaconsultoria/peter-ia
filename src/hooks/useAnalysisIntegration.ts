@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { AnalysisIntegrationService } from '@/services/analysisIntegrationService';
+import { AnalysisIntegrationService } from '@/services/analysis-integration/analysisIntegrationService';
 import { IntegrationPreview, AnalysisIntegrationOptions } from '@/types/analysis-integration';
 import { useCurrentUser } from './useCurrentUser';
 import { toast } from 'sonner';
