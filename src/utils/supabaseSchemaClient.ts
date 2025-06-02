@@ -62,7 +62,7 @@ export class SupabaseSchemaClient {
     
     // Usar a nova função execute_sql_with_schema
     try {
-      const { data, error } = await supabase.rpc('execute_sql_with_schema', {
+      const { data, error } = await (supabase as any).rpc('execute_sql_with_schema', {
         sql_statement: query,
         target_schema: currentSchema
       });
@@ -92,7 +92,7 @@ export class SupabaseSchemaClient {
     const currentSchema = schemaContext.getCurrentSchema();
     
     try {
-      const { data, error } = await supabase.rpc('check_table_exists_in_schema', {
+      const { data, error } = await (supabase as any).rpc('check_table_exists_in_schema', {
         schema_name: currentSchema,
         table_name: contextualTableName.replace(`${currentSchema}.`, '')
       });
@@ -121,7 +121,7 @@ export class SupabaseSchemaClient {
       const currentSchema = schemaContext.getCurrentSchema();
       
       // Usar a função nativa para verificar se o schema existe
-      const { data, error } = await supabase.rpc('create_schema_if_not_exists', {
+      const { data, error } = await (supabase as any).rpc('create_schema_if_not_exists', {
         schema_name: currentSchema
       });
       
@@ -152,7 +152,7 @@ export class SupabaseSchemaClient {
     const currentSchema = schemaContext.getCurrentSchema();
     
     try {
-      const { data, error } = await supabase.rpc('get_schema_tables', {
+      const { data, error } = await (supabase as any).rpc('get_schema_tables', {
         schema_name: currentSchema
       });
       
@@ -161,7 +161,8 @@ export class SupabaseSchemaClient {
         return [];
       }
       
-      return data || [];
+      // A função retorna um array de objetos { table_name: string }, então precisamos mapear para extrair apenas os nomes
+      return (data || []).map((row: { table_name: string }) => row.table_name);
     } catch (error) {
       logger.error('SupabaseSchemaClient', 'Erro inesperado ao listar tabelas', error);
       return [];
