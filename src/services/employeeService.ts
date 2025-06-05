@@ -8,13 +8,17 @@ export interface Employee {
   position: string;
   department: string;
   hire_date: string;
-  status: 'active' | 'inactive' | 'on_leave';
+  status: 'active' | 'inactive' | 'on_leave' | 'pending_onboarding';
   company_id: string;
   phone?: string;
   salary?: number;
   avatar_url?: string;
-  created_at: string;
-  updated_at: string;
+  sector?: string;
+  immediate_supervisor_id?: string;
+  job_position_id?: string;
+  department_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const employeeService = {
@@ -33,7 +37,7 @@ export const employeeService = {
 
       return (data || []).map(emp => ({
         ...emp,
-        status: emp.status as 'active' | 'inactive' | 'on_leave'
+        status: emp.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       }));
     } catch (error) {
       console.error('Employee service error:', error);
@@ -56,7 +60,7 @@ export const employeeService = {
 
       return data ? {
         ...data,
-        status: data.status as 'active' | 'inactive' | 'on_leave'
+        status: data.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       } : null;
     } catch (error) {
       console.error('Employee service error:', error);
@@ -79,7 +83,7 @@ export const employeeService = {
 
       return {
         ...data,
-        status: data.status as 'active' | 'inactive' | 'on_leave'
+        status: data.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       };
     } catch (error) {
       console.error('Employee service error:', error);
@@ -103,7 +107,7 @@ export const employeeService = {
 
       return {
         ...data,
-        status: data.status as 'active' | 'inactive' | 'on_leave'
+        status: data.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       };
     } catch (error) {
       console.error('Employee service error:', error);
@@ -144,7 +148,7 @@ export const employeeService = {
 
       return (data || []).map(emp => ({
         ...emp,
-        status: emp.status as 'active' | 'inactive' | 'on_leave'
+        status: emp.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       }));
     } catch (error) {
       console.error('Employee service error:', error);
@@ -168,7 +172,7 @@ export const employeeService = {
 
       return (data || []).map(emp => ({
         ...emp,
-        status: emp.status as 'active' | 'inactive' | 'on_leave'
+        status: emp.status as 'active' | 'inactive' | 'on_leave' | 'pending_onboarding'
       }));
     } catch (error) {
       console.error('Employee service error:', error);
@@ -176,6 +180,3 @@ export const employeeService = {
     }
   }
 };
-
-// Re-export employee filter functions
-export * from './employee/employeeFilterService';

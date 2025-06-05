@@ -13,7 +13,6 @@ export interface TrainingMatrix {
   status: 'pending' | 'completed' | 'overdue';
 }
 
-// Implementação das funções do serviço
 const getTrainingMatrix = async (companyId: string): Promise<TrainingMatrixData[]> => {
   try {
     console.log('Getting training matrix - using mock data until training_requirements table exists');
@@ -188,7 +187,6 @@ const deleteJobPositionRequirement = async (id: string) => {
   }
 };
 
-// Exportar como objeto de serviço
 export const TrainingMatrixService = {
   getTrainingMatrix,
   updateTrainingCompletion,
@@ -202,7 +200,6 @@ export const TrainingMatrixService = {
   deleteJobPositionRequirement
 };
 
-// Exportações individuais para compatibilidade
 export {
   getTrainingMatrix,
   updateTrainingCompletion,

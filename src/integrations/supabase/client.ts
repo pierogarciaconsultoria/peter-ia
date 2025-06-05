@@ -3,7 +3,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Credenciais da nova instância Peter.IA
+// Credenciais da instância exclusiva Peter.IA
 const SUPABASE_URL = "https://togaxikjlyxyauvcsgrd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvZ2F4aWtqbHl4eWF1dmNzZ3JkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzMTYxMzEsImV4cCI6MjA1Njg5MjEzMX0.gP233qWDbIIHRSVpjU3S9TNr69hiVtKiVjPENUSlAVM";
 
@@ -20,6 +20,9 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: false,
       storage: localStorage,
       flowType: 'pkce'
+    },
+    db: {
+      schema: 'public'
     }
   }
 );

@@ -28,30 +28,27 @@ export function useSupabaseQuery<T>({
     setError(null);
     
     try {
-      // Iniciar a query usando o tipo genérico para evitar o erro de tipagem
-      // Usamos `as any` para contornar a verificação de tipo do Supabase
       let query = supabase
         .from(customOptions?.table || table as any)
         .select(customOptions?.columns || columns, { count: 'exact' });
       
-      // Aplicar filtros
+      // Apply filters
       const filtersToApply = customOptions?.filters || filters;
       filtersToApply.forEach(filter => {
         query = query.filter(filter.column, filter.operator, filter.value);
       });
       
-      // Aplicar ordenação
+      // Apply ordering
       const order = customOptions?.orderBy || orderBy;
       if (order) {
         query = query.order(order.column, { ascending: order.ascending ?? true });
       }
       
-      // Aplicar limite
+      // Apply limit
       if (customOptions?.limit || limit) {
         query = query.limit(customOptions?.limit || limit);
       }
       
-      // Executar a query
       const { data: result, error: queryError, count: resultCount } = await query;
       
       if (queryError) throw queryError;
