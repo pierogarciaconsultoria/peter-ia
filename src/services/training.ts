@@ -69,7 +69,7 @@ export const fetchTrainings = async (filters?: TrainingFilters): Promise<Trainin
       evaluation_method: training.evaluation_method || 'assessment',
       created_at: training.created_at,
       updated_at: training.updated_at,
-      company_id: training.empresa_id || training.company_id || ''
+      company_id: training.empresa_id || ''
     }));
 
     return trainings;
@@ -119,7 +119,7 @@ export const createTraining = async (training: Omit<Training, 'id' | 'created_at
       evaluation_method: data.evaluation_method,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      company_id: data.empresa_id || data.company_id || ''
+      company_id: data.empresa_id || ''
     };
 
     return newTraining;
