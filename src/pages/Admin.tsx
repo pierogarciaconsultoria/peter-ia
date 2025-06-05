@@ -125,7 +125,7 @@ const Admin = () => {
   const fetchRoles = useCallback(async () => {
     setLoading(true);
     try {
-      // Simplified roles fetch - assuming no roles table exists yet
+      // Simplified roles fetch - assumindo que não há tabela de roles ainda
       setRoles([]);
     } catch (error: any) {
       console.error('Error fetching roles:', error);
@@ -197,7 +197,7 @@ const Admin = () => {
       <div className="flex items-center gap-3 mb-8">
         <Shield className="h-8 w-8 text-primary" />
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Administração do Sistema</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Administração Peter.IA</h1>
           <p className="text-gray-600 text-sm md:text-base">
             Gerencie empresas, usuários e configurações do sistema
           </p>

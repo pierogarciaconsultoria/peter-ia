@@ -6,7 +6,7 @@ import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-console.log('🎯 main.tsx: Arquivo carregado');
+console.log('🎯 main.tsx: Peter.IA - Nova instância carregada');
 
 // Create a client
 const queryClient = new QueryClient({
@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
   },
 })
 
-console.log('📊 main.tsx: QueryClient criado');
+console.log('📊 main.tsx: QueryClient criado para Peter.IA');
 
 const rootElement = document.getElementById('root');
 console.log('🎯 main.tsx: Root element encontrado:', !!rootElement);
@@ -28,7 +28,7 @@ if (!rootElement) {
   throw new Error('Root element not found');
 }
 
-console.log('🚀 main.tsx: Iniciando renderização da aplicação');
+console.log('🚀 main.tsx: Iniciando renderização da aplicação Peter.IA');
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
@@ -40,4 +40,4 @@ ReactDOM.createRoot(rootElement).render(
   </React.StrictMode>,
 )
 
-console.log('✅ main.tsx: Aplicação renderizada com sucesso');
+console.log('✅ main.tsx: Aplicação Peter.IA renderizada com sucesso');

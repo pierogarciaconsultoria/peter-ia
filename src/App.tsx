@@ -48,11 +48,11 @@ import IntelligentAnalysisPage from "@/pages/IntelligentAnalysisPage";
 import './App.css';
 
 function AppContent() {
-  console.log('🚀 AppContent: Componente inicializado');
+  console.log('🚀 AppContent: Componente inicializado - Nova instância Peter.IA');
   
   // Test Supabase connection once on startup
   useEffect(() => {
-    console.log('🔧 AppContent: useEffect para conexão Supabase iniciado');
+    console.log('🔧 AppContent: useEffect para conexão Supabase iniciado - Peter.IA');
     let connectionChecked = false;
     
     const checkSupabaseConnection = async () => {
@@ -61,7 +61,7 @@ function AppContent() {
         return;
       }
       
-      console.log('🔌 AppContent: Testando conexão com Supabase...');
+      console.log('🔌 AppContent: Testando conexão com Supabase Peter.IA...');
       try {
         const { data, error } = await supabase.from('connection_test').select('*').limit(1);
         
@@ -73,7 +73,7 @@ function AppContent() {
             });
           }
         } else {
-          console.log('✅ AppContent: Conexão com banco de dados bem-sucedida');
+          console.log('✅ AppContent: Conexão com banco de dados Peter.IA bem-sucedida');
           connectionChecked = true;
         }
       } catch (err) {
@@ -100,7 +100,7 @@ function AppContent() {
     };
   }, []);
 
-  console.log('🎨 AppContent: Renderizando rotas');
+  console.log('🎨 AppContent: Renderizando rotas Peter.IA');
 
   return (
     <SidebarProvider>
@@ -168,7 +168,7 @@ function AppContent() {
 }
 
 function App() {
-  console.log('📁 App: Arquivo carregado e função exportada');
+  console.log('📁 App: Aplicação Peter.IA carregada');
 
   return (
     <ErrorBoundary>
