@@ -3,8 +3,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://kxkcgbtsgfyisbrtjmvv.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4a2NnYnRzZ2Z5aXNicnRqbXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzODQ1MTQsImV4cCI6MjA1NDk2MDUxNH0.JHd7Cafdd4gxn7s_DE3ndeHiZ7Y-Om-c5M8J0POem0U";
+// TODO: Atualizar com as credenciais da nova instância Peter.IA
+const SUPABASE_URL = "https://sua-nova-instancia.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sua-nova-chave-aqui";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

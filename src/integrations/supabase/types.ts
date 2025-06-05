@@ -1016,6 +1016,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          logo_url: string | null
           name: string
           operational_problems: string | null
           phone: string | null
@@ -1037,6 +1038,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           operational_problems?: string | null
           phone?: string | null
@@ -1058,6 +1060,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           operational_problems?: string | null
           phone?: string | null
@@ -1700,12 +1703,51 @@ export type Database = {
           revision_date?: string
           version?: string
         }
+        Relationships: []
+      }
+      document_templates: {
+        Row: {
+          company_id: string
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          type: string
+          updated_at: string | null
+          variables: string[] | null
+        }
+        Insert: {
+          company_id: string
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          type: string
+          updated_at?: string | null
+          variables?: string[] | null
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+          variables?: string[] | null
+        }
         Relationships: [
           {
-            foreignKeyName: "document_revisions_document_id_fkey"
-            columns: ["document_id"]
+            foreignKeyName: "document_templates_company_id_fkey"
+            columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "iso_documents"
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -2860,56 +2902,6 @@ export type Database = {
           },
         ]
       }
-      hr_company_documents: {
-        Row: {
-          company_id: string
-          content: string | null
-          created_at: string
-          document_type: string
-          file_url: string | null
-          id: string
-          published_date: string
-          required_acknowledgment: boolean
-          title: string
-          updated_at: string
-          version: string
-        }
-        Insert: {
-          company_id: string
-          content?: string | null
-          created_at?: string
-          document_type: string
-          file_url?: string | null
-          id?: string
-          published_date: string
-          required_acknowledgment?: boolean
-          title: string
-          updated_at?: string
-          version: string
-        }
-        Update: {
-          company_id?: string
-          content?: string | null
-          created_at?: string
-          document_type?: string
-          file_url?: string | null
-          id?: string
-          published_date?: string
-          required_acknowledgment?: boolean
-          title?: string
-          updated_at?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hr_company_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hr_departments: {
         Row: {
           company_id: string
@@ -3104,63 +3096,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "hr_document_acknowledgments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_acknowledgments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "hr_company_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hr_employee_documents: {
-        Row: {
-          company_id: string
-          created_at: string
-          document_type: string
-          document_url: string | null
-          employee_id: string
-          expiry_date: string | null
-          id: string
-          notes: string | null
-          signed: boolean
-          signed_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          document_type: string
-          document_url?: string | null
-          employee_id: string
-          expiry_date?: string | null
-          id?: string
-          notes?: string | null
-          signed?: boolean
-          signed_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          document_type?: string
-          document_url?: string | null
-          employee_id?: string
-          expiry_date?: string | null
-          id?: string
-          notes?: string | null
-          signed?: boolean
-          signed_at?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hr_employee_documents_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -4519,53 +4454,6 @@ export type Database = {
           },
         ]
       }
-      inspection_documents: {
-        Row: {
-          company_id: string
-          created_at: string
-          created_by: string | null
-          document_type: string
-          file_name: string
-          file_size: number | null
-          file_url: string
-          id: string
-          inspection_id: string | null
-          upload_date: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          created_by?: string | null
-          document_type: string
-          file_name: string
-          file_size?: number | null
-          file_url: string
-          id?: string
-          inspection_id?: string | null
-          upload_date?: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          created_by?: string | null
-          document_type?: string
-          file_name?: string
-          file_size?: number | null
-          file_url?: string
-          id?: string
-          inspection_id?: string | null
-          upload_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inspection_documents_inspection_id_fkey"
-            columns: ["inspection_id"]
-            isOneToOne: false
-            referencedRelation: "inspections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       inspections: {
         Row: {
           ai_processing_completed_at: string | null
@@ -4641,86 +4529,116 @@ export type Database = {
         }
         Relationships: []
       }
-      iso_documents: {
+      invoice_sending_logs: {
         Row: {
-          approval_date: string | null
-          archiving_time: string | null
-          associated_requirement: string
-          content: string | null
-          created_at: string
-          description: string | null
-          disposal_method: string | null
-          distribution_location: string | null
-          document_code: string | null
-          document_type: string
-          empresa_id: string | null
+          company_id: string | null
+          error_message: string | null
           id: string
-          internal_external: string | null
-          process: string | null
-          protection: string | null
-          recovery_method: string | null
-          responsible: string | null
-          retention_time: string | null
-          revision: string | null
-          standard_item: string | null
-          status: string | null
-          storage_location: string | null
-          title: string
-          updated_at: string
+          invoice_id: string
+          member_id: string
+          member_name: string
+          phone_number: string | null
+          schedule_id: string | null
+          sent_at: string | null
+          status: string
         }
         Insert: {
-          approval_date?: string | null
-          archiving_time?: string | null
-          associated_requirement: string
-          content?: string | null
-          created_at?: string
-          description?: string | null
-          disposal_method?: string | null
-          distribution_location?: string | null
-          document_code?: string | null
-          document_type: string
-          empresa_id?: string | null
+          company_id?: string | null
+          error_message?: string | null
           id?: string
-          internal_external?: string | null
-          process?: string | null
-          protection?: string | null
-          recovery_method?: string | null
-          responsible?: string | null
-          retention_time?: string | null
-          revision?: string | null
-          standard_item?: string | null
-          status?: string | null
-          storage_location?: string | null
-          title: string
-          updated_at?: string
+          invoice_id: string
+          member_id: string
+          member_name: string
+          phone_number?: string | null
+          schedule_id?: string | null
+          sent_at?: string | null
+          status: string
         }
         Update: {
-          approval_date?: string | null
-          archiving_time?: string | null
-          associated_requirement?: string
-          content?: string | null
-          created_at?: string
-          description?: string | null
-          disposal_method?: string | null
-          distribution_location?: string | null
-          document_code?: string | null
-          document_type?: string
-          empresa_id?: string | null
+          company_id?: string | null
+          error_message?: string | null
           id?: string
-          internal_external?: string | null
-          process?: string | null
-          protection?: string | null
-          recovery_method?: string | null
-          responsible?: string | null
-          retention_time?: string | null
-          revision?: string | null
-          standard_item?: string | null
-          status?: string | null
-          storage_location?: string | null
-          title?: string
-          updated_at?: string
+          invoice_id?: string
+          member_id?: string
+          member_name?: string
+          phone_number?: string | null
+          schedule_id?: string | null
+          sent_at?: string | null
+          status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "invoice_sending_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_sending_logs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_sending_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_sending_schedules: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          day_of_month: number
+          id: string
+          is_active: boolean | null
+          last_run: string | null
+          name: string
+          send_time: string
+          status_filter: string[] | null
+          template_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          day_of_month: number
+          id?: string
+          is_active?: boolean | null
+          last_run?: string | null
+          name: string
+          send_time: string
+          status_filter?: string[] | null
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          day_of_month?: number
+          id?: string
+          is_active?: boolean | null
+          last_run?: string | null
+          name?: string
+          send_time?: string
+          status_filter?: string[] | null
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_sending_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_sending_schedules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       iso_records: {
         Row: {
@@ -4756,15 +4674,7 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "iso_records_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "iso_documents"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       job_position_training_requirements: {
         Row: {
@@ -4816,13 +4726,6 @@ export type Database = {
             columns: ["job_position_id"]
             isOneToOne: false
             referencedRelation: "job_positions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_position_training_requirements_procedure_id_fkey"
-            columns: ["procedure_id"]
-            isOneToOne: false
-            referencedRelation: "iso_documents"
             referencedColumns: ["id"]
           },
           {
@@ -7695,6 +7598,44 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_templates: {
+        Row: {
+          company_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

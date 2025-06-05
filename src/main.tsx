@@ -5,18 +5,8 @@ import App from './App'
 import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { initializeSchemaContext } from '@/utils/schemaContext'
 
 console.log('🎯 main.tsx: Arquivo carregado');
-
-// Initialize schema context on startup
-console.log('🔧 main.tsx: Inicializando contexto de schema');
-try {
-  initializeSchemaContext();
-  console.log('✅ main.tsx: Contexto de schema inicializado com sucesso');
-} catch (error) {
-  console.error('❌ main.tsx: Erro ao inicializar contexto de schema:', error);
-}
 
 // Create a client
 const queryClient = new QueryClient({

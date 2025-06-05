@@ -1,12 +1,12 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompanyManagement from '@/components/admin/CompanyManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import { PermissoesUsuarios } from '@/components/admin/PermissoesUsuarios';
 import { AdminAdvancedSettings } from '@/components/admin/AdminAdvancedSettings';
-import { SchemaContextSelector } from '@/components/admin/SchemaContextSelector';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Building2, Users, Lock, Database } from 'lucide-react';
+import { Shield, Building2, Users, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -125,29 +125,8 @@ const Admin = () => {
   const fetchRoles = useCallback(async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('roles')
-        .select(`
-          *,
-          companies(name)
-        `)
-        .order('name');
-
-      // Se não é super admin, filtrar apenas roles da empresa
-      if (!isSuperAdmin && userCompany) {
-        query = query.eq('company_id', userCompany.id);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      
-      const formattedRoles = (data || []).map(role => ({
-        ...role,
-        company_name: role.companies?.name
-      }));
-      
-      setRoles(formattedRoles);
+      // Simplified roles fetch - assuming no roles table exists yet
+      setRoles([]);
     } catch (error: any) {
       console.error('Error fetching roles:', error);
       toast.error('Erro ao carregar papéis');
@@ -226,7 +205,7 @@ const Admin = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 gap-2 h-auto p-2 bg-muted">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 gap-2 h-auto p-2 bg-muted">
           {isSuperAdmin && (
             <TabsTrigger 
               value="empresas" 
@@ -254,23 +233,13 @@ const Admin = () => {
           </TabsTrigger>
 
           {isSuperAdmin && (
-            <>
-              <TabsTrigger 
-                value="schema" 
-                className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                <Database className="h-5 w-5" />
-                <span className="text-xs md:text-sm font-medium">Schema</span>
-              </TabsTrigger>
-
-              <TabsTrigger 
-                value="avancado" 
-                className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                <Shield className="h-5 w-5" />
-                <span className="text-xs md:text-sm font-medium">Avançado</span>
-              </TabsTrigger>
-            </>
+            <TabsTrigger 
+              value="avancado" 
+              className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Shield className="h-5 w-5" />
+              <span className="text-xs md:text-sm font-medium">Avançado</span>
+            </TabsTrigger>
           )}
         </TabsList>
 
@@ -305,27 +274,21 @@ const Admin = () => {
         </TabsContent>
 
         {isSuperAdmin && (
-          <>
-            <TabsContent value="schema" className="space-y-6">
-              <SchemaContextSelector />
-            </TabsContent>
-
-            <TabsContent value="avancado" className="space-y-6">
-              <AdminAdvancedSettings 
-                roles={roles}
-                companies={companies}
-                users={users}
-                loading={loading}
-                fetchRoles={fetchRoles}
-                fetchCompanies={fetchCompanies}
-                fetchUsers={fetchUsers}
-                setItemToDelete={setItemToDelete}
-                setDeleteDialogOpen={setDeleteDialogOpen}
-                isSuperAdmin={isSuperAdmin}
-                userCompany={userCompany}
-              />
-            </TabsContent>
-          </>
+          <TabsContent value="avancado" className="space-y-6">
+            <AdminAdvancedSettings 
+              roles={roles}
+              companies={companies}
+              users={users}
+              loading={loading}
+              fetchRoles={fetchRoles}
+              fetchCompanies={fetchCompanies}
+              fetchUsers={fetchUsers}
+              setItemToDelete={setItemToDelete}
+              setDeleteDialogOpen={setDeleteDialogOpen}
+              isSuperAdmin={isSuperAdmin}
+              userCompany={userCompany}
+            />
+          </TabsContent>
         )}
       </Tabs>
 
