@@ -5113,6 +5113,132 @@ export type Database = {
         }
         Relationships: []
       }
+      members: {
+        Row: {
+          address: string | null
+          bio: string | null
+          birthdate: string | null
+          blood_type: string | null
+          city: string | null
+          civil_status: string | null
+          company_id: string
+          country: string | null
+          cpf: string | null
+          created_at: string
+          elevation_date: string | null
+          email: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          exaltation_date: string | null
+          father_name: string | null
+          gender: string | null
+          health_insurance: string | null
+          health_insurance_number: string | null
+          id: string
+          initiation_date: string | null
+          join_date: string | null
+          masonic_degree: string | null
+          masonic_position: string | null
+          mentor_id: string | null
+          mother_name: string | null
+          name: string
+          occupation: string | null
+          phone: string | null
+          postal_code: string | null
+          profile_image: string | null
+          rg: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          birthdate?: string | null
+          blood_type?: string | null
+          city?: string | null
+          civil_status?: string | null
+          company_id: string
+          country?: string | null
+          cpf?: string | null
+          created_at?: string
+          elevation_date?: string | null
+          email: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          exaltation_date?: string | null
+          father_name?: string | null
+          gender?: string | null
+          health_insurance?: string | null
+          health_insurance_number?: string | null
+          id?: string
+          initiation_date?: string | null
+          join_date?: string | null
+          masonic_degree?: string | null
+          masonic_position?: string | null
+          mentor_id?: string | null
+          mother_name?: string | null
+          name: string
+          occupation?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          profile_image?: string | null
+          rg?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          birthdate?: string | null
+          blood_type?: string | null
+          city?: string | null
+          civil_status?: string | null
+          company_id?: string
+          country?: string | null
+          cpf?: string | null
+          created_at?: string
+          elevation_date?: string | null
+          email?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          exaltation_date?: string | null
+          father_name?: string | null
+          gender?: string | null
+          health_insurance?: string | null
+          health_insurance_number?: string | null
+          id?: string
+          initiation_date?: string | null
+          join_date?: string | null
+          masonic_degree?: string | null
+          masonic_position?: string | null
+          mentor_id?: string | null
+          mother_name?: string | null
+          name?: string
+          occupation?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          profile_image?: string | null
+          rg?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "members_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_assistants: {
         Row: {
           capabilities: string | null

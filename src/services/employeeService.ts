@@ -1,38 +1,139 @@
 
-// This file is maintained for backward compatibility
-// It re-exports all the functionality from the refactored modules
+import { supabase } from '@/integrations/supabase/client';
 
-import {
-  Employee,
-  mockEmployees,
-  getEmployees,
-  getEmployeeById,
-  getEmployeesByDepartment,
-  getEmployeesByStatus,
-  searchEmployees,
-  getQualityInspectors,
-  createEmployee,
-  updateEmployee,
-  deleteEmployee
-} from "./employee";
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  position: string;
+  department: string;
+  hire_date: string;
+  status: string;
+  company_id: string;
+  phone?: string;
+  salary?: number;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+}
 
-export {
-  // Types
-  type Employee,
-  mockEmployees,
-  
-  // Basic operations
-  getEmployees,
-  getEmployeeById,
-  
-  // Filtering operations
-  getEmployeesByDepartment,
-  getEmployeesByStatus,
-  searchEmployees,
-  getQualityInspectors,
-  
-  // CRUD operations
-  createEmployee,
-  updateEmployee,
-  deleteEmployee
+export const employeeService = {
+  async getEmployees(companyId: string): Promise<Employee[]> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching employees:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async getEmployeeById(id: string): Promise<Employee | null> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching employee:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async createEmployee(employee: Omit<Employee, 'id' | 'created_at' | 'updated_at'>): Promise<Employee> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .insert([employee])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating employee:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async updateEmployee(id: string, updates: Partial<Employee>): Promise<Employee> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating employee:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async deleteEmployee(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting employee:', error);
+        throw error;
+      }
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async getEmployeesByDepartment(companyId: string, department: string): Promise<Employee[]> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('department', department)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching employees by department:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  }
 };

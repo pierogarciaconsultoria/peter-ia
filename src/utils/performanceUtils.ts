@@ -1,56 +1,55 @@
 
-import { useEffect, useRef } from 'react';
-
 /**
- * Hook para evitar execuções iniciais de efeitos
- * @param callback Função a ser executada após a primeira renderização
- * @param deps Array de dependências
+ * Debounce function to limit the rate of function execution
  */
-export function useSkipFirstRender(callback: Function, deps: any[]) {
-  const firstRender = useRef(true);
-
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    callback();
-  }, deps);
-}
-
-/**
- * Função para debounce de eventos
- * @param func Função a ser executada
- * @param wait Tempo de espera em ms
- */
-export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
   
-  return function(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    
-    if (timeout !== null) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(later, wait);
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
   };
 }
 
 /**
- * Função para normalizar e otimizar pesquisas em arrays
- * @param items Array a ser otimizado
- * @param key Chave para indexação dos itens
+ * Throttle function to ensure function is called at most once per interval
  */
-export function optimizeArraySearch<T extends Record<K, string | number>, K extends keyof T>(
-  items: T[],
-  key: K
-): { [key: string]: T } {
-  return items.reduce((acc, item) => {
-    const itemKey = String(item[key]);
-    acc[itemKey] = item;
-    return acc;
-  }, {} as { [key: string]: T });
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+/**
+ * Memoization function for expensive computations
+ */
+export function memoize<T extends (...args: any[]) => any>(
+  func: T
+): T {
+  const cache = new Map();
+  
+  return ((...args: Parameters<T>) => {
+    const key = JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    
+    const result = func(...args);
+    cache.set(key, result);
+    
+    return result;
+  }) as T;
 }
