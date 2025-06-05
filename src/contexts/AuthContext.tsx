@@ -1,10 +1,18 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { isSuperAdminInLovable } from '@/utils/lovableEditorDetection';
+import { isSuperAdminInLovable, shouldBypassAuth, isProductionEnvironment } from '@/utils/lovableEditorDetection';
 import { logger } from '@/utils/logger';
 import { authOptimization } from '@/utils/authOptimization';
+
+// SECURITY: Constantes de segurança
+const SECURITY_CONSTANTS = {
+  SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 horas
+  MAX_RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 2000,
+  ACTIVITY_CHECK_INTERVAL: 5 * 60 * 1000, // 5 minutos
+};
 
 interface Company {
   id: string;
@@ -33,7 +41,7 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   userCompany: Company | null;
   loading: boolean;
-  isLoading: boolean; // Alias para compatibilidade
+  isLoading: boolean;
   connectionStatus: 'connected' | 'disconnected' | 'connecting';
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -42,9 +50,13 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isCompanyAdmin: boolean;
   isAdmin: boolean;
-  empresaId?: string; // Para compatibilidade com código legado
+  empresaId?: string;
   hasAuthError: boolean;
   clearAuthError: () => void;
+  // SECURITY: Novos campos de segurança
+  sessionExpiry: Date | null;
+  lastActivity: Date | null;
+  forceLogout: () => void;
 }
 
 // Create and export the context
@@ -58,13 +70,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const [hasAuthError, setHasAuthError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-
-  // Debug logging for context creation
-  logger.debug('AuthContext', 'AuthProvider inicializado');
   
-  // Detecta se é super admin no Lovable Editor
+  // SECURITY: Novos estados de segurança
+  const [sessionExpiry, setSessionExpiry] = useState<Date | null>(null);
+  const [lastActivity, setLastActivity] = useState<Date | null>(null);
+
   const isLovableEditor = isSuperAdminInLovable();
-  logger.debug('AuthContext', 'Super admin detection', { isLovableEditor });
+  const bypassAuth = shouldBypassAuth();
+
+  // SECURITY: Validar sessão expirada
+  const isSessionExpired = useCallback(() => {
+    if (!sessionExpiry) return false;
+    return new Date() > sessionExpiry;
+  }, [sessionExpiry]);
+
+  // SECURITY: Atualizar atividade do usuário
+  const updateLastActivity = useCallback(() => {
+    setLastActivity(new Date());
+  }, []);
+
+  // SECURITY: Forçar logout por segurança
+  const forceLogout = useCallback(async () => {
+    logger.warn('AuthProvider', 'Forçando logout por segurança');
+    setUser(null);
+    setUserProfile(null);
+    setUserCompany(null);
+    setSessionExpiry(null);
+    setLastActivity(null);
+    
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      logger.error('AuthProvider', 'Erro ao forçar logout', error);
+    }
+    
+    toast.error('Sessão expirada. Faça login novamente.');
+  }, []);
+
+  // SECURITY: Verificar validade da sessão
+  const validateSession = useCallback(async () => {
+    if (!user || isSessionExpired()) {
+      if (user && isSessionExpired()) {
+        logger.warn('AuthProvider', 'Sessão expirada detectada');
+        await forceLogout();
+      }
+      return false;
+    }
+
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        logger.warn('AuthProvider', 'Sessão inválida detectada');
+        await forceLogout();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      logger.error('AuthProvider', 'Erro ao validar sessão', error);
+      return false;
+    }
+  }, [user, isSessionExpired, forceLogout]);
 
   const clearAuthError = () => {
     logger.debug('AuthProvider', 'Limpando erro de autenticação');
@@ -80,32 +147,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     setHasAuthError(true);
     
-    // Se for erro de permissão, não mostrar toast repetidamente
+    // SECURITY: Log de evento de segurança
+    if (isProductionEnvironment()) {
+      console.error('SECURITY EVENT: Auth error in production', { context, error: error?.message });
+    }
+    
     if (error?.code !== 'PGRST301' && error?.message !== 'JWT expired') {
       toast.error(`Erro de autenticação: ${error.message || 'Erro desconhecido'}`);
     }
     
-    // Auto-recovery para certos tipos de erro
     if (error?.message?.includes('JWT expired') || error?.code === 'PGRST301') {
       logger.info('AuthProvider', 'Tentando recuperação automática');
       setTimeout(() => {
-        if (retryCount < 3) {
+        if (retryCount < SECURITY_CONSTANTS.MAX_RETRY_ATTEMPTS) {
           setRetryCount(prev => prev + 1);
           reconnect();
+        } else {
+          logger.warn('AuthProvider', 'Máximo de tentativas atingido, forçando logout');
+          forceLogout();
         }
-      }, 2000);
+      }, SECURITY_CONSTANTS.RETRY_DELAY);
     }
   };
 
+  // SECURITY: Verificação periódica de atividade
+  useEffect(() => {
+    const activityInterval = setInterval(async () => {
+      if (user && !bypassAuth) {
+        const isValid = await validateSession();
+        if (!isValid) {
+          clearInterval(activityInterval);
+        }
+      }
+    }, SECURITY_CONSTANTS.ACTIVITY_CHECK_INTERVAL);
+
+    return () => clearInterval(activityInterval);
+  }, [user, bypassAuth, validateSession]);
+
+  // SECURITY: Listeners de atividade do usuário
+  useEffect(() => {
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    const activityHandler = () => {
+      updateLastActivity();
+    };
+
+    events.forEach(event => {
+      document.addEventListener(event, activityHandler, true);
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, activityHandler, true);
+      });
+    };
+  }, [updateLastActivity]);
+
   const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
-    logger.debug('AuthProvider', 'Buscando perfil do usuário', { userId: userId.substring(0, 8) + '...' });
+    logger.debug('AuthProvider', 'Buscando perfil do usuário');
     try {
-      // Usar otimização de cache para buscar perfil
       const profile = await authOptimization.getUserProfileOptimized(userId);
       
       if (!profile) {
         logger.info('AuthProvider', 'Perfil não encontrado para usuário');
         return null;
+      }
+
+      // SECURITY: Validar se perfil está ativo
+      if (!profile.is_active) {
+        logger.warn('AuthProvider', 'Perfil do usuário está inativo');
+        throw new Error('User profile is inactive');
       }
 
       logger.debug('AuthProvider', 'Perfil do usuário encontrado');
@@ -117,17 +228,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchUserCompany = async (companyId: string): Promise<Company | null> => {
-    logger.debug('AuthProvider', 'Buscando empresa', { companyId });
+    logger.debug('AuthProvider', 'Buscando empresa');
     try {
       const { data: company, error } = await supabase
         .from('companies')
         .select('*')
         .eq('id', companyId)
+        .eq('active', true) // SECURITY: Apenas empresas ativas
         .single();
 
       if (error) {
         if (error.code === 'PGRST116') {
-          logger.info('AuthProvider', 'Empresa não encontrada');
+          logger.info('AuthProvider', 'Empresa não encontrada ou inativa');
           return null;
         }
         handleError(error, 'fetchUserCompany');
@@ -143,15 +255,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const initializeUser = async (user: User | null) => {
-    logger.debug('AuthProvider', 'Inicializando usuário', { 
-      hasUser: !!user,
-      userId: user?.id?.substring(0, 8) + '...' || 'none'
-    });
+    logger.debug('AuthProvider', 'Inicializando usuário');
     
     if (!user) {
       logger.debug('AuthProvider', 'Usuário null, limpando estado');
       setUserProfile(null);
       setUserCompany(null);
+      setSessionExpiry(null);
+      setLastActivity(null);
       setLoading(false);
       setConnectionStatus('connected');
       clearAuthError();
@@ -159,13 +270,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      // SECURITY: Configurar expiração da sessão
+      setSessionExpiry(new Date(Date.now() + SECURITY_CONSTANTS.SESSION_TIMEOUT));
+      updateLastActivity();
+      
       logger.debug('AuthProvider', 'Buscando dados do usuário');
       
-      // Buscar perfil do usuário com otimização
       const profile = await fetchUserProfile(user.id);
       setUserProfile(profile);
 
-      // Se o perfil tem uma empresa, buscar os dados da empresa
       if (profile?.company_id) {
         logger.debug('AuthProvider', 'Buscando dados da empresa');
         const company = await fetchUserCompany(profile.company_id);
@@ -183,7 +296,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       handleError(error, 'initializeUser');
       setConnectionStatus('disconnected');
     } finally {
-      logger.debug('AuthProvider', 'Finalizando inicialização');
       setLoading(false);
     }
   };
@@ -243,9 +355,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     clearAuthError();
     
+    // SECURITY: Validar entrada
+    if (!email || !password) {
+      throw new Error('Email e senha são obrigatórios');
+    }
+    
+    if (!email.includes('@')) {
+      throw new Error('Email inválido');
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -256,10 +377,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       logger.info('AuthProvider', 'Login realizado com sucesso');
+      updateLastActivity();
 
-      // Atualizar last_login se o perfil existir
       if (data.user) {
-        logger.debug('AuthProvider', 'Atualizando last_login');
         try {
           await supabase
             .from('user_profiles')
@@ -267,7 +387,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .eq('id', data.user.id);
         } catch (updateError) {
           logger.warn('AuthProvider', 'Erro ao atualizar last_login', updateError);
-          // Não falhar o login por causa disso
         }
       }
 
@@ -329,6 +448,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserProfile(null);
       setUserCompany(null);
+      setSessionExpiry(null);
+      setLastActivity(null);
       toast.success('Logout realizado com sucesso');
     } catch (error: any) {
       logger.error('AuthProvider', 'Erro no logout', error);
@@ -337,6 +458,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserProfile(null);
       setUserCompany(null);
+      setSessionExpiry(null);
+      setLastActivity(null);
     } finally {
       setLoading(false);
     }
@@ -364,9 +487,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 1000);
   };
 
-  // Calcular permissões com fallbacks seguros
-  const isSuperAdmin = isLovableEditor || (userProfile?.is_super_admin ?? false);
-  const isCompanyAdmin = isLovableEditor || (userProfile?.is_company_admin ?? false);
+  // SECURITY: Permissões com validação adicional
+  const isSuperAdmin = (bypassAuth && isLovableEditor) || (userProfile?.is_super_admin ?? false);
+  const isCompanyAdmin = (bypassAuth && isLovableEditor) || (userProfile?.is_company_admin ?? false);
   const isAdmin = isSuperAdmin || isCompanyAdmin;
 
   logger.debug('AuthProvider', 'Permissões calculadas', {
@@ -381,7 +504,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userProfile,
     userCompany,
     loading,
-    isLoading: loading, // Alias para compatibilidade
+    isLoading: loading,
     connectionStatus,
     signOut,
     signIn,
@@ -390,9 +513,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isSuperAdmin,
     isCompanyAdmin,
     isAdmin,
-    empresaId: userProfile?.company_id, // Para compatibilidade com código legado
+    empresaId: userProfile?.company_id,
     hasAuthError,
     clearAuthError,
+    // SECURITY: Novos campos
+    sessionExpiry,
+    lastActivity,
+    forceLogout,
   };
 
   logger.debug('AuthContext', 'Providing context value', { 

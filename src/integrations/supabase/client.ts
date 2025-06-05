@@ -3,12 +3,31 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Credenciais da instância exclusiva Peter.IA
-const SUPABASE_URL = "https://togaxikjlyxyauvcsgrd.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvZ2F4aWtqbHl4eWF1dmNzZ3JkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzMTYxMzEsImV4cCI6MjA1Njg5MjEzMX0.gP233qWDbIIHRSVpjU3S9TNr69hiVtKiVjPENUSlAVM";
+// Configuração segura - usar variáveis de ambiente
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+// Validação crítica de segurança
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error('SECURITY ERROR: Missing Supabase credentials');
+  throw new Error('Missing required Supabase environment variables');
+}
+
+// Validação adicional de formato das credenciais
+if (!SUPABASE_URL.includes('supabase.co') && !SUPABASE_URL.includes('localhost')) {
+  console.error('SECURITY ERROR: Invalid Supabase URL format');
+  throw new Error('Invalid Supabase URL format');
+}
+
+if (!SUPABASE_PUBLISHABLE_KEY.startsWith('eyJ')) {
+  console.error('SECURITY ERROR: Invalid Supabase key format');
+  throw new Error('Invalid Supabase publishable key format');
+}
+
+// Log de segurança (apenas em desenvolvimento)
+if (process.env.NODE_ENV === 'development') {
+  console.log('Supabase client initialized with environment variables');
+}
 
 export const supabase = createClient<Database>(
   SUPABASE_URL, 
@@ -27,28 +46,34 @@ export const supabase = createClient<Database>(
   }
 );
 
-// Helper function to check if admin account exists
+// Helper function to check if admin account exists - REMOVIDO bypass inseguro
 export const confirmAdminEmail = async (email: string) => {
   try {
     console.log("Checking admin account:", email);
     
-    // Try to get user by email
-    const { data, error } = await supabase.auth.admin.listUsers();
+    // Verificação segura sem bypass
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (error) {
-      console.error("Error checking admin account:", error);
-      return { success: false, error };
+    if (!user) {
+      return { success: false, error: new Error("User not authenticated") };
     }
     
-    // Find the admin user by email in the users array
-    // Explicitly type the users array to avoid 'never' type issues
-    const adminUser = data.users?.find((user: any) => user.email === email);
+    // Verificar se o usuário atual tem permissões de admin
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('is_super_admin, is_company_admin')
+      .eq('id', user.id)
+      .single();
     
-    if (!adminUser) {
-      return { success: false, error: new Error("Admin account not found") };
+    if (profileError || !profile) {
+      return { success: false, error: new Error("Unable to verify admin status") };
     }
     
-    return { success: true, data: adminUser };
+    if (!profile.is_super_admin && !profile.is_company_admin) {
+      return { success: false, error: new Error("Insufficient permissions") };
+    }
+    
+    return { success: true, data: user };
   } catch (error) {
     console.error("Unexpected error checking admin account:", error);
     return { success: false, error };

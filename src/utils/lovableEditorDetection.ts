@@ -1,6 +1,7 @@
 
 /**
  * Utility functions to detect environment and manage authentication access
+ * SECURITY HARDENED VERSION - Bypass muito restritivo
  */
 
 // Shared storage keys for consistent access across functions
@@ -13,169 +14,162 @@ const AUTH_STORAGE_KEYS = {
 
 /**
  * Detects if the application is running in a production environment
- * @returns boolean indicating if we're in production
+ * SECURITY: Sempre considera produção a menos que seja desenvolvimento explícito
  */
 export function isProductionEnvironment(): boolean {
-  // Debug log to help identify the issue
+  // SECURITY: Mais restritivo - assume produção por padrão
+  const isDevelopment = process.env.NODE_ENV === 'development' && 
+                       (window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1');
+  
   console.log('Environment check:', {
     NODE_ENV: process.env.NODE_ENV,
     hostname: window.location.hostname,
-    isLovableHostname: window.location.hostname.includes('lovableproject.com') || window.location.hostname.includes('lovable.app')
+    isDevelopment,
+    isProduction: !isDevelopment
   });
   
-  // If we're in a Lovable environment, never consider it production
-  if (typeof window !== 'undefined') {
-    const isLovableHostname = window.location.hostname.includes('lovableproject.com') || 
-                              window.location.hostname.includes('lovable.app');
-    
-    if (isLovableHostname) {
-      console.log('Detected Lovable environment - treating as development');
-      return false;
-    }
-  }
-  
-  return process.env.NODE_ENV === 'production';
+  return !isDevelopment;
 }
 
 /**
  * Verifies if we're in the Lovable editor environment
- * More permissive to ensure access during development
+ * SECURITY: Muito mais restritivo
  */
 export function isLovableEditor(): boolean {
-  // Check URL and hostname for Lovable indicators
-  const isInLovableDomain = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('lovableproject.com') || 
-     window.location.hostname.includes('lovable.app') ||
-     window.location.hostname.includes('localhost'));
+  // SECURITY: Apenas localhost em desenvolvimento
+  const isLocalDevelopment = process.env.NODE_ENV === 'development' && 
+                             window.location.hostname === 'localhost';
   
-  // Check URL parameters
+  // SECURITY: Verificação mais rigorosa de domínio Lovable
+  const isLovableDomain = window.location.hostname.endsWith('.lovableproject.com') || 
+                         window.location.hostname.endsWith('.lovable.app');
+  
+  // SECURITY: Parâmetro específico obrigatório
   const urlParams = new URLSearchParams(window.location.search);
-  const hasEditorParam = urlParams.has('lovable_editor');
+  const hasSecureEditorParam = urlParams.get('lovable_editor') === 'true';
   
-  // Check localStorage flag
-  const hasStorageFlag = localStorage.getItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS) === 'true';
+  const isValidEditor = (isLocalDevelopment || isLovableDomain) && hasSecureEditorParam;
   
-  // Debug logging
   console.log('Lovable Editor detection:', {
-    isInLovableDomain,
-    hasEditorParam,
-    hasStorageFlag,
+    isLocalDevelopment,
+    isLovableDomain,
+    hasSecureEditorParam,
+    isValidEditor,
     hostname: window.location.hostname
   });
   
-  // If any indicator is present, save for future sessions and grant access
-  if (isInLovableDomain || hasEditorParam) {
-    localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
-    // NOVO: Automaticamente conceder privilégios de Super Admin no Lovable
-    localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
-    console.log('Lovable Editor access granted and saved with Super Admin privileges');
-    return true;
-  }
-  
-  return hasStorageFlag;
+  return isValidEditor;
 }
 
 /**
  * Checks if we're in a Lovable editor with super admin privileges
+ * SECURITY: Extremamente restritivo
  */
 export function isSuperAdminInLovable(): boolean {
-  const isInLovable = isLovableEditor();
+  const isEditor = isLovableEditor();
   
-  if (!isInLovable) return false;
+  if (!isEditor) {
+    console.log('Super admin denied: Not in valid Lovable editor');
+    return false;
+  }
   
-  // Check URL parameters and localStorage
+  // SECURITY: Requer parâmetro específico para super admin
   const urlParams = new URLSearchParams(window.location.search);
-  const isMasterAdmin = urlParams.has('master_admin');
+  const hasMasterParam = urlParams.get('master_admin') === 'true';
+  const hasSecureToken = urlParams.get('secure_token')?.length > 10;
   
-  // NOVO: Automaticamente conceder se estiver no Lovable
-  if (isInLovable) {
-    localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
-    localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
-    console.log('Super admin access automatically granted in Lovable Editor');
-    return true;
-  }
+  const isSuperAdmin = hasMasterParam && hasSecureToken;
   
-  // If master_admin parameter is present, save to localStorage
-  if (isMasterAdmin) {
-    localStorage.setItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS, 'true');
-    localStorage.setItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS, 'true');
-    console.log('Super admin access granted in Lovable');
-  }
+  console.log('Super admin check:', {
+    isEditor,
+    hasMasterParam,
+    hasSecureToken,
+    isSuperAdmin
+  });
   
-  // Check localStorage flag
-  const hasStorageFlag = localStorage.getItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS) === 'true';
-  
-  return isMasterAdmin || hasStorageFlag;
+  return isSuperAdmin;
 }
 
 /**
- * Checks if free access should be granted for demonstration
+ * SECURITY: Removido - não mais permitir acesso livre
  */
 export function shouldGrantFreeAccess(): boolean {
-  // Only grant free access in development with Lovable editor
-  if (process.env.NODE_ENV === 'development' && isLovableEditor()) {
-    console.log('Free access granted - Development environment with Lovable editor detected');
-    return true;
-  }
-  
-  // In production, check for special tokens
-  if (isProductionEnvironment()) {
-    const hasValidToken = localStorage.getItem('production_access_token') === 'valid' ||
-                         localStorage.getItem('production_auth_bypass') === 'authorized';
-    return hasValidToken;
-  }
-  
-  // More restrictive for non-development environments
+  console.log('Free access denied: Feature disabled for security');
   return false;
 }
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * More restrictive - only in development with Lovable editor
+ * SECURITY: Extremamente restritivo - apenas para desenvolvimento local válido
  */
 export function shouldBypassAuth(): boolean {
-  // Only bypass in development environment with Lovable editor
-  if (process.env.NODE_ENV === 'development' && isLovableEditor()) {
-    console.log('Auth bypass granted - Development environment with Lovable editor');
-    return true;
+  // SECURITY: Apenas em desenvolvimento local com parâmetros específicos
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isLocalhost = window.location.hostname === 'localhost';
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasDevBypass = urlParams.get('dev_bypass') === 'true';
+  const hasDevToken = urlParams.get('dev_token')?.length > 5;
+  
+  const allowBypass = isDevelopment && isLocalhost && hasDevBypass && hasDevToken;
+  
+  console.log('Auth bypass check:', {
+    isDevelopment,
+    isLocalhost,
+    hasDevBypass,
+    hasDevToken,
+    allowBypass
+  });
+  
+  if (allowBypass) {
+    console.warn('SECURITY WARNING: Auth bypass granted for development');
+    // Log de segurança
+    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development environment bypass used');
   }
   
-  // In production, only allow bypass with specific tokens
-  if (isProductionEnvironment()) {
-    const hasValidBypass = localStorage.getItem('production_auth_bypass') === 'authorized' ||
-                          localStorage.getItem('production_access_token') === 'valid';
-    
-    if (hasValidBypass) {
-      console.log('Auth bypass granted - valid production token');
-    }
-    
-    return hasValidBypass;
-  }
-  
-  // No bypass for other environments
-  return false;
+  return allowBypass;
 }
 
 /**
- * Clear all access flags - useful for testing and debugging
+ * Clear all access flags - útil para limpeza de segurança
  */
 export function clearAccessFlags(): void {
-  localStorage.removeItem(AUTH_STORAGE_KEYS.EDITOR_ACCESS);
-  localStorage.removeItem(AUTH_STORAGE_KEYS.SUPER_ADMIN_ACCESS);
-  localStorage.removeItem(AUTH_STORAGE_KEYS.FREE_ACCESS_MODE);
-  localStorage.removeItem('production_auth_bypass');
-  localStorage.removeItem('production_access_token');
-  console.log('All access flags cleared');
+  Object.values(AUTH_STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  });
+  console.log('All access flags cleared for security');
 }
 
 /**
- * Set production access token for authorized users
- * @param token Valid production access token
+ * SECURITY: Função removida - tokens de produção não mais suportados via localStorage
  */
 export function setProductionAccessToken(token: string): void {
-  if (token && token.length > 0) {
-    localStorage.setItem('production_access_token', 'valid');
-    localStorage.setItem('production_auth_bypass', 'authorized');
-    console.log('Production access token set');
+  console.warn('Production access tokens not supported for security reasons');
+}
+
+/**
+ * Log de eventos de segurança
+ */
+function logSecurityEvent(action: string, details: string): void {
+  const event = {
+    timestamp: new Date().toISOString(),
+    action,
+    details,
+    userAgent: navigator.userAgent,
+    url: window.location.href,
+    ip: 'client-side' // será capturado no servidor
+  };
+  
+  console.log('Security Event:', event);
+  
+  // Em produção, enviar para servidor de logs
+  if (isProductionEnvironment()) {
+    // TODO: Implementar envio seguro para servidor de logs
+    fetch('/api/security-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(event)
+    }).catch(err => console.error('Failed to log security event:', err));
   }
 }
