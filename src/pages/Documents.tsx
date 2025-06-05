@@ -2,12 +2,11 @@
 import { useState, useEffect } from "react";
 import { DocumentsList } from "@/components/DocumentsList";
 import { DocumentForm } from "@/components/DocumentForm";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, FileDown } from "lucide-react";
 import { toast } from "sonner";
-import { ISODocument } from "@/utils/isoTypes";
+import { ISODocument } from "@/services/documentService";
 import { AuthenticationRequired } from "@/components/auth/AuthenticationRequired";
 
 const Documents = () => {
@@ -23,13 +22,37 @@ const Documents = () => {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('iso_documents')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setDocuments(data || []);
+      // Using mock data since iso_documents table doesn't exist
+      console.log('Documents - using mock data until database setup');
+      const mockDocuments: ISODocument[] = [
+        {
+          id: '1',
+          title: 'Manual de Qualidade',
+          document_type: 'manual',
+          description: 'Manual principal do sistema de qualidade',
+          content: 'Conteúdo do manual...',
+          associated_requirement: '4.1',
+          status: 'approved',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          document_code: 'MQ-001',
+          revision: '02'
+        },
+        {
+          id: '2',
+          title: 'Procedimento de Controle de Documentos',
+          document_type: 'procedure',
+          description: 'Procedimento para controle de documentos',
+          content: 'Conteúdo do procedimento...',
+          associated_requirement: '4.2.3',
+          status: 'approved',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          document_code: 'PR-001',
+          revision: '01'
+        }
+      ];
+      setDocuments(mockDocuments);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast.error('Falha ao carregar documentos');

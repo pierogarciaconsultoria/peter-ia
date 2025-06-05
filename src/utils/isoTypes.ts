@@ -1,3 +1,4 @@
+
 export interface ISODocument {
   id: string;
   title: string;
@@ -5,7 +6,7 @@ export interface ISODocument {
   description?: string;
   content?: string;
   associated_requirement: string;
-  status?: string;
+  status: string; // Make this required to match service interface
   created_at: string;
   updated_at: string;
   document_code?: string;
