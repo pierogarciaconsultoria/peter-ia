@@ -1,22 +1,114 @@
 
-/**
- * This file is maintained for backward compatibility
- * New code should import from the training directory directly
- */
+import { supabase } from "@/integrations/supabase/client";
+import { Training, CreateTrainingInput, UpdateTrainingInput } from "@/types/training";
 
-import { Training, TrainingFilters, CreateTrainingInput, UpdateTrainingInput, TrainingParticipant } from "@/types/training";
+// Re-export everything from the training module
+export * from './training/trainingService';
+export * from './training/trainingQueries';
+export * from './training/trainingGeneration';
+export * from './training/trainingMappers';
 
-// Re-export everything from the new module
-export * from './training';
+// Legacy functions for backward compatibility
+export const fetchTrainings = async (filters?: any): Promise<Training[]> => {
+  try {
+    let query = supabase
+      .from('trainings')
+      .select(`
+        *,
+        employee_trainings (
+          id,
+          employee_id,
+          status,
+          completion_date,
+          score,
+          employees (
+            id,
+            name
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
 
-// Re-export the types for backward compatibility
-export type {
-  Training,
-  TrainingFilters,
-  CreateTrainingInput,
-  UpdateTrainingInput,
-  TrainingParticipant
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching trainings:', error);
+      throw error;
+    }
+
+    // Transform the data to match the Training interface
+    const trainings: Training[] = (data || []).map(training => ({
+      id: training.id,
+      title: training.name,
+      description: training.description,
+      trainer: training.instructor || 'N/A',
+      training_date: training.created_at,
+      duration: training.duration_hours || 0,
+      department: 'Geral',
+      participants: training.employee_trainings?.map((et: any) => ({
+        id: et.employee_id,
+        name: et.employees?.name || 'Unknown',
+        status: et.status,
+        attended: et.status === 'completed'
+      })) || [],
+      status: training.status === 'active' ? 'planned' : 'canceled',
+      procedure_id: null,
+      evaluation_method: 'assessment',
+      created_at: training.created_at,
+      updated_at: training.updated_at,
+      company_id: training.company_id
+    }));
+
+    return trainings;
+  } catch (error) {
+    console.error('Training service error:', error);
+    throw error;
+  }
 };
 
-// Re-export specific functions for backward compatibility
-export { fetchTrainings as getTrainings } from './training/trainingQueries';
+export const createTraining = async (training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<Training> => {
+  try {
+    const trainingData = {
+      name: training.title,
+      description: training.description,
+      instructor: training.trainer,
+      duration_hours: training.duration,
+      type: 'internal',
+      status: 'active',
+      company_id: training.company_id
+    };
+
+    const { data, error } = await supabase
+      .from('trainings')
+      .insert([trainingData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating training:', error);
+      throw error;
+    }
+
+    const newTraining: Training = {
+      id: data.id,
+      title: data.name,
+      description: data.description,
+      trainer: data.instructor || 'N/A',
+      training_date: data.created_at,
+      duration: data.duration_hours || 0,
+      department: training.department,
+      participants: [],
+      status: 'planned',
+      procedure_id: training.procedure_id,
+      evaluation_method: training.evaluation_method,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      company_id: data.company_id
+    };
+
+    return newTraining;
+  } catch (error) {
+    console.error('Training creation error:', error);
+    throw error;
+  }
+};

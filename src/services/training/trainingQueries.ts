@@ -6,16 +6,16 @@ import { mapHrTrainingToTraining } from "./trainingMappers";
 /**
  * Fetch trainings with optional filters
  */
-export async function fetchTrainings(filters?: TrainingFilters): Promise<Training[]> {
+export const fetchTrainings = async (filters?: TrainingFilters): Promise<Training[]> => {
   try {
     let query = supabase
       .from('hr_trainings')
       .select('*')
-      .order('start_date', { ascending: false });
-    
+      .order('created_at', { ascending: false });
+
     // Apply filters if provided
     if (filters) {
-      if (filters.department) {
+      if (filters.department && filters.department !== 'all') {
         query = query.eq('department', filters.department);
       }
       
@@ -30,51 +30,41 @@ export async function fetchTrainings(filters?: TrainingFilters): Promise<Trainin
       if (filters.endDate) {
         query = query.lte('start_date', filters.endDate);
       }
-      
-      if (filters.searchQuery) {
-        query = query.ilike('title', `%${filters.searchQuery}%`);
-      }
     }
-    
+
     const { data, error } = await query;
-    
+
     if (error) {
-      console.error("Error fetching trainings:", error);
+      console.error('Error fetching trainings:', error);
       throw error;
     }
-    
-    // Convert the data to our Training interface
-    const trainings: Training[] = data.map(item => mapHrTrainingToTraining(item));
-    
-    return trainings;
+
+    return (data || []).map(mapHrTrainingToTraining);
   } catch (error) {
-    console.error("Error in fetchTrainings:", error);
+    console.error('Training query error:', error);
     throw error;
   }
-}
+};
 
 /**
- * Fetch a single training by id
+ * Fetch a single training by ID
  */
-export async function fetchTraining(id: string): Promise<Training | null> {
+export const fetchTraining = async (id: string): Promise<Training | null> => {
   try {
     const { data, error } = await supabase
       .from('hr_trainings')
       .select('*')
       .eq('id', id)
-      .maybeSingle();
-    
+      .single();
+
     if (error) {
-      console.error("Error fetching training by id:", error);
+      console.error('Error fetching training:', error);
       throw error;
     }
-    
-    if (!data) return null;
-    
-    // Convert the data to our Training interface
-    return mapHrTrainingToTraining(data);
+
+    return data ? mapHrTrainingToTraining(data) : null;
   } catch (error) {
-    console.error("Error in fetchTraining:", error);
+    console.error('Training query error:', error);
     throw error;
   }
-}
+};
