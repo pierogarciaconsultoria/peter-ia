@@ -180,3 +180,6 @@ export const employeeService = {
     }
   }
 };
+
+// Export the function directly for backward compatibility
+export const getQualityInspectors = employeeService.getQualityInspectors;

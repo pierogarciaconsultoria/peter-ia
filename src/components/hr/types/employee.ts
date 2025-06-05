@@ -6,7 +6,7 @@ export type JobPosition = {
   description: string;
 };
 
-export type EmployeeStatus = "active" | "inactive" | "on_leave";
+export type EmployeeStatus = "active" | "inactive" | "on_leave" | "pending_onboarding";
 
 export type Employee = {
   id: string;

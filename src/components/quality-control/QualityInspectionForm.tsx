@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,7 +15,7 @@ import {
   createQualityInspection 
 } from "@/services/qualityControlService";
 import { useToast } from "@/hooks/use-toast";
-import { getQualityInspectors } from "@/services/employeeService";
+import { employeeService } from "@/services/employeeService";
 
 // Employee type definition
 interface QualityInspector {
@@ -60,9 +59,12 @@ export function QualityInspectionForm() {
 
     const fetchInspectors = async () => {
       try {
-        // Fetch quality inspectors
-        const inspectorsData = await getQualityInspectors();
-        setInspectors(inspectorsData);
+        // Fetch quality inspectors using the correct service method
+        const inspectorsData = await employeeService.getQualityInspectors('default-company-id');
+        setInspectors(inspectorsData.map(emp => ({
+          id: emp.id,
+          name: emp.name
+        })));
       } catch (error) {
         console.error("Failed to fetch inspectors:", error);
         toast({
