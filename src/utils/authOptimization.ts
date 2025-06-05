@@ -1,118 +1,81 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
 
-export class AuthOptimization {
-  private static instance: AuthOptimization;
-  private queryCache = new Map<string, { data: any; timestamp: number }>();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+// Sistema de cache otimizado para autenticação
+class AuthOptimization {
+  private profileCache = new Map<string, { data: any; timestamp: number }>();
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
-  public static getInstance(): AuthOptimization {
-    if (!AuthOptimization.instance) {
-      AuthOptimization.instance = new AuthOptimization();
-    }
-    return AuthOptimization.instance;
-  }
-
-  async checkUserPermissionOptimized(
-    table: string,
-    action: string,
-    targetId?: string
-  ): Promise<boolean> {
-    const cacheKey = `permission_${table}_${action}_${targetId}`;
-    const cached = this.queryCache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      logger.debug('AuthOptimization', 'Cache hit para permissão', { cacheKey });
-      return cached.data;
-    }
-
-    const startTime = Date.now();
-    
-    try {
-      // Usar as novas funções security definer para evitar recursão
-      const { data, error } = await supabase.rpc('is_current_user_admin');
-
-      const queryTime = Date.now() - startTime;
-      logger.debug('AuthOptimization', 'Query executada', { 
-        table, 
-        action, 
-        queryTime 
-      });
-
-      if (error) {
-        logger.error('AuthOptimization', 'Erro ao verificar permissão', error);
-        return false;
-      }
-
-      // Cache do resultado
-      this.queryCache.set(cacheKey, {
-        data: data || false,
-        timestamp: Date.now(),
-      });
-
-      return data || false;
-    } catch (error: any) {
-      logger.error('AuthOptimization', 'Erro inesperado', error);
-      return false;
-    }
-  }
-
-  clearCache(): void {
-    this.queryCache.clear();
-    logger.info('AuthOptimization', 'Cache limpo');
-  }
-
-  getCacheStats(): { size: number; hitRate: number } {
-    return {
-      size: this.queryCache.size,
-      hitRate: 0, // Implementar contador de hits se necessário
-    };
-  }
-
-  // Otimização para queries de perfil do usuário usando novas funções
   async getUserProfileOptimized(userId: string) {
-    const cacheKey = `user_profile_${userId}`;
-    const cached = this.queryCache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+    // Verificar cache
+    const cached = this.profileCache.get(userId);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
       return cached.data;
     }
 
     try {
-      // Usar select direto agora que as políticas RLS foram corrigidas
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          company_id,
+          is_super_admin,
+          is_company_admin,
+          created_at,
+          last_login,
+          is_active
+        `)
         .eq('id', userId)
         .single();
 
-      if (!error && data) {
-        this.queryCache.set(cacheKey, {
-          data,
-          timestamp: Date.now(),
-        });
-      }
+      if (error) throw error;
+
+      // Atualizar cache
+      this.profileCache.set(userId, {
+        data,
+        timestamp: Date.now()
+      });
 
       return data;
-    } catch (error: any) {
-      logger.error('AuthOptimization', 'Erro ao buscar perfil', error);
+    } catch (error) {
+      console.error('Erro ao buscar perfil otimizado:', error);
       return null;
     }
   }
 
-  // Limpar cache automaticamente
-  startCacheCleanup(): void {
-    setInterval(() => {
-      const now = Date.now();
-      for (const [key, value] of this.queryCache.entries()) {
-        if (now - value.timestamp > this.CACHE_TTL) {
-          this.queryCache.delete(key);
-        }
+  clearCache(userId?: string) {
+    if (userId) {
+      this.profileCache.delete(userId);
+    } else {
+      this.profileCache.clear();
+    }
+  }
+
+  // Limpar cache expirado
+  cleanExpiredCache() {
+    const now = Date.now();
+    for (const [key, value] of this.profileCache.entries()) {
+      if (now - value.timestamp > this.CACHE_DURATION) {
+        this.profileCache.delete(key);
       }
-      logger.debug('AuthOptimization', 'Limpeza automática de cache executada');
-    }, 10 * 60 * 1000); // A cada 10 minutos
+    }
+  }
+
+  // Estatísticas do cache
+  getCacheStats() {
+    return {
+      size: this.profileCache.size,
+      entries: Array.from(this.profileCache.keys())
+    };
   }
 }
 
-export const authOptimization = AuthOptimization.getInstance();
+export const authOptimization = new AuthOptimization();
+
+// Limpar cache expirado a cada 5 minutos
+setInterval(() => {
+  authOptimization.cleanExpiredCache();
+}, 5 * 60 * 1000);
