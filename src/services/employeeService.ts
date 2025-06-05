@@ -8,7 +8,7 @@ export interface Employee {
   position: string;
   department: string;
   hire_date: string;
-  status: string;
+  status: 'active' | 'inactive' | 'on_leave';
   company_id: string;
   phone?: string;
   salary?: number;
@@ -31,7 +31,10 @@ export const employeeService = {
         throw error;
       }
 
-      return data || [];
+      return (data || []).map(emp => ({
+        ...emp,
+        status: emp.status as 'active' | 'inactive' | 'on_leave'
+      }));
     } catch (error) {
       console.error('Employee service error:', error);
       throw error;
@@ -51,7 +54,10 @@ export const employeeService = {
         throw error;
       }
 
-      return data;
+      return data ? {
+        ...data,
+        status: data.status as 'active' | 'inactive' | 'on_leave'
+      } : null;
     } catch (error) {
       console.error('Employee service error:', error);
       throw error;
@@ -71,7 +77,10 @@ export const employeeService = {
         throw error;
       }
 
-      return data;
+      return {
+        ...data,
+        status: data.status as 'active' | 'inactive' | 'on_leave'
+      };
     } catch (error) {
       console.error('Employee service error:', error);
       throw error;
@@ -92,7 +101,10 @@ export const employeeService = {
         throw error;
       }
 
-      return data;
+      return {
+        ...data,
+        status: data.status as 'active' | 'inactive' | 'on_leave'
+      };
     } catch (error) {
       console.error('Employee service error:', error);
       throw error;
@@ -130,7 +142,34 @@ export const employeeService = {
         throw error;
       }
 
-      return data || [];
+      return (data || []).map(emp => ({
+        ...emp,
+        status: emp.status as 'active' | 'inactive' | 'on_leave'
+      }));
+    } catch (error) {
+      console.error('Employee service error:', error);
+      throw error;
+    }
+  },
+
+  async getQualityInspectors(companyId: string): Promise<Employee[]> {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('company_id', companyId)
+        .eq('status', 'active')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching quality inspectors:', error);
+        throw error;
+      }
+
+      return (data || []).map(emp => ({
+        ...emp,
+        status: emp.status as 'active' | 'inactive' | 'on_leave'
+      }));
     } catch (error) {
       console.error('Employee service error:', error);
       throw error;

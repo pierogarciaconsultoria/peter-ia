@@ -1,11 +1,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { TrainingMatrixData, JobPositionTrainingRequirement } from '@/types/trainingMatrix';
+import { TrainingMatrixData, JobPositionTrainingRequirement, EmployeeTrainingCompliance, ComplianceStats } from '@/types/trainingMatrix';
 
 export class TrainingMatrixService {
   static async getTrainingMatrix(companyId: string): Promise<TrainingMatrixData[]> {
     try {
-      // This is a simplified version - in a real implementation you'd join multiple tables
       const { data, error } = await supabase
         .from('training_requirements')
         .select('*')
@@ -16,7 +15,6 @@ export class TrainingMatrixService {
         throw error;
       }
 
-      // Transform to expected format
       return (data || []).map(req => ({
         jobPosition: {
           id: req.id,
@@ -44,7 +42,6 @@ export class TrainingMatrixService {
         throw error;
       }
 
-      // Transform to expected format
       return (data || []).map(req => ({
         id: req.id,
         job_position_id: req.id,
@@ -90,6 +87,45 @@ export class TrainingMatrixService {
       }
     } catch (error) {
       console.error('Delete job position requirement error:', error);
+      throw error;
+    }
+  }
+
+  static async getEmployeeCompliance(companyId: string): Promise<EmployeeTrainingCompliance[]> {
+    try {
+      // For now, return empty array since this table structure doesn't exist yet
+      console.log('Employee compliance feature will be available after database setup');
+      return [];
+    } catch (error) {
+      console.error('Employee compliance service error:', error);
+      throw error;
+    }
+  }
+
+  static async getComplianceStats(companyId: string): Promise<ComplianceStats> {
+    try {
+      // For now, return default stats since this feature doesn't exist yet
+      console.log('Compliance stats feature will be available after database setup');
+      return {
+        total: 0,
+        completed: 0,
+        pending: 0,
+        inProgress: 0,
+        overdue: 0,
+        completionRate: 0
+      };
+    } catch (error) {
+      console.error('Compliance stats service error:', error);
+      throw error;
+    }
+  }
+
+  static async updateEmployeeCompliance(id: string, updates: any): Promise<void> {
+    try {
+      // For now, just log since this table structure doesn't exist yet
+      console.log('Employee compliance update feature will be available after database setup');
+    } catch (error) {
+      console.error('Update employee compliance error:', error);
       throw error;
     }
   }

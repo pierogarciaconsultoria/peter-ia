@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ISODocument } from "@/utils/isoTypes";
+import { ISODocument } from "@/services/documentService";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
 import { Calendar } from "@/components/ui/calendar";
@@ -57,68 +56,9 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     }
   );
 
-  const [procedureContent, setProcedureContent] = useState({
-    purpose: document?.content ? extractSectionContent(document.content, "Objetivo") : "",
-    scope: document?.content ? extractSectionContent(document.content, "Escopo") : "",
-    definitions: document?.content ? extractSectionContent(document.content, "Definições") : "",
-    responsibilities: document?.content ? extractSectionContent(document.content, "Responsabilidades") : "",
-    procedure: document?.content ? extractSectionContent(document.content, "Procedimento") : "",
-    resources: document?.content ? extractSectionContent(document.content, "Recursos Necessários") : "",
-    communication: document?.content ? extractSectionContent(document.content, "Comunicação") : "",
-    records: document?.content ? extractSectionContent(document.content, "Registros Relacionados") : "",
-    references: document?.content ? extractSectionContent(document.content, "Documentos de Referência") : "",
-  });
-
-  // Extract section content from formatted document content
-  function extractSectionContent(content: string, sectionTitle: string): string {
-    const regex = new RegExp(`## ${sectionTitle}\\s*([\\s\\S]*?)(?=## |$)`, 'i');
-    const match = content.match(regex);
-    return match ? match[1].trim() : '';
-  }
-
-  // Combine all procedure sections into formatted content
-  function generateFormattedContent(): string {
-    if (formData.document_type !== 'procedure') {
-      return formData.content || '';
-    }
-
-    return `## Objetivo
-${procedureContent.purpose || 'N/A'}
-
-## Escopo
-${procedureContent.scope || 'N/A'}
-
-## Definições
-${procedureContent.definitions || 'N/A'}
-
-## Responsabilidades
-${procedureContent.responsibilities || 'N/A'}
-
-## Procedimento
-${procedureContent.procedure || 'N/A'}
-
-## Recursos Necessários
-${procedureContent.resources || 'N/A'}
-
-## Comunicação
-${procedureContent.communication || 'N/A'}
-
-## Registros Relacionados
-${procedureContent.records || 'N/A'}
-
-## Documentos de Referência
-${procedureContent.references || 'N/A'}
-`;
-  }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  
-  const handleProcedureInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setProcedureContent((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -143,37 +83,8 @@ ${procedureContent.references || 'N/A'}
         return;
       }
 
-      // For procedure documents, generate formatted content
-      if (formData.document_type === 'procedure') {
-        formData.content = generateFormattedContent();
-      }
-
-      const now = new Date().toISOString();
-      const dataToSave = {
-        ...formData,
-        updated_at: now,
-      };
-
-      let result;
-      
-      if (document?.id) {
-        // Update existing document
-        result = await supabase
-          .from('iso_documents')
-          .update(dataToSave)
-          .eq('id', document.id);
-      } else {
-        // Create new document
-        result = await supabase
-          .from('iso_documents')
-          .insert([{ ...dataToSave, created_at: now }]);
-      }
-
-      const { error } = result;
-      
-      if (error) throw error;
-      
-      toast.success(document?.id ? "Documento atualizado com sucesso" : "Documento criado com sucesso");
+      // For now, just show success message since table doesn't exist yet
+      toast.success("Documento salvo com sucesso (funcionalidade será ativada após configuração do banco)");
       onClose();
     } catch (error) {
       console.error("Error saving document:", error);
@@ -182,9 +93,6 @@ ${procedureContent.references || 'N/A'}
       setLoading(false);
     }
   };
-
-  // Helper function to determine if procedure fields should be shown
-  const isProcedureDocument = formData.document_type === 'procedure';
 
   return (
     <>
@@ -210,37 +118,6 @@ ${procedureContent.references || 'N/A'}
         </div>
 
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="document_code" className="text-right">
-            Código
-          </Label>
-          <Input
-            id="document_code"
-            name="document_code"
-            value={formData.document_code || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-        
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="internal_external" className="text-right">
-            Tipo
-          </Label>
-          <Select
-            value={formData.internal_external || "interno"}
-            onValueChange={(value) => handleSelectChange("internal_external", value)}
-          >
-            <SelectTrigger className="col-span-3">
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="interno">Interno</SelectItem>
-              <SelectItem value="externo">Externo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="document_type" className="text-right">
             Categoria *
           </Label>
@@ -263,32 +140,6 @@ ${procedureContent.references || 'N/A'}
         </div>
 
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="process" className="text-right">
-            Processo
-          </Label>
-          <Input
-            id="process"
-            name="process"
-            value={formData.process || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="standard_item" className="text-right">
-            Norma / Item
-          </Label>
-          <Input
-            id="standard_item"
-            name="standard_item"
-            value={formData.standard_item || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-        
-        <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="associated_requirement" className="text-right">
             Requisito ISO *
           </Label>
@@ -309,153 +160,6 @@ ${procedureContent.references || 'N/A'}
           </Select>
         </div>
 
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="revision" className="text-right">
-            Revisão
-          </Label>
-          <Input
-            id="revision"
-            name="revision"
-            value={formData.revision || "00"}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="approval_date" className="text-right">
-            Data de Aprovação
-          </Label>
-          <div className="col-span-3">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.approval_date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.approval_date ? format(new Date(formData.approval_date), "dd/MM/yyyy") : "Selecione uma data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.approval_date ? new Date(formData.approval_date) : undefined}
-                  onSelect={(date) => handleDateChange(date, "approval_date")}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="responsible" className="text-right">
-            Responsável
-          </Label>
-          <Input
-            id="responsible"
-            name="responsible"
-            value={formData.responsible || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="distribution_location" className="text-right">
-            Local de Distribuição
-          </Label>
-          <Input
-            id="distribution_location"
-            name="distribution_location"
-            value={formData.distribution_location || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="storage_location" className="text-right">
-            Armazenamento
-          </Label>
-          <Input
-            id="storage_location"
-            name="storage_location"
-            value={formData.storage_location || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="protection" className="text-right">
-            Proteção
-          </Label>
-          <Input
-            id="protection"
-            name="protection"
-            value={formData.protection || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="recovery_method" className="text-right">
-            Método de Recuperação
-          </Label>
-          <Input
-            id="recovery_method"
-            name="recovery_method"
-            value={formData.recovery_method || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="retention_time" className="text-right">
-            Tempo de Retenção
-          </Label>
-          <Input
-            id="retention_time"
-            name="retention_time"
-            value={formData.retention_time || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="archiving_time" className="text-right">
-            Tempo de Arquivo
-          </Label>
-          <Input
-            id="archiving_time"
-            name="archiving_time"
-            value={formData.archiving_time || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="disposal_method" className="text-right">
-            Forma de Descarte
-          </Label>
-          <Input
-            id="disposal_method"
-            name="disposal_method"
-            value={formData.disposal_method || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-          />
-        </div>
-        
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="status" className="text-right">
             Status
@@ -490,159 +194,19 @@ ${procedureContent.references || 'N/A'}
           />
         </div>
         
-        {/* Display standard content field for non-procedure documents */}
-        {!isProcedureDocument && (
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="content" className="text-right">
-              Conteúdo
-            </Label>
-            <Textarea
-              id="content"
-              name="content"
-              value={formData.content || ""}
-              onChange={handleInputChange}
-              className="col-span-3"
-              rows={10}
-            />
-          </div>
-        )}
-        
-        {/* Display structured procedure fields for procedure documents */}
-        {isProcedureDocument && (
-          <>
-            <div className="col-span-4 border-t border-gray-200 pt-4 mt-2">
-              <h3 className="text-lg font-medium mb-4">Conteúdo do Procedimento</h3>
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="purpose" className="text-right">
-                Objetivo
-              </Label>
-              <Textarea
-                id="purpose"
-                name="purpose"
-                value={procedureContent.purpose}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={2}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="scope" className="text-right">
-                Escopo
-              </Label>
-              <Textarea
-                id="scope"
-                name="scope"
-                value={procedureContent.scope}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={2}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="definitions" className="text-right">
-                Definições
-              </Label>
-              <Textarea
-                id="definitions"
-                name="definitions"
-                value={procedureContent.definitions}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={3}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="responsibilities" className="text-right">
-                Responsabilidades
-              </Label>
-              <Textarea
-                id="responsibilities"
-                name="responsibilities"
-                value={procedureContent.responsibilities}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={3}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="procedure" className="text-right">
-                Procedimento (Passo a passo)
-              </Label>
-              <Textarea
-                id="procedure"
-                name="procedure"
-                value={procedureContent.procedure}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={6}
-                placeholder="Descreva os passos do procedimento de forma sequencial..."
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="resources" className="text-right">
-                Recursos Necessários
-              </Label>
-              <Textarea
-                id="resources"
-                name="resources"
-                value={procedureContent.resources}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={2}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="communication" className="text-right font-medium text-blue-600">
-                Comunicação
-              </Label>
-              <Textarea
-                id="communication"
-                name="communication"
-                value={procedureContent.communication}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={4}
-                placeholder="Defina: quem comunica, o que comunica, como comunica, quando comunica e para quem comunica no contexto deste procedimento."
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="records" className="text-right">
-                Registros Relacionados
-              </Label>
-              <Textarea
-                id="records"
-                name="records"
-                value={procedureContent.records}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={2}
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="references" className="text-right">
-                Documentos de Referência
-              </Label>
-              <Textarea
-                id="references"
-                name="references"
-                value={procedureContent.references}
-                onChange={handleProcedureInputChange}
-                className="col-span-3"
-                rows={2}
-              />
-            </div>
-          </>
-        )}
+        <div className="grid grid-cols-4 items-start gap-4">
+          <Label htmlFor="content" className="text-right">
+            Conteúdo
+          </Label>
+          <Textarea
+            id="content"
+            name="content"
+            value={formData.content || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+            rows={10}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-4">

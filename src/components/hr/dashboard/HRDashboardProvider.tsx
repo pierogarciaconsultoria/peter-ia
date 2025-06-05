@@ -127,7 +127,7 @@ export function HRDashboardProvider({ children }: HRDashboardProviderProps) {
   const value = {
     dashboardData: data || defaultData,
     isLoading,
-    error,
+    error: error ? new Error(error) : null,
     refreshData: refetch
   };
 

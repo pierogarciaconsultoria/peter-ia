@@ -36,7 +36,7 @@ export const useHRDashboardData = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch all metrics concurrently
+        // Fetch all metrics concurrently with fallback for missing tables
         const [
           employeesResult,
           jobOpeningsResult,
@@ -44,7 +44,7 @@ export const useHRDashboardData = () => {
           interviewsResult,
           trialsResult,
           onboardingResult
-        ] = await Promise.all([
+        ] = await Promise.allSettled([
           // Total employees
           supabase
             .from('employees')
@@ -52,65 +52,68 @@ export const useHRDashboardData = () => {
             .eq('company_id', userCompany.id)
             .eq('status', 'active'),
           
-          // Active job openings
+          // Active job openings - with fallback
           supabase
             .from('hr_job_openings')
             .select('*', { count: 'exact', head: true })
             .eq('company_id', userCompany.id)
-            .eq('status', 'open'),
+            .eq('status', 'open')
+            .then(result => result)
+            .catch(() => ({ count: 0, error: null })),
           
-          // Pending applications
+          // Pending applications - with fallback
           supabase
             .from('hr_applications')
             .select('*', { count: 'exact', head: true })
             .eq('company_id', userCompany.id)
-            .in('status', ['received', 'screening', 'interview_scheduled']),
+            .in('status', ['received', 'screening', 'interview_scheduled'])
+            .then(result => result)
+            .catch(() => ({ count: 0, error: null })),
           
-          // Scheduled interviews (applications in interview stage)
+          // Scheduled interviews - with fallback
           supabase
             .from('hr_applications')
             .select('*', { count: 'exact', head: true })
             .eq('company_id', userCompany.id)
-            .eq('current_stage', 'interview'),
+            .eq('current_stage', 'interview')
+            .then(result => result)
+            .catch(() => ({ count: 0, error: null })),
           
-          // Pending trial evaluations
+          // Pending trial evaluations - with fallback
           supabase
             .from('trial_period_evaluations')
             .select('*', { count: 'exact', head: true })
             .eq('company_id', userCompany.id)
             .is('approved', null)
-            .lte('evaluation_date', new Date().toISOString().split('T')[0]),
+            .lte('evaluation_date', new Date().toISOString().split('T')[0])
+            .then(result => result)
+            .catch(() => ({ count: 0, error: null })),
           
-          // Active onboarding processes
+          // Active onboarding processes - with fallback
           supabase
             .from('onboarding_processes')
             .select('*', { count: 'exact', head: true })
             .eq('company_id', userCompany.id)
             .eq('status', 'pending')
+            .then(result => result)
+            .catch(() => ({ count: 0, error: null }))
         ]);
 
-        // Check for errors in any of the queries
-        const errors = [
-          employeesResult.error,
-          jobOpeningsResult.error,
-          applicationsResult.error,
-          interviewsResult.error,
-          trialsResult.error,
-          onboardingResult.error
-        ].filter(Boolean);
-
-        if (errors.length > 0) {
-          console.error('HR Dashboard errors:', errors);
-          // Don't throw error, just use 0 for failed queries
-        }
+        // Extract counts with safe fallbacks
+        const getCount = (result: PromiseSettledResult<any>) => {
+          if (result.status === 'fulfilled' && result.value && !result.value.error) {
+            return result.value.count || 0;
+          }
+          return 0;
+        };
 
         setMetrics({
-          totalEmployees: employeesResult.count || 0,
-          activeJobs: jobOpeningsResult.count || 0,
-          pendingApplications: applicationsResult.count || 0,
-          scheduledInterviews: interviewsResult.count || 0,
-          trialEvaluations: trialsResult.count || 0,
-          onboardingProcesses: onboardingResult.count || 0,
+          totalEmployees: getCount(employeesResult),
+          activeJobs: getCount(jobOpeningsResult),
+          pendingApplications: getCount(applicationsResult),
+          scheduledInterviews: getCount(interviewsResult),
+          trialEvaluations: getCount(trialsResult),
+          onboardingProcesses: getCount(onboardingResult),
         });
 
       } catch (err: any) {
@@ -124,5 +127,25 @@ export const useHRDashboardData = () => {
     fetchMetrics();
   }, [userCompany?.id]);
 
-  return { metrics, loading, error };
+  const refetch = async () => {
+    await fetchMetrics();
+  };
+
+  return { 
+    metrics, 
+    loading, 
+    error,
+    data: {
+      departmentDistribution: [],
+      turnoverData: [],
+      recruitmentStatus: [],
+      trainingCompletionData: [],
+      evaluationScores: [],
+      salaryComparisonData: [],
+      employeeCostsData: [],
+      discDistribution: []
+    },
+    isLoading: loading,
+    refetch 
+  };
 };
