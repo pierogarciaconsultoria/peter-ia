@@ -137,3 +137,6 @@ export const employeeService = {
     }
   }
 };
+
+// Re-export employee filter functions
+export * from './employee/employeeFilterService';
