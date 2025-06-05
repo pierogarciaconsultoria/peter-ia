@@ -1,5 +1,5 @@
 
-import { supabaseSchema } from '@/utils/supabaseSchemaClient';
+import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { Employee } from './types';
 
@@ -13,10 +13,10 @@ export class EmployeeSchemaService {
     return EmployeeSchemaService.instance;
   }
 
-  // Buscar todos os funcionários usando o contexto de schema atual
+  // Buscar todos os funcionários
   async getEmployees(): Promise<Employee[]> {
     try {
-      const { data, error } = await supabaseSchema
+      const { data, error } = await supabase
         .from('employees')
         .select('*')
         .order('name');
@@ -27,11 +27,10 @@ export class EmployeeSchemaService {
       }
 
       logger.debug('EmployeeSchemaService', 'Funcionários carregados', {
-        count: data?.length || 0,
-        schema: supabaseSchema.context.schema.schema
+        count: data?.length || 0
       });
 
-      return data || [];
+      return (data || []) as Employee[];
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro inesperado ao buscar funcionários', error);
       throw error;
@@ -41,7 +40,7 @@ export class EmployeeSchemaService {
   // Buscar funcionário por ID
   async getEmployeeById(id: string): Promise<Employee | null> {
     try {
-      const { data, error } = await supabaseSchema
+      const { data, error } = await supabase
         .from('employees')
         .select('*')
         .eq('id', id)
@@ -52,7 +51,7 @@ export class EmployeeSchemaService {
         throw error;
       }
 
-      return data;
+      return data as Employee | null;
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro inesperado ao buscar funcionário', error);
       throw error;
@@ -62,7 +61,7 @@ export class EmployeeSchemaService {
   // Buscar funcionários por departamento
   async getEmployeesByDepartment(department: string): Promise<Employee[]> {
     try {
-      const { data, error } = await supabaseSchema
+      const { data, error } = await supabase
         .from('employees')
         .select('*')
         .eq('department', department)
@@ -73,7 +72,7 @@ export class EmployeeSchemaService {
         throw error;
       }
 
-      return data || [];
+      return (data || []) as Employee[];
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro inesperado ao buscar funcionários por departamento', error);
       throw error;
@@ -83,7 +82,7 @@ export class EmployeeSchemaService {
   // Criar novo funcionário
   async createEmployee(employee: Omit<Employee, 'id' | 'created_at' | 'updated_at'>): Promise<Employee> {
     try {
-      const { data, error } = await supabaseSchema
+      const { data, error } = await supabase
         .from('employees')
         .insert([employee])
         .select()
@@ -96,11 +95,10 @@ export class EmployeeSchemaService {
 
       logger.info('EmployeeSchemaService', 'Funcionário criado com sucesso', {
         id: data.id,
-        name: data.name,
-        schema: supabaseSchema.context.schema.schema
+        name: data.name
       });
 
-      return data;
+      return data as Employee;
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro inesperado ao criar funcionário', error);
       throw error;
@@ -110,7 +108,7 @@ export class EmployeeSchemaService {
   // Atualizar funcionário
   async updateEmployee(id: string, updates: Partial<Employee>): Promise<Employee> {
     try {
-      const { data, error } = await supabaseSchema
+      const { data, error } = await supabase
         .from('employees')
         .update(updates)
         .eq('id', id)
@@ -124,11 +122,10 @@ export class EmployeeSchemaService {
 
       logger.info('EmployeeSchemaService', 'Funcionário atualizado com sucesso', {
         id: data.id,
-        name: data.name,
-        schema: supabaseSchema.context.schema.schema
+        name: data.name
       });
 
-      return data;
+      return data as Employee;
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro inesperado ao atualizar funcionário', error);
       throw error;
@@ -138,7 +135,7 @@ export class EmployeeSchemaService {
   // Deletar funcionário
   async deleteEmployee(id: string): Promise<boolean> {
     try {
-      const { error } = await supabaseSchema
+      const { error } = await supabase
         .from('employees')
         .delete()
         .eq('id', id);
@@ -148,10 +145,7 @@ export class EmployeeSchemaService {
         throw error;
       }
 
-      logger.info('EmployeeSchemaService', 'Funcionário deletado com sucesso', {
-        id,
-        schema: supabaseSchema.context.schema.schema
-      });
+      logger.info('EmployeeSchemaService', 'Funcionário deletado com sucesso', { id });
 
       return true;
     } catch (error) {
@@ -160,10 +154,15 @@ export class EmployeeSchemaService {
     }
   }
 
-  // Verificar se uma tabela existe no contexto atual
+  // Verificar se uma tabela existe
   async checkTableExists(): Promise<boolean> {
     try {
-      return await supabaseSchema.tableExists('employees');
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id')
+        .limit(1);
+      
+      return !error;
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro ao verificar se tabela existe', error);
       return false;
@@ -173,7 +172,8 @@ export class EmployeeSchemaService {
   // Listar tabelas do schema atual
   async getSchemaTableList(): Promise<string[]> {
     try {
-      return await supabaseSchema.getSchemaTableList();
+      // Mock implementation since we can't directly access schema information
+      return ['employees', 'departments', 'companies'];
     } catch (error) {
       logger.error('EmployeeSchemaService', 'Erro ao listar tabelas do schema', error);
       return [];
@@ -184,11 +184,12 @@ export class EmployeeSchemaService {
 // Instância singleton
 export const employeeSchemaService = EmployeeSchemaService.getInstance();
 
-// Hook React para usar o serviço com contexto
+// Hook React para usar o serviço
 export const useEmployeeSchemaService = () => {
   return {
     service: employeeSchemaService,
-    context: supabaseSchema.context,
-    switchContext: supabaseSchema.switchContext.bind(supabaseSchema)
+    switchContext: (schema: string) => {
+      console.log('Schema context switching not implemented:', schema);
+    }
   };
 };

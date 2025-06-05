@@ -46,7 +46,7 @@ export interface EmployeeCostsData {
   taxes: number;
 }
 
-// Updated HRMetrics interface to match all requirements
+// Unified HRMetrics interface with all required properties
 export interface HRMetrics {
   totalEmployees: number;
   newHires: number;
@@ -92,7 +92,7 @@ interface HRDashboardContextType {
   refreshData: () => void;
 }
 
-// Default data para quando os dados reais estão carregando
+// Complete default metrics with all required properties
 const defaultMetrics: HRMetrics = {
   totalEmployees: 0,
   newHires: 0,
@@ -146,23 +146,37 @@ interface HRDashboardProviderProps {
 }
 
 export function HRDashboardProvider({ children }: HRDashboardProviderProps) {
-  // Usar nosso hook real de busca de dados
   const { data, isLoading, error, refetch } = useHRDashboardData();
 
   // Transform metrics to match the complete interface
   const completeMetrics: HRMetrics = {
     ...defaultMetrics,
-    ...data?.metrics,
-    // Map fields that might have different names
-    employeeCount: data?.metrics?.totalEmployees || 0,
-    newEmployees: data?.metrics?.newHires || 0,
-    openPositions: data?.metrics?.activeJobs || 0,
-    pendingOnboarding: data?.metrics?.onboardingProcesses || 0,
-    pendingEvaluations: data?.metrics?.trialEvaluations || 0,
-    developmentPlans: data?.metrics?.developmentPlans || 0
+    // Use data from hook if available, otherwise use defaults
+    totalEmployees: data?.metrics?.totalEmployees || 0,
+    newHires: data?.metrics?.newHires || 0,
+    upcomingEvaluations: data?.metrics?.upcomingEvaluations || 0,
+    pendingTrainings: data?.metrics?.pendingTrainings || 0,
+    departments: data?.metrics?.departments || 0,
+    turnoverRate: data?.metrics?.turnoverRate || 0,
+    averageTenure: data?.metrics?.averageTenure || 0,
+    pendingRecruitments: data?.metrics?.pendingRecruitments || 0,
+    vacationRequests: data?.metrics?.vacationRequests || 0,
+    approvedPositions: data?.metrics?.approvedPositions || 0,
+    filledPositions: data?.metrics?.filledPositions || 0,
+    medicalLeaves: data?.metrics?.medicalLeaves || 0,
+    activeJobs: data?.metrics?.activeJobs || 0,
+    pendingApplications: data?.metrics?.pendingApplications || 0,
+    scheduledInterviews: data?.metrics?.scheduledInterviews || 0,
+    trialEvaluations: data?.metrics?.trialEvaluations || 0,
+    onboardingProcesses: data?.metrics?.onboardingProcesses || 0,
+    pendingOnboarding: data?.metrics?.pendingOnboarding || 0,
+    pendingEvaluations: data?.metrics?.pendingEvaluations || 0,
+    developmentPlans: data?.metrics?.developmentPlans || 0,
+    employeeCount: data?.metrics?.employeeCount || data?.metrics?.totalEmployees || 0,
+    newEmployees: data?.metrics?.newEmployees || data?.metrics?.newHires || 0,
+    openPositions: data?.metrics?.openPositions || data?.metrics?.activeJobs || 0
   };
 
-  // Transformar os dados do hook para o formato esperado
   const dashboardData: HRDashboardData = {
     metrics: completeMetrics,
     departmentDistribution: data?.data?.departmentDistribution || [],
