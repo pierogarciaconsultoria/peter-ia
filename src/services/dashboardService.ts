@@ -10,6 +10,13 @@ export interface DashboardMetrics {
   nextAuditDate: string | null;
 }
 
+export interface MockDashboardData {
+  upcomingAudits: Array<{
+    title: string;
+    date: string;
+  }>;
+}
+
 export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
   try {
     console.log('Dashboard service - using mock data until database setup');
@@ -29,4 +36,19 @@ export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
     console.error("Error fetching dashboard metrics:", error);
     throw error;
   }
+}
+
+export function getMockDashboardData(): MockDashboardData {
+  return {
+    upcomingAudits: [
+      {
+        title: "Auditoria Interna de Qualidade",
+        date: new Date().toISOString()
+      },
+      {
+        title: "Auditoria Externa ISO 9001",
+        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ]
+  };
 }

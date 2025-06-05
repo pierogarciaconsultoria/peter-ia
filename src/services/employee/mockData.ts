@@ -11,7 +11,8 @@ export const mockEmployees: Employee[] = [
     department: "Qualidade",
     phone: "(11) 97654-3210",
     status: "active",
-    hire_date: "2022-03-15"
+    hire_date: "2022-03-15",
+    company_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
   },
   {
     id: "2",
@@ -21,7 +22,8 @@ export const mockEmployees: Employee[] = [
     department: "Qualidade",
     phone: "(11) 98765-4321",
     status: "active",
-    hire_date: "2021-06-10"
+    hire_date: "2021-06-10",
+    company_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
   },
   {
     id: "3",
@@ -31,7 +33,8 @@ export const mockEmployees: Employee[] = [
     department: "Qualidade",
     phone: "(11) 99876-5432",
     status: "active",
-    hire_date: "2020-01-12"
+    hire_date: "2020-01-12",
+    company_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
   },
   {
     id: "4",
@@ -41,6 +44,7 @@ export const mockEmployees: Employee[] = [
     department: "Qualidade",
     phone: "(11) 91234-5678",
     status: "on_leave",
-    hire_date: "2021-09-25"
+    hire_date: "2021-09-25",
+    company_id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
   }
 ];

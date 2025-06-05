@@ -6,7 +6,7 @@ export interface Employee {
   position: string;
   department: string;
   hire_date: string;
-  status: 'active' | 'inactive' | 'pending_onboarding';
+  status: 'active' | 'inactive' | 'pending_onboarding' | 'on_leave';
   company_id: string;
   phone?: string;
   salary?: number;

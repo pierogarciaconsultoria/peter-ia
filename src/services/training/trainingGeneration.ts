@@ -1,114 +1,65 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Training } from "@/types/training";
-import { mapHrTrainingToTraining } from "./trainingMappers";
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Generate trainings for an employee based on job position requirements
- */
-export async function generateTrainingsForEmployee(
-  employeeId: string, 
-  jobPositionId: string, 
-  employeeName: string,
-  departmentName: string
-): Promise<Training[]> {
+export interface TrainingRequirement {
+  id: string;
+  title: string;
+  description: string;
+  frequency: 'annual' | 'biannual' | 'monthly' | 'quarterly';
+  target_audience: string[];
+  related_documents: string[];
+}
+
+export const generateTrainingFromProcedure = async (procedureId: string): Promise<TrainingRequirement[]> => {
   try {
-    const { data: jobPosition, error: jobError } = await supabase
-      .from('job_positions')
-      .select('*')
-      .eq('id', jobPositionId)
-      .single();
+    console.log('Generating training from procedure - using mock data until iso_documents table exists');
     
-    if (jobError) throw jobError;
-    
-    console.log("Job position data:", jobPosition);
-    
-    const requiredProcedures = Array.isArray((jobPosition as any).required_procedures) 
-      ? (jobPosition as any).required_procedures 
-      : [];
-      
-    if (requiredProcedures.length === 0) {
-      console.log("No required procedures found for this position:", jobPositionId);
-      return [];
-    }
-
-    const { data: documents, error: docError } = await supabase
-      .from('iso_documents')
-      .select('*')
-      .in('id', requiredProcedures);
-      
-    if (docError) throw docError;
-    
-    if (!documents || documents.length === 0) {
-      console.log("No documents found for the required procedures:", requiredProcedures);
-      return [];
-    }
-    
-    const trainings: Training[] = [];
-    
-    for (const doc of documents) {
-      const newTrainingData = {
-        title: `Treinamento: ${doc.title}`,
-        description: `Treinamento baseado no documento ${doc.document_code || doc.title}`,
-        instructor: "A definir", // Map to trainer in our interface
-        start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Map to training_date
-        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        duration: 2,
-        department: departmentName,
-        status: 'planned' as const,
-        procedure_id: doc.id,
-        evaluation_method: "A definir",
-        participants: [
-          {
-            id: employeeId,
-            name: employeeName,
-            status: 'confirmed'
-          }
-        ],
-        type: 'required', // Default value for required field
-        company_id: (jobPosition as any).company_id // Adding the required company_id field
-      };
-      
-      const { data, error } = await supabase
-        .from('hr_trainings')
-        .insert(newTrainingData)
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Error creating training for document:", doc.title, error);
-        continue;
+    // Mock training requirements since iso_documents table doesn't exist
+    const mockTrainingRequirements: TrainingRequirement[] = [
+      {
+        id: '1',
+        title: 'Treinamento em Controle de Documentos',
+        description: 'Treinamento obrigatório sobre os procedimentos de controle de documentos conforme ISO 9001',
+        frequency: 'annual',
+        target_audience: ['all_employees'],
+        related_documents: [procedureId]
+      },
+      {
+        id: '2',
+        title: 'Treinamento em Qualidade',
+        description: 'Capacitação em procedimentos de qualidade e melhoria contínua',
+        frequency: 'biannual',
+        target_audience: ['quality_team'],
+        related_documents: [procedureId]
       }
-      
-      // Convert the returned data to our Training interface
-      const newTraining: Training = mapHrTrainingToTraining(data);
-      
-      trainings.push(newTraining);
-    }
-    
-    return trainings;
-  } catch (error) {
-    console.error("Error generating trainings for employee:", error);
-    throw error;
-  }
-}
+    ];
 
-/**
- * Generate a certificate for a completed training
- */
-export async function generateTrainingCertificate(trainingId: string, employeeId: string): Promise<string> {
-  try {
-    // This is a placeholder implementation
-    // In a real application, this would generate a PDF certificate and possibly store it
-    
-    // For now, we'll just return a mock URL
-    const certificateUrl = `https://example.com/certificates/${trainingId}_${employeeId}.pdf`;
-    
-    // In a real implementation, we would update the employee_trainings record with the certificate URL
-    
-    return certificateUrl;
+    return mockTrainingRequirements;
   } catch (error) {
-    console.error("Error generating training certificate:", error);
-    throw error;
+    console.error('Error generating training from procedure:', error);
+    return [];
   }
-}
+};
+
+export const getRelatedDocuments = async (trainingId: string) => {
+  try {
+    console.log('Getting related documents - using mock data until iso_documents table exists');
+    
+    // Mock related documents
+    return [
+      {
+        id: '1',
+        title: 'Manual de Qualidade',
+        document_code: 'MQ-001'
+      },
+      {
+        id: '2', 
+        title: 'Procedimento de Controle de Documentos',
+        document_code: 'PR-001'
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching related documents:', error);
+    return [];
+  }
+};
