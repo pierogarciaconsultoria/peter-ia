@@ -39,7 +39,7 @@ export class SimplifiedSupabaseClient {
   }
 
   // Método para verificar se uma tabela existe (usando query SQL)
-  async tableExists(tableName: string): Promise<boolean> => {
+  async tableExists(tableName: string): Promise<boolean> {
     try {
       // Usar uma consulta SQL para verificar se a tabela existe
       const { data, error } = await supabase
