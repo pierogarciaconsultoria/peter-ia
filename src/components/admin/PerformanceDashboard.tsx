@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SecurityMonitor } from '@/components/auth/SecurityMonitor';
+import { SecurityMonitor } from '@/components/security/SecurityMonitor';
 import { authOptimization } from '@/utils/authOptimization';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckCircle, Clock, Database } from 'lucide-react';
@@ -19,7 +19,10 @@ export const PerformanceDashboard: React.FC = () => {
     // Atualizar estatísticas periodicamente
     const interval = setInterval(() => {
       const stats = authOptimization.getCacheStats();
-      setCacheStats(stats);
+      setCacheStats({
+        size: stats.size,
+        hitRate: stats.hitRate
+      });
       
       // Determinar saúde do sistema baseado nas métricas
       if (stats.size > 1000) {
@@ -31,7 +34,10 @@ export const PerformanceDashboard: React.FC = () => {
       }
     }, 30000); // A cada 30 segundos
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      authOptimization.stopCacheCleanup();
+    };
   }, []);
 
   const handleClearCache = () => {

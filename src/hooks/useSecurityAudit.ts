@@ -9,7 +9,7 @@ export interface SecurityAuditLog {
   action: string;
   user_id: string;
   target_resource?: string;
-  details: Record<string, any>;
+  details: any; // Changed from Record<string, any> to any to match Json type
   status: 'success' | 'denied' | 'error';
   ip_address?: string;
   timestamp: string;
@@ -89,7 +89,7 @@ export const useSecurityAudit = () => {
         throw error;
       }
 
-      return data || [];
+      return (data || []) as SecurityAuditLog[];
     } catch (error) {
       console.error('Erro ao buscar logs de segurança:', error);
       return [];

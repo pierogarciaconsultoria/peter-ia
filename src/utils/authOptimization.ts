@@ -5,11 +5,17 @@ import { supabase } from '@/integrations/supabase/client';
 class AuthOptimization {
   private profileCache = new Map<string, { data: any; timestamp: number }>();
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+  private cleanupInterval: NodeJS.Timeout | null = null;
+  private cacheHits = 0;
+  private totalRequests = 0;
 
   async getUserProfileOptimized(userId: string) {
+    this.totalRequests++;
+    
     // Verificar cache
     const cached = this.profileCache.get(userId);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      this.cacheHits++;
       return cached.data;
     }
 
@@ -64,10 +70,30 @@ class AuthOptimization {
     }
   }
 
+  // Iniciar limpeza automática
+  startCacheCleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+    this.cleanupInterval = setInterval(() => {
+      this.cleanExpiredCache();
+    }, this.CACHE_DURATION);
+  }
+
+  // Parar limpeza automática
+  stopCacheCleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+  }
+
   // Estatísticas do cache
   getCacheStats() {
+    const hitRate = this.totalRequests > 0 ? (this.cacheHits / this.totalRequests) * 100 : 0;
     return {
       size: this.profileCache.size,
+      hitRate: hitRate,
       entries: Array.from(this.profileCache.keys())
     };
   }
