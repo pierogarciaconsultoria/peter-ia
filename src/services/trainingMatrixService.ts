@@ -12,7 +12,8 @@ export interface TrainingMatrix {
   status: 'pending' | 'completed' | 'overdue';
 }
 
-export const getTrainingMatrix = async (companyId: string): Promise<TrainingMatrix[]> => {
+// Implementação das funções do serviço
+const getTrainingMatrix = async (companyId: string): Promise<TrainingMatrix[]> => {
   try {
     console.log('Getting training matrix - using mock data until training_requirements table exists');
     
@@ -45,7 +46,7 @@ export const getTrainingMatrix = async (companyId: string): Promise<TrainingMatr
   }
 };
 
-export const updateTrainingCompletion = async (
+const updateTrainingCompletion = async (
   employeeId: string,
   trainingId: string,
   completed: boolean,
@@ -53,7 +54,6 @@ export const updateTrainingCompletion = async (
 ): Promise<boolean> => {
   try {
     console.log('Updating training completion - mock implementation');
-    // Mock implementation until proper table exists
     return true;
   } catch (error) {
     console.error('Error updating training completion:', error);
@@ -61,7 +61,7 @@ export const updateTrainingCompletion = async (
   }
 };
 
-export const generateComplianceReport = async (companyId: string) => {
+const generateComplianceReport = async (companyId: string) => {
   try {
     console.log('Generating compliance report - mock implementation');
     
@@ -76,4 +76,109 @@ export const generateComplianceReport = async (companyId: string) => {
     console.error('Error generating compliance report:', error);
     return null;
   }
+};
+
+const getEmployeeCompliance = async (companyId: string) => {
+  try {
+    console.log('Getting employee compliance - mock implementation');
+    return [];
+  } catch (error) {
+    console.error('Error fetching employee compliance:', error);
+    return [];
+  }
+};
+
+const getComplianceStats = async (companyId: string) => {
+  try {
+    console.log('Getting compliance stats - mock implementation');
+    return {
+      total: 0,
+      completed: 0,
+      pending: 0,
+      inProgress: 0,
+      overdue: 0,
+      completionRate: 0
+    };
+  } catch (error) {
+    console.error('Error fetching compliance stats:', error);
+    return {
+      total: 0,
+      completed: 0,
+      pending: 0,
+      inProgress: 0,
+      overdue: 0,
+      completionRate: 0
+    };
+  }
+};
+
+const updateEmployeeCompliance = async (id: string, updates: any) => {
+  try {
+    console.log('Updating employee compliance - mock implementation');
+    return true;
+  } catch (error) {
+    console.error('Error updating employee compliance:', error);
+    return false;
+  }
+};
+
+const getJobPositionRequirements = async (companyId: string) => {
+  try {
+    console.log('Getting job position requirements - mock implementation');
+    return [];
+  } catch (error) {
+    console.error('Error fetching job position requirements:', error);
+    return [];
+  }
+};
+
+const createJobPositionRequirement = async (data: any) => {
+  try {
+    console.log('Creating job position requirement - mock implementation');
+    return { id: 'mock-id' };
+  } catch (error) {
+    console.error('Error creating job position requirement:', error);
+    throw error;
+  }
+};
+
+const updateJobPositionRequirement = async (id: string, data: any) => {
+  try {
+    console.log('Updating job position requirement - mock implementation');
+    return { id };
+  } catch (error) {
+    console.error('Error updating job position requirement:', error);
+    throw error;
+  }
+};
+
+const deleteJobPositionRequirement = async (id: string) => {
+  try {
+    console.log('Deleting job position requirement - mock implementation');
+    return true;
+  } catch (error) {
+    console.error('Error deleting job position requirement:', error);
+    throw error;
+  }
+};
+
+// Exportar como objeto de serviço
+export const TrainingMatrixService = {
+  getTrainingMatrix,
+  updateTrainingCompletion,
+  generateComplianceReport,
+  getEmployeeCompliance,
+  getComplianceStats,
+  updateEmployeeCompliance,
+  getJobPositionRequirements,
+  createJobPositionRequirement,
+  updateJobPositionRequirement,
+  deleteJobPositionRequirement
+};
+
+// Exportações individuais para compatibilidade
+export {
+  getTrainingMatrix,
+  updateTrainingCompletion,
+  generateComplianceReport
 };

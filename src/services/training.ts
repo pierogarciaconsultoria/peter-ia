@@ -69,7 +69,8 @@ export const fetchTrainings = async (filters?: TrainingFilters): Promise<Trainin
       evaluation_method: training.evaluation_method || 'assessment',
       created_at: training.created_at,
       updated_at: training.updated_at,
-      company_id: training.empresa_id || training.company_id || ''
+      // Use empresa_id if company_id doesn't exist, or fallback to empty string
+      company_id: training.empresa_id || ''
     }));
 
     return trainings;

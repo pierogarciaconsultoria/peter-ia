@@ -63,3 +63,22 @@ export const getRelatedDocuments = async (trainingId: string) => {
     return [];
   }
 };
+
+export const generateTrainingCertificate = async (trainingId: string, employeeId: string) => {
+  try {
+    console.log('Generating training certificate - mock implementation');
+    
+    // Mock certificate generation
+    return {
+      id: 'cert-' + Date.now(),
+      training_id: trainingId,
+      employee_id: employeeId,
+      certificate_url: '/mock-certificate.pdf',
+      issued_date: new Date().toISOString(),
+      valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year
+    };
+  } catch (error) {
+    console.error('Error generating training certificate:', error);
+    throw error;
+  }
+};
