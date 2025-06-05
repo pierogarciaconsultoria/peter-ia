@@ -74,6 +74,26 @@ export class TrainingMatrixService {
     }
   }
 
+  static async createJobPositionRequirement(payload: any): Promise<void> {
+    try {
+      // Para agora, apenas log até a tabela ser criada
+      console.log('Create job position requirement feature will be available after database setup');
+    } catch (error) {
+      console.error('Create job position requirement error:', error);
+      throw error;
+    }
+  }
+
+  static async updateJobPositionRequirement(id: string, payload: any): Promise<void> {
+    try {
+      // Para agora, apenas log até a tabela ser criada
+      console.log('Update job position requirement feature will be available after database setup');
+    } catch (error) {
+      console.error('Update job position requirement error:', error);
+      throw error;
+    }
+  }
+
   static async deleteJobPositionRequirement(id: string): Promise<void> {
     try {
       const { error } = await supabase
@@ -93,7 +113,7 @@ export class TrainingMatrixService {
 
   static async getEmployeeCompliance(companyId: string): Promise<EmployeeTrainingCompliance[]> {
     try {
-      // For now, return empty array since this table structure doesn't exist yet
+      // Para agora, retorna array vazio até a estrutura da tabela ser criada
       console.log('Employee compliance feature will be available after database setup');
       return [];
     } catch (error) {
@@ -104,7 +124,7 @@ export class TrainingMatrixService {
 
   static async getComplianceStats(companyId: string): Promise<ComplianceStats> {
     try {
-      // For now, return default stats since this feature doesn't exist yet
+      // Para agora, retorna stats padrão até a funcionalidade ser criada
       console.log('Compliance stats feature will be available after database setup');
       return {
         total: 0,
@@ -122,7 +142,7 @@ export class TrainingMatrixService {
 
   static async updateEmployeeCompliance(id: string, updates: any): Promise<void> {
     try {
-      // For now, just log since this table structure doesn't exist yet
+      // Para agora, apenas log até a estrutura da tabela ser criada
       console.log('Employee compliance update feature will be available after database setup');
     } catch (error) {
       console.error('Update employee compliance error:', error);

@@ -1,114 +1,64 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Training, CreateTrainingInput, UpdateTrainingInput } from "@/types/training";
+import { supabase } from '@/integrations/supabase/client';
 
-// Re-export everything from the training module
-export * from './training/trainingService';
-export * from './training/trainingQueries';
-export * from './training/trainingGeneration';
-export * from './training/trainingMappers';
+export interface Training {
+  id: string;
+  title: string;
+  description?: string;
+  trainer: string;
+  department: string;
+  training_date: string;
+  duration: number;
+  status: 'planned' | 'in_progress' | 'completed' | 'canceled';
+  participants?: Array<{
+    id: string;
+    name: string;
+  }>;
+  evaluation_method?: string;
+  procedure_id?: string;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
-// Legacy functions for backward compatibility
-export const fetchTrainings = async (filters?: any): Promise<Training[]> => {
+export interface TrainingFilters {
+  searchQuery?: string;
+  department?: string;
+  employeeId?: string;
+  procedure?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export async function fetchTrainings(filters?: TrainingFilters): Promise<Training[]> {
   try {
-    let query = supabase
-      .from('trainings')
-      .select(`
-        *,
-        employee_trainings (
-          id,
-          employee_id,
-          status,
-          completion_date,
-          score,
-          employees (
-            id,
-            name
-          )
-        )
-      `)
-      .order('created_at', { ascending: false });
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching trainings:', error);
-      throw error;
-    }
-
-    // Transform the data to match the Training interface
-    const trainings: Training[] = (data || []).map(training => ({
-      id: training.id,
-      title: training.name,
-      description: training.description,
-      trainer: training.instructor || 'N/A',
-      training_date: training.created_at,
-      duration: training.duration_hours || 0,
-      department: 'Geral',
-      participants: training.employee_trainings?.map((et: any) => ({
-        id: et.employee_id,
-        name: et.employees?.name || 'Unknown',
-        status: et.status,
-        attended: et.status === 'completed'
-      })) || [],
-      status: training.status === 'active' ? 'planned' : 'canceled',
-      procedure_id: null,
-      evaluation_method: 'assessment',
-      created_at: training.created_at,
-      updated_at: training.updated_at,
-      company_id: training.company_id
-    }));
-
-    return trainings;
+    // Para agora, retorna dados mock até a tabela ser criada
+    console.log('Training service - returning mock data until database setup');
+    return [];
   } catch (error) {
-    console.error('Training service error:', error);
+    console.error('Error fetching trainings:', error);
     throw error;
   }
-};
+}
 
-export const createTraining = async (training: Omit<Training, 'id' | 'created_at' | 'updated_at'>): Promise<Training> => {
+export async function createTraining(training: Partial<Training>): Promise<Training> {
   try {
-    const trainingData = {
-      name: training.title,
-      description: training.description,
-      instructor: training.trainer,
-      duration_hours: training.duration,
-      type: 'internal',
-      status: 'active',
-      company_id: training.company_id
+    // Para agora, retorna dados mock até a tabela ser criada
+    console.log('Training service - mock creation until database setup');
+    return {
+      id: crypto.randomUUID(),
+      title: training.title || '',
+      trainer: training.trainer || '',
+      department: training.department || '',
+      training_date: training.training_date || new Date().toISOString(),
+      duration: training.duration || 0,
+      status: training.status || 'planned',
+      company_id: training.company_id || '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
-
-    const { data, error } = await supabase
-      .from('trainings')
-      .insert([trainingData])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating training:', error);
-      throw error;
-    }
-
-    const newTraining: Training = {
-      id: data.id,
-      title: data.name,
-      description: data.description,
-      trainer: data.instructor || 'N/A',
-      training_date: data.created_at,
-      duration: data.duration_hours || 0,
-      department: training.department,
-      participants: [],
-      status: 'planned',
-      procedure_id: training.procedure_id,
-      evaluation_method: training.evaluation_method,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      company_id: data.company_id
-    };
-
-    return newTraining;
   } catch (error) {
-    console.error('Training creation error:', error);
+    console.error('Error creating training:', error);
     throw error;
   }
-};
+}

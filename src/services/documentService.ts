@@ -28,13 +28,13 @@ export interface ISODocument {
 }
 
 export async function fetchDocumentsForRequirement(requirementId: string): Promise<ISODocument[]> {
-  // For now, return empty array since table doesn't exist yet
+  // Para agora, retorna array vazio até a tabela ser criada
   console.log('Documents feature will be available after database setup');
   return [];
 }
 
 export async function createDocumentTemplate(document: Partial<ISODocument>): Promise<ISODocument> {
-  // For now, return a mock document since table doesn't exist yet
+  // Para agora, retorna documento mock até a tabela ser criada
   console.log('Documents feature will be available after database setup');
   return {
     id: crypto.randomUUID(),

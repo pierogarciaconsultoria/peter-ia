@@ -80,7 +80,7 @@ interface HRDashboardContextType {
   refreshData: () => void;
 }
 
-// Default data for when the real data is loading
+// Default data para quando os dados reais estão carregando
 const defaultData: HRDashboardData = {
   metrics: {
     totalEmployees: 0,
@@ -121,11 +121,24 @@ interface HRDashboardProviderProps {
 }
 
 export function HRDashboardProvider({ children }: HRDashboardProviderProps) {
-  // Use our real data fetching hook
+  // Usar nosso hook real de busca de dados
   const { data, isLoading, error, refetch } = useHRDashboardData();
 
+  // Transformar os dados do hook para o formato esperado
+  const dashboardData: HRDashboardData = {
+    metrics: data?.metrics || defaultData.metrics,
+    departmentDistribution: data?.data?.departmentDistribution || [],
+    turnoverData: data?.data?.turnoverData || [],
+    recruitmentStatus: data?.data?.recruitmentStatus || [],
+    trainingCompletionData: data?.data?.trainingCompletionData || [],
+    evaluationScores: data?.data?.evaluationScores || [],
+    salaryComparisonData: data?.data?.salaryComparisonData || [],
+    employeeCostsData: data?.data?.employeeCostsData || [],
+    discDistribution: data?.data?.discDistribution || []
+  };
+
   const value = {
-    dashboardData: data || defaultData,
+    dashboardData,
     isLoading,
     error: error ? new Error(error) : null,
     refreshData: refetch

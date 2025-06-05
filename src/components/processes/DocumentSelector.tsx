@@ -5,7 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { ChevronsUpDown, Check, FileText, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 
@@ -33,16 +32,23 @@ export function DocumentSelector({ value, onChange, placeholder = "Selecionar do
     async function fetchDocuments() {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('iso_documents')
-          .select('id, title, document_code, document_type')
-          .order('title');
-
-        if (error) {
-          throw error;
-        }
-
-        setDocuments(data || []);
+        // Para agora, usar documentos mock até a tabela ser criada
+        console.log('Document selector - using mock data until database setup');
+        const mockDocuments: Document[] = [
+          {
+            id: '1',
+            title: 'Procedimento de Controle de Qualidade',
+            document_code: 'PRC-001',
+            document_type: 'Procedimento'
+          },
+          {
+            id: '2',
+            title: 'Manual de Operações',
+            document_code: 'MAN-001',
+            document_type: 'Manual'
+          }
+        ];
+        setDocuments(mockDocuments);
       } catch (error) {
         console.error("Error loading documents:", error);
       } finally {

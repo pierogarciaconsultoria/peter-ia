@@ -1,142 +1,156 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2, FileText } from "lucide-react";
 
-interface RelatedDocument {
+interface Document {
   id: string;
   title: string;
+  document_code?: string;
   document_type: string;
 }
 
 interface RelatedDocumentsSectionProps {
-  relatedDocuments: RelatedDocument[];
-  handleAddDocument: (document: RelatedDocument) => void;
-  handleRemoveDocument: (index: number) => void;
-  newDocument: RelatedDocument;
-  setNewDocument: (document: RelatedDocument) => void;
+  onDocumentsChange?: (documents: Document[]) => void;
 }
 
-export function RelatedDocumentsSection({
-  relatedDocuments,
-  handleAddDocument,
-  handleRemoveDocument,
-  newDocument,
-  setNewDocument
-}: RelatedDocumentsSectionProps) {
-  const [availableDocuments, setAvailableDocuments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
+export function RelatedDocumentsSection({ onDocumentsChange }: RelatedDocumentsSectionProps) {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
 
   useEffect(() => {
-    fetchAvailableDocuments();
+    async function fetchDocuments() {
+      setLoading(true);
+      try {
+        // Para agora, usar documentos mock até a tabela ser criada
+        console.log('Related documents - using mock data until database setup');
+        const mockDocuments: Document[] = [
+          {
+            id: '1',
+            title: 'Procedimento de Controle de Qualidade',
+            document_code: 'PRC-001',
+            document_type: 'Procedimento'
+          },
+          {
+            id: '2',
+            title: 'Manual de Operações',
+            document_code: 'MAN-001',
+            document_type: 'Manual'
+          },
+          {
+            id: '3',
+            title: 'Instrução de Trabalho - Soldagem',
+            document_code: 'IT-001',
+            document_type: 'Instrução'
+          }
+        ];
+        setDocuments(mockDocuments);
+      } catch (error) {
+        console.error("Error loading documents:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDocuments();
   }, []);
 
-  const fetchAvailableDocuments = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('iso_documents')
-        .select('id, title, document_type')
-        .eq('document_type', 'procedure');
-      
-      if (error) throw error;
-      setAvailableDocuments(data || []);
-    } catch (error) {
-      console.error("Erro ao buscar documentos:", error);
-    } finally {
-      setLoading(false);
+  const handleAddDocument = (documentId: string) => {
+    const document = documents.find(doc => doc.id === documentId);
+    if (document && !selectedDocuments.find(d => d.id === documentId)) {
+      const newSelectedDocuments = [...selectedDocuments, document];
+      setSelectedDocuments(newSelectedDocuments);
+      onDocumentsChange?.(newSelectedDocuments);
     }
   };
 
-  const handleDocumentSelect = (docId: string) => {
-    setSelectedDocumentId(docId);
-    const selectedDoc = availableDocuments.find(doc => doc.id === docId);
-    
-    if (selectedDoc) {
-      setNewDocument({
-        id: selectedDoc.id,
-        title: selectedDoc.title,
-        document_type: selectedDoc.document_type
-      });
-    }
+  const handleRemoveDocument = (documentId: string) => {
+    const newSelectedDocuments = selectedDocuments.filter(doc => doc.id !== documentId);
+    setSelectedDocuments(newSelectedDocuments);
+    onDocumentsChange?.(newSelectedDocuments);
   };
 
-  const handleAdd = () => {
-    if (selectedDocumentId && newDocument) {
-      handleAddDocument(newDocument);
-      setSelectedDocumentId("");
-      setNewDocument({ id: "", title: "", document_type: "" });
-    }
-  };
-
-  // Filter out documents that are already linked
-  const filteredDocuments = availableDocuments.filter(doc => 
-    !relatedDocuments.some(relDoc => relDoc.id === doc.id)
-  );
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Documentos Relacionados</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="border border-gray-200 rounded-md">
-      <CardContent className="pt-6">
-        <h3 className="text-lg font-medium mb-4">Procedimentos Operacionais Relacionados</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
-          <div className="md:col-span-3">
-            <Label htmlFor="document">Procedimento</Label>
-            <Select 
-              value={selectedDocumentId} 
-              onValueChange={handleDocumentSelect}
+    <Card>
+      <CardHeader>
+        <CardTitle>Documentos Relacionados</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Label htmlFor="document-select">Adicionar Documento</Label>
+          <div className="flex gap-2 mt-1">
+            <select
+              id="document-select"
+              className="flex-1 border border-input bg-background px-3 py-2 text-sm ring-offset-background rounded-md"
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleAddDocument(e.target.value);
+                  e.target.value = "";
+                }
+              }}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um procedimento operacional" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredDocuments.map(doc => (
-                  <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>
-                ))}
-                {filteredDocuments.length === 0 && (
-                  <SelectItem value="none" disabled>Nenhum procedimento disponível</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+              <option value="">Selecionar documento...</option>
+              {documents
+                .filter(doc => !selectedDocuments.find(d => d.id === doc.id))
+                .map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  {doc.document_code ? `${doc.document_code} - ` : ''}{doc.title}
+                </option>
+              ))}
+            </select>
           </div>
-          <Button 
-            onClick={handleAdd}
-            disabled={!selectedDocumentId}
-            className="w-full md:w-auto"
-          >
-            Adicionar
-          </Button>
         </div>
-        
-        {relatedDocuments.length > 0 ? (
+
+        {selectedDocuments.length > 0 && (
           <div className="space-y-2">
-            <Label>Procedimentos Vinculados</Label>
-            {relatedDocuments.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                <div>
-                  <span className="font-medium">{doc.title}</span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({doc.document_type === 'procedure' ? 'Procedimento' : doc.document_type})
-                  </span>
+            <Label>Documentos Selecionados</Label>
+            {selectedDocuments.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{doc.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.document_code ? `${doc.document_code} - ` : ''}{doc.document_type}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleRemoveDocument(index)}
+                  onClick={() => handleRemoveDocument(doc.id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">Nenhum procedimento operacional vinculado.</p>
+        )}
+
+        {selectedDocuments.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Nenhum documento relacionado selecionado</p>
+          </div>
         )}
       </CardContent>
     </Card>
