@@ -50,7 +50,12 @@ export class SimplifiedSupabaseClient {
         return false;
       }
       
-      return data || false;
+      // Verificar se data é um array e pegar o primeiro elemento
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0]?.table_exists || false;
+      }
+      
+      return Boolean(data);
     } catch (error) {
       logger.error('SimplifiedSupabaseClient', 'Erro inesperado ao verificar tabela', error);
       return false;

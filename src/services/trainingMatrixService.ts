@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { TrainingMatrixData, JobPositionTrainingRequirement, EmployeeTrainingCompliance, ComplianceStats } from '@/types/trainingMatrix';
 
 export interface TrainingMatrix {
   id: string;
@@ -13,33 +14,58 @@ export interface TrainingMatrix {
 }
 
 // Implementação das funções do serviço
-const getTrainingMatrix = async (companyId: string): Promise<TrainingMatrix[]> => {
+const getTrainingMatrix = async (companyId: string): Promise<TrainingMatrixData[]> => {
   try {
     console.log('Getting training matrix - using mock data until training_requirements table exists');
     
-    // Mock training matrix data since training_requirements table doesn't exist
-    const mockMatrix: TrainingMatrix[] = [
+    // Mock training matrix data transformed to TrainingMatrixData format
+    const mockMatrixData: TrainingMatrixData[] = [
       {
-        id: '1',
-        employee_id: '1',
-        training_id: '1',
-        required: true,
-        completed: false,
-        due_date: '2024-12-31',
-        status: 'pending'
-      },
-      {
-        id: '2',
-        employee_id: '2',
-        training_id: '1',
-        required: true,
-        completed: true,
-        completion_date: '2024-01-15',
-        status: 'completed'
+        jobPosition: {
+          id: '1',
+          title: 'Inspetor de Qualidade',
+          department: 'Qualidade'
+        },
+        requirements: [
+          {
+            id: '1',
+            job_position_id: '1',
+            training_id: '1',
+            is_mandatory: true,
+            completion_deadline_days: 30,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            company_id: companyId,
+            training: {
+              id: '1',
+              title: 'Treinamento em Controle de Qualidade',
+              description: 'Treinamento básico em procedimentos de qualidade'
+            }
+          }
+        ],
+        compliance: [
+          {
+            id: '1',
+            employee_id: '1',
+            requirement_id: '1',
+            status: 'pending',
+            assigned_date: new Date().toISOString(),
+            due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            company_id: companyId,
+            employee: {
+              id: '1',
+              name: 'João Silva',
+              position: 'Inspetor de Qualidade',
+              department: 'Qualidade'
+            }
+          }
+        ]
       }
     ];
 
-    return mockMatrix;
+    return mockMatrixData;
   } catch (error) {
     console.error('Error fetching training matrix:', error);
     return [];
@@ -78,7 +104,7 @@ const generateComplianceReport = async (companyId: string) => {
   }
 };
 
-const getEmployeeCompliance = async (companyId: string) => {
+const getEmployeeCompliance = async (companyId: string): Promise<EmployeeTrainingCompliance[]> => {
   try {
     console.log('Getting employee compliance - mock implementation');
     return [];
@@ -88,7 +114,7 @@ const getEmployeeCompliance = async (companyId: string) => {
   }
 };
 
-const getComplianceStats = async (companyId: string) => {
+const getComplianceStats = async (companyId: string): Promise<ComplianceStats> => {
   try {
     console.log('Getting compliance stats - mock implementation');
     return {
@@ -122,7 +148,7 @@ const updateEmployeeCompliance = async (id: string, updates: any) => {
   }
 };
 
-const getJobPositionRequirements = async (companyId: string) => {
+const getJobPositionRequirements = async (companyId: string): Promise<JobPositionTrainingRequirement[]> => {
   try {
     console.log('Getting job position requirements - mock implementation');
     return [];
