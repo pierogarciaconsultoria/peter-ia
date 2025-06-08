@@ -40,8 +40,8 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatisticCard title="Total de Usuários" value={metrics.totalEmployees} description="Usuários registrados" />
         <StatisticCard title="Usuários Ativos" value={metrics.employeeCount} description="Usuários ativos na última semana" />
-        <StatisticCard title="Receita Total" value={25000} description="Receita gerada no último mês" />
-        <StatisticCard title="Taxa de Conclusão de Tarefas" value={85} description="Média de tarefas concluídas" />
+        <StatisticCard title="Receita Total" value="R$ 25.000" description="Receita gerada no último mês" />
+        <StatisticCard title="Taxa de Conclusão de Tarefas" value="85%" description="Média de tarefas concluídas" />
       </div>
 
       {/* Nova seção com ISO Dashboard Widget e Quick Access */}

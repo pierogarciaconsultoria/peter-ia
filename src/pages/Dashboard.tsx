@@ -38,7 +38,7 @@ export default function Dashboard() {
           <CardDescription>Acompanhamento do Sistema de Gestão da Qualidade</CardDescription>
         </CardHeader>
         
-        <DashboardComponent requirements={requirements} />
+        <DashboardComponent />
         
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-6">Requisitos da ISO 9001:2015</h2>
