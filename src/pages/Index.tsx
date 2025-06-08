@@ -42,7 +42,7 @@ const Index = () => {
           <CompanyInfoCard />
         </div>
         
-        <Dashboard requirements={isoRequirements} />
+        <Dashboard />
         
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-6">Requisitos da ISO 9001:2015</h2>
