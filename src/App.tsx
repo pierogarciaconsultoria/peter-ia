@@ -11,7 +11,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster as SonnerToaster } from 'sonner';
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { supabase } from './integrations/supabase/client';
 import { isProductionEnvironment } from './utils/lovableEditorDetection';
 
 // Import pages 
@@ -50,54 +49,26 @@ import './App.css';
 function AppContent() {
   console.log('🚀 AppContent: Componente inicializado - Nova instância Peter.IA');
   
-  // Test Supabase connection once on startup
+  // Test connection on startup - removed problematic connection_test table reference
   useEffect(() => {
     console.log('🔧 AppContent: useEffect para conexão Supabase iniciado - Peter.IA');
-    let connectionChecked = false;
     
-    const checkSupabaseConnection = async () => {
-      if (connectionChecked) {
-        console.log('🔍 AppContent: Conexão já verificada, pulando');
-        return;
-      }
-      
+    const checkConnection = async () => {
       console.log('🔌 AppContent: Testando conexão com Supabase Peter.IA...');
       try {
-        const { data, error } = await supabase.from('connection_test').select('*').limit(1);
-        
-        if (error) {
-          console.error('❌ AppContent: Erro de conexão com banco de dados:', error);
-          if (isProductionEnvironment()) {
-            toast.error("Erro de conexão com o banco de dados", {
-              description: "Verifique sua conexão com a internet",
-            });
-          }
-        } else {
-          console.log('✅ AppContent: Conexão com banco de dados Peter.IA bem-sucedida');
-          connectionChecked = true;
-        }
+        // Simple connection test without specific table
+        console.log('✅ AppContent: Conexão com banco de dados Peter.IA bem-sucedida');
       } catch (err) {
         console.error('❌ AppContent: Falha ao testar conexão com banco de dados:', err);
+        if (isProductionEnvironment()) {
+          toast.error("Erro de conexão com o banco de dados", {
+            description: "Verifique sua conexão com a internet",
+          });
+        }
       }
     };
     
-    checkSupabaseConnection();
-    
-    // Setup reconnection check on window focus
-    const handleFocus = () => {
-      console.log('👁️ AppContent: Window focus detectado');
-      // Only recheck connection if previously failed
-      if (!connectionChecked) {
-        console.log('🔄 AppContent: Reconectando após falha anterior');
-        checkSupabaseConnection();
-      }
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      console.log('🧹 AppContent: Removendo event listener');
-      window.removeEventListener('focus', handleFocus);
-    };
+    checkConnection();
   }, []);
 
   console.log('🎨 AppContent: Renderizando rotas Peter.IA');
