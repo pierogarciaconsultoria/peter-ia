@@ -1,31 +1,60 @@
 
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 /**
- * Mock connection test since connection_test table doesn't exist
+ * Tests the connection to Supabase by running a simple query
+ * and returning the results along with connection status
  */
 export async function testSupabaseConnection() {
   try {
     console.log("Testing Supabase connection...");
     
-    // Simulate connection test
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Try to query the connection_test table
+    const { data, error } = await supabase
+      .from('connection_test')
+      .select('*')
+      .order('connection_time', { ascending: false })
+      .limit(1);
     
-    console.log("Mock Supabase connection successful!");
-    toast.success("Connected to Supabase successfully (mock)");
+    if (error) {
+      console.error("Supabase connection error:", error);
+      toast.error("Failed to connect to Supabase database");
+      return {
+        success: false,
+        error: error.message,
+        details: error
+      };
+    }
+    
+    // Record a new connection test entry
+    const { error: insertError } = await supabase
+      .from('connection_test')
+      .insert([
+        { message: `Connection test at ${new Date().toISOString()}` }
+      ]);
+    
+    if (insertError) {
+      console.warn("Could read but not write to Supabase:", insertError);
+      return {
+        success: true,
+        readOnly: true,
+        lastConnection: data?.[0] || null,
+        error: insertError.message
+      };
+    }
+    
+    console.log("Supabase connection successful!");
+    toast.success("Connected to Supabase successfully");
     
     return {
       success: true,
       readOnly: false,
-      lastConnection: {
-        id: '1',
-        message: `Mock connection test at ${new Date().toISOString()}`,
-        connection_time: new Date().toISOString()
-      }
+      lastConnection: data?.[0] || null
     };
   } catch (e: any) {
-    console.error("Mock error testing Supabase connection:", e);
-    toast.error("Failed to connect to Supabase: Mock error");
+    console.error("Unexpected error testing Supabase connection:", e);
+    toast.error("Failed to connect to Supabase: Unexpected error");
     return {
       success: false,
       error: e.message || "Unknown error",
@@ -35,26 +64,48 @@ export async function testSupabaseConnection() {
 }
 
 /**
- * Mock table structure verification
+ * Verifies if a specific table exists and has the expected structure
  */
 export async function verifyTableStructure(tableName: string) {
   try {
-    // Simulate table check
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // First check if we can access the table
+    // Use type assertion to handle dynamic table names
+    const { data, error } = await supabase
+      .from(tableName as any)
+      .select('*')
+      .limit(1);
     
-    console.log(`Mock verification for table ${tableName}`);
+    if (error) {
+      console.error(`Error accessing table ${tableName}:`, error);
+      return {
+        exists: false,
+        accessible: false,
+        error: error.message
+      };
+    }
+    
+    // Get table structure info from postgres
+    // Use type assertion for RPC function call
+    const { data: columns, error: columnsError } = await supabase
+      .rpc('get_table_columns' as any, { table_name: tableName });
+    
+    if (columnsError) {
+      console.warn(`Could not retrieve column info for ${tableName}:`, columnsError);
+      return {
+        exists: true,
+        accessible: true,
+        columns: null,
+        error: columnsError.message
+      };
+    }
     
     return {
       exists: true,
       accessible: true,
-      columns: [
-        { column_name: 'id', data_type: 'uuid' },
-        { column_name: 'created_at', data_type: 'timestamp with time zone' },
-        { column_name: 'updated_at', data_type: 'timestamp with time zone' }
-      ]
+      columns: columns
     };
   } catch (e: any) {
-    console.error(`Mock error verifying table ${tableName}:`, e);
+    console.error(`Error verifying table ${tableName}:`, e);
     return {
       exists: false,
       error: e.message || "Unknown error",
@@ -64,24 +115,29 @@ export async function verifyTableStructure(tableName: string) {
 }
 
 /**
- * Mock function creation
+ * Creates a database function to get column information for a table
+ * This helps examine table structure without direct access to information_schema
  */
 export async function createColumnInfoFunction() {
   try {
-    console.log("Mock: Creating column info function");
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Use type assertion for RPC function call
+    const { error } = await supabase.rpc('create_column_info_function' as any);
+    if (error) {
+      console.error("Could not create column info function:", error);
+      return false;
+    }
     return true;
   } catch (e) {
-    console.error("Mock error creating column info function:", e);
+    console.error("Error creating column info function:", e);
     return false;
   }
 }
 
 /**
- * Mock comprehensive database connection test
+ * Initializes and runs a comprehensive database connection test
  */
 export async function initializeSupabaseConnection() {
-  // Mock function creation
+  // Create the helper function if it doesn't exist
   await createColumnInfoFunction();
   
   // Test basic connection
@@ -94,7 +150,7 @@ export async function initializeSupabaseConnection() {
     };
   }
   
-  // Check critical tables (mock)
+  // Check critical tables
   const tables = [
     'job_positions', 
     'employees', 

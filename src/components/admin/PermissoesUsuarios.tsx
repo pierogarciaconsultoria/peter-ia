@@ -72,10 +72,10 @@ export function PermissoesUsuarios() {
         const { data: usuariosData, error: usuariosError } = await query;
         if (usuariosError) throw usuariosError;
         
-        // Carregar empresas para associar aos usuários - using correct table name
-        const { data: empresasData } = await supabase.from('companies').select('id, name');
+        // Carregar empresas para associar aos usuários
+        const { data: empresasData } = await supabase.from('empresas').select('id, nome');
         const empresasMap = (empresasData || []).reduce((acc, empresa) => {
-          acc[empresa.id] = empresa.name;
+          acc[empresa.id] = empresa.nome;
           return acc;
         }, {} as Record<string, string>);
         

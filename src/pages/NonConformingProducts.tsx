@@ -1,317 +1,341 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
+import { Navigation } from "@/components/Navigation";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Filter, FileText, Package, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import NonConformingProductForm from "@/components/NonConformingProductForm";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle, CheckCircle, Clock, Filter, Package } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { Dashboard } from "@/components/Dashboard";
-import { 
-  getNonConformingProducts, 
-  type NonConformingProduct 
-} from "@/services/nonConformingProductService";
+import { isoRequirements } from "@/utils/isoRequirements";
+import NonConformingProductForm from "@/components/NonConformingProductForm";
+import { NonConformingProductsDashboard } from "@/components/NonConformingProductsDashboard";
 
-export default function NonConformingProducts() {
-  const [products, setProducts] = useState<NonConformingProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [selectedProduct, setSelectedProduct] = useState<NonConformingProduct | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+type NonConformingProduct = {
+  id: string;
+  product_name: string;
+  description: string;
+  status: "identified" | "isolated" | "reviewed" | "resolved";
+  severity: "low" | "medium" | "high";
+  created_at: string;
+  requirement_id: string;
+  department: string;
+  customer: string;
+  non_conformity_type: string;
+  immediate_action: string;
+  approval_status: "approved" | "rejected" | "pending";
+};
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await getNonConformingProducts();
-      setProducts(data);
-    } catch (error) {
-      console.error('Error loading non-conforming products:', error);
-      toast.error("Erro ao carregar produtos não conformes");
-    } finally {
-      setLoading(false);
+const fetchNonConformingProducts = async () => {
+  // This would normally fetch from the database
+  // For now, we'll return mock data
+  const mockData: NonConformingProduct[] = [
+    {
+      id: "1",
+      product_name: "Produto A-123",
+      description: "Falha no acabamento da superfície identificada durante inspeção final.",
+      status: "identified",
+      severity: "high",
+      created_at: new Date().toISOString(),
+      requirement_id: "8.7",
+      department: "Produção",
+      customer: "Cliente A",
+      non_conformity_type: "Defeito de acabamento",
+      immediate_action: "Segregação",
+      approval_status: "pending"
+    },
+    {
+      id: "2",
+      product_name: "Componente B-456",
+      description: "Dimensões fora da especificação tolerada. Produto isolado para análise de causa raiz.",
+      status: "isolated",
+      severity: "medium",
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.1",
+      department: "Controle de Qualidade",
+      customer: "Cliente B",
+      non_conformity_type: "Dimensão incorreta",
+      immediate_action: "Retrabalho",
+      approval_status: "approved"
+    },
+    {
+      id: "3",
+      product_name: "Conjunto C-789",
+      description: "Falta de conformidade com especificações técnicas. Analisado e aprovado com concessão.",
+      status: "reviewed",
+      severity: "low",
+      created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.2",
+      department: "Engenharia",
+      customer: "Cliente A",
+      non_conformity_type: "Especificação técnica",
+      immediate_action: "Concessão",
+      approval_status: "approved"
+    },
+    {
+      id: "4",
+      product_name: "Peça D-012",
+      description: "Problema de qualidade resolvido após retrabalho. Liberado para uso.",
+      status: "resolved",
+      severity: "medium",
+      created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7",
+      department: "Produção",
+      customer: "Cliente C",
+      non_conformity_type: "Problema de qualidade",
+      immediate_action: "Retrabalho",
+      approval_status: "approved"
+    },
+    {
+      id: "5",
+      product_name: "Módulo E-345",
+      description: "Componente com falha funcional detectada em teste.",
+      status: "identified",
+      severity: "high",
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7",
+      department: "Teste",
+      customer: "Cliente D",
+      non_conformity_type: "Falha funcional",
+      immediate_action: "Segregação",
+      approval_status: "rejected"
+    },
+    {
+      id: "6",
+      product_name: "Conjunto F-678",
+      description: "Desalinhamento de componentes durante montagem.",
+      status: "isolated",
+      severity: "medium",
+      created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.1",
+      department: "Montagem",
+      customer: "Cliente B",
+      non_conformity_type: "Problema de montagem",
+      immediate_action: "Desmontagem e remontagem",
+      approval_status: "approved"
+    },
+    {
+      id: "7",
+      product_name: "Produto A-123",
+      description: "Matéria-prima fora das especificações.",
+      status: "reviewed",
+      severity: "high",
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      requirement_id: "8.7.2",
+      department: "Almoxarifado",
+      customer: "Cliente A",
+      non_conformity_type: "Matéria-prima não conforme",
+      immediate_action: "Devolução ao fornecedor",
+      approval_status: "approved"
     }
-  };
+  ];
+  
+  return mockData;
+};
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
-    const matchesSeverity = severityFilter === "all" || product.severity === severityFilter;
-    
-    return matchesSearch && matchesStatus && matchesSeverity;
+const NonConformingProducts = () => {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [registerFormOpen, setRegisterFormOpen] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(true);
+  
+  const { data: nonConformingProducts = [], isLoading, error } = useQuery({
+    queryKey: ["nonConformingProducts"],
+    queryFn: fetchNonConformingProducts
   });
-
-  const getStatusColor = (status: string) => {
+  
+  const filteredProducts = statusFilter 
+    ? nonConformingProducts.filter(item => item.status === statusFilter)
+    : nonConformingProducts;
+  
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'identified': return 'bg-red-100 text-red-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'approved': return 'bg-blue-100 text-blue-800';
-      case 'rejected': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "identified":
+        return <AlertTriangle className="h-5 w-5 text-red-500" />;
+      case "isolated":
+        return <Clock className="h-5 w-5 text-amber-500" />;
+      case "reviewed":
+        return <Clock className="h-5 w-5 text-blue-500" />;
+      case "resolved":
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      default:
+        return null;
     }
   };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'low': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'critical': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
+  
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'identified': return 'Identificado';
-      case 'in_progress': return 'Em Progresso';
-      case 'resolved': return 'Resolvido';
-      case 'approved': return 'Aprovado';
-      case 'rejected': return 'Rejeitado';
-      default: return status;
+      case "identified":
+        return "Identificado";
+      case "isolated":
+        return "Isolado";
+      case "reviewed":
+        return "Analisado";
+      case "resolved":
+        return "Resolvido";
+      default:
+        return status;
     }
   };
-
+  
   const getSeverityLabel = (severity: string) => {
     switch (severity) {
-      case 'low': return 'Baixa';
-      case 'medium': return 'Média';
-      case 'high': return 'Alta';
-      case 'critical': return 'Crítica';
-      default: return severity;
+      case "low":
+        return "Baixa";
+      case "medium":
+        return "Média";
+      case "high":
+        return "Alta";
+      default:
+        return severity;
     }
   };
-
-  const handleNewProduct = () => {
-    setSelectedProduct(null);
-    setIsFormOpen(true);
+  
+  const getSeverityClass = (severity: string) => {
+    switch (severity) {
+      case "low":
+        return "bg-blue-100 text-blue-800";
+      case "medium":
+        return "bg-orange-100 text-orange-800";
+      case "high":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
-
-  const handleEditProduct = (product: NonConformingProduct) => {
-    setSelectedProduct(product);
-    setIsFormOpen(true);
+  
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setSelectedProduct(null);
-    loadProducts();
-  };
-
-  // Statistics
-  const totalProducts = products.length;
-  const identifiedProducts = products.filter(p => p.status === 'identified').length;
-  const inProgressProducts = products.filter(p => p.status === 'in_progress').length;
-  const resolvedProducts = products.filter(p => p.status === 'resolved').length;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Produtos Não Conformes</h1>
-          <p className="text-muted-foreground">
-            Gerencie e acompanhe produtos que não atendem aos requisitos de qualidade
-          </p>
-        </div>
-        <Button onClick={handleNewProduct}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto Não Conforme
-        </Button>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              Produtos não conformes registrados
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Identificados</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{identifiedProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              Aguardando ação
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Progresso</CardTitle>
-            <FileText className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{inProgressProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              Sendo tratados
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolvidos</CardTitle>
-            <Package className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{resolvedProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              Concluídos
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por produto ou descrição..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="md:pl-64 p-6 transition-all duration-300">
+        <div className="max-w-6xl mx-auto">
+          {/* Dashboard section (imported from Index page) */}
+          <Dashboard requirements={isoRequirements} />
+          
+          <div className="flex items-center justify-between my-6">
+            <h1 className="text-3xl font-bold">Controle de Produto Não Conforme</h1>
+            <div className="flex gap-2">
+              <Button 
+                variant={showDashboard ? "default" : "outline"}
+                onClick={() => setShowDashboard(true)}
+              >
+                Dashboard
+              </Button>
+              <Button 
+                variant={!showDashboard ? "default" : "outline"}
+                onClick={() => setShowDashboard(false)}
+              >
+                Listagem
+              </Button>
+              <Button onClick={() => setRegisterFormOpen(true)}>
+                <Package size={16} className="mr-2" />
+                Registrar Produto Não Conforme
+              </Button>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="identified">Identificado</SelectItem>
-                <SelectItem value="in_progress">Em Progresso</SelectItem>
-                <SelectItem value="resolved">Resolvido</SelectItem>
-                <SelectItem value="approved">Aprovado</SelectItem>
-                <SelectItem value="rejected">Rejeitado</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Filtrar por severidade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as Severidades</SelectItem>
-                <SelectItem value="low">Baixa</SelectItem>
-                <SelectItem value="medium">Média</SelectItem>
-                <SelectItem value="high">Alta</SelectItem>
-                <SelectItem value="critical">Crítica</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Products List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Produtos Não Conformes</CardTitle>
-          <CardDescription>
-            {filteredProducts.length} produto(s) encontrado(s)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Carregando produtos...</p>
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-foreground">Nenhum produto encontrado</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {products.length === 0 
-                  ? "Comece criando seu primeiro produto não conforme."
-                  : "Tente ajustar os filtros de busca."
-                }
-              </p>
-              {products.length === 0 && (
-                <div className="mt-6">
-                  <Button onClick={handleNewProduct}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Novo Produto Não Conforme
-                  </Button>
+          
+          {showDashboard ? (
+            <NonConformingProductsDashboard products={nonConformingProducts} />
+          ) : (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-sm font-medium mr-2">Filtrar por status:</span>
+                <Button 
+                  variant={statusFilter === null ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter(null)}
+                >
+                  Todos
+                </Button>
+                <Button 
+                  variant={statusFilter === "identified" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("identified")}
+                >
+                  Identificados
+                </Button>
+                <Button 
+                  variant={statusFilter === "isolated" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("isolated")}
+                >
+                  Isolados
+                </Button>
+                <Button 
+                  variant={statusFilter === "reviewed" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("reviewed")}
+                >
+                  Analisados
+                </Button>
+                <Button 
+                  variant={statusFilter === "resolved" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setStatusFilter("resolved")}
+                >
+                  Resolvidos
+                </Button>
+              </div>
+              
+              {isLoading ? (
+                <div className="text-center py-10">Carregando...</div>
+              ) : error ? (
+                <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
+              ) : (
+                <div className="grid gap-4">
+                  {filteredProducts.map((item) => (
+                    <Card key={item.id} className="overflow-hidden">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(item.status)}
+                            <CardTitle className="text-lg">{item.product_name}</CardTitle>
+                          </div>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
+                            {getSeverityLabel(item.severity)}
+                          </div>
+                        </div>
+                        <CardDescription className="flex items-center justify-between">
+                          <span>Requisito: {item.requirement_id}</span>
+                          <span>Data: {formatDate(item.created_at)}</span>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">{item.description}</p>
+                      </CardContent>
+                      <CardFooter className="bg-muted/50 flex justify-between pt-2">
+                        <span className="text-sm flex items-center gap-1">
+                          Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
+                        </span>
+                        <Button size="sm" variant="outline">Ver Detalhes</Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                  
+                  {filteredProducts.length === 0 && (
+                    <div className="text-center py-10 bg-muted rounded-lg">
+                      <p className="text-muted-foreground">Nenhum produto não conforme encontrado</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredProducts.map((product) => (
-                <Card 
-                  key={product.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleEditProduct(product)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-semibold">{product.product_name}</h3>
-                          <Badge className={getStatusColor(product.status)}>
-                            {getStatusLabel(product.status)}
-                          </Badge>
-                          <Badge className={getSeverityColor(product.severity)}>
-                            {getSeverityLabel(product.severity)}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {product.description}
-                        </p>
-                        <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                          <span>Detectado em: {new Date(product.detected_date).toLocaleDateString('pt-BR')}</span>
-                          <span>Responsável: {product.responsible}</span>
-                          {product.requirement_id && (
-                            <span>Requisito: {product.requirement_id}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            </>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Dashboard Component */}
-      <Dashboard />
-
-      {/* Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <NonConformingProductForm
-            open={isFormOpen}
-            onOpenChange={handleCloseForm}
-          />
-        </DialogContent>
-      </Dialog>
+        </div>
+      </main>
+      
+      {/* Non-conforming Product Registration Form */}
+      <NonConformingProductForm
+        open={registerFormOpen}
+        onOpenChange={setRegisterFormOpen}
+      />
     </div>
   );
-}
+};
+
+export default NonConformingProducts;

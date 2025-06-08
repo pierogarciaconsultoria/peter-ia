@@ -1,100 +1,104 @@
 
-// Mock service for satisfaction surveys - replace with actual implementation when customer_satisfaction_surveys table exists
+import { supabase } from "@/integrations/supabase/client";
+
 export interface SatisfactionSurvey {
   id: string;
   title: string;
   customer_name: string;
   survey_date: string;
+  overall_satisfaction?: number;
+  product_quality?: number;
+  service_quality?: number;
+  delivery_satisfaction?: number;
+  suggestions?: string;
   status: 'draft' | 'sent' | 'completed';
-  rating?: number;
-  comments?: string;
   created_at: string;
   updated_at: string;
 }
 
-// Mock data for demonstration
-const mockSurveys: SatisfactionSurvey[] = [
-  {
-    id: '1',
-    title: 'Pesquisa de Satisfação - Cliente A',
-    customer_name: 'Empresa ABC Ltda',
-    survey_date: '2024-01-15',
-    status: 'completed',
-    rating: 8,
-    comments: 'Serviço de boa qualidade, entrega pontual',
-    created_at: '2024-01-10T10:00:00Z',
-    updated_at: '2024-01-15T16:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Pesquisa de Satisfação - Cliente B',
-    customer_name: 'Tech Solutions Inc',
-    survey_date: '2024-01-20',
-    status: 'sent',
-    created_at: '2024-01-20T09:00:00Z',
-    updated_at: '2024-01-20T09:00:00Z'
-  }
-];
-
 export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockSurveys;
+  const { data, error } = await supabase
+    .from('customer_satisfaction_surveys')
+    .select('*')
+    .order('survey_date', { ascending: false });
+  
+  if (error) {
+    console.error("Error fetching satisfaction surveys:", error);
+    throw new Error(error.message);
+  }
+  
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as SatisfactionSurvey['status'],
+  }));
 }
 
 export async function getSatisfactionSurveyById(id: string): Promise<SatisfactionSurvey> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const { data, error } = await supabase
+    .from('customer_satisfaction_surveys')
+    .select('*')
+    .eq('id', id)
+    .single();
   
-  const survey = mockSurveys.find(s => s.id === id);
-  if (!survey) {
-    throw new Error('Satisfaction survey not found');
+  if (error) {
+    console.error("Error fetching satisfaction survey:", error);
+    throw new Error(error.message);
   }
   
-  return survey;
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
+  };
 }
 
 export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>): Promise<SatisfactionSurvey> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const { data, error } = await supabase
+    .from('customer_satisfaction_surveys')
+    .insert([survey])
+    .select()
+    .single();
   
-  const newSurvey: SatisfactionSurvey = {
-    ...survey,
-    id: Date.now().toString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  if (error) {
+    console.error("Error creating satisfaction survey:", error);
+    throw new Error(error.message);
+  }
+  
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
   };
-  
-  mockSurveys.push(newSurvey);
-  return newSurvey;
 }
 
 export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>>): Promise<SatisfactionSurvey> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const { data, error } = await supabase
+    .from('customer_satisfaction_surveys')
+    .update({
+      ...survey,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
   
-  const index = mockSurveys.findIndex(s => s.id === id);
-  if (index === -1) {
-    throw new Error('Satisfaction survey not found');
+  if (error) {
+    console.error("Error updating satisfaction survey:", error);
+    throw new Error(error.message);
   }
   
-  mockSurveys[index] = {
-    ...mockSurveys[index],
-    ...survey,
-    updated_at: new Date().toISOString()
+  return {
+    ...data,
+    status: data.status as SatisfactionSurvey['status'],
   };
-  
-  return mockSurveys[index];
 }
 
 export async function deleteSatisfactionSurvey(id: string): Promise<void> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const { error } = await supabase
+    .from('customer_satisfaction_surveys')
+    .delete()
+    .eq('id', id);
   
-  const index = mockSurveys.findIndex(s => s.id === id);
-  if (index === -1) {
-    throw new Error('Satisfaction survey not found');
+  if (error) {
+    console.error("Error deleting satisfaction survey:", error);
+    throw new Error(error.message);
   }
-  
-  mockSurveys.splice(index, 1);
 }

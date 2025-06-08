@@ -1,165 +1,120 @@
 
-export interface ISORequirement {
-  id: string;
-  number: string;
+/**
+ * Maps ISO 9001:2015 requirements to their corresponding application routes
+ */
+export const requirementToRouteMap: Record<string, {
+  route: string;
   title: string;
   description: string;
-  route: string;
-}
-
-export const requirementToRouteMap: Record<string, ISORequirement> = {
-  '4.1': {
-    id: '4.1',
-    number: '4.1',
-    title: 'Contexto da Organização',
-    description: 'Compreensão da organização e de seu contexto',
-    route: '/organization-context'
+}> = {
+  "4.1": {
+    route: "/organization-context",
+    title: "Contexto da Organização",
+    description: "Entenda e defina o contexto interno e externo da sua organização"
   },
-  '4.2': {
-    id: '4.2',
-    number: '4.2',
-    title: 'Partes Interessadas',
-    description: 'Compreensão das necessidades e expectativas das partes interessadas',
-    route: '/organization-context'
+  "4.2": {
+    route: "/organization-context",
+    title: "Partes Interessadas",
+    description: "Identifique e gerencie as necessidades das partes interessadas"
   },
-  '4.3': {
-    id: '4.3',
-    number: '4.3',
-    title: 'Escopo do SGQ',
-    description: 'Determinação do escopo do sistema de gestão da qualidade',
-    route: '/strategic-planning'
+  "4.3": {
+    route: "/strategic-planning",
+    title: "Planejamento Estratégico",
+    description: "Defina o escopo do seu sistema de gestão da qualidade"
   },
-  '4.4': {
-    id: '4.4',
-    number: '4.4',
-    title: 'Sistema de Gestão da Qualidade',
-    description: 'Sistema de gestão da qualidade e seus processos',
-    route: '/processo'
+  "4.4": {
+    route: "/processo",
+    title: "Processos",
+    description: "Mapeie e gerencie os processos do seu sistema de gestão"
   },
-  '5.1': {
-    id: '5.1',
-    number: '5.1',
-    title: 'Liderança e Comprometimento',
-    description: 'Liderança e comprometimento da alta direção',
-    route: '/critical-analysis'
+  "5.1": {
+    route: "/critical-analysis",
+    title: "Análise Crítica",
+    description: "Demonstre liderança e comprometimento da alta direção"
   },
-  '5.2': {
-    id: '5.2',
-    number: '5.2',
-    title: 'Política da Qualidade',
-    description: 'Estabelecimento da política da qualidade',
-    route: '/strategic-planning'
+  "5.2": {
+    route: "/strategic-planning",
+    title: "Política e Objetivos",
+    description: "Estabeleça a política da qualidade e objetivos estratégicos"
   },
-  '5.3': {
-    id: '5.3',
-    number: '5.3',
-    title: 'Papéis e Responsabilidades',
-    description: 'Papéis, responsabilidades e autoridades organizacionais',
-    route: '/human-resources'
+  "5.3": {
+    route: "/human-resources",
+    title: "Funções e Responsabilidades",
+    description: "Atribua e comunique responsabilidades dentro da organização"
   },
-  '6.1': {
-    id: '6.1',
-    number: '6.1',
-    title: 'Ações para Riscos e Oportunidades',
-    description: 'Ações para abordar riscos e oportunidades',
-    route: '/risk-management'
+  "6.1": {
+    route: "/risk-management",
+    title: "Gestão de Riscos",
+    description: "Identifique e gerencie riscos e oportunidades"
   },
-  '6.2': {
-    id: '6.2',
-    number: '6.2',
-    title: 'Objetivos da Qualidade',
-    description: 'Objetivos da qualidade e planejamento para alcançá-los',
-    route: '/performance-indicators'
+  "6.2": {
+    route: "/performance-indicators",
+    title: "Indicadores de Desempenho",
+    description: "Estabeleça objetivos da qualidade mensuráveis"
   },
-  '6.3': {
-    id: '6.3',
-    number: '6.3',
-    title: 'Planejamento de Mudanças',
-    description: 'Planejamento de mudanças',
-    route: '/action-schedule'
+  "6.3": {
+    route: "/action-schedule",
+    title: "Plano de Ação",
+    description: "Planeje e implemente mudanças de forma controlada"
   },
-  '7.1': {
-    id: '7.1',
-    number: '7.1',
-    title: 'Recursos',
-    description: 'Provisão de recursos',
-    route: '/human-resources'
+  "7.1": {
+    route: "/human-resources",
+    title: "Recursos",
+    description: "Determine e forneça recursos necessários para o SGQ"
   },
-  '7.2': {
-    id: '7.2',
-    number: '7.2',
-    title: 'Competência',
-    description: 'Competência das pessoas',
-    route: '/human-resources'
+  "7.2": {
+    route: "/human-resources",
+    title: "Competência",
+    description: "Garanta a competência das pessoas que afetam o desempenho"
   },
-  '7.5': {
-    id: '7.5',
-    number: '7.5',
-    title: 'Informação Documentada',
-    description: 'Informação documentada',
-    route: '/documents'
+  "7.5": {
+    route: "/documents",
+    title: "Informação Documentada",
+    description: "Controle documentos e registros do sistema de gestão"
   },
-  '8.2': {
-    id: '8.2',
-    number: '8.2',
-    title: 'Comunicação com o Cliente',
-    description: 'Comunicação com o cliente',
-    route: '/customer-complaints'
+  "8.2": {
+    route: "/customer-complaints",
+    title: "Reclamações de Clientes",
+    description: "Determine e revise requisitos para produtos e serviços"
   },
-  '8.4': {
-    id: '8.4',
-    number: '8.4',
-    title: 'Controle de Processos Externos',
-    description: 'Controle de processos, produtos e serviços providos externamente',
-    route: '/supplier-evaluation'
+  "8.4": {
+    route: "/supplier-evaluation",
+    title: "Avaliação de Fornecedores",
+    description: "Controle processos, produtos e serviços providos externamente"
   },
-  '8.5': {
-    id: '8.5',
-    number: '8.5',
-    title: 'Produção e Provisão de Serviços',
-    description: 'Produção e provisão de serviços',
-    route: '/quality-control'
+  "8.5": {
+    route: "/quality-control",
+    title: "Controle de Qualidade",
+    description: "Controle a produção e a provisão de serviços"
   },
-  '8.7': {
-    id: '8.7',
-    number: '8.7',
-    title: 'Controle de Saídas Não Conformes',
-    description: 'Controle de saídas não conformes',
-    route: '/non-conforming-products'
+  "8.7": {
+    route: "/non-conforming-products",
+    title: "Produtos Não Conformes",
+    description: "Controle saídas não conformes para prevenir uso não intencional"
   },
-  '9.1': {
-    id: '9.1',
-    number: '9.1',
-    title: 'Monitoramento e Medição',
-    description: 'Monitoramento, medição, análise e avaliação',
-    route: '/performance-indicators'
+  "9.1": {
+    route: "/performance-indicators",
+    title: "Indicadores",
+    description: "Monitore, meça, analise e avalie o desempenho"
   },
-  '9.2': {
-    id: '9.2',
-    number: '9.2',
-    title: 'Auditoria Interna',
-    description: 'Auditoria interna',
-    route: '/audit-schedule'
+  "9.2": {
+    route: "/audit-schedule",
+    title: "Auditorias",
+    description: "Planeje e execute auditorias internas para avaliar o SGQ"
   },
-  '9.3': {
-    id: '9.3',
-    number: '9.3',
-    title: 'Análise Crítica pela Direção',
-    description: 'Análise crítica pela direção',
-    route: '/critical-analysis'
+  "9.3": {
+    route: "/critical-analysis",
+    title: "Análise Crítica",
+    description: "Realize análises críticas periódicas do sistema de gestão"
   },
-  '10.2': {
-    id: '10.2',
-    number: '10.2',
-    title: 'Não Conformidade e Ação Corretiva',
-    description: 'Não conformidade e ação corretiva',
-    route: '/non-compliance'
+  "10.2": {
+    route: "/non-compliance",
+    title: "Não Conformidades",
+    description: "Trate não conformidades e implemente ações corretivas"
   },
-  '10.3': {
-    id: '10.3',
-    number: '10.3',
-    title: 'Melhoria Contínua',
-    description: 'Melhoria contínua',
-    route: '/action-schedule'
-  }
+  "10.3": {
+    route: "/action-schedule",
+    title: "Melhoria Contínua",
+    description: "Implemente ações para melhorar continuamente o SGQ"
+  },
 };

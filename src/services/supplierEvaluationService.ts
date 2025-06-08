@@ -1,5 +1,6 @@
 
-// Mock service for supplier evaluations - replace with actual implementation when supplier_evaluations table exists
+import { supabase } from "@/integrations/supabase/client";
+
 export interface SupplierEvaluation {
   id: string;
   supplier_name: string;
@@ -17,101 +18,89 @@ export interface SupplierEvaluation {
   updated_at: string;
 }
 
-// Mock data for demonstration
-const mockEvaluations: SupplierEvaluation[] = [
-  {
-    id: '1',
-    supplier_name: 'Fornecedor ABC Ltda',
-    evaluation_date: '2024-01-15',
-    evaluator: 'João Silva',
-    category: 'Matéria Prima',
-    quality_score: 8,
-    delivery_score: 9,
-    price_score: 7,
-    support_score: 8,
-    total_score: 8,
-    status: 'active',
-    comments: 'Fornecedor confiável com boa qualidade',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    supplier_name: 'Tech Solutions Inc',
-    evaluation_date: '2024-01-20',
-    evaluator: 'Maria Santos',
-    category: 'Serviços',
-    quality_score: 9,
-    delivery_score: 8,
-    price_score: 6,
-    support_score: 9,
-    total_score: 8,
-    status: 'active',
-    comments: 'Excelente suporte técnico',
-    created_at: '2024-01-20T09:00:00Z',
-    updated_at: '2024-01-20T09:00:00Z'
-  }
-];
-
 export async function getSupplierEvaluations(): Promise<SupplierEvaluation[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockEvaluations;
+  const { data, error } = await supabase
+    .from('supplier_evaluations')
+    .select('*')
+    .order('evaluation_date', { ascending: false });
+  
+  if (error) {
+    console.error("Error fetching supplier evaluations:", error);
+    throw new Error(error.message);
+  }
+  
+  return (data || []).map(item => ({
+    ...item,
+    status: item.status as SupplierEvaluation['status'],
+  }));
 }
 
 export async function getSupplierEvaluationById(id: string): Promise<SupplierEvaluation> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const { data, error } = await supabase
+    .from('supplier_evaluations')
+    .select('*')
+    .eq('id', id)
+    .single();
   
-  const evaluation = mockEvaluations.find(e => e.id === id);
-  if (!evaluation) {
-    throw new Error('Supplier evaluation not found');
+  if (error) {
+    console.error("Error fetching supplier evaluation:", error);
+    throw new Error(error.message);
   }
   
-  return evaluation;
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
+  };
 }
 
 export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<SupplierEvaluation> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const { data, error } = await supabase
+    .from('supplier_evaluations')
+    .insert([evaluation])
+    .select()
+    .single();
   
-  const newEvaluation: SupplierEvaluation = {
-    ...evaluation,
-    id: Date.now().toString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  if (error) {
+    console.error("Error creating supplier evaluation:", error);
+    throw new Error(error.message);
+  }
+  
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
   };
-  
-  mockEvaluations.push(newEvaluation);
-  return newEvaluation;
 }
 
 export async function updateSupplierEvaluation(id: string, evaluation: Partial<Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>>): Promise<SupplierEvaluation> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const { data, error } = await supabase
+    .from('supplier_evaluations')
+    .update({
+      ...evaluation,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
   
-  const index = mockEvaluations.findIndex(e => e.id === id);
-  if (index === -1) {
-    throw new Error('Supplier evaluation not found');
+  if (error) {
+    console.error("Error updating supplier evaluation:", error);
+    throw new Error(error.message);
   }
   
-  mockEvaluations[index] = {
-    ...mockEvaluations[index],
-    ...evaluation,
-    updated_at: new Date().toISOString()
+  return {
+    ...data,
+    status: data.status as SupplierEvaluation['status'],
   };
-  
-  return mockEvaluations[index];
 }
 
 export async function deleteSupplierEvaluation(id: string): Promise<void> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const { error } = await supabase
+    .from('supplier_evaluations')
+    .delete()
+    .eq('id', id);
   
-  const index = mockEvaluations.findIndex(e => e.id === id);
-  if (index === -1) {
-    throw new Error('Supplier evaluation not found');
+  if (error) {
+    console.error("Error deleting supplier evaluation:", error);
+    throw new Error(error.message);
   }
-  
-  mockEvaluations.splice(index, 1);
 }
