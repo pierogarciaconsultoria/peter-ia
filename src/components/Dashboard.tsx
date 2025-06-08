@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { StatisticCard } from './ui/StatisticCard';
+import { StatisticCard } from './StatisticCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { generateRandomData } from '@/utils/mock';
 import { Button } from '@/components/ui/button';
