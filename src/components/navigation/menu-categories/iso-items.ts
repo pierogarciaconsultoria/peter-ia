@@ -1,7 +1,7 @@
 
 import { FileBox } from "lucide-react";
 import { MenuItem } from "../types";
-import { isoSubmenuItems } from "../../../iso/navigation/ISOSubmenu";
+import { isoSubmenuItems } from "@/components/iso/navigation/ISOSubmenu";
 
 export const isoItems: MenuItem[] = [
   {

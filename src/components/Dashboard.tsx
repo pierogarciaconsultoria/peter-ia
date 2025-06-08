@@ -1,19 +1,18 @@
 
 import React from 'react';
 import { StatisticCard } from './StatisticCard';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useHRDashboardData } from '@/hooks/useHRDashboardData';
 import { generateRandomData } from '@/utils/mock';
 import { Button } from '@/components/ui/button';
 import { CalendarRange } from 'lucide-react';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ISORequirementBadge } from './iso/badges/ISORequirementBadge';
 import { ISODashboardWidget } from './iso/dashboard/ISODashboardWidget';
 import { ISOQuickAccess } from './iso/navigation/ISOQuickAccess';
 
 export const Dashboard: React.FC = () => {
-  const { totalUsers, activeUsers, totalRevenue, taskCompletionRate } = useDashboardData();
+  const { metrics } = useHRDashboardData();
 
   // Mock data for demonstration
   const companyInfo = {
@@ -42,10 +41,10 @@ export const Dashboard: React.FC = () => {
 
       {/* Estatísticas principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatisticCard title="Total de Usuários" value={totalUsers} description="Usuários registrados" />
-        <StatisticCard title="Usuários Ativos" value={activeUsers} description="Usuários ativos na última semana" />
-        <StatisticCard title="Receita Total" value={`R$${totalRevenue}`} description="Receita gerada no último mês" />
-        <StatisticCard title="Taxa de Conclusão de Tarefas" value={`${taskCompletionRate}%`} description="Média de tarefas concluídas" />
+        <StatisticCard title="Total de Usuários" value={metrics.totalEmployees} description="Usuários registrados" />
+        <StatisticCard title="Usuários Ativos" value={metrics.employeeCount} description="Usuários ativos na última semana" />
+        <StatisticCard title="Receita Total" value={`R$25.000`} description="Receita gerada no último mês" />
+        <StatisticCard title="Taxa de Conclusão de Tarefas" value={`85%`} description="Média de tarefas concluídas" />
       </div>
 
       {/* Nova seção com ISO Dashboard Widget e Quick Access */}
