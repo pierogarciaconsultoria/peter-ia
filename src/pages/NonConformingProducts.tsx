@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Filter, FileText, Package, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { NonConformingProductForm } from "@/components/NonConformingProductForm";
+import NonConformingProductForm from "@/components/NonConformingProductForm";
 import { Dashboard } from "@/components/Dashboard";
 import { 
   getNonConformingProducts, 
@@ -308,8 +307,8 @@ export default function NonConformingProducts() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <NonConformingProductForm
-            product={selectedProduct}
-            onClose={handleCloseForm}
+            open={isFormOpen}
+            onOpenChange={handleCloseForm}
           />
         </DialogContent>
       </Dialog>
