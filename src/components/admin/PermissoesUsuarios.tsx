@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -72,8 +71,8 @@ export function PermissoesUsuarios() {
         const { data: usuariosData, error: usuariosError } = await query;
         if (usuariosError) throw usuariosError;
         
-        // Carregar empresas para associar aos usuários
-        const { data: empresasData } = await supabase.from('empresas').select('id, nome');
+        // Carregar empresas para associar aos usuários - CORRIGIDO: usar 'companies' em vez de 'empresas'
+        const { data: empresasData } = await supabase.from('companies').select('id, name as nome');
         const empresasMap = (empresasData || []).reduce((acc, empresa) => {
           acc[empresa.id] = empresa.nome;
           return acc;

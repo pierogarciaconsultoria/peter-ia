@@ -107,10 +107,11 @@ export const confirmAdminEmail = async (email: string) => {
   }
 };
 
-// Função para testar a conexão
+// Função para testar a conexão - REMOVIDO: conexão com tabela inexistente
 export const testConnection = async () => {
   try {
-    const { data, error } = await supabase.from('connection_test').select('*').limit(1);
+    // Teste simples com uma tabela que existe
+    const { data, error } = await supabase.from('companies').select('id').limit(1);
     return { success: !error, error };
   } catch (error) {
     return { success: false, error };

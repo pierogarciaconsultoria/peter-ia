@@ -17,7 +17,7 @@ export function DashboardAlerts({ pendingEvaluations, pendingOnboarding }: Dashb
   return (
     <>
       {pendingEvaluations.status === 'success' && pendingEvaluations.value > 0 && (
-        <Alert variant="warning">
+        <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Ações pendentes</AlertTitle>
           <AlertDescription>
