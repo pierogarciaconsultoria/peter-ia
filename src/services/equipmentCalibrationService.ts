@@ -12,27 +12,10 @@ export interface EquipmentCalibration {
   certificate_number?: string;
   calibration_entity: string;
   observations?: string;
+  company_id?: string;
   created_at: string;
   updated_at: string;
 }
-
-// Mock data para demonstração até a tabela ser criada
-const mockEquipmentCalibrations: EquipmentCalibration[] = [
-  {
-    id: '1',
-    equipment_name: 'Balança Digital BX-100',
-    equipment_id: 'EQ-001',
-    calibration_date: '2024-01-15',
-    next_calibration_date: '2025-01-15',
-    responsible: 'João Silva',
-    status: 'valid',
-    certificate_number: 'CERT-2024-001',
-    calibration_entity: 'INMETRO',
-    observations: 'Calibração realizada conforme norma',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  }
-];
 
 export async function getEquipmentCalibrations(): Promise<EquipmentCalibration[]> {
   try {
@@ -42,14 +25,14 @@ export async function getEquipmentCalibrations(): Promise<EquipmentCalibration[]
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.warn("Tabela 'equipment_calibrations' não existe, usando dados mock:", error.message);
-      return mockEquipmentCalibrations;
+      console.error("Erro ao buscar calibrações de equipamentos:", error.message);
+      return [];
     }
     
     return data || [];
   } catch (error) {
-    console.warn("Erro ao acessar equipment_calibrations, usando dados mock:", error);
-    return mockEquipmentCalibrations;
+    console.error("Erro inesperado ao buscar equipment_calibrations:", error);
+    return [];
   }
 }
 
@@ -62,39 +45,52 @@ export async function getEquipmentCalibrationById(id: string): Promise<Equipment
       .single();
     
     if (error) {
-      console.warn("Tabela 'equipment_calibrations' não existe, usando dados mock");
-      return mockEquipmentCalibrations.find(item => item.id === id) || null;
+      console.error("Erro ao buscar calibração por ID:", error.message);
+      return null;
     }
     
     return data;
   } catch (error) {
-    console.warn("Erro ao acessar equipment_calibrations, usando dados mock:", error);
-    return mockEquipmentCalibrations.find(item => item.id === id) || null;
+    console.error("Erro inesperado ao buscar equipment calibration por ID:", error);
+    return null;
   }
 }
 
 export async function createEquipmentCalibration(calibration: Omit<EquipmentCalibration, 'id' | 'created_at' | 'updated_at'>): Promise<EquipmentCalibration | null> {
   try {
+    // Get user's company ID
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const { data: profileData } = await supabase
+      .from('user_profiles')
+      .select('company_id')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (!profileData?.company_id) {
+      throw new Error("Empresa do usuário não encontrada");
+    }
+
     const { data, error } = await supabase
       .from('equipment_calibrations')
-      .insert(calibration)
+      .insert({
+        ...calibration,
+        company_id: profileData.company_id
+      })
       .select()
       .single();
     
     if (error) {
-      console.warn("Tabela 'equipment_calibrations' não existe, simulando criação");
-      const newCalibration: EquipmentCalibration = {
-        ...calibration,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      return newCalibration;
+      console.error("Erro ao criar equipment calibration:", error.message);
+      return null;
     }
     
     return data;
   } catch (error) {
-    console.error("Erro ao criar equipment calibration:", error);
+    console.error("Erro inesperado ao criar equipment calibration:", error);
     return null;
   }
 }
@@ -109,13 +105,13 @@ export async function updateEquipmentCalibration(id: string, calibration: Partia
       .single();
     
     if (error) {
-      console.warn("Tabela 'equipment_calibrations' não existe, simulando atualização");
+      console.error("Erro ao atualizar equipment calibration:", error.message);
       return null;
     }
     
     return data;
   } catch (error) {
-    console.error("Erro ao atualizar equipment calibration:", error);
+    console.error("Erro inesperado ao atualizar equipment calibration:", error);
     return null;
   }
 }
@@ -128,9 +124,9 @@ export async function deleteEquipmentCalibration(id: string): Promise<void> {
       .eq('id', id);
     
     if (error) {
-      console.warn("Tabela 'equipment_calibrations' não existe, simulando exclusão");
+      console.error("Erro ao deletar equipment calibration:", error.message);
     }
   } catch (error) {
-    console.error("Erro ao deletar equipment calibration:", error);
+    console.error("Erro inesperado ao deletar equipment calibration:", error);
   }
 }

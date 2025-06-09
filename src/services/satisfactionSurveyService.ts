@@ -12,27 +12,10 @@ export interface SatisfactionSurvey {
   delivery_satisfaction?: number;
   suggestions?: string;
   status: 'draft' | 'sent' | 'completed';
+  company_id?: string;
   created_at: string;
   updated_at: string;
 }
-
-// Mock data para demonstração até a tabela ser criada
-const mockSatisfactionSurveys: SatisfactionSurvey[] = [
-  {
-    id: '1',
-    title: 'Pesquisa de Satisfação Q1 2024',
-    customer_name: 'Cliente A',
-    survey_date: '2024-01-15',
-    overall_satisfaction: 8,
-    product_quality: 9,
-    service_quality: 7,
-    delivery_satisfaction: 8,
-    suggestions: 'Melhorar o atendimento pós-venda',
-    status: 'completed',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  }
-];
 
 export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
   try {
@@ -42,14 +25,14 @@ export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.warn("Tabela 'customer_satisfaction_surveys' não existe, usando dados mock:", error.message);
-      return mockSatisfactionSurveys;
+      console.error("Erro ao buscar pesquisas de satisfação:", error.message);
+      return [];
     }
     
     return data || [];
   } catch (error) {
-    console.warn("Erro ao acessar customer_satisfaction_surveys, usando dados mock:", error);
-    return mockSatisfactionSurveys;
+    console.error("Erro inesperado ao buscar customer_satisfaction_surveys:", error);
+    return [];
   }
 }
 
@@ -62,47 +45,52 @@ export async function getSatisfactionSurveyById(id: string): Promise<Satisfactio
       .single();
     
     if (error) {
-      console.warn("Tabela 'customer_satisfaction_surveys' não existe, usando dados mock");
-      const survey = mockSatisfactionSurveys.find(item => item.id === id);
-      if (!survey) {
-        throw new Error("Survey não encontrado");
-      }
-      return survey;
+      console.error("Erro ao buscar pesquisa de satisfação por ID:", error.message);
+      throw new Error("Survey não encontrado");
     }
     
     return data;
   } catch (error) {
-    console.warn("Erro ao acessar customer_satisfaction_surveys, usando dados mock:", error);
-    const survey = mockSatisfactionSurveys.find(item => item.id === id);
-    if (!survey) {
-      throw new Error("Survey não encontrado");
-    }
-    return survey;
+    console.error("Erro inesperado ao buscar satisfaction survey por ID:", error);
+    throw new Error("Survey não encontrado");
   }
 }
 
 export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>): Promise<SatisfactionSurvey> {
   try {
+    // Get user's company ID
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const { data: profileData } = await supabase
+      .from('user_profiles')
+      .select('company_id')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (!profileData?.company_id) {
+      throw new Error("Empresa do usuário não encontrada");
+    }
+
     const { data, error } = await supabase
       .from('customer_satisfaction_surveys')
-      .insert(survey)
+      .insert({
+        ...survey,
+        company_id: profileData.company_id
+      })
       .select()
       .single();
     
     if (error) {
-      console.warn("Tabela 'customer_satisfaction_surveys' não existe, simulando criação");
-      const newSurvey: SatisfactionSurvey = {
-        ...survey,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      return newSurvey;
+      console.error("Erro ao criar satisfaction survey:", error.message);
+      throw new Error("Falha ao criar pesquisa de satisfação");
     }
     
     return data;
   } catch (error) {
-    console.error("Erro ao criar satisfaction survey:", error);
+    console.error("Erro inesperado ao criar satisfaction survey:", error);
     throw new Error("Falha ao criar pesquisa de satisfação");
   }
 }
@@ -117,13 +105,13 @@ export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<
       .single();
     
     if (error) {
-      console.warn("Tabela 'customer_satisfaction_surveys' não existe, simulando atualização");
-      throw new Error("Tabela não existe no banco de dados atual");
+      console.error("Erro ao atualizar satisfaction survey:", error.message);
+      throw new Error("Falha ao atualizar pesquisa de satisfação");
     }
     
     return data;
   } catch (error) {
-    console.error("Erro ao atualizar satisfaction survey:", error);
+    console.error("Erro inesperado ao atualizar satisfaction survey:", error);
     throw new Error("Falha ao atualizar pesquisa de satisfação");
   }
 }
@@ -136,9 +124,9 @@ export async function deleteSatisfactionSurvey(id: string): Promise<void> {
       .eq('id', id);
     
     if (error) {
-      console.warn("Tabela 'customer_satisfaction_surveys' não existe, simulando exclusão");
+      console.error("Erro ao deletar satisfaction survey:", error.message);
     }
   } catch (error) {
-    console.error("Erro ao deletar satisfaction survey:", error);
+    console.error("Erro inesperado ao deletar satisfaction survey:", error);
   }
 }

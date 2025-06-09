@@ -899,6 +899,62 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_satisfaction_surveys: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          customer_name: string
+          delivery_satisfaction: number | null
+          id: string
+          overall_satisfaction: number | null
+          product_quality: number | null
+          service_quality: number | null
+          status: string
+          suggestions: string | null
+          survey_date: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          customer_name: string
+          delivery_satisfaction?: number | null
+          id?: string
+          overall_satisfaction?: number | null
+          product_quality?: number | null
+          service_quality?: number | null
+          status?: string
+          suggestions?: string | null
+          survey_date: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          customer_name?: string
+          delivery_satisfaction?: number | null
+          id?: string
+          overall_satisfaction?: number | null
+          product_quality?: number | null
+          service_quality?: number | null
+          status?: string
+          suggestions?: string | null
+          survey_date?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_satisfaction_surveys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           approved_headcount: number | null
@@ -1485,6 +1541,62 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment_calibrations: {
+        Row: {
+          calibration_date: string
+          calibration_entity: string
+          certificate_number: string | null
+          company_id: string | null
+          created_at: string | null
+          equipment_id: string
+          equipment_name: string
+          id: string
+          next_calibration_date: string
+          observations: string | null
+          responsible: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          calibration_date: string
+          calibration_entity: string
+          certificate_number?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          equipment_id: string
+          equipment_name: string
+          id?: string
+          next_calibration_date: string
+          observations?: string | null
+          responsible: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          calibration_date?: string
+          calibration_entity?: string
+          certificate_number?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          equipment_id?: string
+          equipment_name?: string
+          id?: string
+          next_calibration_date?: string
+          observations?: string | null
+          responsible?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_calibrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -4585,6 +4697,65 @@ export type Database = {
           },
         ]
       }
+      non_conforming_products: {
+        Row: {
+          approval_status: string
+          company_id: string | null
+          created_at: string | null
+          customer: string | null
+          department: string
+          description: string
+          id: string
+          immediate_action: string
+          non_conformity_type: string
+          product_name: string
+          requirement_id: string
+          severity: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string
+          company_id?: string | null
+          created_at?: string | null
+          customer?: string | null
+          department: string
+          description: string
+          id?: string
+          immediate_action: string
+          non_conformity_type: string
+          product_name: string
+          requirement_id: string
+          severity: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string
+          company_id?: string | null
+          created_at?: string | null
+          customer?: string | null
+          department?: string
+          description?: string
+          id?: string
+          immediate_action?: string
+          non_conformity_type?: string
+          product_name?: string
+          requirement_id?: string
+          severity?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "non_conforming_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       non_conformities: {
         Row: {
           closed_at: string | null
@@ -6337,6 +6508,68 @@ export type Database = {
           },
         ]
       }
+      supplier_evaluations: {
+        Row: {
+          category: string
+          comments: string | null
+          company_id: string | null
+          created_at: string | null
+          delivery_score: number | null
+          evaluation_date: string
+          evaluator: string
+          id: string
+          price_score: number | null
+          quality_score: number | null
+          status: string
+          supplier_name: string
+          support_score: number | null
+          total_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          comments?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          delivery_score?: number | null
+          evaluation_date: string
+          evaluator: string
+          id?: string
+          price_score?: number | null
+          quality_score?: number | null
+          status?: string
+          supplier_name: string
+          support_score?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          comments?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          delivery_score?: number | null
+          evaluation_date?: string
+          evaluator?: string
+          id?: string
+          price_score?: number | null
+          quality_score?: number | null
+          status?: string
+          supplier_name?: string
+          support_score?: number | null
+          total_score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           created_at: string | null
@@ -7032,6 +7265,10 @@ export type Database = {
         }[]
       }
       get_user_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_user_company_safe: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

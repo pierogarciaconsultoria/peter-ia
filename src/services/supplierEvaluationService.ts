@@ -14,47 +14,27 @@ export interface SupplierEvaluation {
   total_score?: number;
   status: 'active' | 'inactive';
   comments?: string;
+  company_id?: string;
   created_at: string;
   updated_at: string;
 }
 
-// Mock data para demonstração até a tabela ser criada
-const mockSupplierEvaluations: SupplierEvaluation[] = [
-  {
-    id: '1',
-    supplier_name: 'Fornecedor A',
-    evaluation_date: '2024-01-15',
-    evaluator: 'João Silva',
-    category: 'Matéria Prima',
-    quality_score: 8,
-    delivery_score: 9,
-    price_score: 7,
-    support_score: 8,
-    total_score: 8,
-    status: 'active',
-    comments: 'Bom fornecedor, entrega dentro do prazo',
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  }
-];
-
 export async function getSupplierEvaluations(): Promise<SupplierEvaluation[]> {
   try {
-    // Tentar buscar da tabela real primeiro
     const { data, error } = await supabase
       .from('supplier_evaluations')
       .select('*')
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.warn("Tabela 'supplier_evaluations' não existe, usando dados mock:", error.message);
-      return mockSupplierEvaluations;
+      console.error("Erro ao buscar avaliações de fornecedores:", error.message);
+      return [];
     }
     
     return data || [];
   } catch (error) {
-    console.warn("Erro ao acessar supplier_evaluations, usando dados mock:", error);
-    return mockSupplierEvaluations;
+    console.error("Erro inesperado ao buscar supplier_evaluations:", error);
+    return [];
   }
 }
 
@@ -67,44 +47,57 @@ export async function getSupplierEvaluationById(id: string): Promise<SupplierEva
       .single();
     
     if (error) {
-      console.warn("Tabela 'supplier_evaluations' não existe, usando dados mock");
-      return mockSupplierEvaluations.find(item => item.id === id) || null;
+      console.error("Erro ao buscar avaliação por ID:", error.message);
+      return null;
     }
     
     return data;
   } catch (error) {
-    console.warn("Erro ao acessar supplier_evaluations, usando dados mock:", error);
-    return mockSupplierEvaluations.find(item => item.id === id) || null;
-  }
-}
-
-export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>): Promise<SupplierEvaluation | null> {
-  try {
-    const { data, error } = await supabase
-      .from('supplier_evaluations')
-      .insert(evaluation)
-      .select()
-      .single();
-    
-    if (error) {
-      console.warn("Tabela 'supplier_evaluations' não existe, simulando criação");
-      const newEvaluation: SupplierEvaluation = {
-        ...evaluation,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      return newEvaluation;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error("Erro ao criar supplier evaluation:", error);
+    console.error("Erro inesperado ao buscar supplier evaluation por ID:", error);
     return null;
   }
 }
 
-export async function updateSupplierEvaluation(id: string, evaluation: Partial<Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at'>>): Promise<SupplierEvaluation | null> {
+export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at' | 'total_score'>): Promise<SupplierEvaluation | null> {
+  try {
+    // Get user's company ID
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const { data: profileData } = await supabase
+      .from('user_profiles')
+      .select('company_id')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (!profileData?.company_id) {
+      throw new Error("Empresa do usuário não encontrada");
+    }
+
+    const { data, error } = await supabase
+      .from('supplier_evaluations')
+      .insert({
+        ...evaluation,
+        company_id: profileData.company_id
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Erro ao criar supplier evaluation:", error.message);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erro inesperado ao criar supplier evaluation:", error);
+    return null;
+  }
+}
+
+export async function updateSupplierEvaluation(id: string, evaluation: Partial<Omit<SupplierEvaluation, 'id' | 'created_at' | 'updated_at' | 'total_score'>>): Promise<SupplierEvaluation | null> {
   try {
     const { data, error } = await supabase
       .from('supplier_evaluations')
@@ -114,13 +107,13 @@ export async function updateSupplierEvaluation(id: string, evaluation: Partial<O
       .single();
     
     if (error) {
-      console.warn("Tabela 'supplier_evaluations' não existe, simulando atualização");
+      console.error("Erro ao atualizar supplier evaluation:", error.message);
       return null;
     }
     
     return data;
   } catch (error) {
-    console.error("Erro ao atualizar supplier evaluation:", error);
+    console.error("Erro inesperado ao atualizar supplier evaluation:", error);
     return null;
   }
 }
@@ -133,9 +126,9 @@ export async function deleteSupplierEvaluation(id: string): Promise<void> {
       .eq('id', id);
     
     if (error) {
-      console.warn("Tabela 'supplier_evaluations' não existe, simulando exclusão");
+      console.error("Erro ao deletar supplier evaluation:", error.message);
     }
   } catch (error) {
-    console.error("Erro ao deletar supplier evaluation:", error);
+    console.error("Erro inesperado ao deletar supplier evaluation:", error);
   }
 }
