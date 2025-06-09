@@ -1,7 +1,7 @@
 
 /**
  * Utility functions to detect environment and manage authentication access
- * SECURITY HARDENED VERSION - Bypass muito restritivo
+ * SECURITY HARDENED VERSION - Bypass muito restritivo para produção
  */
 
 // Shared storage keys for consistent access across functions
@@ -14,39 +14,44 @@ const AUTH_STORAGE_KEYS = {
 
 /**
  * Detects if the application is running in a production environment
- * MODIFIED: More permissive for Lovable environment
  */
 export function isProductionEnvironment(): boolean {
-  // Check if we're in Lovable environment first
-  const isLovableDomain = window.location.hostname.endsWith('.lovableproject.com') || 
-                         window.location.hostname.endsWith('.lovable.app');
+  // Check deployment environment
+  const isVercel = window.location.hostname.includes('vercel.app');
+  const isNetlify = window.location.hostname.includes('netlify.app');
+  const isCustomDomain = !window.location.hostname.includes('localhost') && 
+                         !window.location.hostname.includes('127.0.0.1') &&
+                         !window.location.hostname.includes('.lovableproject.com') &&
+                         !window.location.hostname.includes('.lovable.app');
   
-  // If in Lovable, not production
-  if (isLovableDomain) {
-    return false;
-  }
-  
-  // Original production detection logic
-  const isDevelopment = process.env.NODE_ENV === 'development' && 
-                       (window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1');
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                      isVercel || 
+                      isNetlify || 
+                      isCustomDomain;
   
   console.log('Environment check:', {
     NODE_ENV: process.env.NODE_ENV,
     hostname: window.location.hostname,
-    isLovableDomain,
-    isDevelopment,
-    isProduction: !isDevelopment && !isLovableDomain
+    isVercel,
+    isNetlify,
+    isCustomDomain,
+    isProduction
   });
   
-  return !isDevelopment && !isLovableDomain;
+  return isProduction;
 }
 
 /**
  * Verifies if we're in the Lovable editor environment
- * MODIFIED: More permissive detection
+ * SECURITY: Muito restritivo para produção
  */
 export function isLovableEditor(): boolean {
+  // Em produção, nunca permitir bypass
+  if (isProductionEnvironment()) {
+    console.log('Lovable Editor detection: Denied in production environment');
+    return false;
+  }
+  
   // Check for Lovable domains
   const isLovableDomain = window.location.hostname.endsWith('.lovableproject.com') || 
                          window.location.hostname.endsWith('.lovable.app');
@@ -55,7 +60,6 @@ export function isLovableEditor(): boolean {
   const isLocalDevelopment = process.env.NODE_ENV === 'development' && 
                              window.location.hostname === 'localhost';
   
-  // More permissive - allow Lovable domains without requiring specific parameters
   const isValidEditor = isLovableDomain || isLocalDevelopment;
   
   console.log('Lovable Editor detection:', {
@@ -73,6 +77,12 @@ export function isLovableEditor(): boolean {
  * SECURITY: Extremamente restritivo
  */
 export function isSuperAdminInLovable(): boolean {
+  // Em produção, nunca permitir super admin bypass
+  if (isProductionEnvironment()) {
+    console.log('Super admin denied: Production environment');
+    return false;
+  }
+  
   const isEditor = isLovableEditor();
   
   if (!isEditor) {
@@ -107,9 +117,15 @@ export function shouldGrantFreeAccess(): boolean {
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * MODIFIED: More permissive for development environments
+ * SECURITY: Muito restritivo para produção
  */
 export function shouldBypassAuth(): boolean {
+  // Em produção, NUNCA permitir bypass
+  if (isProductionEnvironment()) {
+    console.log('Auth bypass denied: Production environment');
+    return false;
+  }
+  
   // Check if we're in Lovable environment
   const isInLovable = isLovableEditor();
   
@@ -117,20 +133,20 @@ export function shouldBypassAuth(): boolean {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const isLocalhost = window.location.hostname === 'localhost';
   
-  // More permissive for development and Lovable environments
+  // Permitir apenas em desenvolvimento local ou Lovable
   const allowBypass = (isDevelopment && isLocalhost) || isInLovable;
   
   console.log('Auth bypass check:', {
     isDevelopment,
     isLocalhost,
     isInLovable,
-    allowBypass
+    allowBypass,
+    isProduction: isProductionEnvironment()
   });
   
   if (allowBypass) {
-    console.warn('SECURITY WARNING: Auth bypass granted for development/Lovable environment');
-    // Log de segurança
-    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development/Lovable environment bypass used');
+    console.warn('SECURITY WARNING: Auth bypass granted for development environment only');
+    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development environment bypass used');
   }
   
   return allowBypass;
@@ -148,13 +164,6 @@ export function clearAccessFlags(): void {
 }
 
 /**
- * SECURITY: Função removida - tokens de produção não mais suportados via localStorage
- */
-export function setProductionAccessToken(token: string): void {
-  console.warn('Production access tokens not supported for security reasons');
-}
-
-/**
  * Log de eventos de segurança
  */
 function logSecurityEvent(action: string, details: string): void {
@@ -164,7 +173,7 @@ function logSecurityEvent(action: string, details: string): void {
     details,
     userAgent: navigator.userAgent,
     url: window.location.href,
-    ip: 'client-side' // será capturado no servidor
+    environment: isProductionEnvironment() ? 'production' : 'development'
   };
   
   console.log('Security Event:', event);

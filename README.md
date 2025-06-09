@@ -1,69 +1,64 @@
-# Welcome to your Lovable project
 
-## Project info
+# Peter.IA - Sistema de Gestão da Qualidade
 
-**URL**: https://lovable.dev/projects/6bdd7cd3-ac93-4783-8c7f-12da59ad8e95
+Sistema inteligente de gestão da qualidade baseado na ISO 9001:2015.
 
-## How can I edit this code?
+## 🚀 Configuração para Produção
 
-There are several ways of editing your application.
+### Variáveis de Ambiente Obrigatórias
 
-**Use Lovable**
+Antes de fazer deploy em produção, configure estas variáveis:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6bdd7cd3-ac93-4783-8c7f-12da59ad8e95) and start prompting.
+```bash
+VITE_SUPABASE_URL=your_production_supabase_url
+VITE_SUPABASE_ANON_KEY=your_production_supabase_anon_key
+NODE_ENV=production
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+### ⚠️ Segurança em Produção
 
-**Use your preferred IDE**
+Este projeto implementa verificações de segurança rigorosas:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Bypass de autenticação** é automaticamente **DESABILITADO** em produção
+- **Credenciais hardcoded** foram removidas - use apenas variáveis de ambiente
+- **Logs de segurança** são implementados para monitoramento
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 📋 Checklist Pré-Deploy
 
-Follow these steps:
+- [ ] Variáveis de ambiente configuradas
+- [ ] Tabelas do banco de dados criadas (veja seção SQL)
+- [ ] Políticas RLS configuradas
+- [ ] Testes de autenticação realizados
+- [ ] Backup de dados importante
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🗄️ Tabelas Pendentes
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Algumas funcionalidades usam dados mock até as tabelas serem criadas:
 
-# Step 3: Install the necessary dependencies.
-npm i
+- `supplier_evaluations`
+- `non_conforming_products` 
+- `customer_satisfaction_surveys`
+- `equipment_calibrations`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 🔧 Desenvolvimento
+
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 🏗️ Build de Produção
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run build
+npm run preview
+```
 
-**Use GitHub Codespaces**
+### 📊 Monitoramento
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Em produção, todos os eventos de segurança são logados automaticamente.
+Configure um endpoint `/api/security-logs` para capturar estes logs.
 
-## What technologies are used for this project?
+---
 
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/6bdd7cd3-ac93-4783-8c7f-12da59ad8e95) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+⚡ **Pronto para produção com as correções de segurança implementadas!**

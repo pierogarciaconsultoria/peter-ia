@@ -3,22 +3,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Configuração segura - usar variáveis de ambiente
+// Configuração segura - SEMPRE usar variáveis de ambiente
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Função para verificar se estamos em ambiente de desenvolvimento
-const isDevelopment = import.meta.env.DEV;
-
-// Configuração de fallback para desenvolvimento
-const fallbackConfig = {
-  url: 'https://kxkcgbtsgfyisbrtjmvv.supabase.co',
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4a2NnYnRzZ2Z5aXNicnRqbXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzODQ1MTQsImV4cCI6MjA1NDk2MDUxNH0.JHd7Cafdd4gxn7s_DE3ndeHiZ7Y-Om-c5M8J0POem0U'
-};
-
-// Usar credenciais do ambiente ou fallback
-const supabaseUrl = SUPABASE_URL || fallbackConfig.url;
-const supabaseKey = SUPABASE_PUBLISHABLE_KEY || fallbackConfig.key;
+// Verificar se as variáveis de ambiente estão definidas
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+}
 
 // Validação básica de formato
 const isValidUrl = (url: string) => {
@@ -35,25 +27,21 @@ const isValidKey = (key: string) => {
 };
 
 // Verificar se as credenciais são válidas
-if (!isValidUrl(supabaseUrl) || !isValidKey(supabaseKey)) {
-  console.error('SUPABASE CONFIG ERROR: Invalid credentials detected');
-  if (!isDevelopment) {
-    throw new Error('Invalid Supabase configuration');
-  }
+if (!isValidUrl(SUPABASE_URL) || !isValidKey(SUPABASE_PUBLISHABLE_KEY)) {
+  throw new Error('Invalid Supabase configuration. Please check your environment variables.');
 }
 
 // Log de configuração (apenas em desenvolvimento)
-if (isDevelopment) {
+if (import.meta.env.DEV) {
   console.log('Supabase client initialized:', {
-    url: supabaseUrl.substring(0, 30) + '...',
-    hasKey: !!supabaseKey,
-    isProduction: !isDevelopment
+    url: SUPABASE_URL.substring(0, 30) + '...',
+    hasKey: !!SUPABASE_PUBLISHABLE_KEY
   });
 }
 
 export const supabase = createClient<Database>(
-  supabaseUrl, 
-  supabaseKey,
+  SUPABASE_URL, 
+  SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       autoRefreshToken: true,
@@ -107,13 +95,13 @@ export const confirmAdminEmail = async (email: string) => {
   }
 };
 
-// Função para testar a conexão - REMOVIDO: conexão com tabela inexistente
+// Função para testar a conexão com tratamento de erro
 export const testConnection = async () => {
   try {
     // Teste simples com uma tabela que existe
     const { data, error } = await supabase.from('companies').select('id').limit(1);
-    return { success: !error, error };
-  } catch (error) {
-    return { success: false, error };
+    return { success: !error, error: error?.message || null };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Unknown connection error' };
   }
 };
