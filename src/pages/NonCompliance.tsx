@@ -1,7 +1,5 @@
 
 import { useState } from "react";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,94 +122,88 @@ const NonCompliance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Não Conformidades</h1>
-            <Button>Nova Não Conformidade</Button>
-          </div>
-          
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-sm font-medium mr-2">Filtrar por status:</span>
-            <Button 
-              variant={statusFilter === null ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter(null)}
-            >
-              Todos
-            </Button>
-            <Button 
-              variant={statusFilter === "open" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("open")}
-            >
-              Abertas
-            </Button>
-            <Button 
-              variant={statusFilter === "in_progress" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("in_progress")}
-            >
-              Em Andamento
-            </Button>
-            <Button 
-              variant={statusFilter === "closed" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setStatusFilter("closed")}
-            >
-              Concluídas
-            </Button>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-10">Carregando...</div>
-          ) : error ? (
-            <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
-          ) : (
-            <div className="grid gap-4">
-              {filteredNonCompliances.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(item.status)}
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
-                      </div>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
-                        {getSeverityLabel(item.severity)}
-                      </div>
-                    </div>
-                    <CardDescription className="flex items-center justify-between">
-                      <span>Requisito: {item.requirement_id}</span>
-                      <span>Data: {formatDate(item.created_at)}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600">{item.description}</p>
-                  </CardContent>
-                  <CardFooter className="bg-muted/50 flex justify-between pt-2">
-                    <span className="text-sm flex items-center gap-1">
-                      Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
-                    </span>
-                    <Button size="sm" variant="outline">Ver Detalhes</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-              
-              {filteredNonCompliances.length === 0 && (
-                <div className="text-center py-10 bg-muted rounded-lg">
-                  <p className="text-muted-foreground">Nenhuma não conformidade encontrada</p>
-                </div>
-              )}
-            </div>
-          )}
+    <div className="p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Não Conformidades</h1>
+          <Button>Nova Não Conformidade</Button>
         </div>
-      </main>
-      
-      <Footer />
+        
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-sm font-medium mr-2">Filtrar por status:</span>
+          <Button 
+            variant={statusFilter === null ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setStatusFilter(null)}
+          >
+            Todos
+          </Button>
+          <Button 
+            variant={statusFilter === "open" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setStatusFilter("open")}
+          >
+            Abertas
+          </Button>
+          <Button 
+            variant={statusFilter === "in_progress" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setStatusFilter("in_progress")}
+          >
+            Em Andamento
+          </Button>
+          <Button 
+            variant={statusFilter === "closed" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setStatusFilter("closed")}
+          >
+            Concluídas
+          </Button>
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center py-10">Carregando...</div>
+        ) : error ? (
+          <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
+        ) : (
+          <div className="grid gap-4">
+            {filteredNonCompliances.map((item) => (
+              <Card key={item.id} className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(item.status)}
+                      <CardTitle className="text-lg">{item.title}</CardTitle>
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
+                      {getSeverityLabel(item.severity)}
+                    </div>
+                  </div>
+                  <CardDescription className="flex items-center justify-between">
+                    <span>Requisito: {item.requirement_id}</span>
+                    <span>Data: {formatDate(item.created_at)}</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                </CardContent>
+                <CardFooter className="bg-muted/50 flex justify-between pt-2">
+                  <span className="text-sm flex items-center gap-1">
+                    Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
+                  </span>
+                  <Button size="sm" variant="outline">Ver Detalhes</Button>
+                </CardFooter>
+              </Card>
+            ))}
+            
+            {filteredNonCompliances.length === 0 && (
+              <div className="text-center py-10 bg-muted rounded-lg">
+                <p className="text-muted-foreground">Nenhuma não conformidade encontrada</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

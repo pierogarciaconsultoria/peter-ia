@@ -38,7 +38,7 @@ export function Navigation() {
         </header>
         
         {/* Main content com overflow controlado */}
-        <main className="flex-1 overflow-auto pb-4">
+        <main className="flex-1 overflow-auto">
           <div className="w-full max-w-full">
             <Outlet />
           </div>

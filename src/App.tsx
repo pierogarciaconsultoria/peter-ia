@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -127,8 +126,12 @@ function AppContent() {
             {/* Rota pública para entrevista de desligamento */}
             <Route path="/exit-interview/:token" element={<ExitInterviewPage />} />
             
-            {/* Rotas protegidas por autenticação com AuthGuard */}
-            <Route element={<AuthGuard><Navigation /></AuthGuard>}>
+            {/* Rotas protegidas por autenticação com AuthGuard e Navigation compartilhada */}
+            <Route path="/*" element={
+              <AuthGuard>
+                <Navigation />
+              </AuthGuard>
+            }>
               <Route path="dashboard" element={<Dashboard />} />
               
               {/* Redirecionamento da ISO 9001 para Dashboard */}
@@ -165,7 +168,7 @@ function AppContent() {
               <Route path="ambiente" element={<Ambiente />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="admin" element={<Admin />} />
-              <Route path="/analise-inteligente" element={<IntelligentAnalysisPage />} />
+              <Route path="analise-inteligente" element={<IntelligentAnalysisPage />} />
             </Route>
             
             {/* Catch-all route for pages not found */}
