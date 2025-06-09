@@ -17,97 +17,29 @@ export interface NonConformingProduct {
   updated_at: string;
 }
 
+// NOTA: Estas funções estão desabilitadas porque a tabela 'non_conforming_products' não existe no banco atual
+// Para usar este serviço, primeiro crie a tabela no banco de dados
+
 export async function getNonConformingProducts(): Promise<NonConformingProduct[]> {
-  const { data, error } = await supabase
-    .from('non_conforming_products')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) {
-    console.error("Error fetching non-conforming products:", error);
-    throw new Error(error.message);
-  }
-  
-  return (data || []).map(item => ({
-    ...item,
-    status: item.status as NonConformingProduct['status'],
-    severity: item.severity as NonConformingProduct['severity'],
-    approval_status: item.approval_status as NonConformingProduct['approval_status'],
-  }));
+  console.warn("Tabela 'non_conforming_products' não existe no banco de dados atual");
+  return [];
 }
 
-export async function getNonConformingProductById(id: string): Promise<NonConformingProduct> {
-  const { data, error } = await supabase
-    .from('non_conforming_products')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error("Error fetching non-conforming product:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as NonConformingProduct['status'],
-    severity: data.severity as NonConformingProduct['severity'],
-    approval_status: data.approval_status as NonConformingProduct['approval_status'],
-  };
+export async function getNonConformingProductById(id: string): Promise<NonConformingProduct | null> {
+  console.warn("Tabela 'non_conforming_products' não existe no banco de dados atual");
+  return null;
 }
 
-export async function createNonConformingProduct(product: Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>): Promise<NonConformingProduct> {
-  const { data, error } = await supabase
-    .from('non_conforming_products')
-    .insert([product])
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("Error creating non-conforming product:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as NonConformingProduct['status'],
-    severity: data.severity as NonConformingProduct['severity'],
-    approval_status: data.approval_status as NonConformingProduct['approval_status'],
-  };
+export async function createNonConformingProduct(product: Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>): Promise<NonConformingProduct | null> {
+  console.warn("Tabela 'non_conforming_products' não existe no banco de dados atual");
+  return null;
 }
 
-export async function updateNonConformingProduct(id: string, product: Partial<Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>>): Promise<NonConformingProduct> {
-  const { data, error } = await supabase
-    .from('non_conforming_products')
-    .update({
-      ...product,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("Error updating non-conforming product:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as NonConformingProduct['status'],
-    severity: data.severity as NonConformingProduct['severity'],
-    approval_status: data.approval_status as NonConformingProduct['approval_status'],
-  };
+export async function updateNonConformingProduct(id: string, product: Partial<Omit<NonConformingProduct, 'id' | 'created_at' | 'updated_at'>>): Promise<NonConformingProduct | null> {
+  console.warn("Tabela 'non_conforming_products' não existe no banco de dados atual");
+  return null;
 }
 
 export async function deleteNonConformingProduct(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('non_conforming_products')
-    .delete()
-    .eq('id', id);
-  
-  if (error) {
-    console.error("Error deleting non-conforming product:", error);
-    throw new Error(error.message);
-  }
+  console.warn("Tabela 'non_conforming_products' não existe no banco de dados atual");
 }

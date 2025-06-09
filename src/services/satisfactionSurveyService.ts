@@ -16,89 +16,29 @@ export interface SatisfactionSurvey {
   updated_at: string;
 }
 
+// NOTA: Estas funções estão desabilitadas porque a tabela 'customer_satisfaction_surveys' não existe no banco atual
+// Para usar este serviço, primeiro crie a tabela no banco de dados
+
 export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
-  const { data, error } = await supabase
-    .from('customer_satisfaction_surveys')
-    .select('*')
-    .order('survey_date', { ascending: false });
-  
-  if (error) {
-    console.error("Error fetching satisfaction surveys:", error);
-    throw new Error(error.message);
-  }
-  
-  return (data || []).map(item => ({
-    ...item,
-    status: item.status as SatisfactionSurvey['status'],
-  }));
+  console.warn("Tabela 'customer_satisfaction_surveys' não existe no banco de dados atual");
+  return [];
 }
 
 export async function getSatisfactionSurveyById(id: string): Promise<SatisfactionSurvey> {
-  const { data, error } = await supabase
-    .from('customer_satisfaction_surveys')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error("Error fetching satisfaction survey:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as SatisfactionSurvey['status'],
-  };
+  console.warn("Tabela 'customer_satisfaction_surveys' não existe no banco de dados atual");
+  throw new Error("Tabela não existe no banco de dados atual");
 }
 
 export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>): Promise<SatisfactionSurvey> {
-  const { data, error } = await supabase
-    .from('customer_satisfaction_surveys')
-    .insert([survey])
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("Error creating satisfaction survey:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as SatisfactionSurvey['status'],
-  };
+  console.warn("Tabela 'customer_satisfaction_surveys' não existe no banco de dados atual");
+  throw new Error("Tabela não existe no banco de dados atual");
 }
 
 export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<SatisfactionSurvey, 'id' | 'created_at' | 'updated_at'>>): Promise<SatisfactionSurvey> {
-  const { data, error } = await supabase
-    .from('customer_satisfaction_surveys')
-    .update({
-      ...survey,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("Error updating satisfaction survey:", error);
-    throw new Error(error.message);
-  }
-  
-  return {
-    ...data,
-    status: data.status as SatisfactionSurvey['status'],
-  };
+  console.warn("Tabela 'customer_satisfaction_surveys' não existe no banco de dados atual");
+  throw new Error("Tabela não existe no banco de dados atual");
 }
 
 export async function deleteSatisfactionSurvey(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('customer_satisfaction_surveys')
-    .delete()
-    .eq('id', id);
-  
-  if (error) {
-    console.error("Error deleting satisfaction survey:", error);
-    throw new Error(error.message);
-  }
+  console.warn("Tabela 'customer_satisfaction_surveys' não existe no banco de dados atual");
 }
