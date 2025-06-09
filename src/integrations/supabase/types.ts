@@ -9,40 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      access_tokens: {
+      _backup_important_data: {
         Row: {
-          active: boolean
-          company_id: string
-          created_at: string
-          expires_at: string
-          id: string
-          token: string
+          created_at: string | null
+          status: string | null
         }
         Insert: {
-          active?: boolean
-          company_id: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          token: string
+          created_at?: string | null
+          status?: string | null
         }
         Update: {
-          active?: boolean
-          company_id?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          token?: string
+          created_at?: string | null
+          status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "access_tokens_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      _optimization_log: {
+        Row: {
+          created_at: string | null
+          id: string
+          operation: string
+          tables_consolidated: string[] | null
+          tables_removed: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          operation: string
+          tables_consolidated?: string[] | null
+          tables_removed?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          operation?: string
+          tables_consolidated?: string[] | null
+          tables_removed?: string[] | null
+        }
+        Relationships: []
       }
       action_items: {
         Row: {
@@ -125,152 +129,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      admin_users: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          is_master: boolean
-          password: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          is_master?: boolean
-          password: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          is_master?: boolean
-          password?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      ai_damage_reports: {
-        Row: {
-          assigned_to: string | null
-          auto_generated: boolean
-          company_id: string
-          created_at: string
-          description: string
-          detected_issues: Json
-          id: string
-          inspection_id: string | null
-          recommended_actions: Json | null
-          report_type: string
-          severity: string
-          status: string
-          updated_at: string
-          verification_id: string | null
-        }
-        Insert: {
-          assigned_to?: string | null
-          auto_generated?: boolean
-          company_id: string
-          created_at?: string
-          description: string
-          detected_issues: Json
-          id?: string
-          inspection_id?: string | null
-          recommended_actions?: Json | null
-          report_type: string
-          severity?: string
-          status?: string
-          updated_at?: string
-          verification_id?: string | null
-        }
-        Update: {
-          assigned_to?: string | null
-          auto_generated?: boolean
-          company_id?: string
-          created_at?: string
-          description?: string
-          detected_issues?: Json
-          id?: string
-          inspection_id?: string | null
-          recommended_actions?: Json | null
-          report_type?: string
-          severity?: string
-          status?: string
-          updated_at?: string
-          verification_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_damage_reports_inspection_id_fkey"
-            columns: ["inspection_id"]
-            isOneToOne: false
-            referencedRelation: "inspections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_damage_reports_verification_id_fkey"
-            columns: ["verification_id"]
-            isOneToOne: false
-            referencedRelation: "ai_verifications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ai_verifications: {
-        Row: {
-          ai_response: Json | null
-          company_id: string
-          confidence_score: number | null
-          created_at: string
-          discrepancies: Json | null
-          error_message: string | null
-          id: string
-          inspection_id: string | null
-          processed_at: string | null
-          processing_time: number | null
-          status: string
-          verification_stage: string
-        }
-        Insert: {
-          ai_response?: Json | null
-          company_id: string
-          confidence_score?: number | null
-          created_at?: string
-          discrepancies?: Json | null
-          error_message?: string | null
-          id?: string
-          inspection_id?: string | null
-          processed_at?: string | null
-          processing_time?: number | null
-          status?: string
-          verification_stage: string
-        }
-        Update: {
-          ai_response?: Json | null
-          company_id?: string
-          confidence_score?: number | null
-          created_at?: string
-          discrepancies?: Json | null
-          error_message?: string | null
-          id?: string
-          inspection_id?: string | null
-          processed_at?: string | null
-          processing_time?: number | null
-          status?: string
-          verification_stage?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_verifications_inspection_id_fkey"
-            columns: ["inspection_id"]
-            isOneToOne: false
-            referencedRelation: "inspections"
             referencedColumns: ["id"]
           },
         ]
@@ -361,56 +219,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
-      }
-      attendance_records: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_exempt: boolean | null
-          justification: string | null
-          meeting_id: string
-          member_id: string
-          name: string
-          spouse_name: string | null
-          spouse_present: boolean | null
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_exempt?: boolean | null
-          justification?: string | null
-          meeting_id: string
-          member_id: string
-          name: string
-          spouse_name?: string | null
-          spouse_present?: boolean | null
-          status: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_exempt?: boolean | null
-          justification?: string | null
-          meeting_id?: string
-          member_id?: string
-          name?: string
-          spouse_name?: string | null
-          spouse_present?: boolean | null
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_records_meeting_id_fkey"
-            columns: ["meeting_id"]
-            isOneToOne: false
-            referencedRelation: "meetings"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       audits: {
         Row: {
@@ -726,83 +534,6 @@ export type Database = {
           },
         ]
       }
-      carriers: {
-        Row: {
-          address: string | null
-          cnpj: string
-          company_id: string | null
-          created_at: string
-          email: string
-          id: string
-          name: string
-          phone: string | null
-          rating: number | null
-          specialties: string[] | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          cnpj: string
-          company_id?: string | null
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          phone?: string | null
-          rating?: number | null
-          specialties?: string[] | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          cnpj?: string
-          company_id?: string | null
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          phone?: string | null
-          rating?: number | null
-          specialties?: string[] | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "carriers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      clickup_integrations: {
-        Row: {
-          api_key: string | null
-          created_at: string | null
-          id: string
-          updated_at: string | null
-          webhook_url: string | null
-        }
-        Insert: {
-          api_key?: string | null
-          created_at?: string | null
-          id?: string
-          updated_at?: string | null
-          webhook_url?: string | null
-        }
-        Update: {
-          api_key?: string | null
-          created_at?: string | null
-          id?: string
-          updated_at?: string | null
-          webhook_url?: string | null
-        }
-        Relationships: []
-      }
       climate_survey_questions: {
         Row: {
           category: string
@@ -959,50 +690,6 @@ export type Database = {
           },
         ]
       }
-      colaboradores: {
-        Row: {
-          cargo: string
-          company_id: string | null
-          created_at: string
-          departamento: string
-          email_corporativo: string
-          id: string
-          nome: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          cargo: string
-          company_id?: string | null
-          created_at?: string
-          departamento: string
-          email_corporativo: string
-          id?: string
-          nome: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          cargo?: string
-          company_id?: string | null
-          created_at?: string
-          departamento?: string
-          email_corporativo?: string
-          id?: string
-          nome?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "colaboradores_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       companies: {
         Row: {
           active: boolean
@@ -1116,24 +803,6 @@ export type Database = {
           },
         ]
       }
-      connection_test: {
-        Row: {
-          connection_time: string | null
-          id: string
-          message: string
-        }
-        Insert: {
-          connection_time?: string | null
-          id?: string
-          message: string
-        }
-        Update: {
-          connection_time?: string | null
-          id?: string
-          message?: string
-        }
-        Relationships: []
-      }
       critical_analysis: {
         Row: {
           analysis_date: string
@@ -1226,54 +895,6 @@ export type Database = {
           priority?: string
           resolution?: string | null
           status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      customer_satisfaction_surveys: {
-        Row: {
-          created_at: string
-          customer_name: string
-          delivery_satisfaction: number | null
-          empresa_id: string | null
-          id: string
-          overall_satisfaction: number | null
-          product_quality: number | null
-          service_quality: number | null
-          status: string
-          suggestions: string | null
-          survey_date: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          customer_name: string
-          delivery_satisfaction?: number | null
-          empresa_id?: string | null
-          id?: string
-          overall_satisfaction?: number | null
-          product_quality?: number | null
-          service_quality?: number | null
-          status?: string
-          suggestions?: string | null
-          survey_date: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          customer_name?: string
-          delivery_satisfaction?: number | null
-          empresa_id?: string | null
-          id?: string
-          overall_satisfaction?: number | null
-          product_quality?: number | null
-          service_quality?: number | null
-          status?: string
-          suggestions?: string | null
-          survey_date?: string
-          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -1404,48 +1025,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      diagnostic_submissions: {
-        Row: {
-          analysis: Json
-          company_segment: string
-          created_at: string
-          email: string
-          employee_count: string
-          full_name: string
-          id: string
-          phone: string
-          results: Json
-          submission_id: string
-          timestamp: string
-        }
-        Insert: {
-          analysis: Json
-          company_segment: string
-          created_at?: string
-          email: string
-          employee_count: string
-          full_name: string
-          id?: string
-          phone: string
-          results: Json
-          submission_id: string
-          timestamp: string
-        }
-        Update: {
-          analysis?: Json
-          company_segment?: string
-          created_at?: string
-          email?: string
-          employee_count?: string
-          full_name?: string
-          id?: string
-          phone?: string
-          results?: Json
-          submission_id?: string
-          timestamp?: string
-        }
-        Relationships: []
       }
       disc_assessments: {
         Row: {
@@ -1705,53 +1284,6 @@ export type Database = {
         }
         Relationships: []
       }
-      document_templates: {
-        Row: {
-          company_id: string
-          content: string
-          created_at: string | null
-          created_by: string | null
-          id: string
-          is_default: boolean | null
-          name: string
-          type: string
-          updated_at: string | null
-          variables: string[] | null
-        }
-        Insert: {
-          company_id: string
-          content: string
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          is_default?: boolean | null
-          name: string
-          type: string
-          updated_at?: string | null
-          variables?: string[] | null
-        }
-        Update: {
-          company_id?: string
-          content?: string
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          is_default?: boolean | null
-          name?: string
-          type?: string
-          updated_at?: string | null
-          variables?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_templates_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       employee_training_compliance: {
         Row: {
           assigned_date: string | null
@@ -1955,132 +1487,6 @@ export type Database = {
             referencedRelation: "departments"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "employees_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      empresas: {
-        Row: {
-          cnpj: string | null
-          created_at: string | null
-          email: string | null
-          endereco: string | null
-          id: string
-          id_responsavel: string | null
-          nome: string
-          setor: string | null
-          telefone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          cnpj?: string | null
-          created_at?: string | null
-          email?: string | null
-          endereco?: string | null
-          id?: string
-          id_responsavel?: string | null
-          nome: string
-          setor?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          cnpj?: string | null
-          created_at?: string | null
-          email?: string | null
-          endereco?: string | null
-          id?: string
-          id_responsavel?: string | null
-          nome?: string
-          setor?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      equipment_calibrations: {
-        Row: {
-          calibration_date: string
-          calibration_entity: string
-          certificate_number: string | null
-          created_at: string
-          empresa_id: string | null
-          equipment_id: string
-          equipment_name: string
-          id: string
-          next_calibration_date: string
-          observations: string | null
-          responsible: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          calibration_date: string
-          calibration_entity: string
-          certificate_number?: string | null
-          created_at?: string
-          empresa_id?: string | null
-          equipment_id: string
-          equipment_name: string
-          id?: string
-          next_calibration_date: string
-          observations?: string | null
-          responsible: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          calibration_date?: string
-          calibration_entity?: string
-          certificate_number?: string | null
-          created_at?: string
-          empresa_id?: string | null
-          equipment_id?: string
-          equipment_name?: string
-          id?: string
-          next_calibration_date?: string
-          observations?: string | null
-          responsible?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      external_attendees: {
-        Row: {
-          created_at: string | null
-          id: string
-          meeting_id: string
-          name: string
-          relationship: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          meeting_id: string
-          name: string
-          relationship?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          meeting_id?: string
-          name?: string
-          relationship?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "external_attendees_meeting_id_fkey"
-            columns: ["meeting_id"]
-            isOneToOne: false
-            referencedRelation: "meetings"
-            referencedColumns: ["id"]
-          },
         ]
       }
       external_audits: {
@@ -2188,132 +1594,6 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      freight_notifications: {
-        Row: {
-          created_at: string
-          id: string
-          link: string | null
-          message: string
-          read: boolean
-          reference_id: string | null
-          title: string
-          type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          message: string
-          read?: boolean
-          reference_id?: string | null
-          title: string
-          type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          message?: string
-          read?: boolean
-          reference_id?: string | null
-          title?: string
-          type?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      freight_quotes: {
-        Row: {
-          collection_date: string
-          company_id: string
-          created_at: string
-          created_by: string
-          delivery_date: string
-          destination_address: string
-          destination_city: string
-          destination_zip_code: string
-          id: string
-          observations: string | null
-          origin_address: string
-          origin_city: string
-          origin_zip_code: string
-          payment_method: string
-          payment_term: string
-          quote_number: string
-          selected_carrier_id: string | null
-          selected_response_id: string | null
-          status: string
-          total_volume: number | null
-          total_weight: number | null
-          updated_at: string
-        }
-        Insert: {
-          collection_date: string
-          company_id: string
-          created_at?: string
-          created_by: string
-          delivery_date: string
-          destination_address: string
-          destination_city: string
-          destination_zip_code: string
-          id?: string
-          observations?: string | null
-          origin_address: string
-          origin_city: string
-          origin_zip_code: string
-          payment_method: string
-          payment_term: string
-          quote_number: string
-          selected_carrier_id?: string | null
-          selected_response_id?: string | null
-          status?: string
-          total_volume?: number | null
-          total_weight?: number | null
-          updated_at?: string
-        }
-        Update: {
-          collection_date?: string
-          company_id?: string
-          created_at?: string
-          created_by?: string
-          delivery_date?: string
-          destination_address?: string
-          destination_city?: string
-          destination_zip_code?: string
-          id?: string
-          observations?: string | null
-          origin_address?: string
-          origin_city?: string
-          origin_zip_code?: string
-          payment_method?: string
-          payment_term?: string
-          quote_number?: string
-          selected_carrier_id?: string | null
-          selected_response_id?: string | null
-          status?: string
-          total_volume?: number | null
-          total_weight?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "freight_quotes_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "freight_quotes_selected_carrier_id_fkey"
-            columns: ["selected_carrier_id"]
-            isOneToOne: false
-            referencedRelation: "carriers"
             referencedColumns: ["id"]
           },
         ]
@@ -4454,81 +3734,6 @@ export type Database = {
           },
         ]
       }
-      inspections: {
-        Row: {
-          ai_processing_completed_at: string | null
-          ai_processing_started_at: string | null
-          ai_verification_status: string | null
-          batch_number: string
-          company_id: string
-          created_at: string
-          created_by: string | null
-          has_discrepancies: boolean | null
-          id: string
-          inspection_criteria: Json | null
-          inspection_date: string
-          inspection_result: string
-          inspector: string
-          invoice_number: string | null
-          material_name: string
-          non_conformity: string | null
-          observations: string | null
-          purchase_order_number: string | null
-          quantity: number
-          supplier: string
-          unit: string
-          updated_at: string
-        }
-        Insert: {
-          ai_processing_completed_at?: string | null
-          ai_processing_started_at?: string | null
-          ai_verification_status?: string | null
-          batch_number: string
-          company_id: string
-          created_at?: string
-          created_by?: string | null
-          has_discrepancies?: boolean | null
-          id?: string
-          inspection_criteria?: Json | null
-          inspection_date: string
-          inspection_result: string
-          inspector: string
-          invoice_number?: string | null
-          material_name: string
-          non_conformity?: string | null
-          observations?: string | null
-          purchase_order_number?: string | null
-          quantity: number
-          supplier: string
-          unit: string
-          updated_at?: string
-        }
-        Update: {
-          ai_processing_completed_at?: string | null
-          ai_processing_started_at?: string | null
-          ai_verification_status?: string | null
-          batch_number?: string
-          company_id?: string
-          created_at?: string
-          created_by?: string | null
-          has_discrepancies?: boolean | null
-          id?: string
-          inspection_criteria?: Json | null
-          inspection_date?: string
-          inspection_result?: string
-          inspector?: string
-          invoice_number?: string | null
-          material_name?: string
-          non_conformity?: string | null
-          observations?: string | null
-          purchase_order_number?: string | null
-          quantity?: number
-          supplier?: string
-          unit?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       invoice_sending_logs: {
         Row: {
           company_id: string | null
@@ -5379,72 +4584,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      "Morada do Sol": {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-        }
-        Relationships: []
-      }
-      non_conforming_products: {
-        Row: {
-          approval_status: string
-          created_at: string
-          customer: string | null
-          department: string
-          description: string
-          empresa_id: string | null
-          id: string
-          immediate_action: string
-          non_conformity_type: string
-          product_name: string
-          requirement_id: string
-          severity: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          approval_status?: string
-          created_at?: string
-          customer?: string | null
-          department: string
-          description: string
-          empresa_id?: string | null
-          id?: string
-          immediate_action: string
-          non_conformity_type: string
-          product_name: string
-          requirement_id: string
-          severity: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          approval_status?: string
-          created_at?: string
-          customer?: string | null
-          department?: string
-          description?: string
-          empresa_id?: string | null
-          id?: string
-          immediate_action?: string
-          non_conformity_type?: string
-          product_name?: string
-          requirement_id?: string
-          severity?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       non_conformities: {
         Row: {
@@ -6402,13 +5541,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "quote_evaluations_quote_id_fkey"
-            columns: ["quote_id"]
-            isOneToOne: false
-            referencedRelation: "freight_quotes"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "quote_evaluations_response_id_fkey"
             columns: ["response_id"]
             isOneToOne: false
@@ -6445,15 +5577,7 @@ export type Database = {
           volume?: number
           weight?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "quote_items_quote_id_fkey"
-            columns: ["quote_id"]
-            isOneToOne: false
-            referencedRelation: "freight_quotes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       quote_responses: {
         Row: {
@@ -6501,22 +5625,7 @@ export type Database = {
           updated_at?: string
           valid_until?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "quote_responses_carrier_id_fkey"
-            columns: ["carrier_id"]
-            isOneToOne: false
-            referencedRelation: "carriers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quote_responses_quote_id_fkey"
-            columns: ["quote_id"]
-            isOneToOne: false
-            referencedRelation: "freight_quotes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       raw_material_inspections: {
         Row: {
@@ -6972,6 +6081,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rls_policies_backup: {
+        Row: {
+          cmd: string | null
+          permissive: string | null
+          policyname: unknown | null
+          qual: string | null
+          roles: unknown[] | null
+          schemaname: unknown | null
+          tablename: unknown | null
+          with_check: string | null
+        }
+        Insert: {
+          cmd?: string | null
+          permissive?: string | null
+          policyname?: unknown | null
+          qual?: string | null
+          roles?: unknown[] | null
+          schemaname?: unknown | null
+          tablename?: unknown | null
+          with_check?: string | null
+        }
+        Update: {
+          cmd?: string | null
+          permissive?: string | null
+          policyname?: unknown | null
+          qual?: string | null
+          roles?: unknown[] | null
+          schemaname?: unknown | null
+          tablename?: unknown | null
+          with_check?: string | null
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           granted: boolean
@@ -7194,60 +6336,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      supplier_evaluations: {
-        Row: {
-          category: string
-          comments: string | null
-          created_at: string
-          delivery_score: number | null
-          empresa_id: string | null
-          evaluation_date: string
-          evaluator: string
-          id: string
-          price_score: number | null
-          quality_score: number | null
-          status: string
-          supplier_name: string
-          support_score: number | null
-          total_score: number | null
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          comments?: string | null
-          created_at?: string
-          delivery_score?: number | null
-          empresa_id?: string | null
-          evaluation_date: string
-          evaluator: string
-          id?: string
-          price_score?: number | null
-          quality_score?: number | null
-          status?: string
-          supplier_name: string
-          support_score?: number | null
-          total_score?: number | null
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          comments?: string | null
-          created_at?: string
-          delivery_score?: number | null
-          empresa_id?: string | null
-          evaluation_date?: string
-          evaluator?: string
-          id?: string
-          price_score?: number | null
-          quality_score?: number | null
-          status?: string
-          supplier_name?: string
-          support_score?: number | null
-          total_score?: number | null
-          updated_at?: string
-        }
-        Relationships: []
       }
       tasks: {
         Row: {
@@ -7718,15 +6806,7 @@ export type Database = {
           projeto_id?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "usuarios_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       whatsapp_templates: {
         Row: {
