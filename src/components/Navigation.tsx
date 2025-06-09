@@ -18,7 +18,7 @@ export function Navigation() {
       {/* Sidebar */}
       <Sidebar />
       
-      {/* Main content - ajustado para não sobrepor */}
+      {/* Main content area */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'} min-w-0`}>
         <header className="flex-shrink-0 h-16 bg-background/95 backdrop-blur-sm border-b">
           <div className="flex h-full items-center justify-between px-4">
@@ -37,7 +37,7 @@ export function Navigation() {
           </div>
         </header>
         
-        {/* Main content com overflow controlado */}
+        {/* Main content without extra padding - each page controls its own spacing */}
         <main className="flex-1 overflow-auto">
           <div className="w-full max-w-full">
             <Outlet />
