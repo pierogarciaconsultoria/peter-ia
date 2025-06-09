@@ -71,8 +71,8 @@ export function PermissoesUsuarios() {
         const { data: usuariosData, error: usuariosError } = await query;
         if (usuariosError) throw usuariosError;
         
-        // Carregar empresas para associar aos usuários - CORRIGIDO: usar 'companies' em vez de 'empresas'
-        const { data: empresasData } = await supabase.from('companies').select('id, name as nome');
+        // Carregar empresas para associar aos usuários - CORRIGIDO: usar sintaxe correta do Supabase
+        const { data: empresasData } = await supabase.from('companies').select('id, name:nome');
         const empresasMap = (empresasData || []).reduce((acc, empresa) => {
           acc[empresa.id] = empresa.nome;
           return acc;
