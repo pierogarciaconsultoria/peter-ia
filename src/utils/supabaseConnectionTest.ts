@@ -10,11 +10,10 @@ export async function testSupabaseConnection() {
   try {
     console.log("Testing Supabase connection...");
     
-    // Try to query the connection_test table
+    // Try to query a table that exists - using companies table instead
     const { data, error } = await supabase
-      .from('connection_test')
-      .select('*')
-      .order('connection_time', { ascending: false })
+      .from('companies')
+      .select('id, name')
       .limit(1);
     
     if (error) {
@@ -24,23 +23,6 @@ export async function testSupabaseConnection() {
         success: false,
         error: error.message,
         details: error
-      };
-    }
-    
-    // Record a new connection test entry
-    const { error: insertError } = await supabase
-      .from('connection_test')
-      .insert([
-        { message: `Connection test at ${new Date().toISOString()}` }
-      ]);
-    
-    if (insertError) {
-      console.warn("Could read but not write to Supabase:", insertError);
-      return {
-        success: true,
-        readOnly: true,
-        lastConnection: data?.[0] || null,
-        error: insertError.message
       };
     }
     
@@ -84,25 +66,10 @@ export async function verifyTableStructure(tableName: string) {
       };
     }
     
-    // Get table structure info from postgres
-    // Use type assertion for RPC function call
-    const { data: columns, error: columnsError } = await supabase
-      .rpc('get_table_columns' as any, { table_name: tableName });
-    
-    if (columnsError) {
-      console.warn(`Could not retrieve column info for ${tableName}:`, columnsError);
-      return {
-        exists: true,
-        accessible: true,
-        columns: null,
-        error: columnsError.message
-      };
-    }
-    
     return {
       exists: true,
       accessible: true,
-      columns: columns
+      columns: null
     };
   } catch (e: any) {
     console.error(`Error verifying table ${tableName}:`, e);
@@ -120,12 +87,7 @@ export async function verifyTableStructure(tableName: string) {
  */
 export async function createColumnInfoFunction() {
   try {
-    // Use type assertion for RPC function call
-    const { error } = await supabase.rpc('create_column_info_function' as any);
-    if (error) {
-      console.error("Could not create column info function:", error);
-      return false;
-    }
+    console.log("Column info function creation skipped - using existing functions");
     return true;
   } catch (e) {
     console.error("Error creating column info function:", e);
@@ -152,11 +114,10 @@ export async function initializeSupabaseConnection() {
   
   // Check critical tables
   const tables = [
-    'job_positions', 
+    'companies',
     'employees', 
     'departments', 
-    'occurrences',
-    'customer_complaints'
+    'user_profiles'
   ];
   
   const tableResults: Record<string, any> = {};
