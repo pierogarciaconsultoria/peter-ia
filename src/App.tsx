@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -129,6 +130,9 @@ function AppContent() {
             {/* Rotas protegidas por autenticação com AuthGuard */}
             <Route element={<AuthGuard><Navigation /></AuthGuard>}>
               <Route path="dashboard" element={<Dashboard />} />
+              
+              {/* Redirecionamento da ISO 9001 para Dashboard */}
+              <Route path="iso-9001" element={<Navigate to="/dashboard" replace />} />
               
               <Route path="profile" element={<Navigate to="/dashboard" replace />} />
               <Route path="documents" element={<Navigate to="/dashboard" replace />} />
