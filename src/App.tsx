@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -11,7 +10,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster as SonnerToaster } from 'sonner';
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { supabase } from './integrations/supabase/client';
+import { testConnection } from './integrations/supabase/client';
 import { isProductionEnvironment } from './utils/lovableEditorDetection';
 
 // Import pages 
@@ -48,11 +47,11 @@ import IntelligentAnalysisPage from "@/pages/IntelligentAnalysisPage";
 import './App.css';
 
 function AppContent() {
-  console.log('🚀 AppContent: Componente inicializado - Nova instância Peter.IA');
+  console.log('🚀 AppContent: Componente inicializado - Peter.IA');
   
-  // Test Supabase connection once on startup
+  // Test Supabase connection once on startup with better error handling
   useEffect(() => {
-    console.log('🔧 AppContent: useEffect para conexão Supabase iniciado - Peter.IA');
+    console.log('🔧 AppContent: useEffect para conexão Supabase iniciado');
     let connectionChecked = false;
     
     const checkSupabaseConnection = async () => {
@@ -61,42 +60,51 @@ function AppContent() {
         return;
       }
       
-      console.log('🔌 AppContent: Testando conexão com Supabase Peter.IA...');
+      console.log('🔌 AppContent: Testando conexão com Supabase...');
       try {
-        const { data, error } = await supabase.from('connection_test').select('*').limit(1);
+        const result = await testConnection();
         
-        if (error) {
-          console.error('❌ AppContent: Erro de conexão com banco de dados:', error);
+        if (!result.success) {
+          console.warn('⚠️ AppContent: Problema de conexão com banco de dados:', result.error);
           if (isProductionEnvironment()) {
-            toast.error("Erro de conexão com o banco de dados", {
-              description: "Verifique sua conexão com a internet",
+            toast.warning("Modo offline", {
+              description: "Algumas funcionalidades podem estar limitadas",
             });
           }
         } else {
-          console.log('✅ AppContent: Conexão com banco de dados Peter.IA bem-sucedida');
+          console.log('✅ AppContent: Conexão com banco de dados bem-sucedida');
           connectionChecked = true;
         }
       } catch (err) {
-        console.error('❌ AppContent: Falha ao testar conexão com banco de dados:', err);
+        console.warn('⚠️ AppContent: Erro ao testar conexão:', err);
+        // Não mostrar erro em desenvolvimento para não atrapalhar o workflow
+        if (isProductionEnvironment()) {
+          toast.warning("Conectividade limitada", {
+            description: "Verifique sua conexão com a internet",
+          });
+        }
       }
     };
     
-    checkSupabaseConnection();
+    // Delay inicial para evitar race conditions
+    setTimeout(checkSupabaseConnection, 1000);
     
-    // Setup reconnection check on window focus
+    // Setup reconnection check on window focus (com debounce)
+    let focusTimeout: NodeJS.Timeout;
     const handleFocus = () => {
-      console.log('👁️ AppContent: Window focus detectado');
-      // Only recheck connection if previously failed
-      if (!connectionChecked) {
-        console.log('🔄 AppContent: Reconectando após falha anterior');
-        checkSupabaseConnection();
-      }
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(() => {
+        if (!connectionChecked) {
+          console.log('🔄 AppContent: Reconectando após falha anterior');
+          checkSupabaseConnection();
+        }
+      }, 2000);
     };
     
     window.addEventListener('focus', handleFocus);
     return () => {
-      console.log('🧹 AppContent: Removendo event listener');
       window.removeEventListener('focus', handleFocus);
+      clearTimeout(focusTimeout);
     };
   }, []);
 
@@ -121,6 +129,7 @@ function AppContent() {
             {/* Rotas protegidas por autenticação com AuthGuard */}
             <Route element={<AuthGuard><Navigation /></AuthGuard>}>
               <Route path="dashboard" element={<Dashboard />} />
+              
               <Route path="profile" element={<Navigate to="/dashboard" replace />} />
               <Route path="documents" element={<Navigate to="/dashboard" replace />} />
               <Route path="document-upload" element={<Navigate to="/dashboard" replace />} />

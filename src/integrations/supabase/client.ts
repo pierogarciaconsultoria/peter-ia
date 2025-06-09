@@ -7,46 +7,73 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Validação crítica de segurança
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.error('SECURITY ERROR: Missing Supabase credentials');
-  throw new Error('Missing required Supabase environment variables');
+// Função para verificar se estamos em ambiente de desenvolvimento
+const isDevelopment = import.meta.env.DEV;
+
+// Configuração de fallback para desenvolvimento
+const fallbackConfig = {
+  url: 'https://kxkcgbtsgfyisbrtjmvv.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4a2NnYnRzZ2Z5aXNicnRqbXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzODQ1MTQsImV4cCI6MjA1NDk2MDUxNH0.JHd7Cafdd4gxn7s_DE3ndeHiZ7Y-Om-c5M8J0POem0U'
+};
+
+// Usar credenciais do ambiente ou fallback
+const supabaseUrl = SUPABASE_URL || fallbackConfig.url;
+const supabaseKey = SUPABASE_PUBLISHABLE_KEY || fallbackConfig.key;
+
+// Validação básica de formato
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return url.includes('supabase.co') || url.includes('localhost');
+  } catch {
+    return false;
+  }
+};
+
+const isValidKey = (key: string) => {
+  return key && key.length > 10 && key.startsWith('eyJ');
+};
+
+// Verificar se as credenciais são válidas
+if (!isValidUrl(supabaseUrl) || !isValidKey(supabaseKey)) {
+  console.error('SUPABASE CONFIG ERROR: Invalid credentials detected');
+  if (!isDevelopment) {
+    throw new Error('Invalid Supabase configuration');
+  }
 }
 
-// Validação adicional de formato das credenciais
-if (!SUPABASE_URL.includes('supabase.co') && !SUPABASE_URL.includes('localhost')) {
-  console.error('SECURITY ERROR: Invalid Supabase URL format');
-  throw new Error('Invalid Supabase URL format');
-}
-
-if (!SUPABASE_PUBLISHABLE_KEY.startsWith('eyJ')) {
-  console.error('SECURITY ERROR: Invalid Supabase key format');
-  throw new Error('Invalid Supabase publishable key format');
-}
-
-// Log de segurança (apenas em desenvolvimento)
-if (import.meta.env.DEV) {
-  console.log('Supabase client initialized with environment variables');
+// Log de configuração (apenas em desenvolvimento)
+if (isDevelopment) {
+  console.log('Supabase client initialized:', {
+    url: supabaseUrl.substring(0, 30) + '...',
+    hasKey: !!supabaseKey,
+    isProduction: !isDevelopment
+  });
 }
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL, 
-  SUPABASE_PUBLISHABLE_KEY,
+  supabaseUrl, 
+  supabaseKey,
   {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
-      storage: localStorage,
+      storage: typeof window !== 'undefined' ? localStorage : undefined,
       flowType: 'pkce'
     },
     db: {
       schema: 'public'
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'peter-ia'
+      }
     }
   }
 );
 
-// Helper function to check if admin account exists - REMOVIDO bypass inseguro
+// Helper function to check if admin account exists
 export const confirmAdminEmail = async (email: string) => {
   try {
     console.log("Checking admin account:", email);
@@ -76,6 +103,16 @@ export const confirmAdminEmail = async (email: string) => {
     return { success: true, data: user };
   } catch (error) {
     console.error("Unexpected error checking admin account:", error);
+    return { success: false, error };
+  }
+};
+
+// Função para testar a conexão
+export const testConnection = async () => {
+  try {
+    const { data, error } = await supabase.from('connection_test').select('*').limit(1);
+    return { success: !error, error };
+  } catch (error) {
     return { success: false, error };
   }
 };
