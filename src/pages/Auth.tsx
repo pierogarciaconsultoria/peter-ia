@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
@@ -5,11 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrainCircuit, Loader2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-import { shouldBypassAuth, isProductionEnvironment, setProductionAccessToken, isLovableEditor } from "@/utils/lovableEditorDetection";
+import { shouldBypassAuth, isProductionEnvironment, isLovableEditor } from "@/utils/lovableEditorDetection";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const Auth = () => {
@@ -20,8 +18,6 @@ const Auth = () => {
   const { user, loading, connectionStatus, reconnect } = useAuth();
   
   const [activeTab, setActiveTab] = useState("login");
-  const [accessToken, setAccessToken] = useState("");
-  const [isSubmittingToken, setIsSubmittingToken] = useState(false);
   
   // Get redirect path from location state or default to dashboard
   const from = location.state?.from?.pathname || "/dashboard";
@@ -62,35 +58,6 @@ const Auth = () => {
     }
   }, [bypassAuth, navigate]);
 
-  // Handle production access token submission
-  const handleAccessTokenSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmittingToken(true);
-    
-    try {
-      if (accessToken.length > 4) { // More permissive
-        setProductionAccessToken(accessToken);
-        toast.success("Token de acesso aceito", {
-          description: "Redirecionando para o dashboard..."
-        });
-        
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1000);
-      } else {
-        toast.error("Token inválido", {
-          description: "O token de acesso deve ter pelo menos 4 caracteres."
-        });
-      }
-    } catch (error) {
-      toast.error("Erro ao processar token", {
-        description: "Ocorreu um erro ao processar o token de acesso."
-      });
-    } finally {
-      setIsSubmittingToken(false);
-    }
-  };
-  
   // Show connection error if disconnected
   if (connectionStatus === 'disconnected' && !bypassAuth) {
     return (
@@ -129,9 +96,11 @@ const Auth = () => {
     );
   }
   
-  // In production environment with no access, show production token input
-  // But be more permissive - only show this if we're actually in production AND not in Lovable
-  if (isProduction && !bypassAuth && !isInLovable) {
+  // MODIFIED: Always show standard auth form in Lovable environment
+  // Only show production token input if truly in production AND not in Lovable
+  const showProductionTokenInput = isProduction && !isInLovable && !bypassAuth;
+  
+  if (showProductionTokenInput) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
@@ -147,54 +116,16 @@ const Auth = () => {
             <CardHeader>
               <CardTitle className="text-center">Acesso à Produção</CardTitle>
               <CardDescription className="text-center">
-                Digite seu token de acesso para entrar no ambiente de produção
+                Esta funcionalidade foi desabilitada. Use o formulário de login padrão.
               </CardDescription>
             </CardHeader>
-            
-            <form onSubmit={handleAccessTokenSubmit}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="accessToken">Token de Acesso</Label>
-                  <Input
-                    id="accessToken"
-                    placeholder="Digite seu token de acesso"
-                    value={accessToken}
-                    onChange={(e) => setAccessToken(e.target.value)}
-                    required
-                  />
-                </div>
-                {/* Debug info for development */}
-                {!isProduction && (
-                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
-                    Debug: isProduction={isProduction.toString()}, isInLovable={isInLovable.toString()}, bypassAuth={bypassAuth.toString()}
-                  </div>
-                )}
-              </CardContent>
-              
-              <CardFooter>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmittingToken}
-                >
-                  {isSubmittingToken ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verificando...
-                    </>
-                  ) : (
-                    "Acessar"
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
           </Card>
         </div>
       </div>
     );
   }
   
-  // Standard auth form for development or Lovable environments
+  // Standard auth form for development, Lovable environments, and fallback
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
