@@ -94,14 +94,15 @@ export async function logHealthCheck(result: HealthCheckResult): Promise<void> {
       
       // Log critical errors to audit trail
       if (result.status === 'error') {
+        const resultJson = JSON.stringify(result);
         await supabase.rpc('log_security_event', {
           action_text: 'HEALTH_CHECK_FAILED',
           user_id_text: 'system',
           target_resource_text: 'health_check',
-          details_json: result,
+          details_json: JSON.parse(resultJson),
           status_text: 'error',
           ip_address_text: null
-        }).catch(err => console.error('Failed to log health check error:', err));
+        });
       }
     } catch (error) {
       console.error('Failed to log health check:', error);

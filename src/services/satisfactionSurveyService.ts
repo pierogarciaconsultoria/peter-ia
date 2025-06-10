@@ -29,7 +29,7 @@ export async function getSatisfactionSurveys(): Promise<SatisfactionSurvey[]> {
       return [];
     }
     
-    return data || [];
+    return (data || []) as SatisfactionSurvey[];
   } catch (error) {
     console.error("Erro inesperado ao buscar customer_satisfaction_surveys:", error);
     return [];
@@ -49,7 +49,7 @@ export async function getSatisfactionSurveyById(id: string): Promise<Satisfactio
       throw new Error("Survey não encontrado");
     }
     
-    return data;
+    return data as SatisfactionSurvey;
   } catch (error) {
     console.error("Erro inesperado ao buscar satisfaction survey por ID:", error);
     throw new Error("Survey não encontrado");
@@ -88,7 +88,7 @@ export async function createSatisfactionSurvey(survey: Omit<SatisfactionSurvey, 
       throw new Error("Falha ao criar pesquisa de satisfação");
     }
     
-    return data;
+    return data as SatisfactionSurvey;
   } catch (error) {
     console.error("Erro inesperado ao criar satisfaction survey:", error);
     throw new Error("Falha ao criar pesquisa de satisfação");
@@ -109,7 +109,7 @@ export async function updateSatisfactionSurvey(id: string, survey: Partial<Omit<
       throw new Error("Falha ao atualizar pesquisa de satisfação");
     }
     
-    return data;
+    return data as SatisfactionSurvey;
   } catch (error) {
     console.error("Erro inesperado ao atualizar satisfaction survey:", error);
     throw new Error("Falha ao atualizar pesquisa de satisfação");

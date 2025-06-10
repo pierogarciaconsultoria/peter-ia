@@ -8,10 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HealthMonitor } from "@/components/system/HealthMonitor";
+import { ProductionStatus } from "@/components/admin/ProductionStatus";
 import { getAuditLogs, AuditLogEntry } from "@/services/auditService";
-import { performHealthCheck } from "@/services/healthCheckService";
 import { isProductionEnvironment } from "@/utils/lovableEditorDetection";
-import { Shield, Activity, Database, Users } from "lucide-react";
+import { Shield, Activity, Database, Users, Settings } from "lucide-react";
 
 export function SystemMonitoring() {
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
@@ -114,12 +114,17 @@ export function SystemMonitoring() {
       <Tabs defaultValue="health" className="space-y-4">
         <TabsList>
           <TabsTrigger value="health">Health Check</TabsTrigger>
+          <TabsTrigger value="production">Configuração</TabsTrigger>
           <TabsTrigger value="audit">Logs de Auditoria</TabsTrigger>
-          <TabsTrigger value="security">Configurações de Segurança</TabsTrigger>
+          <TabsTrigger value="security">Segurança</TabsTrigger>
         </TabsList>
 
         <TabsContent value="health">
           <HealthMonitor />
+        </TabsContent>
+
+        <TabsContent value="production">
+          <ProductionStatus />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">

@@ -29,7 +29,7 @@ export async function getEquipmentCalibrations(): Promise<EquipmentCalibration[]
       return [];
     }
     
-    return data || [];
+    return (data || []) as EquipmentCalibration[];
   } catch (error) {
     console.error("Erro inesperado ao buscar equipment_calibrations:", error);
     return [];
@@ -49,7 +49,7 @@ export async function getEquipmentCalibrationById(id: string): Promise<Equipment
       return null;
     }
     
-    return data;
+    return data as EquipmentCalibration;
   } catch (error) {
     console.error("Erro inesperado ao buscar equipment calibration por ID:", error);
     return null;
@@ -88,7 +88,7 @@ export async function createEquipmentCalibration(calibration: Omit<EquipmentCali
       return null;
     }
     
-    return data;
+    return data as EquipmentCalibration;
   } catch (error) {
     console.error("Erro inesperado ao criar equipment calibration:", error);
     return null;
@@ -109,7 +109,7 @@ export async function updateEquipmentCalibration(id: string, calibration: Partia
       return null;
     }
     
-    return data;
+    return data as EquipmentCalibration;
   } catch (error) {
     console.error("Erro inesperado ao atualizar equipment calibration:", error);
     return null;

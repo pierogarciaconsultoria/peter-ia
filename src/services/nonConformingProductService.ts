@@ -30,7 +30,7 @@ export async function getNonConformingProducts(): Promise<NonConformingProduct[]
       return [];
     }
     
-    return data || [];
+    return (data || []) as NonConformingProduct[];
   } catch (error) {
     console.error("Erro inesperado ao buscar non_conforming_products:", error);
     return [];
@@ -50,7 +50,7 @@ export async function getNonConformingProductById(id: string): Promise<NonConfor
       return null;
     }
     
-    return data;
+    return data as NonConformingProduct;
   } catch (error) {
     console.error("Erro inesperado ao buscar non conforming product por ID:", error);
     return null;
@@ -89,7 +89,7 @@ export async function createNonConformingProduct(product: Omit<NonConformingProd
       return null;
     }
     
-    return data;
+    return data as NonConformingProduct;
   } catch (error) {
     console.error("Erro inesperado ao criar non conforming product:", error);
     return null;
@@ -110,7 +110,7 @@ export async function updateNonConformingProduct(id: string, product: Partial<Om
       return null;
     }
     
-    return data;
+    return data as NonConformingProduct;
   } catch (error) {
     console.error("Erro inesperado ao atualizar non conforming product:", error);
     return null;
