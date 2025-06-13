@@ -2,6 +2,20 @@
 import { supabase } from "@/integrations/supabase/client";
 import { isProductionEnvironment } from "@/utils/lovableEditorDetection";
 
+export interface Audit {
+  id: string;
+  title: string;
+  description?: string;
+  area: string;
+  responsible: string;
+  audit_date: string;
+  status: 'planned' | 'in_progress' | 'completed' | 'canceled';
+  findings?: string;
+  completion_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuditLogEntry {
   action: string;
   user_id?: string;
@@ -10,6 +24,31 @@ export interface AuditLogEntry {
   status: 'success' | 'denied' | 'error';
   ip_address?: string;
   timestamp: Date;
+}
+
+export async function getAudits(): Promise<Audit[]> {
+  try {
+    const { data, error } = await supabase
+      .from('audits')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Erro ao buscar auditorias:", error.message);
+      return [];
+    }
+    
+    return (data || []).map(audit => ({
+      ...audit,
+      audit_date: audit.audit_date,
+      completion_date: audit.completion_date,
+      created_at: audit.created_at,
+      updated_at: audit.updated_at
+    })) as Audit[];
+  } catch (error) {
+    console.error("Erro inesperado ao buscar auditorias:", error);
+    return [];
+  }
 }
 
 export async function logAuditEvent(entry: Omit<AuditLogEntry, 'timestamp'>): Promise<void> {

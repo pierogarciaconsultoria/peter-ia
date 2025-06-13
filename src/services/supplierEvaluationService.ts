@@ -31,7 +31,10 @@ export async function getSupplierEvaluations(): Promise<SupplierEvaluation[]> {
       return [];
     }
     
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      status: (item.status === 'active' || item.status === 'inactive') ? item.status : 'active'
+    })) as SupplierEvaluation[];
   } catch (error) {
     console.error("Erro inesperado ao buscar supplier_evaluations:", error);
     return [];
@@ -51,7 +54,12 @@ export async function getSupplierEvaluationById(id: string): Promise<SupplierEva
       return null;
     }
     
-    return data;
+    const result = {
+      ...data,
+      status: (data.status === 'active' || data.status === 'inactive') ? data.status : 'active'
+    } as SupplierEvaluation;
+    
+    return result;
   } catch (error) {
     console.error("Erro inesperado ao buscar supplier evaluation por ID:", error);
     return null;
@@ -90,7 +98,12 @@ export async function createSupplierEvaluation(evaluation: Omit<SupplierEvaluati
       return null;
     }
     
-    return data;
+    const result = {
+      ...data,
+      status: (data.status === 'active' || data.status === 'inactive') ? data.status : 'active'
+    } as SupplierEvaluation;
+    
+    return result;
   } catch (error) {
     console.error("Erro inesperado ao criar supplier evaluation:", error);
     return null;
@@ -111,7 +124,12 @@ export async function updateSupplierEvaluation(id: string, evaluation: Partial<O
       return null;
     }
     
-    return data;
+    const result = {
+      ...data,
+      status: (data.status === 'active' || data.status === 'inactive') ? data.status : 'active'
+    } as SupplierEvaluation;
+    
+    return result;
   } catch (error) {
     console.error("Erro inesperado ao atualizar supplier evaluation:", error);
     return null;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -6,7 +7,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays, AlertCircle, RefreshCcw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getAudits } from "@/services/auditService";
+import { getAudits, Audit } from "@/services/auditService";
 import { getExternalAudits } from "@/services/externalAuditService";
 import { formatDistanceToNow, format, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -117,22 +118,22 @@ export function Dashboard({ requirements }: DashboardProps) {
     }
   }, [internalAuditsError, externalAuditsError]);
 
-  // Filter upcoming audits (those with a future date)
+  // Filter upcoming audits (those with a future date) - with safety checks
   const today = new Date();
   
-  const upcomingInternalAudits = internalAudits
+  const upcomingInternalAudits = Array.isArray(internalAudits) ? internalAudits
     .filter(audit => {
       const auditDate = new Date(audit.audit_date);
       return isAfter(auditDate, today) && audit.status === 'planned';
     })
-    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime());
+    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime()) : [];
 
-  const upcomingExternalAudits = externalAudits
+  const upcomingExternalAudits = Array.isArray(externalAudits) ? externalAudits
     .filter(audit => {
       const auditDate = new Date(audit.audit_date);
       return isAfter(auditDate, today) && audit.status === 'scheduled';
     })
-    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime());
+    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime()) : [];
 
   const nextInternalAudit = upcomingInternalAudits.length > 0 ? upcomingInternalAudits[0] : null;
   const nextExternalAudit = upcomingExternalAudits.length > 0 ? upcomingExternalAudits[0] : null;

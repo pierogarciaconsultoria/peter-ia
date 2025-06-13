@@ -5798,6 +5798,265 @@ export type Database = {
         }
         Relationships: []
       }
+      raltec_ai_verifications: {
+        Row: {
+          ai_response: Json | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string | null
+          discrepancies: Json | null
+          error_message: string | null
+          id: string
+          inspection_id: string | null
+          processed_at: string | null
+          processing_time: number | null
+          status: string
+          verification_stage: string
+        }
+        Insert: {
+          ai_response?: Json | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          discrepancies?: Json | null
+          error_message?: string | null
+          id?: string
+          inspection_id?: string | null
+          processed_at?: string | null
+          processing_time?: number | null
+          status?: string
+          verification_stage?: string
+        }
+        Update: {
+          ai_response?: Json | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          discrepancies?: Json | null
+          error_message?: string | null
+          id?: string
+          inspection_id?: string | null
+          processed_at?: string | null
+          processing_time?: number | null
+          status?: string
+          verification_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raltec_ai_verifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raltec_ai_verifications_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "raltec_inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raltec_damage_reports: {
+        Row: {
+          assigned_to: string | null
+          auto_generated: boolean
+          company_id: string
+          created_at: string | null
+          description: string
+          detected_issues: Json
+          id: string
+          inspection_id: string | null
+          recommended_actions: Json | null
+          report_type: string
+          severity: string
+          status: string
+          updated_at: string | null
+          verification_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          company_id: string
+          created_at?: string | null
+          description: string
+          detected_issues?: Json
+          id?: string
+          inspection_id?: string | null
+          recommended_actions?: Json | null
+          report_type?: string
+          severity: string
+          status?: string
+          updated_at?: string | null
+          verification_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          auto_generated?: boolean
+          company_id?: string
+          created_at?: string | null
+          description?: string
+          detected_issues?: Json
+          id?: string
+          inspection_id?: string | null
+          recommended_actions?: Json | null
+          report_type?: string
+          severity?: string
+          status?: string
+          updated_at?: string | null
+          verification_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raltec_damage_reports_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raltec_damage_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raltec_damage_reports_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "raltec_inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raltec_damage_reports_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "raltec_ai_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raltec_inspection_documents: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          inspection_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          inspection_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          inspection_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raltec_inspection_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raltec_inspection_documents_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "raltec_inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raltec_inspections: {
+        Row: {
+          batch_number: string
+          company_id: string | null
+          created_at: string | null
+          id: string
+          inspection_criteria: Json | null
+          inspection_date: string
+          inspection_result: string
+          inspector: string
+          invoice_number: string | null
+          material_name: string
+          non_conformity: string | null
+          observations: string | null
+          purchase_order_number: string | null
+          quantity: number
+          supplier: string
+          unit: string
+          updated_at: string | null
+        }
+        Insert: {
+          batch_number: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          inspection_criteria?: Json | null
+          inspection_date: string
+          inspection_result?: string
+          inspector: string
+          invoice_number?: string | null
+          material_name: string
+          non_conformity?: string | null
+          observations?: string | null
+          purchase_order_number?: string | null
+          quantity?: number
+          supplier: string
+          unit?: string
+          updated_at?: string | null
+        }
+        Update: {
+          batch_number?: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          inspection_criteria?: Json | null
+          inspection_date?: string
+          inspection_result?: string
+          inspector?: string
+          invoice_number?: string | null
+          material_name?: string
+          non_conformity?: string | null
+          observations?: string | null
+          purchase_order_number?: string | null
+          quantity?: number
+          supplier?: string
+          unit?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raltec_inspections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       raw_material_inspections: {
         Row: {
           batch_number: string

@@ -27,12 +27,12 @@ export const useAuditSchedule = () => {
   
   // Find next scheduled audit
   const today = new Date();
-  const upcomingAudits = audits
+  const upcomingAudits = Array.isArray(audits) ? audits
     .filter(audit => {
       const auditDate = new Date(audit.audit_date);
       return isAfter(auditDate, today) && audit.status === 'planned';
     })
-    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime());
+    .sort((a, b) => new Date(a.audit_date).getTime() - new Date(b.audit_date).getTime()) : [];
 
   const nextAudit = upcomingAudits.length > 0 ? upcomingAudits[0] : null;
   
@@ -40,10 +40,10 @@ export const useAuditSchedule = () => {
   const daysRemaining = nextAudit ? 
     differenceInDays(new Date(nextAudit.audit_date), today) : null;
 
-  // Filter audits based on status
-  const plannedAudits = audits.filter(audit => audit.status === 'planned');
-  const inProgressAudits = audits.filter(audit => audit.status === 'in_progress');
-  const completedAudits = audits.filter(audit => audit.status === 'completed');
+  // Filter audits based on status - with safety checks
+  const plannedAudits = Array.isArray(audits) ? audits.filter(audit => audit.status === 'planned') : [];
+  const inProgressAudits = Array.isArray(audits) ? audits.filter(audit => audit.status === 'in_progress') : [];
+  const completedAudits = Array.isArray(audits) ? audits.filter(audit => audit.status === 'completed') : [];
 
   // Detect if sidebar is collapsed
   useEffect(() => {
@@ -63,7 +63,7 @@ export const useAuditSchedule = () => {
     activeTab,
     setActiveTab,
     sidebarCollapsed,
-    audits,
+    audits: Array.isArray(audits) ? audits : [],
     isLoading,
     nextAudit,
     daysRemaining,
