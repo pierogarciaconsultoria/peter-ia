@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { isProductionEnvironment } from "@/utils/lovableEditorDetection";
 
@@ -55,7 +54,7 @@ export async function logAuditEvent(entry: Omit<AuditLogEntry, 'timestamp'>): Pr
   try {
     const auditEntry = {
       ...entry,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(), // Convert to string
       ip_address: entry.ip_address || window.sessionStorage.getItem('client_ip') || undefined
     };
 
