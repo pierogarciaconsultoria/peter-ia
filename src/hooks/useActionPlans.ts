@@ -14,12 +14,21 @@ export function useActionPlans(company_id?: string) {
   useEffect(() => {
     if (!company_id) return;
     setLoading(true);
-    supabase
-      .from("action_plans")
-      .select("id, title")
-      .eq("company_id", company_id)
-      .then(({ data }) => setActionPlans(data || []))
-      .finally(() => setLoading(false));
+
+    async function fetchPlans() {
+      try {
+        const { data } = await supabase
+          .from("action_plans")
+          .select("id, title")
+          .eq("company_id", company_id);
+
+        setActionPlans(data || []);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPlans();
   }, [company_id]);
 
   return { actionPlans, loading };

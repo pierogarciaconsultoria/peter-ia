@@ -14,12 +14,21 @@ export function usePerformanceIndicators(company_id?: string) {
   useEffect(() => {
     if (!company_id) return;
     setLoading(true);
-    supabase
-      .from("performance_indicators")
-      .select("id, name")
-      .eq("company_id", company_id)
-      .then(({ data }) => setIndicators(data || []))
-      .finally(() => setLoading(false));
+
+    async function fetchIndicators() {
+      try {
+        const { data } = await supabase
+          .from("performance_indicators")
+          .select("id, name")
+          .eq("company_id", company_id);
+
+        setIndicators(data || []);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchIndicators();
   }, [company_id]);
 
   return { indicators, loading };
