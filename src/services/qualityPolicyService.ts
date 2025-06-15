@@ -8,6 +8,8 @@ export type QualityPolicy = {
   created_at: string;
   updated_at: string;
   created_by?: string;
+  related_action_plans?: string[];
+  related_indicators?: string[];
 };
 
 // Busca a política mais recente para a empresa
@@ -27,8 +29,13 @@ export async function fetchQualityPolicy(company_id: string): Promise<QualityPol
 }
 
 // SALVA (insere nova ou atualiza) a política
-export async function upsertQualityPolicy(company_id: string, policy_text: string, created_by?: string) {
-  // upsert: se já houver uma, faz update; se não, insere
+export async function upsertQualityPolicy(
+  company_id: string,
+  policy_text: string,
+  created_by?: string,
+  related_action_plans?: string[],
+  related_indicators?: string[]
+) {
   const { data, error } = await supabase
     .from("quality_policy")
     .upsert(
@@ -38,12 +45,14 @@ export async function upsertQualityPolicy(company_id: string, policy_text: strin
           policy_text,
           created_by,
           updated_at: new Date().toISOString(),
+          related_action_plans: related_action_plans || [],
+          related_indicators: related_indicators || [],
         }
       ],
       { onConflict: "company_id" }
     )
     .select()
-    .maybeSingle(); // corrigido para usar maybeSingle
+    .maybeSingle();
 
   if (error) {
     throw error;

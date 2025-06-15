@@ -3,15 +3,40 @@ import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useActionPlans } from "@/hooks/useActionPlans";
+import { usePerformanceIndicators } from "@/hooks/usePerformanceIndicators";
+import { MultiSelect, Option } from "@/components/ui/multi-select";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 type Props = {
   value: string;
-  onSave: (policy: string) => Promise<void>;
+  relatedActionPlans?: string[];
+  relatedIndicators?: string[];
+  onSave: (policy: string, actionPlans: string[], indicators: string[]) => Promise<void>;
   loading?: boolean;
 };
 
-export default function QualityPolicyForm({ value, onSave, loading }: Props) {
+export default function QualityPolicyForm({
+  value,
+  relatedActionPlans = [],
+  relatedIndicators = [],
+  onSave,
+  loading,
+}: Props) {
   const [text, setText] = useState(value);
+  const [selectedPlans, setSelectedPlans] = useState<string[]>(relatedActionPlans);
+  const [selectedIndicators, setSelectedIndicators] = useState<string[]>(relatedIndicators);
+
+  const { empresaId } = useCurrentUser() || {};
+
+  const { actionPlans } = useActionPlans(empresaId);
+  const { indicators } = usePerformanceIndicators(empresaId);
+
+  // Para MultiSelect:
+  const planOptions: Option[] = actionPlans.map(p => ({ value: p.id, label: p.title }));
+  const selectedPlanOptions = planOptions.filter(opt => selectedPlans.includes(opt.value));
+  const indicatorOptions: Option[] = indicators.map(i => ({ value: i.id, label: i.name }));
+  const selectedIndicatorOptions = indicatorOptions.filter(opt => selectedIndicators.includes(opt.value));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,11 +44,15 @@ export default function QualityPolicyForm({ value, onSave, loading }: Props) {
       toast.error("Insira o texto da política da qualidade.");
       return;
     }
-    await onSave(text.trim());
+    await onSave(
+      text.trim(),
+      selectedPlanOptions.map(opt => opt.value),
+      selectedIndicatorOptions.map(opt => opt.value)
+    );
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <Textarea
         value={text}
         onChange={e => setText(e.target.value)}
@@ -32,6 +61,29 @@ export default function QualityPolicyForm({ value, onSave, loading }: Props) {
         disabled={loading}
         maxLength={2000}
       />
+
+      <div>
+        <label className="block mb-1 text-sm font-medium">Planos de Ação Relacionados</label>
+        <MultiSelect
+          options={planOptions}
+          value={selectedPlanOptions}
+          onChange={opts => setSelectedPlans(opts.map(opt => opt.value))}
+          placeholder="Selecione os planos de ação"
+          disabled={loading}
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 text-sm font-medium">Indicadores de Desempenho Relacionados</label>
+        <MultiSelect
+          options={indicatorOptions}
+          value={selectedIndicatorOptions}
+          onChange={opts => setSelectedIndicators(opts.map(opt => opt.value))}
+          placeholder="Selecione os indicadores"
+          disabled={loading}
+        />
+      </div>
+      
       <div className="flex justify-end">
         <Button type="submit" disabled={loading}>
           {loading ? "Salvando..." : "Salvar"}

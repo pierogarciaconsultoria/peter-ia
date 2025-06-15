@@ -6240,6 +6240,8 @@ export type Database = {
           created_by: string | null
           id: string
           policy_text: string
+          related_action_plans: string[] | null
+          related_indicators: string[] | null
           updated_at: string | null
         }
         Insert: {
@@ -6248,6 +6250,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           policy_text: string
+          related_action_plans?: string[] | null
+          related_indicators?: string[] | null
           updated_at?: string | null
         }
         Update: {
@@ -6256,6 +6260,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           policy_text?: string
+          related_action_plans?: string[] | null
+          related_indicators?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
