@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { isLovableEditor } from "@/utils/lovableEditorDetection";
+import { ModuleAssistantSettings } from "@/components/admin/ModuleAssistantSettings";
 
 interface Company {
   id: string;
@@ -290,6 +291,7 @@ const Admin = () => {
 
         <TabsContent value="acesso" className="space-y-6">
           <PermissoesUsuarios />
+          <ModuleAssistantSettings isAdmin={isSuperAdmin} />
         </TabsContent>
 
         {isSuperAdmin && (

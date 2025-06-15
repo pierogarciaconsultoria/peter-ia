@@ -3,12 +3,13 @@
 CREATE TABLE IF NOT EXISTS public.module_assistants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
+    label TEXT NOT NULL,
     description TEXT,
     enabled BOOLEAN DEFAULT true,
     capabilities TEXT,
     limitations TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+    updated_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Comentário da tabela
@@ -31,14 +32,15 @@ CREATE POLICY "Apenas super admins podem gerenciar assistentes" ON public.module
         (SELECT is_super_admin FROM public.user_profiles WHERE id = auth.uid())
     );
 
+-- Gatilho para atualizar a coluna updated_at
+CREATE TRIGGER set_module_assistants_updated_at
+BEFORE UPDATE ON public.module_assistants
+FOR EACH ROW
+EXECUTE FUNCTION public.trigger_set_updated_at();
+
 -- Tabela para armazenar conversas com assistentes
 CREATE TABLE IF NOT EXISTS public.assistant_conversations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    module TEXT NOT NULL,
-    role TEXT NOT NULL,
-    content TEXT NOT NULL,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    timestamp TIMESTAMP WITH TIME ZONE DEFAULT now()
+-- ... keep existing code (assistant_conversations table definition)
 );
 
 -- Comentário da tabela
