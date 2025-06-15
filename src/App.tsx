@@ -138,14 +138,15 @@ function AppContent() {
               </AuthGuard>
             }>
               <Route path="/dashboard" element={<Dashboard />} />
-              
               {/* Redirecionamento da ISO 9001 para Dashboard */}
               <Route path="/iso-9001" element={<Navigate to="/dashboard" replace />} />
               
               <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/documents" element={<Navigate to="/dashboard" replace />} />
+
+              {/* Removido o redirecionamento conflitante de /documents */}
+              {/* <Route path="/documents" element={<Navigate to="/dashboard" replace />} /> */}
               <Route path="/document-upload" element={<Navigate to="/dashboard" replace />} />
-              
+
               <Route path="/human-resources" element={<HumanResources />} />
               
               <Route path="/process-form" element={<ProcessFormPage />} />
@@ -178,6 +179,7 @@ function AppContent() {
               <Route path="/quality-policy" element={<QualityPolicy />} />
               <Route path="/quality-objectives" element={<QualityObjectives />} />
               <Route path="/audit-plan" element={<AuditPlan />} />
+              {/* Esta rota exibe o componente correto */}
               <Route path="/documents" element={<Documents />} />
             </Route>
             
