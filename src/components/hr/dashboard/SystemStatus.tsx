@@ -40,7 +40,7 @@ export function SystemStatus({
   const getStatusBadge = (status: MetricStatus["status"]) => {
     switch (status) {
       case "success":
-        return <Badge variant="success" className="bg-green-100 text-green-700">OK</Badge>;
+        return <Badge variant="default" className="bg-green-100 text-green-700">OK</Badge>;
       case "error":
         return <Badge variant="destructive" className="bg-red-100 text-red-700">Erro</Badge>;
       case "pending":
