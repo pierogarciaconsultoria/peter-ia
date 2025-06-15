@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompanyManagement from '@/components/admin/CompanyManagement';
@@ -18,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { isLovableEditor } from "@/utils/lovableEditorDetection";
 
 interface Company {
   id: string;
@@ -180,7 +180,10 @@ const Admin = () => {
     }
   }, [isSuperAdmin, isCompanyAdmin, fetchUsers, fetchRoles, fetchCompanies]);
 
-  if (!isSuperAdmin && !isCompanyAdmin) {
+  // Função: liberar acesso total se estiver em editor Lovable/localhost
+  const isDevBypass = isLovableEditor();
+
+  if ((!isSuperAdmin && !isCompanyAdmin) && !isDevBypass) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -201,6 +204,22 @@ const Admin = () => {
           <p className="text-gray-600 text-sm md:text-base">
             Gerencie empresas, usuários e configurações do sistema
           </p>
+        </div>
+      </div>
+
+      {/* Card de integração do Custom GPT - apenas exibição rápida/configuração */}
+      <div className="mb-8">
+        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-center gap-4">
+          <span className="text-yellow-700 font-bold text-xl">🤖</span>
+          <div>
+            <div className="font-semibold text-yellow-900">Integração com Custom GPT</div>
+            <div className="text-yellow-900/80 text-sm">
+              Para integrar seu próprio modelo GPT personalizado via API, configure o endpoint e a chave de API apropriada abaixo.
+              <br />
+              <span className="font-semibold">Ambiente:</span> <span className="ml-1 px-2 py-0.5 bg-yellow-100 rounded text-xs">{isDevBypass ? 'Desenvolvimento (Acesso Liberado)' : 'Restrito'}</span>
+            </div>
+            {/* No futuro: Adicionar campos/editáveis para URL/chave. Por enquanto, apenas informativo. */}
+          </div>
         </div>
       </div>
 
