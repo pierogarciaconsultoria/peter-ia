@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -74,10 +73,11 @@ const SupplierEvaluation = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
+      {/* Remove Navigation and extra mx-auto/max-w-6xl */}
+      {/* <Navigation /> */}
       
-      <main className="md:pl-64 p-6 transition-all duration-300">
-        <div className="max-w-6xl mx-auto">
+      <main className="p-6 transition-all duration-300">
+        <div>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold">Avaliação de Fornecedores</h1>

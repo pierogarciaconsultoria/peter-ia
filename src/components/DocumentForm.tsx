@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +45,7 @@ interface DocumentFormProps {
 
 export function DocumentForm({ document, onClose }: DocumentFormProps) {
   const [loading, setLoading] = useState(false);
+  // Fix: ensure default for associated_requirement and standard_items
   const [formData, setFormData] = useState<Document>(
     document || {
       id: "",
@@ -55,7 +55,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
       description: "",
       revision: "",
       approval_date: "",
-      standard_items: [],
+      standard_items: [], // Properly default to empty array
       process: "",
       distribution_location: "",
       storage_location: "",
@@ -71,6 +71,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
       company_id: "",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      associated_requirement: "", // Required field per ISODocument
     }
   );
 
@@ -84,8 +85,19 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleMultiSelectChange = (selected: string[]) => {
-    setFormData((prev) => ({ ...prev, standard_items: selected }));
+  // --- FIX: MultiSelect expects Option[], not string[] 
+  // We need to convert between option/value for saving.
+  type Option = { value: string; label: string };
+  const isoOptions: Option[] = isoRequirements.map(req => ({
+    value: req.number, label: req.number + " - " + req.title
+  }));
+  const standardItemsValue: Option[] = isoOptions.filter(opt => formData.standard_items?.includes(opt.value));
+
+  const handleMultiSelectChange = (selected: Option[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      standard_items: selected.map(s => s.value),
+    }));
   };
 
   const saveDocument = async () => {
@@ -174,8 +186,8 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             Itens Norma ISO 9001:2015
           </Label>
           <MultiSelect
-            options={isoRequirements.map(req => ({ value: req.number, label: req.number + " - " + req.title }))}
-            value={formData.standard_items || []}
+            options={isoOptions}
+            value={standardItemsValue}
             onChange={handleMultiSelectChange}
             className="col-span-3"
             placeholder="Selecione os itens da norma"

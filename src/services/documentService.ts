@@ -19,11 +19,17 @@ export async function fetchDocuments(): Promise<Document[]> {
     console.error("Erro ao buscar documentos:", error);
     return [];
   }
-  return data as Document[];
+  // Fix: Ensure associated_requirement present in all objects
+  return (data as any[]).map(doc => ({
+    associated_requirement: "",
+    ...doc
+  })) as Document[];
 }
 
 // Criar novo documento (sem upload por enquanto)
-export async function createDocument(document: Omit<Document, "id" | "created_at" | "updated_at">): Promise<Document | null> {
+export async function createDocument(
+  document: Omit<Document, "id" | "created_at" | "updated_at">
+): Promise<Document | null> {
   const { data, error } = await supabase
     .from("documents")
     .insert([document])
@@ -33,7 +39,8 @@ export async function createDocument(document: Omit<Document, "id" | "created_at
     console.error("Erro ao criar documento:", error);
     return null;
   }
-  return data as Document;
+  // Ensure required field present for typing
+  return { associated_requirement: "", ...data } as Document;
 }
 
 export async function updateDocument(id: string, fields: Partial<Document>): Promise<Document | null> {
@@ -47,5 +54,5 @@ export async function updateDocument(id: string, fields: Partial<Document>): Pro
     console.error("Erro ao atualizar documento:", error);
     return null;
   }
-  return data as Document;
+  return { associated_requirement: "", ...data } as Document;
 }
