@@ -50,6 +50,7 @@ import AuditPlan from '@/pages/AuditPlan';
 import Documents from '@/pages/Documents';
 
 import './App.css';
+import AuditManagement from "@/pages/AuditManagement";
 
 function AppContent() {
   console.log('🚀 AppContent: Componente inicializado - Peter.IA');
@@ -154,8 +155,14 @@ function AppContent() {
               <Route path="/processo/:id" element={<ProcessFormPage />} />
               <Route path="/non-compliance" element={<NonCompliance />} />
               <Route path="/action-schedule" element={<ActionSchedule />} />
-              <Route path="/audit-schedule" element={<AuditSchedule />} />
-              <Route path="/external-audit" element={<ExternalAudit />} />
+              
+              {/* NOVA ROTA UNIFICADA DA AUDITORIA */}
+              <Route path="/audit-management" element={<AuditManagement />} />
+              {/* REDIRECIONAMENTOS DAS TELAS ANTIGAS: */}
+              <Route path="/audit-schedule" element={<Navigate to="/audit-management" replace />} />
+              <Route path="/audit-plan" element={<Navigate to="/audit-management" replace />} />
+              <Route path="/external-audit" element={<Navigate to="/audit-management" replace />} />
+              
               <Route path="/strategic-planning" element={<StrategicPlanning />} />
               <Route path="/strategic-planning/:tab" element={<StrategicPlanning />} />
               <Route path="/critical-analysis" element={<CriticalAnalysis />} />

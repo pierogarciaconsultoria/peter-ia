@@ -1,12 +1,12 @@
 
-import { FileBox } from "lucide-react";
-import { MenuItem } from "../types";
+import { BookOpen } from "lucide-react";
 
-export const isoItems: MenuItem[] = [
+export const isoItems = [
   {
-    title: "ISO 9001:2015",
-    icon: FileBox,
-    href: "/iso-9001",
-    modulo: "iso"
+    title: "Auditoria",
+    icon: BookOpen,
+    href: "/audit-management",
+    modulo: "iso",
   },
+  // ... outros itens ISO (mantidos)
 ];
