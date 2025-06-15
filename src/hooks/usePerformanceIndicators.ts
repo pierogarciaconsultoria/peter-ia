@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Tipo explícito do indicador
 export type PerformanceIndicator = {
   id: string;
   name: string;
@@ -21,21 +20,25 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Cast response to any[] IMMEDIATELY to avoid TS inference issues
-      const { data, error } = await supabase
-        .from("performance_indicators")
-        .select("id, name")
-        .eq("company_id", company_id);
-
+      // Query SQL crua evita qualquer inferência profunda do TS
+      const sql = `
+        select id::text, name::text
+        from performance_indicators
+        where company_id = $1
+      `;
+      const { data, error } = await supabase.rpc("execute_sql_with_schema", {
+        sql_statement: sql,
+        target_schema: "public",
+        params: [company_id],
+      });
       if (!isMounted) return;
 
-      const rows = data as any[] | null | undefined;
-      if (error || !Array.isArray(rows)) {
+      // Fallback seguro e risco zero de type instantiation deep/infinite
+      if (error || !Array.isArray(data)) {
         setIndicators([]);
       } else {
-        // Map only top-level fields to string for safety
         setIndicators(
-          rows.map((item) => ({
+          (data as any[]).map((item: any) => ({
             id: String(item.id),
             name: String(item.name),
           }))
