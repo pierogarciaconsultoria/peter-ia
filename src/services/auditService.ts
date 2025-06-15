@@ -119,7 +119,13 @@ export async function getAuditLogs(filters?: {
       details: log.details,
       status: log.status,
       ip_address: log.ip_address,
-      timestamp: new Date(log.event_timestamp).toISOString() // Convert to string
+      // The error lines: timestamp: new Date(log.event_timestamp)
+      // Change so that `timestamp` is always a string:
+      timestamp: log.event_timestamp
+        ? (typeof log.event_timestamp === "string"
+            ? log.event_timestamp
+            : new Date(log.event_timestamp).toISOString())
+        : ""
     }));
   } catch (error) {
     console.error('Unexpected error fetching audit logs:', error);
