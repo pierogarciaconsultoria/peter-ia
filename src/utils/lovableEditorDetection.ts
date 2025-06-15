@@ -43,7 +43,8 @@ export function isProductionEnvironment(): boolean {
 
 /**
  * Verifies if we're in the Lovable editor environment
- * SECURITY: Muito restritivo para produção
+ * CORRIGIDO: Considera também subdomínio ".lovable.app" para visual editor
+ * Aceita sempre localhost E qualquer hostname que contenha ".lovable.app" OU ".lovableproject.com"
  */
 export function isLovableEditor(): boolean {
   // Em produção, nunca permitir bypass
@@ -52,17 +53,17 @@ export function isLovableEditor(): boolean {
     return false;
   }
   
-  // Check for Lovable domains
-  const isLovableDomain = window.location.hostname.endsWith('.lovableproject.com') || 
-                         window.location.hostname.endsWith('.lovable.app');
+  // Check for Lovable domains (agora aceita *.lovable.app, *.lovableproject.com)
+  const host = window.location.hostname;
+  const isLovableDomain = host.endsWith('.lovableproject.com') ||
+    host.endsWith('.lovable.app');
   
-  // Check for localhost development
-  const isLocalDevelopment = process.env.NODE_ENV === 'development' && 
-                             window.location.hostname === 'localhost';
+  // Accept localhost for development ease-of-use
+  const isLocalDevelopment = host === 'localhost' || host === '127.0.0.1';
   
   const isValidEditor = isLovableDomain || isLocalDevelopment;
   
-  console.log('Lovable Editor detection:', {
+  console.log('Lovable Editor detection (ajustado):', {
     isLocalDevelopment,
     isLovableDomain,
     isValidEditor,
@@ -117,7 +118,7 @@ export function shouldGrantFreeAccess(): boolean {
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * SECURITY: Muito restritivo para produção
+ * Agora considera corretamente domínio do Lovable Editor.
  */
 export function shouldBypassAuth(): boolean {
   // Em produção, NUNCA permitir bypass
@@ -131,12 +132,12 @@ export function shouldBypassAuth(): boolean {
   
   // Check for development environment
   const isDevelopment = process.env.NODE_ENV === 'development';
-  const isLocalhost = window.location.hostname === 'localhost';
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
-  // Permitir apenas em desenvolvimento local ou Lovable
-  const allowBypass = (isDevelopment && isLocalhost) || isInLovable;
+  // Permitir em Localhost OU Lovable
+  const allowBypass = isLocalhost || isInLovable;
   
-  console.log('Auth bypass check:', {
+  console.log('Auth bypass check (corrigido):', {
     isDevelopment,
     isLocalhost,
     isInLovable,
@@ -145,8 +146,8 @@ export function shouldBypassAuth(): boolean {
   });
   
   if (allowBypass) {
-    console.warn('SECURITY WARNING: Auth bypass granted for development environment only');
-    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development environment bypass used');
+    console.warn('SECURITY WARNING: Auth bypass granted for Lovable editor or local development only');
+    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development or Lovable editor bypass used');
   }
   
   return allowBypass;
@@ -188,3 +189,4 @@ function logSecurityEvent(action: string, details: string): void {
     }).catch(err => console.error('Failed to log security event:', err));
   }
 }
+
