@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,14 +12,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Document } from "@/services/documentService"; // fixed ISODocument import
+import { Document } from "@/services/documentService";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 
 interface DocumentFormProps {
   document: Document | null;
@@ -31,27 +27,23 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     document || {
       id: "",
       title: "",
-      document_type: "",
       description: "",
-      content: "",
-      associated_requirement: "",
-      status: "draft",
+      category: "",
+      document_type: "",
+      version: "",
+      file_url: "",
+      file_name: "",
+      file_size: undefined,
+      mime_type: "",
+      status: "rascunho",
+      tags: [],
+      created_by: "",
+      approved_by: "",
+      approval_date: "",
+      review_date: "",
+      company_id: "",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      document_code: "",
-      process: "",
-      standard_item: "",
-      revision: "00",
-      approval_date: undefined,
-      responsible: "",
-      distribution_location: "",
-      storage_location: "",
-      protection: "",
-      recovery_method: "",
-      retention_time: "",
-      archiving_time: "",
-      disposal_method: "",
-      internal_external: "interno"
     }
   );
 
@@ -64,25 +56,14 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleDateChange = (date: Date | undefined, fieldName: string) => {
-    if (date) {
-      setFormData((prev) => ({ 
-        ...prev, 
-        [fieldName]: date.toISOString().split('T')[0] 
-      }));
-    }
-  };
-
   const saveDocument = async () => {
     try {
       setLoading(true);
-      
-      if (!formData.title || !formData.document_type || !formData.associated_requirement) {
+      if (!formData.title || !formData.document_type) {
         toast.error("Por favor, preencha todos os campos obrigatórios");
         return;
       }
 
-      // For now, just show success message since table doesn't exist yet
       toast.success("Documento salvo com sucesso (funcionalidade será ativada após configuração do banco)");
       onClose();
     } catch (error) {
@@ -121,7 +102,7 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             Categoria *
           </Label>
           <Select
-            value={formData.document_type || "policy"}
+            value={formData.document_type || ""}
             onValueChange={(value) => handleSelectChange("document_type", value)}
           >
             <SelectTrigger className="col-span-3">
@@ -139,42 +120,21 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
         </div>
 
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="associated_requirement" className="text-right">
-            Requisito ISO *
-          </Label>
-          <Select
-            value={formData.associated_requirement || "4.1"}
-            onValueChange={(value) => handleSelectChange("associated_requirement", value)}
-          >
-            <SelectTrigger className="col-span-3">
-              <SelectValue placeholder="Selecione o requisito ISO" />
-            </SelectTrigger>
-            <SelectContent>
-              {isoRequirements.map(req => (
-                <SelectItem key={req.number} value={req.number}>
-                  {req.number} - {req.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="status" className="text-right">
-            Status
+            Status *
           </Label>
           <Select
-            value={formData.status || 'draft'}
+            value={formData.status || 'rascunho'}
             onValueChange={(value) => handleSelectChange("status", value)}
           >
             <SelectTrigger className="col-span-3">
               <SelectValue placeholder="Selecione o status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">Rascunho</SelectItem>
-              <SelectItem value="review">Em Revisão</SelectItem>
-              <SelectItem value="approved">Aprovado</SelectItem>
-              <SelectItem value="obsolete">Obsoleto</SelectItem>
+              <SelectItem value="rascunho">Rascunho</SelectItem>
+              <SelectItem value="em_revisao">Em Revisão</SelectItem>
+              <SelectItem value="aprovado">Aprovado</SelectItem>
+              <SelectItem value="obsoleto">Obsoleto</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -192,20 +152,6 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
             rows={3}
           />
         </div>
-        
-        <div className="grid grid-cols-4 items-start gap-4">
-          <Label htmlFor="content" className="text-right">
-            Conteúdo
-          </Label>
-          <Textarea
-            id="content"
-            name="content"
-            value={formData.content || ""}
-            onChange={handleInputChange}
-            className="col-span-3"
-            rows={10}
-          />
-        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-4">
@@ -219,3 +165,4 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     </>
   );
 }
+
