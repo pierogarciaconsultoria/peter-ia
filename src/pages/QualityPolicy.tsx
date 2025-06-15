@@ -7,31 +7,30 @@ import { Card } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const QualityPolicy = () => {
-  const { user, company_id } = useCurrentUser() || {};
+  const { user, empresaId } = useCurrentUser() || {};
   const [qualityPolicy, setQualityPolicy] = useState<QP | null>(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Busca a política existente ao montar
   useEffect(() => {
     async function loadPolicy() {
-      if (!company_id) return;
+      if (!empresaId) return;
       setLoading(true);
-      const policy = await fetchQualityPolicy(company_id);
+      const policy = await fetchQualityPolicy(empresaId);
       setQualityPolicy(policy);
       setLoading(false);
     }
     loadPolicy();
-  }, [company_id]);
+  }, [empresaId]);
 
   async function handleSave(policyText: string) {
-    if (!company_id) {
+    if (!empresaId) {
       toast.error("Empresa não identificada.");
       return;
     }
     setLoading(true);
     try {
-      const policy = await upsertQualityPolicy(company_id, policyText, user?.id);
+      const policy = await upsertQualityPolicy(empresaId, policyText, user?.id);
       setQualityPolicy(policy);
       setEditing(false);
       toast.success("Política salva com sucesso!");

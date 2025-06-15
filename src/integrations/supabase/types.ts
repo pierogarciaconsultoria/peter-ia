@@ -6233,6 +6233,33 @@ export type Database = {
           },
         ]
       }
+      quality_policy: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          policy_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          policy_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          policy_text?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       quote_evaluations: {
         Row: {
           carrier_reputation_score: number
