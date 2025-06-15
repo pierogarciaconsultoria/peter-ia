@@ -1,4 +1,3 @@
-
 import { MenuItem } from "./types";
 import { dashboardItems } from "./menu-categories/dashboard-items";
 import { diagnosticItems } from "./menu-categories/diagnostic-items";
@@ -12,11 +11,10 @@ import { qualityItems } from "./menu-categories/quality-items";
 import { hrItems } from "./menu-categories/hr";
 import { resourcesItems } from "./menu-categories/resources-items";
 import { settingsItems } from "./menu-categories/settings-items";
-import { complianceItems } from "./menu-categories/compliance-items";
+// import { complianceItems } from "./menu-categories/compliance-items"; // Removido
 
 export type { MenuItem };
 
-// Combine all menu items, but we'll filter out duplicates in the Sidebar component
 export const menuItems: MenuItem[] = [
   ...dashboardItems,
   ...diagnosticItems,
@@ -30,7 +28,7 @@ export const menuItems: MenuItem[] = [
   ...hrItems,
   ...resourcesItems,
   ...settingsItems,
-  ...complianceItems,
+  // ...complianceItems, // Removido
 ];
 
 export default menuItems;
