@@ -1396,6 +1396,80 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          category: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          document_type: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          mime_type: string | null
+          review_date: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          review_date?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          review_date?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_training_compliance: {
         Row: {
           assigned_date: string | null
@@ -6841,6 +6915,62 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      stakeholders: {
+        Row: {
+          category: string
+          communication_method: string | null
+          company_id: string | null
+          contact_info: string | null
+          created_at: string
+          expectations: string | null
+          id: string
+          influence_level: string
+          interest_level: string
+          name: string
+          notes: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          communication_method?: string | null
+          company_id?: string | null
+          contact_info?: string | null
+          created_at?: string
+          expectations?: string | null
+          id?: string
+          influence_level: string
+          interest_level: string
+          name: string
+          notes?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          communication_method?: string | null
+          company_id?: string | null
+          contact_info?: string | null
+          created_at?: string
+          expectations?: string | null
+          id?: string
+          influence_level?: string
+          interest_level?: string
+          name?: string
+          notes?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stakeholders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       strategic_action_plans: {
         Row: {

@@ -1,50 +1,51 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export interface ISODocument {
+export type Document = {
   id: string;
   title: string;
-  document_type: string;
   description?: string;
-  content?: string;
-  associated_requirement: string;
-  status: string;
+  category?: string;
+  document_type?: string;
+  version?: string;
+  file_url?: string;
+  file_name?: string;
+  file_size?: number;
+  mime_type?: string;
+  status: "rascunho" | "em_revisao" | "aprovado" | "obsoleto";
+  tags?: string[];
+  created_by?: string;
+  approved_by?: string;
+  approval_date?: string;
+  review_date?: string;
+  company_id: string;
   created_at: string;
   updated_at: string;
-  document_code?: string;
-  process?: string;
-  standard_item?: string;
-  revision?: string;
-  approval_date?: string;
-  responsible?: string;
-  distribution_location?: string;
-  storage_location?: string;
-  protection?: string;
-  recovery_method?: string;
-  retention_time?: string;
-  archiving_time?: string;
-  disposal_method?: string;
-  internal_external?: string;
+};
+
+// Buscar todos documentos da empresa logada
+export async function fetchDocuments(): Promise<Document[]> {
+  const { data, error } = await supabase
+    .from("documents")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Erro ao buscar documentos:", error);
+    return [];
+  }
+  return data as Document[];
 }
 
-export async function fetchDocumentsForRequirement(requirementId: string): Promise<ISODocument[]> {
-  // Para agora, retorna array vazio até a tabela ser criada
-  console.log('Documents feature will be available after database setup');
-  return [];
-}
-
-export async function createDocumentTemplate(document: Partial<ISODocument>): Promise<ISODocument> {
-  // Para agora, retorna documento mock até a tabela ser criada
-  console.log('Documents feature will be available after database setup');
-  return {
-    id: crypto.randomUUID(),
-    title: document.title || '',
-    document_type: document.document_type || '',
-    description: document.description || '',
-    content: document.content || '',
-    associated_requirement: document.associated_requirement || '',
-    status: document.status || 'draft',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
+// Criar novo documento (sem upload por enquanto)
+export async function createDocument(document: Omit<Document, "id" | "created_at" | "updated_at">): Promise<Document | null> {
+  const { data, error } = await supabase
+    .from("documents")
+    .insert([document])
+    .select()
+    .single();
+  if (error) {
+    console.error("Erro ao criar documento:", error);
+    return null;
+  }
+  return data as Document;
 }
