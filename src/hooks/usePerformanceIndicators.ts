@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Use tipo explícito para evitar inferência complexa
+// Tipo explícito do indicador
 export type PerformanceIndicator = {
   id: string;
   name: string;
@@ -21,8 +21,9 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
+      // REMOVE generic do .from() e faz tipagem DEPOIS!
       const { data, error } = await supabase
-        .from<PerformanceIndicator>("performance_indicators")
+        .from("performance_indicators")
         .select("id, name")
         .eq("company_id", company_id);
 
