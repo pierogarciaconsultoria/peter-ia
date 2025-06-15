@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Simples type for safety and to avoid deep TS inference
 export type PerformanceIndicator = {
   id: string;
   name: string;
@@ -20,17 +21,17 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Query SQL crua evita qualquer inferência profunda do TS
+      // Interpolação direta de company_id na query
       const sql = `
         select id::text, name::text
         from performance_indicators
-        where company_id = $1
+        where company_id = '${company_id}'
       `;
       const { data, error } = await supabase.rpc("execute_sql_with_schema", {
         sql_statement: sql,
-        target_schema: "public",
-        params: [company_id],
+        target_schema: "public"
       });
+
       if (!isMounted) return;
 
       // Fallback seguro e risco zero de type instantiation deep/infinite
