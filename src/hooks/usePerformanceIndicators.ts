@@ -21,7 +21,7 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Evite tipagem genérica para não causar recursão
+      // Cast response to any[] IMMEDIATELY to avoid TS inference issues
       const { data, error } = await supabase
         .from("performance_indicators")
         .select("id, name")
@@ -29,12 +29,13 @@ export function usePerformanceIndicators(company_id?: string) {
 
       if (!isMounted) return;
 
-      if (error || !Array.isArray(data)) {
+      const rows = data as any[] | null | undefined;
+      if (error || !Array.isArray(rows)) {
         setIndicators([]);
       } else {
-        // Garanta um array raso, sem inferências profundas
+        // Map only top-level fields to string for safety
         setIndicators(
-          (data as any[]).map(item => ({
+          rows.map((item) => ({
             id: String(item.id),
             name: String(item.name),
           }))
