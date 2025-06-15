@@ -1,8 +1,7 @@
-
 import { 
   Building, AlertTriangle, FileText, ClipboardCheck, 
   ThumbsUp, SlidersHorizontal, Truck, BarChart3, Cog,
-  ClipboardList, Check, CalendarClock, CheckSquare, Users
+  ClipboardList, Check, CalendarClock, CheckSquare, Users, Book, List
 } from "lucide-react";
 import { MenuItem } from "../types";
 
@@ -100,28 +99,8 @@ export const qualityItems: MenuItem[] = [
       { 
         title: "Auditoria", 
         icon: CheckSquare, 
-        href: "#", 
-        modulo: "auditoria",
-        children: [
-          { 
-            title: "Programa de auditoria", 
-            icon: ClipboardList, 
-            href: "/audit-schedule", 
-            modulo: "auditoria" 
-          },
-          { 
-            title: "Plano de auditoria", 
-            icon: CalendarClock, 
-            href: "/audit-plan", 
-            modulo: "auditoria" 
-          },
-          { 
-            title: "Relatório de Auditoria", 
-            icon: Check, 
-            href: "/external-audit", 
-            modulo: "auditoria" 
-          },
-        ]
+        href: "/audit",             // Agora tudo linka pra /audit
+        modulo: "auditoria"
       },
       { 
         title: "Análise Crítica", 

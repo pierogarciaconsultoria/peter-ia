@@ -51,9 +51,7 @@ import Documents from '@/pages/Documents';
 
 import './App.css';
 import AuditManagement from "@/pages/AuditManagement";
-import AuditProgram from '@/pages/AuditProgram';
-import AuditPlanPage from '@/pages/AuditPlanPage';
-import AuditReport from '@/pages/AuditReport';
+import AuditUnifiedPage from '@/pages/Audit';  // Nova página única de auditoria
 
 function AppContent() {
   console.log('🚀 AppContent: Componente inicializado - Peter.IA');
@@ -160,11 +158,12 @@ function AppContent() {
               <Route path="/action-schedule" element={<ActionSchedule />} />
               
               {/* Novas rotas agrupadas de Auditoria */}
-              <Route path="/audit-program" element={<AuditProgram />} />
-              <Route path="/audit-plan" element={<AuditPlanPage />} />
-              <Route path="/audit-report" element={<AuditReport />} />
-
-              {/* Rota legacy (pode remover posteriormente se nada mais depender) */}
+              <Route path="/audit" element={<AuditUnifiedPage />} />
+              {/* Redirecionar rotas antigas para a nova tela unificada */}
+              <Route path="/audit-program" element={<Navigate to="/audit" replace />} />
+              <Route path="/audit-plan" element={<Navigate to="/audit" replace />} />
+              <Route path="/audit-report" element={<Navigate to="/audit" replace />} />
+              {/* Se quiser deixar o legacy temporário */}
               <Route path="/audit-management" element={<AuditManagement />} />
               
               <Route path="/strategic-planning" element={<StrategicPlanning />} />
