@@ -8,8 +8,7 @@ export type QualityPolicy = {
   created_at: string;
   updated_at: string;
   created_by?: string;
-  related_action_plans?: string[];
-  related_indicators?: string[];
+  // Removido: related_action_plans, related_indicators
 };
 
 // Busca a política mais recente para a empresa
@@ -32,9 +31,8 @@ export async function fetchQualityPolicy(company_id: string): Promise<QualityPol
 export async function upsertQualityPolicy(
   company_id: string,
   policy_text: string,
-  created_by?: string,
-  related_action_plans?: string[],
-  related_indicators?: string[]
+  created_by?: string
+  // Parâmetros removidos: related_action_plans, related_indicators
 ) {
   const { data, error } = await supabase
     .from("quality_policy")
@@ -45,8 +43,7 @@ export async function upsertQualityPolicy(
           policy_text,
           created_by,
           updated_at: new Date().toISOString(),
-          related_action_plans: related_action_plans || [],
-          related_indicators: related_indicators || [],
+          // Campos de relação removidos
         }
       ],
       { onConflict: "company_id" }
@@ -59,3 +56,4 @@ export async function upsertQualityPolicy(
   }
   return data as QualityPolicy;
 }
+
