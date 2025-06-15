@@ -1,9 +1,11 @@
-
 import React, { useEffect, useState } from "react";
-import { Stakeholder, fetchStakeholders } from "@/services/stakeholderService";
+import { Stakeholder, fetchStakeholders, createStakeholder } from "@/services/stakeholderService";
 import { StakeholderMatrix } from "@/components/stakeholders/StakeholderMatrix";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { StakeholderDialog } from "@/components/stakeholders/StakeholderDialog";
+import { toast } from "sonner";
 
 // Modos de Visualização
 type ViewMode = "matrix" | "list";
@@ -12,6 +14,10 @@ const Stakeholders = () => {
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
   const [view, setView] = useState<ViewMode>("matrix");
   const [loading, setLoading] = useState(true);
+
+  // NOVO: Modal
+  const [newOpen, setNewOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -23,6 +29,20 @@ const Stakeholders = () => {
     });
     return () => { mounted = false; };
   }, []);
+
+  async function handleCadastrar(form: Omit<Stakeholder, "id" | "created_at" | "updated_at">) {
+    setSaving(true);
+    const result = await createStakeholder(form);
+    if (result) {
+      toast.success("Parte Interessada cadastrada!");
+      setNewOpen(false);
+      // Atualiza lista
+      setStakeholders(await fetchStakeholders());
+    } else {
+      toast.error("Erro ao cadastrar");
+    }
+    setSaving(false);
+  }
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-start p-8 max-w-5xl mx-auto w-full animate-fade-in">
@@ -37,6 +57,9 @@ const Stakeholders = () => {
           </Button>
           <Button variant={view === "list" ? "default" : "outline"} size="sm" onClick={() => setView("list")}>
             Lista
+          </Button>
+          <Button variant="secondary" size="sm" className="ml-2" onClick={() => setNewOpen(true)}>
+            <Plus className="mr-1" size={16} /> Nova Parte Interessada
           </Button>
         </div>
       </div>
@@ -55,6 +78,14 @@ const Stakeholders = () => {
           )}
         </>
       )}
+
+      {/* Modal de cadastro */}
+      <StakeholderDialog
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        onSubmit={handleCadastrar}
+        loading={saving}
+      />
     </div>
   );
 };
