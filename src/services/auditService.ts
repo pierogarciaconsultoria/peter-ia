@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { isProductionEnvironment } from "@/utils/lovableEditorDetection";
 
@@ -22,7 +23,7 @@ export interface AuditLogEntry {
   details?: Record<string, any>;
   status: 'success' | 'denied' | 'error';
   ip_address?: string;
-  timestamp: Date;
+  timestamp: string; // Changed from Date to string
 }
 
 export async function getAudits(): Promise<Audit[]> {
@@ -85,8 +86,8 @@ export async function getAuditLogs(filters?: {
   user_id?: string;
   action?: string;
   status?: string;
-  from_date?: Date;
-  to_date?: Date;
+  from_date?: string; // Changed from Date to string
+  to_date?: string; // Changed from Date to string
   page?: number;
   limit?: number;
 }): Promise<AuditLogEntry[]> {
@@ -100,8 +101,8 @@ export async function getAuditLogs(filters?: {
       user_id_filter: filters?.user_id || null,
       action_filter: filters?.action || null,
       status_filter: filters?.status || null,
-      from_date: filters?.from_date || null,
-      to_date: filters?.to_date || null,
+      from_date: filters?.from_date ? new Date(filters.from_date) : null,
+      to_date: filters?.to_date ? new Date(filters.to_date) : null,
       page_number: filters?.page || 0,
       page_size: filters?.limit || 50
     });
@@ -118,7 +119,7 @@ export async function getAuditLogs(filters?: {
       details: log.details,
       status: log.status,
       ip_address: log.ip_address,
-      timestamp: new Date(log.event_timestamp)
+      timestamp: new Date(log.event_timestamp).toISOString() // Convert to string
     }));
   } catch (error) {
     console.error('Unexpected error fetching audit logs:', error);
