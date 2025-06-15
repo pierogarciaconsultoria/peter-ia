@@ -1,4 +1,3 @@
-
 import { ISODocument } from "@/utils/isoTypes";
 import { 
   Card, 
@@ -33,12 +32,12 @@ export function DocumentsList({ documents, loading, onEditDocument }: DocumentsL
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
 
-  const filteredDocuments = documents.filter(doc => 
-    doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    doc.document_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.associated_requirement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.document_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.process?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDocuments = documents.filter(doc =>
+    (doc.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (doc.document_type?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (doc?.standard_items?.join(", ") || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (doc?.document_code?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (doc?.process?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   const getDocumentTypeLabel = (type: string) => {
@@ -84,6 +83,25 @@ export function DocumentsList({ documents, loading, onEditDocument }: DocumentsL
       </Badge>
     );
   };
+
+  const tableCols = [
+    { key: "title", label: "Título" },
+    { key: "document_type", label: "Tipo" },
+    { key: "document_code", label: "Código" },
+    { key: "revision", label: "Revisão" },
+    { key: "approval_date", label: "Data Aprovação" },
+    { key: "standard_items", label: "Itens Norma" },
+    { key: "created_by", label: "Elaborador" },
+    { key: "approved_by", label: "Aprovador" },
+    { key: "process", label: "Processo" },
+    { key: "distribution_location", label: "Distribuição" },
+    { key: "storage_location", label: "Armazenamento" },
+    { key: "protection", label: "Proteção" },
+    { key: "retention_time", label: "Retenção" },
+    { key: "archiving_time", label: "Arquivo" },
+    { key: "disposal_method", label: "Descarte" },
+    { key: "status", label: "Status" }
+  ];
 
   if (loading) {
     return (
@@ -160,16 +178,9 @@ export function DocumentsList({ documents, loading, onEditDocument }: DocumentsL
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">Título</TableHead>
-                  <TableHead className="whitespace-nowrap">Tipo</TableHead>
-                  <TableHead className="whitespace-nowrap">Código</TableHead>
-                  <TableHead className="whitespace-nowrap">Processo</TableHead>
-                  <TableHead className="whitespace-nowrap">Item Norma</TableHead>
-                  <TableHead className="whitespace-nowrap">Revisão</TableHead>
-                  <TableHead className="whitespace-nowrap">Data Aprovação</TableHead>
-                  <TableHead className="whitespace-nowrap">Responsável</TableHead>
-                  <TableHead className="whitespace-nowrap">Status</TableHead>
-                  <TableHead className="whitespace-nowrap">Ações</TableHead>
+                  {tableCols.map(col => (
+                    <TableHead key={col.key} className="whitespace-nowrap">{col.label}</TableHead>
+                  ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -180,13 +191,20 @@ export function DocumentsList({ documents, loading, onEditDocument }: DocumentsL
                       {doc.internal_external === 'interno' ? 'Interno' : 'Externo'}
                     </TableCell>
                     <TableCell>{doc.document_code || "-"}</TableCell>
-                    <TableCell>{doc.process || "-"}</TableCell>
-                    <TableCell>{doc.standard_item || "-"}</TableCell>
                     <TableCell>{doc.revision || "00"}</TableCell>
                     <TableCell>
                       {doc.approval_date ? new Date(doc.approval_date).toLocaleDateString('pt-BR') : "-"}
                     </TableCell>
-                    <TableCell>{doc.responsible || "-"}</TableCell>
+                    <TableCell>{doc.standard_items?.join(", ") || "-"}</TableCell>
+                    <TableCell>{doc.created_by || "-"}</TableCell>
+                    <TableCell>{doc.approved_by || "-"}</TableCell>
+                    <TableCell>{doc.process || "-"}</TableCell>
+                    <TableCell>{doc.distribution_location || "-"}</TableCell>
+                    <TableCell>{doc.storage_location || "-"}</TableCell>
+                    <TableCell>{doc.protection || "-"}</TableCell>
+                    <TableCell>{doc.retention_time || "-"}</TableCell>
+                    <TableCell>{doc.archiving_time || "-"}</TableCell>
+                    <TableCell>{doc.disposal_method || "-"}</TableCell>
                     <TableCell>{getStatusBadge(doc.status)}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       <div className="flex space-x-2">

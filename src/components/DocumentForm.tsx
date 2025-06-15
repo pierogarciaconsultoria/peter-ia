@@ -4,21 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Document } from "@/services/documentService";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
+import { MultiSelect } from "@/components/ui/multi-select";
+
+const documentTypes = [
+  { value: "policy", label: "Política" },
+  { value: "procedure", label: "Procedimento" },
+  { value: "work-instruction", label: "Instrução de Trabalho" },
+  { value: "form", label: "Formulário" },
+  { value: "record", label: "Registro" },
+  { value: "manual", label: "Manual" }
+];
+
+const statusOptions = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "em_revisao", label: "Em Revisão" },
+  { value: "aprovado", label: "Aprovado" },
+  { value: "obsoleto", label: "Obsoleto" }
+];
+
+const internalExternalOpts = [
+  { value: "interno", label: "Interno" },
+  { value: "externo", label: "Externo" }
+];
 
 interface DocumentFormProps {
   document: Document | null;
   onClose: () => void;
+  onSave?: (doc: Document) => void; // Para integração futura
 }
 
 export function DocumentForm({ document, onClose }: DocumentFormProps) {
@@ -27,26 +50,31 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     document || {
       id: "",
       title: "",
-      description: "",
-      category: "",
+      document_code: "",
       document_type: "",
-      version: "",
-      file_url: "",
-      file_name: "",
-      file_size: undefined,
-      mime_type: "",
+      description: "",
+      revision: "",
+      approval_date: "",
+      standard_items: [],
+      process: "",
+      distribution_location: "",
+      storage_location: "",
+      protection: "",
+      recovery_method: "",
+      retention_time: "",
+      archiving_time: "",
+      disposal_method: "",
       status: "rascunho",
-      tags: [],
+      internal_external: "interno",
       created_by: "",
       approved_by: "",
-      approval_date: "",
-      review_date: "",
       company_id: "",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
   );
 
+  // Handler internals
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -56,6 +84,10 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleMultiSelectChange = (selected: string[]) => {
+    setFormData((prev) => ({ ...prev, standard_items: selected }));
+  };
+
   const saveDocument = async () => {
     try {
       setLoading(true);
@@ -63,9 +95,9 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
         toast.error("Por favor, preencha todos os campos obrigatórios");
         return;
       }
-
-      toast.success("Documento salvo com sucesso (funcionalidade será ativada após configuração do banco)");
-      onClose();
+      // Aqui deve-se chamar o service para salvar (para uso futuro)
+      toast.success("Documento salvo com sucesso (simulação)");
+      if (typeof onClose === "function") onClose();
     } catch (error) {
       console.error("Error saving document:", error);
       toast.error("Erro ao salvar o documento");
@@ -98,6 +130,191 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
         </div>
 
         <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="document_code" className="text-right">
+            Código
+          </Label>
+          <Input
+            id="document_code"
+            name="document_code"
+            value={formData.document_code || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="revision" className="text-right">
+            Revisão
+          </Label>
+          <Input
+            id="revision"
+            name="revision"
+            value={formData.revision || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="approval_date" className="text-right">
+            Data de Aprovação
+          </Label>
+          <Input
+            id="approval_date"
+            name="approval_date"
+            type="date"
+            value={formData.approval_date ? formData.approval_date.substring(0,10) : ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="standard_items" className="text-right">
+            Itens Norma ISO 9001:2015
+          </Label>
+          <MultiSelect
+            options={isoRequirements.map(req => ({ value: req.number, label: req.number + " - " + req.title }))}
+            value={formData.standard_items || []}
+            onChange={handleMultiSelectChange}
+            className="col-span-3"
+            placeholder="Selecione os itens da norma"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="process" className="text-right">
+            Processo Relacionado
+          </Label>
+          <Input
+            id="process"
+            name="process"
+            value={formData.process || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="distribution_location" className="text-right">
+            Local de Distribuição
+          </Label>
+          <Input
+            id="distribution_location"
+            name="distribution_location"
+            value={formData.distribution_location || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="storage_location" className="text-right">
+            Local de Armazenamento
+          </Label>
+          <Input
+            id="storage_location"
+            name="storage_location"
+            value={formData.storage_location || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="protection" className="text-right">
+            Proteção
+          </Label>
+          <Input
+            id="protection"
+            name="protection"
+            value={formData.protection || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="recovery_method" className="text-right">
+            Recuperação
+          </Label>
+          <Input
+            id="recovery_method"
+            name="recovery_method"
+            value={formData.recovery_method || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="retention_time" className="text-right">
+            Tempo de Retenção
+          </Label>
+          <Input
+            id="retention_time"
+            name="retention_time"
+            value={formData.retention_time || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="archiving_time" className="text-right">
+            Tempo de Arquivo
+          </Label>
+          <Input
+            id="archiving_time"
+            name="archiving_time"
+            value={formData.archiving_time || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="disposal_method" className="text-right">
+            Forma de Descarte
+          </Label>
+          <Input
+            id="disposal_method"
+            name="disposal_method"
+            value={formData.disposal_method || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+          />
+        </div>
+
+        {/* Elaborado por/Aprovador poderiam ser selects futuramente */}
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="created_by" className="text-right">
+            Elaborado por
+          </Label>
+          <Input
+            id="created_by"
+            name="created_by"
+            value={formData.created_by || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+            placeholder="ID do usuário elaborador"
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="approved_by" className="text-right">
+            Aprovado por
+          </Label>
+          <Input
+            id="approved_by"
+            name="approved_by"
+            value={formData.approved_by || ""}
+            onChange={handleInputChange}
+            className="col-span-3"
+            placeholder="ID do usuário aprovador"
+          />
+        </div>
+
+        <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="document_type" className="text-right">
             Categoria *
           </Label>
@@ -109,16 +326,12 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
               <SelectValue placeholder="Selecione o tipo de documento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="policy">Política</SelectItem>
-              <SelectItem value="procedure">Procedimento</SelectItem>
-              <SelectItem value="work-instruction">Instrução de Trabalho</SelectItem>
-              <SelectItem value="form">Formulário</SelectItem>
-              <SelectItem value="record">Registro</SelectItem>
-              <SelectItem value="manual">Manual</SelectItem>
+              {documentTypes.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="status" className="text-right">
             Status *
@@ -131,14 +344,31 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
               <SelectValue placeholder="Selecione o status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="rascunho">Rascunho</SelectItem>
-              <SelectItem value="em_revisao">Em Revisão</SelectItem>
-              <SelectItem value="aprovado">Aprovado</SelectItem>
-              <SelectItem value="obsoleto">Obsoleto</SelectItem>
+              {statusOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="internal_external" className="text-right">
+            Doc. Interno/Externo
+          </Label>
+          <Select
+            value={formData.internal_external || "interno"}
+            onValueChange={(value) => handleSelectChange("internal_external", value)}
+          >
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Tipo do documento" />
+            </SelectTrigger>
+            <SelectContent>
+              {internalExternalOpts.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-4 items-start gap-4">
           <Label htmlFor="description" className="text-right">
             Descrição
@@ -165,4 +395,3 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     </>
   );
 }
-

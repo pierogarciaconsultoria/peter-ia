@@ -1502,19 +1502,31 @@ export type Database = {
         Row: {
           approval_date: string | null
           approved_by: string | null
+          archiving_time: string | null
           category: string | null
           company_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
+          disposal_method: string | null
+          distribution_location: string | null
+          document_code: string | null
           document_type: string | null
           file_name: string | null
           file_size: number | null
           file_url: string | null
           id: string
+          internal_external: string | null
           mime_type: string | null
+          process: string | null
+          protection: string | null
+          recovery_method: string | null
+          retention_time: string | null
           review_date: string | null
+          revision: string | null
+          standard_items: string[] | null
           status: string
+          storage_location: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -1523,19 +1535,31 @@ export type Database = {
         Insert: {
           approval_date?: string | null
           approved_by?: string | null
+          archiving_time?: string | null
           category?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          disposal_method?: string | null
+          distribution_location?: string | null
+          document_code?: string | null
           document_type?: string | null
           file_name?: string | null
           file_size?: number | null
           file_url?: string | null
           id?: string
+          internal_external?: string | null
           mime_type?: string | null
+          process?: string | null
+          protection?: string | null
+          recovery_method?: string | null
+          retention_time?: string | null
           review_date?: string | null
+          revision?: string | null
+          standard_items?: string[] | null
           status?: string
+          storage_location?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -1544,19 +1568,31 @@ export type Database = {
         Update: {
           approval_date?: string | null
           approved_by?: string | null
+          archiving_time?: string | null
           category?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
+          disposal_method?: string | null
+          distribution_location?: string | null
+          document_code?: string | null
           document_type?: string | null
           file_name?: string | null
           file_size?: number | null
           file_url?: string | null
           id?: string
+          internal_external?: string | null
           mime_type?: string | null
+          process?: string | null
+          protection?: string | null
+          recovery_method?: string | null
+          retention_time?: string | null
           review_date?: string | null
+          revision?: string | null
+          standard_items?: string[] | null
           status?: string
+          storage_location?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string

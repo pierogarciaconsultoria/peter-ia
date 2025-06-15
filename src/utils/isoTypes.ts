@@ -1,7 +1,7 @@
-
 export interface ISODocument {
   id: string;
   title: string;
+  document_code?: string;                // Código do procedimento
   document_type: string;
   description?: string;
   content?: string;
@@ -9,12 +9,13 @@ export interface ISODocument {
   status: string; // Make this required to match service interface
   created_at: string;
   updated_at: string;
-  document_code?: string;
-  process?: string;
-  standard_item?: string;
+
+  // Novos campos:
   revision?: string;
   approval_date?: string;
-  responsible?: string;
+  standard_items?: string[];              // Multiselect, itens da norma ISO 9001:2015
+  process?: string;
+  responsible?: string;                   // Para compatibilidade legada (usaremos created_by)
   distribution_location?: string;
   storage_location?: string;
   protection?: string;
@@ -22,7 +23,9 @@ export interface ISODocument {
   retention_time?: string;
   archiving_time?: string;
   disposal_method?: string;
-  internal_external?: string;
+  internal_external?: string;             // interno ou externo
+  created_by?: string;                    // Elaborado por (user uuid)
+  approved_by?: string;                   // Aprovado por (user uuid)
 }
 
 export interface DocumentRevision {
