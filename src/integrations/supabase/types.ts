@@ -1167,6 +1167,48 @@ export type Database = {
           },
         ]
       }
+      despesas: {
+        Row: {
+          criado: string
+          descricao: string
+          evento_id: string
+          id: string
+          quem_pagou_id: string
+          valor: number
+        }
+        Insert: {
+          criado?: string
+          descricao: string
+          evento_id: string
+          id?: string
+          quem_pagou_id: string
+          valor: number
+        }
+        Update: {
+          criado?: string
+          descricao?: string
+          evento_id?: string
+          id?: string
+          quem_pagou_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "despesas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "despesas_quem_pagou_id_fkey"
+            columns: ["quem_pagou_id"]
+            isOneToOne: false
+            referencedRelation: "participantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       development_plans: {
         Row: {
           action_items: Json
@@ -1868,6 +1910,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      eventos: {
+        Row: {
+          codigo: string
+          criado: string
+          id: string
+          nome: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          codigo: string
+          criado?: string
+          id?: string
+          nome: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          codigo?: string
+          criado?: string
+          id?: string
+          nome?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       expense_categories: {
         Row: {
@@ -5446,6 +5515,38 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participantes: {
+        Row: {
+          evento_id: string
+          id: string
+          nome: string
+          tipo: string
+          user_id: string | null
+        }
+        Insert: {
+          evento_id: string
+          id?: string
+          nome: string
+          tipo: string
+          user_id?: string | null
+        }
+        Update: {
+          evento_id?: string
+          id?: string
+          nome?: string
+          tipo?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participantes_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
             referencedColumns: ["id"]
           },
         ]

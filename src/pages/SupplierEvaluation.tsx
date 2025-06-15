@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { SupplierEvaluationForm } from "@/components/suppliers/SupplierEvaluationForm";
 import { toast } from "sonner";
 import { Supplier, Evaluation } from "@/types/supplierEvaluation";
+import { RelatedISORequirements } from "@/components/quality/RelatedISORequirements";
+
 const SupplierEvaluation = () => {
   const [activeTab, setActiveTab] = useState("suppliers");
   const [showEvaluationForm, setShowEvaluationForm] = useState(false);
@@ -86,7 +88,7 @@ const SupplierEvaluation = () => {
             </Button>
           </div>
 
-          
+          <RelatedISORequirements requirementNumbers={["8.4"]} />
 
           <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-3">

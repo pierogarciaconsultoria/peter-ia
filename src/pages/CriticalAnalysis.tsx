@@ -10,6 +10,8 @@ import { AnalysisStatusTabs } from "@/components/critical-analysis/AnalysisStatu
 import { NewAnalysisDialog } from "@/components/critical-analysis/NewAnalysisDialog";
 import { AttachmentsDialog } from "@/components/critical-analysis/AttachmentsDialog";
 import { getFileIcon, formatFileSize, getStatusColor, getStatusText } from "@/components/critical-analysis/utils/file-utils";
+import { RelatedISORequirements } from "@/components/quality/RelatedISORequirements";
+
 const mockAnalysis: CriticalAnalysisItem[] = [{
   id: "1",
   date: new Date(2023, 10, 15),
@@ -300,6 +302,9 @@ export default function CriticalAnalysis() {
               </div>
             </div>
           </header>
+
+          <RelatedISORequirements requirementNumbers={["5.1", "9.3"]} />
+
           <AnalysisStatusTabs analyses={analyses} expandedItems={expandedItems} toggleExpand={toggleExpand} handleAttachmentClick={handleAttachmentClick} handleViewReport={handleViewReport} handleDeleteAttachment={handleDeleteAttachment} handleEditAnalysis={handleEditAnalysis} handleDeleteAnalysis={handleDeleteAnalysis} getStatusColor={getStatusColor} getStatusText={getStatusText} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
           <AttachmentsDialog open={attachmentsDialogOpen} setOpen={setAttachmentsDialogOpen} inputAttachments={inputAttachments} outputAttachments={outputAttachments} handleInputFileChange={handleInputFileChange} handleOutputFileChange={handleOutputFileChange} handleRemoveInputFile={handleRemoveInputFile} handleRemoveOutputFile={handleRemoveOutputFile} handleAddAttachment={handleAddAttachment} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
           <NewAnalysisDialog open={open} setOpen={setOpen} onAddAnalysis={handleAddAnalysis} getFileIcon={getFileIcon} formatFileSize={formatFileSize} analysisToEdit={analysisToEdit} />
