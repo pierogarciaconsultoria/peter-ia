@@ -1,7 +1,6 @@
 import { MenuItem } from "./types";
 import { dashboardItems } from "./menu-categories/dashboard-items";
 import { diagnosticItems } from "./menu-categories/diagnostic-items";
-import { isoItems } from "./menu-categories/iso-items";
 import { strategicItems } from "./menu-categories/strategic-items";
 import { processItems } from "./menu-categories/process-items";
 import { indicatorsItems } from "./menu-categories/indicators-items";
@@ -18,7 +17,6 @@ export type { MenuItem };
 export const menuItems: MenuItem[] = [
   ...dashboardItems,
   ...diagnosticItems,
-  ...isoItems,
   ...strategicItems,
   ...processItems,
   ...indicatorsItems,

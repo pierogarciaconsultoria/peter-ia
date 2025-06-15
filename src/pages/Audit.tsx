@@ -4,6 +4,7 @@ import AuditSchedule from "./AuditSchedule";
 import AuditPlan from "./AuditPlan";
 import ExternalAudit from "./ExternalAudit";
 import { useState } from "react";
+import { List, Book, FileText } from "lucide-react";
 
 export default function AuditUnifiedPage() {
   const [tab, setTab] = useState("programa");
@@ -39,3 +40,4 @@ export default function AuditUnifiedPage() {
     </div>
   );
 }
+
