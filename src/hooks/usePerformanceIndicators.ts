@@ -21,7 +21,7 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Do NOT use generics on .from or .select to prevent recursion issues!
+      // Avoid generics on .from or .select to prevent TS recursion issues!
       const { data, error } = await supabase
         .from("performance_indicators")
         .select("id, name")
@@ -31,7 +31,7 @@ export function usePerformanceIndicators(company_id?: string) {
       if (error || !data) {
         setIndicators([]);
       } else {
-        // Do type assertion only here
+        // Cast only at this point
         setIndicators(data as PerformanceIndicator[]);
       }
       setLoading(false);
