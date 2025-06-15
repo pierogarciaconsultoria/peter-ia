@@ -138,6 +138,8 @@ export default function CriticalAnalysis() {
   
   const [isEditing, setIsEditing] = useState(false);
   const [analysisToEdit, setAnalysisToEdit] = useState<CriticalAnalysisItem | null>(null);
+  
+  const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -263,6 +265,54 @@ export default function CriticalAnalysis() {
     setSelectedAnalysis(updatedAnalysis);
   };
 
+  // ------- NOVA FUNÇÃO PARA ANÁLISE VIA IA -------
+  const handleAutomaticAnalysis = async () => {
+    // Seleciona a análise do período atual (pode ser melhorado para múltipla seleção)
+    // Usa a análise com data mais recente cujo status seja "planned" ou "in-progress"
+    const currentPeriodAnalysis = analyses
+      .filter(a => a.status !== "completed")
+      .sort((a, b) => (b.date.getTime() - a.date.getTime()))[0];
+
+    if (!currentPeriodAnalysis) {
+      toast.warning("Nenhuma análise planejada/en andamento encontrada.");
+      return;
+    }
+    setIsGeneratingAnalysis(true);
+    toast.info(`Gerando análise crítica do período via IA...`);
+
+    try {
+      // Chama a Edge Function existente com o item
+      const { data, error } = await (window as any).supabase.functions.invoke('generate-report', {
+        body: { analysis: currentPeriodAnalysis }
+      });
+
+      if (error) {
+        throw new Error(error.message || "Erro desconhecido");
+      }
+
+      if (!data || !data.report) {
+        throw new Error("A IA não retornou o relatório.");
+      }
+
+      // Atualiza a análise com o conteúdo gerado por IA
+      const updatedAnalysis = {
+        ...currentPeriodAnalysis,
+        aiGeneratedContent: data.report
+      };
+      setAnalyses(prev => prev.map(a => a.id === updatedAnalysis.id ? updatedAnalysis : a));
+      toast.success("Análise crítica do período gerada com IA!");
+      setSelectedAnalysis(updatedAnalysis);
+      setReportDialogOpen(true);
+    } catch (err: any) {
+      toast.error(
+        "Erro ao gerar análise automática",
+        { description: err?.message || "Tente novamente mais tarde" }
+      );
+    } finally {
+      setIsGeneratingAnalysis(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/40 flex flex-col">
       <main className="flex-1">
@@ -270,12 +320,25 @@ export default function CriticalAnalysis() {
           <header className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Análise Crítica</h1>
+                <h1 className="text-3xl font-bold flex items-center gap-2">
+                  Análise Crítica
+                  <span className="inline-block rounded bg-yellow-200 px-2 py-0.5 text-xs font-bold text-yellow-800 ml-2">GPT</span>
+                </h1>
                 <p className="text-muted-foreground mt-1">
                   Execução e acompanhamento das reuniões de análise crítica pela direção
                 </p>
               </div>
-              <div>
+              <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                <Button
+                  variant="secondary"
+                  className="flex items-center"
+                  disabled={isGeneratingAnalysis}
+                  onClick={handleAutomaticAnalysis}
+                  title="Gerar análise crítica automatizada através da IA"
+                >
+                  <span className={`mr-1 ${isGeneratingAnalysis ? 'animate-spin' : ''}`}>🤖</span>
+                  {isGeneratingAnalysis ? "Gerando análise..." : "Análise Automática com IA"}
+                </Button>
                 <Button onClick={() => {
                   setAnalysisToEdit(null);
                   setIsEditing(false);
