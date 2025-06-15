@@ -1,5 +1,5 @@
 
-import { Check, FileText, Calendar } from "lucide-react";
+import { Check, List, Book, FileText } from "lucide-react";
 
 export const isoItems = [
   {
@@ -10,20 +10,20 @@ export const isoItems = [
     children: [
       {
         title: "Programa de auditoria",
-        icon: FileText,
-        href: "/audit-management?tab=programa",
+        icon: List,
+        href: "/audit-program",
         modulo: "iso",
       },
       {
         title: "Plano de auditoria",
-        icon: Calendar,
-        href: "/audit-management?tab=plano",
+        icon: Book,
+        href: "/audit-plan",
         modulo: "iso",
       },
       {
         title: "Relatório de Auditoria",
         icon: FileText,
-        href: "/audit-management?tab=relatorio",
+        href: "/audit-report",
         modulo: "iso",
       },
     ],
