@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ISODocument } from "@/services/documentService";
+import { Document } from "@/services/documentService"; // fixed ISODocument import
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,13 +21,13 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 interface DocumentFormProps {
-  document: ISODocument | null;
+  document: Document | null;
   onClose: () => void;
 }
 
 export function DocumentForm({ document, onClose }: DocumentFormProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<ISODocument>(
+  const [formData, setFormData] = useState<Document>(
     document || {
       id: "",
       title: "",

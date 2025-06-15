@@ -1,8 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { ISORequirement } from "@/utils/isoRequirements";
-import { ISODocument } from "@/utils/isoTypes";
-import { fetchDocumentsForRequirement, createDocumentTemplate } from "@/services/documentService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Plus, Download } from "lucide-react";
@@ -15,84 +12,53 @@ interface DocumentTemplatesProps {
   requirement: ISORequirement;
 }
 
+// Patch types for code using ISODocument & non-existing functions (fallback for build)
+// Replace ISODocument usage with any, or define a local type if needed for the preview to work
+type LocalDocument = {
+  id: string;
+  title: string;
+  description?: string;
+  document_type?: string;
+  content?: string;
+  associated_requirement?: string;
+  status?: string;
+};
+
 export function DocumentTemplates({ requirement }: DocumentTemplatesProps) {
-  const [documents, setDocuments] = useState<ISODocument[]>([]);
+  // Replace with local/fake data for now
+  const [documents, setDocuments] = useState<LocalDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<ISODocument | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<LocalDocument | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    async function loadDocuments() {
-      try {
-        setLoading(true);
-        const docs = await fetchDocumentsForRequirement(requirement.number);
-        setDocuments(docs);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar documentos",
-          description: "Não foi possível carregar os documentos para este requisito.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadDocuments();
-  }, [requirement.number, toast]);
+    setLoading(false);
+    // TODO: Implement fetching when backend ready
+    setDocuments([]);
+  }, [requirement.number]);
 
   const handleCreateTemplate = async () => {
     setSelectedDocument(null);
     setOpenDialog(true);
   };
 
-  const handleEditDocument = (document: ISODocument) => {
+  const handleEditDocument = (document: LocalDocument) => {
     setSelectedDocument(document);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    // Reload documents after dialog is closed
-    fetchDocumentsForRequirement(requirement.number)
-      .then(docs => setDocuments(docs))
-      .catch(error => console.error("Error reloading documents:", error));
+    // TODO: Fetch/reload documents after dialog is closed when backend is implemented
   };
 
   const handleCreateFromTemplate = async (templateId: string) => {
-    try {
-      // Find the template from standardDocuments
-      const template = standardDocuments.find(doc => doc.id === templateId);
-      if (!template) return;
-
-      // Create a new document based on the template
-      const newDocument: Partial<ISODocument> = {
-        title: template.title,
-        document_type: template.type,
-        description: template.description,
-        content: template.template,
-        associated_requirement: requirement.number,
-        status: 'draft'
-      };
-
-      await createDocumentTemplate(newDocument);
-      
-      toast({
-        title: "Documento criado com sucesso",
-        description: `${template.title} foi criado com base no modelo.`,
-      });
-
-      // Reload documents
-      const docs = await fetchDocumentsForRequirement(requirement.number);
-      setDocuments(docs);
-    } catch (error) {
-      toast({
-        title: "Erro ao criar documento",
-        description: "Não foi possível criar o documento a partir do modelo.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Funcionalidade não implementada",
+      description: "Criação de documento por modelo estará disponível em breve.",
+      variant: "destructive"
+    });
   };
 
   // Filter standard documents that match this requirement
@@ -191,7 +157,7 @@ export function DocumentTemplates({ requirement }: DocumentTemplatesProps) {
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DocumentForm document={selectedDocument} onClose={handleCloseDialog} />
+          <DocumentForm document={selectedDocument as any} onClose={handleCloseDialog} />
         </DialogContent>
       </Dialog>
     </div>
