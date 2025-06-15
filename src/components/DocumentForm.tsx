@@ -15,6 +15,7 @@ import { Document } from "@/services/documentService";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isoRequirements } from "@/utils/isoRequirements";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { EditableSelect, EditableOption } from "@/components/ui/editable-select";
 
 const documentTypes = [
   { value: "policy", label: "Política" },
@@ -35,6 +36,15 @@ const statusOptions = [
 const internalExternalOpts = [
   { value: "interno", label: "Interno" },
   { value: "externo", label: "Externo" }
+];
+
+const documentTypesDefault: EditableOption[] = [
+  { value: "policy", label: "Política" },
+  { value: "procedure", label: "Procedimento" },
+  { value: "work-instruction", label: "Instrução de Trabalho" },
+  { value: "form", label: "Formulário" },
+  { value: "record", label: "Registro" },
+  { value: "manual", label: "Manual" }
 ];
 
 interface DocumentFormProps {
@@ -74,6 +84,15 @@ export function DocumentForm({ document, onClose, onSave }: DocumentFormProps) {
       associated_requirement: "", // Required field per ISODocument
     }
   );
+
+  // STATE LOCAL para categorias editáveis:
+  const [categoryOptions, setCategoryOptions] = useState<EditableOption[]>(documentTypesDefault);
+
+  // Quando há alteração (inclui, edita ou remove na lista)
+  const handleCategoryChange = (value: string, options?: EditableOption[]) => {
+    setFormData((prev) => ({ ...prev, document_type: value }));
+    if (options) setCategoryOptions(options);
+  };
 
   // Handler internals
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -330,24 +349,21 @@ export function DocumentForm({ document, onClose, onSave }: DocumentFormProps) {
           />
         </div>
 
+        {/* ------------ CAMPO CATEGORIA USANDO EditableSelect ----------- */}
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="document_type" className="text-right">
+          <label htmlFor="document_type" className="text-right font-medium">
             Categoria *
-          </Label>
-          <Select
-            value={formData.document_type || ""}
-            onValueChange={(value) => handleSelectChange("document_type", value)}
-          >
-            <SelectTrigger className="col-span-3">
-              <SelectValue placeholder="Selecione o tipo de documento" />
-            </SelectTrigger>
-            <SelectContent>
-              {documentTypes.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          </label>
+          <div className="col-span-3">
+            <EditableSelect
+              options={categoryOptions}
+              value={formData.document_type}
+              onChange={handleCategoryChange}
+              placeholder="Selecione, adicione ou edite uma categoria"
+            />
+          </div>
         </div>
+
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="status" className="text-right">
             Status *
