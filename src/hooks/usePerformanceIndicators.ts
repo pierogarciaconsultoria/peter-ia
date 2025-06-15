@@ -21,18 +21,22 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Avoid generics on .from or .select to prevent TS recursion issues!
       const { data, error } = await supabase
         .from("performance_indicators")
         .select("id, name")
         .eq("company_id", company_id);
 
       if (!isMounted) return;
-      if (error || !data) {
+
+      if (error || !Array.isArray(data)) {
         setIndicators([]);
       } else {
-        // Cast only at this point
-        setIndicators(data as PerformanceIndicator[]);
+        setIndicators(
+          data.map(item => ({
+            id: item.id,
+            name: item.name
+          }))
+        );
       }
       setLoading(false);
     }
