@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { isProductionEnvironment } from "@/utils/lovableEditorDetection";
 
@@ -101,8 +100,8 @@ export async function getAuditLogs(filters?: {
       user_id_filter: filters?.user_id || null,
       action_filter: filters?.action || null,
       status_filter: filters?.status || null,
-      from_date: filters?.from_date ? new Date(filters.from_date) : null,
-      to_date: filters?.to_date ? new Date(filters.to_date) : null,
+      from_date: filters?.from_date ? new Date(filters.from_date).toISOString() : null,
+      to_date: filters?.to_date ? new Date(filters.to_date).toISOString() : null,
       page_number: filters?.page || 0,
       page_size: filters?.limit || 50
     });
@@ -119,8 +118,6 @@ export async function getAuditLogs(filters?: {
       details: log.details,
       status: log.status,
       ip_address: log.ip_address,
-      // The error lines: timestamp: new Date(log.event_timestamp)
-      // Change so that `timestamp` is always a string:
       timestamp: log.event_timestamp
         ? (typeof log.event_timestamp === "string"
             ? log.event_timestamp

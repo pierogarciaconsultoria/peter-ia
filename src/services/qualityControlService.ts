@@ -96,7 +96,7 @@ export async function createQualityInspection(inspection: Omit<QualityInspection
     .insert([
       {
         ...inspection,
-        criteria_results: JSON.stringify(inspection.criteria_results)
+        criteria_results: inspection.criteria_results // passing plain object, Supabase client handles JSON
       }
     ])
     .select()
@@ -122,8 +122,8 @@ export async function updateQualityInspection(id: string, updates: Partial<Quali
   // Atualiza e salva o criteria_results corretamente
   const payload = {
     ...updates,
-    ...(updates.criteria_results
-      ? { criteria_results: JSON.stringify(updates.criteria_results) }
+    ...(updates.criteria_results !== undefined
+      ? { criteria_results: updates.criteria_results }
       : {})
   };
   const { data, error } = await supabase
