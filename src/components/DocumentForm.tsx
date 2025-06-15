@@ -43,9 +43,9 @@ interface DocumentFormProps {
   onSave?: (doc: Document) => void; // Para integração futura
 }
 
-export function DocumentForm({ document, onClose }: DocumentFormProps) {
+export function DocumentForm({ document, onClose, onSave }: DocumentFormProps) {
   const [loading, setLoading] = useState(false);
-  // Fix: ensure default for associated_requirement and standard_items
+  // Fix: ensure default for associated_requirement and standard_items ALWAYS as array
   const [formData, setFormData] = useState<Document>(
     document || {
       id: "",
@@ -85,18 +85,22 @@ export function DocumentForm({ document, onClose }: DocumentFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- FIX: MultiSelect expects Option[], not string[] 
-  // We need to convert between option/value for saving.
   type Option = { value: string; label: string };
   const isoOptions: Option[] = isoRequirements.map(req => ({
     value: req.number, label: req.number + " - " + req.title
   }));
-  const standardItemsValue: Option[] = isoOptions.filter(opt => formData.standard_items?.includes(opt.value));
+
+  // PROTEÇÃO AQUI ↓↓↓↓↓
+  // Garante que o filtro só tenta `.includes` se for array, nunca null/undefined
+  const standardItemsValue: Option[] =
+    Array.isArray(formData.standard_items)
+      ? isoOptions.filter(opt => formData.standard_items.includes(opt.value))
+      : [];
 
   const handleMultiSelectChange = (selected: Option[]) => {
     setFormData((prev) => ({
       ...prev,
-      standard_items: selected.map(s => s.value),
+      standard_items: Array.isArray(selected) ? selected.map(s => s.value) : [],
     }));
   };
 
