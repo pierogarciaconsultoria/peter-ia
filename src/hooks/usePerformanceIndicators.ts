@@ -21,7 +21,7 @@ export function usePerformanceIndicators(company_id?: string) {
     setLoading(true);
 
     async function fetchIndicators() {
-      // Don't use generics in from or select to prevent type recursion
+      // Evite tipagem genérica para não causar recursão
       const { data, error } = await supabase
         .from("performance_indicators")
         .select("id, name")
@@ -29,14 +29,14 @@ export function usePerformanceIndicators(company_id?: string) {
 
       if (!isMounted) return;
 
-      if (error || !data || !Array.isArray(data)) {
+      if (error || !Array.isArray(data)) {
         setIndicators([]);
       } else {
-        // Create plain objects to avoid deep type instantiation issues
+        // Garanta um array raso, sem inferências profundas
         setIndicators(
-          data.map((item: any) => ({
-            id: item.id,
-            name: item.name,
+          (data as any[]).map(item => ({
+            id: String(item.id),
+            name: String(item.name),
           }))
         );
       }
