@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,126 +208,128 @@ const NonConformingProducts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300">
-        <div className="max-w-6xl mx-auto">
-          {/* Dashboard section (imported from Index page) */}
-          <Dashboard requirements={isoRequirements} />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Layout padrão: max-w-6xl, centralizado, padding */}
+      <div className="max-w-6xl w-full mx-auto flex flex-col p-6 gap-6 flex-1">
+        <header>
+          <h1 className="text-3xl font-bold mb-1">Controle de Produto Não Conforme</h1>
+          <p className="text-muted-foreground mb-6">
+            Registre, monitore e visualize os produtos não conformes detectados nos processos da empresa.
+          </p>
+        </header>
+        
+        {/* Dashboard section (imported from Index page) */}
+        <Dashboard requirements={isoRequirements} />
           
-          <div className="flex items-center justify-between my-6">
-            <h1 className="text-3xl font-bold">Controle de Produto Não Conforme</h1>
-            <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between my-4 gap-3">
+          <div className="flex gap-2">
+            <Button 
+              variant={showDashboard ? "default" : "outline"}
+              onClick={() => setShowDashboard(true)}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant={!showDashboard ? "default" : "outline"}
+              onClick={() => setShowDashboard(false)}
+            >
+              Listagem
+            </Button>
+          </div>
+          <Button onClick={() => setRegisterFormOpen(true)}>
+            <Package size={16} className="mr-2" />
+            Registrar Produto Não Conforme
+          </Button>
+        </div>
+          
+        {showDashboard ? (
+          <NonConformingProductsDashboard products={nonConformingProducts} />
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="text-sm font-medium mr-2">Filtrar por status:</span>
               <Button 
-                variant={showDashboard ? "default" : "outline"}
-                onClick={() => setShowDashboard(true)}
+                variant={statusFilter === null ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setStatusFilter(null)}
               >
-                Dashboard
+                Todos
               </Button>
               <Button 
-                variant={!showDashboard ? "default" : "outline"}
-                onClick={() => setShowDashboard(false)}
+                variant={statusFilter === "identified" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setStatusFilter("identified")}
               >
-                Listagem
+                Identificados
               </Button>
-              <Button onClick={() => setRegisterFormOpen(true)}>
-                <Package size={16} className="mr-2" />
-                Registrar Produto Não Conforme
+              <Button 
+                variant={statusFilter === "isolated" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setStatusFilter("isolated")}
+              >
+                Isolados
+              </Button>
+              <Button 
+                variant={statusFilter === "reviewed" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setStatusFilter("reviewed")}
+              >
+                Analisados
+              </Button>
+              <Button 
+                variant={statusFilter === "resolved" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setStatusFilter("resolved")}
+              >
+                Resolvidos
               </Button>
             </div>
-          </div>
-          
-          {showDashboard ? (
-            <NonConformingProductsDashboard products={nonConformingProducts} />
-          ) : (
-            <>
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-sm font-medium mr-2">Filtrar por status:</span>
-                <Button 
-                  variant={statusFilter === null ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setStatusFilter(null)}
-                >
-                  Todos
-                </Button>
-                <Button 
-                  variant={statusFilter === "identified" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setStatusFilter("identified")}
-                >
-                  Identificados
-                </Button>
-                <Button 
-                  variant={statusFilter === "isolated" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setStatusFilter("isolated")}
-                >
-                  Isolados
-                </Button>
-                <Button 
-                  variant={statusFilter === "reviewed" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setStatusFilter("reviewed")}
-                >
-                  Analisados
-                </Button>
-                <Button 
-                  variant={statusFilter === "resolved" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setStatusFilter("resolved")}
-                >
-                  Resolvidos
-                </Button>
-              </div>
-              
-              {isLoading ? (
-                <div className="text-center py-10">Carregando...</div>
-              ) : error ? (
-                <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
-              ) : (
-                <div className="grid gap-4">
-                  {filteredProducts.map((item) => (
-                    <Card key={item.id} className="overflow-hidden">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(item.status)}
-                            <CardTitle className="text-lg">{item.product_name}</CardTitle>
-                          </div>
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
-                            {getSeverityLabel(item.severity)}
-                          </div>
+            
+            {isLoading ? (
+              <div className="text-center py-10">Carregando...</div>
+            ) : error ? (
+              <div className="text-center py-10 text-red-500">Erro ao carregar dados</div>
+            ) : (
+              <div className="grid gap-4">
+                {filteredProducts.map((item) => (
+                  <Card key={item.id} className="overflow-hidden">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(item.status)}
+                          <CardTitle className="text-lg">{item.product_name}</CardTitle>
                         </div>
-                        <CardDescription className="flex items-center justify-between">
-                          <span>Requisito: {item.requirement_id}</span>
-                          <span>Data: {formatDate(item.created_at)}</span>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">{item.description}</p>
-                      </CardContent>
-                      <CardFooter className="bg-muted/50 flex justify-between pt-2">
-                        <span className="text-sm flex items-center gap-1">
-                          Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
-                        </span>
-                        <Button size="sm" variant="outline">Ver Detalhes</Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                  
-                  {filteredProducts.length === 0 && (
-                    <div className="text-center py-10 bg-muted rounded-lg">
-                      <p className="text-muted-foreground">Nenhum produto não conforme encontrado</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-      
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(item.severity)}`}>
+                          {getSeverityLabel(item.severity)}
+                        </div>
+                      </div>
+                      <CardDescription className="flex items-center justify-between">
+                        <span>Requisito: {item.requirement_id}</span>
+                        <span>Data: {formatDate(item.created_at)}</span>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-600">{item.description}</p>
+                    </CardContent>
+                    <CardFooter className="bg-muted/50 flex justify-between pt-2">
+                      <span className="text-sm flex items-center gap-1">
+                        Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
+                      </span>
+                      <Button size="sm" variant="outline">Ver Detalhes</Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+                
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-10 bg-muted rounded-lg">
+                    <p className="text-muted-foreground">Nenhum produto não conforme encontrado</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
       {/* Non-conforming Product Registration Form */}
       <NonConformingProductForm
         open={registerFormOpen}
