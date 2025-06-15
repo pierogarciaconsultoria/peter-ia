@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Define the frontend type
 export type QualityObjective = {
   id: string;
   title: string;
@@ -11,7 +12,39 @@ export type QualityObjective = {
   company_id: string;
   created_at: string;
   updated_at: string;
+  frequency?: string;
+  created_by?: string;
 };
+
+// Helpers to map Supabase (db) <-> Frontend
+function fromDb(obj: any): QualityObjective {
+  return {
+    id: obj.id,
+    title: obj.name,
+    description: obj.description,
+    target_value: obj.target,
+    unit: obj.unit,
+    status: obj.status,
+    company_id: obj.company_id,
+    created_at: obj.created_at,
+    updated_at: obj.updated_at,
+    frequency: obj.frequency,
+    created_by: obj.created_by,
+  };
+}
+
+function toDb(obj: Omit<QualityObjective, "id" | "created_at" | "updated_at">) {
+  return {
+    name: obj.title,
+    description: obj.description,
+    target: obj.target_value,
+    unit: obj.unit,
+    status: obj.status,
+    company_id: obj.company_id,
+    frequency: obj.frequency,
+    created_by: obj.created_by,
+  };
+}
 
 export async function fetchQualityObjectives(): Promise<QualityObjective[]> {
   const { data, error } = await supabase
@@ -22,7 +55,7 @@ export async function fetchQualityObjectives(): Promise<QualityObjective[]> {
     console.error("Erro ao buscar objetivos da qualidade:", error);
     return [];
   }
-  return data as QualityObjective[];
+  return (data as any[]).map(fromDb);
 }
 
 export async function createQualityObjective(
@@ -30,14 +63,14 @@ export async function createQualityObjective(
 ): Promise<QualityObjective | null> {
   const { data, error } = await supabase
     .from("quality_objectives")
-    .insert([obj])
+    .insert([toDb(obj)])
     .select()
     .single();
   if (error) {
     console.error("Erro ao criar objetivo da qualidade:", error);
     return null;
   }
-  return data as QualityObjective;
+  return fromDb(data);
 }
 
 export async function updateQualityObjective(
@@ -46,7 +79,7 @@ export async function updateQualityObjective(
 ): Promise<QualityObjective | null> {
   const { data, error } = await supabase
     .from("quality_objectives")
-    .update(updates)
+    .update(toDb(updates as any))
     .eq("id", id)
     .select()
     .single();
@@ -54,7 +87,7 @@ export async function updateQualityObjective(
     console.error("Erro ao atualizar objetivo da qualidade:", error);
     return null;
   }
-  return data as QualityObjective;
+  return fromDb(data);
 }
 
 export async function deleteQualityObjective(id: string): Promise<boolean> {
