@@ -8,9 +8,6 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       
-      <Button className="self-start" onClick={onNewDocument}>
-        <Plus size={16} className="mr-2" />
-        Novo Documento
-      </Button>
+      
     </div>;
 }
