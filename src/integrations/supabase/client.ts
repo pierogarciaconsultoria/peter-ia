@@ -3,14 +3,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Configuração segura - SEMPRE usar variáveis de ambiente
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Verificar se as variáveis de ambiente estão definidas
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
-}
+// Configuração segura - Usar valores fixos para Lovable AI
+const SUPABASE_URL = "https://kxkcgbtsgfyisbrtjmvv.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4a2NnYnRzZ2Z5aXNicnRqbXZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzODQ1MTQsImV4cCI6MjA1NDk2MDUxNH0.JHd7Cafdd4gxn7s_DE3ndeHiZ7Y-Om-c5M8J0POem0U";
 
 // Validação básica de formato
 const isValidUrl = (url: string) => {
@@ -32,7 +27,7 @@ if (!isValidUrl(SUPABASE_URL) || !isValidKey(SUPABASE_PUBLISHABLE_KEY)) {
 }
 
 // Log de configuração (apenas em desenvolvimento)
-if (import.meta.env.DEV) {
+if (typeof window !== 'undefined') {
   console.log('Supabase client initialized:', {
     url: SUPABASE_URL.substring(0, 30) + '...',
     hasKey: !!SUPABASE_PUBLISHABLE_KEY
@@ -105,3 +100,4 @@ export const testConnection = async () => {
     return { success: false, error: error.message || 'Unknown connection error' };
   }
 };
+
