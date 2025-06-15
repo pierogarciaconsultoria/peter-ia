@@ -220,6 +220,62 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_plans: {
+        Row: {
+          audited_areas: string
+          company_id: string | null
+          created_at: string
+          end_date: string
+          id: string
+          observations: string | null
+          responsible: string
+          start_date: string
+          status: string
+          summary: string | null
+          team: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audited_areas: string
+          company_id?: string | null
+          created_at?: string
+          end_date: string
+          id?: string
+          observations?: string | null
+          responsible: string
+          start_date: string
+          status: string
+          summary?: string | null
+          team?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audited_areas?: string
+          company_id?: string | null
+          created_at?: string
+          end_date?: string
+          id?: string
+          observations?: string | null
+          responsible?: string
+          start_date?: string
+          status?: string
+          summary?: string | null
+          team?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audits: {
         Row: {
           area: string
