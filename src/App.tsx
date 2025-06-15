@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -44,6 +43,11 @@ import Ambiente from '@/pages/Ambiente';
 import Tasks from '@/pages/Tasks';
 import ExitInterviewPage from "./pages/ExitInterviewPage";
 import IntelligentAnalysisPage from "@/pages/IntelligentAnalysisPage";
+import Stakeholders from '@/pages/Stakeholders';
+import QualityPolicy from '@/pages/QualityPolicy';
+import QualityObjectives from '@/pages/QualityObjectives';
+import AuditPlan from '@/pages/AuditPlan';
+import Documents from '@/pages/Documents';
 
 import './App.css';
 
@@ -170,6 +174,11 @@ function AppContent() {
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/analise-inteligente" element={<IntelligentAnalysisPage />} />
+              <Route path="/stakeholders" element={<Stakeholders />} />
+              <Route path="/quality-policy" element={<QualityPolicy />} />
+              <Route path="/quality-objectives" element={<QualityObjectives />} />
+              <Route path="/audit-plan" element={<AuditPlan />} />
+              <Route path="/documents" element={<Documents />} />
             </Route>
             
             {/* Catch-all route for pages not found */}
