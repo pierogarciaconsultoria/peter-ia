@@ -17,12 +17,14 @@ export function usePerformanceIndicators(company_id?: string) {
 
     async function fetchIndicators() {
       try {
+        // Explicitly type the Supabase response
         const { data } = await supabase
           .from("performance_indicators")
           .select("id, name")
           .eq("company_id", company_id);
 
-        setIndicators(data || []);
+        // Explicitly cast/handle returned data array
+        setIndicators((data as PerformanceIndicator[]) || []);
       } finally {
         setLoading(false);
       }
