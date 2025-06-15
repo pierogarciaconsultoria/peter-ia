@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { useActionPlans } from "@/hooks/useActionPlans";
 import { usePerformanceIndicators } from "@/hooks/usePerformanceIndicators";
 import { MultiSelect, Option } from "@/components/ui/multi-select";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { QuickCreateActionPlan } from "./QuickCreateActionPlan";
+import { QuickCreateIndicator } from "./QuickCreateIndicator";
 
 type Props = {
   value: string;
@@ -31,6 +32,14 @@ export default function QualityPolicyForm({
 
   const { actionPlans } = useActionPlans(empresaId);
   const { indicators } = usePerformanceIndicators(empresaId);
+
+  // Novos handlers: ao criar plano/indicador, adiciona ao MultiSelect
+  function handleActionPlanCreated(plan: { id: string; title: string }) {
+    setSelectedPlans(prev => [...prev, plan.id]);
+  }
+  function handleIndicatorCreated(indicator: { id: string; name: string }) {
+    setSelectedIndicators(prev => [...prev, indicator.id]);
+  }
 
   // Para MultiSelect:
   const planOptions: Option[] = actionPlans.map(p => ({ value: p.id, label: p.title }));
@@ -64,6 +73,9 @@ export default function QualityPolicyForm({
 
       <div>
         <label className="block mb-1 text-sm font-medium">Planos de Ação Relacionados</label>
+        {empresaId && (
+          <QuickCreateActionPlan companyId={empresaId} onCreated={handleActionPlanCreated} />
+        )}
         <MultiSelect
           options={planOptions}
           value={selectedPlanOptions}
@@ -75,6 +87,9 @@ export default function QualityPolicyForm({
 
       <div>
         <label className="block mb-1 text-sm font-medium">Indicadores de Desempenho Relacionados</label>
+        {empresaId && (
+          <QuickCreateIndicator companyId={empresaId} onCreated={handleIndicatorCreated} />
+        )}
         <MultiSelect
           options={indicatorOptions}
           value={selectedIndicatorOptions}
