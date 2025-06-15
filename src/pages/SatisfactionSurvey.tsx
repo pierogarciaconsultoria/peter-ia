@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -22,18 +21,15 @@ const SatisfactionSurvey = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Pesquisa de Satisfação</h1>
-              <p className="text-muted-foreground mt-1">
-                Crie e acompanhe pesquisas de satisfação com seus clientes
-              </p>
-            </div>
-            
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="flex flex-col gap-1 mb-6">
+            <h1 className="text-3xl font-bold">Pesquisa de Satisfação</h1>
+            <p className="text-muted-foreground">
+              Crie e acompanhe pesquisas de satisfação com seus clientes
+            </p>
+          </div>
+          <div className="flex justify-end mb-4">
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
               <DialogTrigger asChild>
                 <Button>
@@ -49,7 +45,6 @@ const SatisfactionSurvey = () => {
               </DialogContent>
             </Dialog>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardHeader className="py-4">
@@ -81,7 +76,6 @@ const SatisfactionSurvey = () => {
               </CardContent>
             </Card>
           </div>
-          
           <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
               <TabsList>
@@ -126,7 +120,6 @@ const SatisfactionSurvey = () => {
           </Tabs>
         </div>
       </main>
-      
       <Footer />
     </div>
   );

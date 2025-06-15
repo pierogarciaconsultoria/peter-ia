@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import * as React from "react";
 import { Navigation } from "@/components/Navigation";
@@ -265,76 +264,71 @@ export default function CriticalAnalysis() {
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
-      <Navigation />
-      
-      <main className="flex-1 p-6 md:p-8 ml-0 md:ml-64">
-        <header className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Análise Crítica</h1>
-              <p className="text-muted-foreground mt-1">
-                Execução e acompanhamento das reuniões de análise crítica pela direção
-              </p>
+    <div className="min-h-screen bg-muted/40 flex flex-col">
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto p-6">
+          <header className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold">Análise Crítica</h1>
+                <p className="text-muted-foreground mt-1">
+                  Execução e acompanhamento das reuniões de análise crítica pela direção
+                </p>
+              </div>
+              <div>
+                <Button onClick={() => {
+                  setAnalysisToEdit(null);
+                  setIsEditing(false);
+                  setOpen(true);
+                }}>
+                  <Plus size={16} className="mr-2" />
+                  Nova Análise Crítica
+                </Button>
+              </div>
             </div>
-            
-            <div>
-              <Button onClick={() => {
-                setAnalysisToEdit(null);
-                setIsEditing(false);
-                setOpen(true);
-              }}>
-                <Plus size={16} className="mr-2" />
-                Nova Análise Crítica
-              </Button>
-            </div>
-          </div>
-        </header>
-        
-        <AnalysisStatusTabs 
-          analyses={analyses}
-          expandedItems={expandedItems}
-          toggleExpand={toggleExpand}
-          handleAttachmentClick={handleAttachmentClick}
-          handleViewReport={handleViewReport}
-          handleDeleteAttachment={handleDeleteAttachment}
-          handleEditAnalysis={handleEditAnalysis}
-          handleDeleteAnalysis={handleDeleteAnalysis}
-          getStatusColor={getStatusColor}
-          getStatusText={getStatusText}
-          getFileIcon={getFileIcon}
-          formatFileSize={formatFileSize}
-        />
-        
-        <AttachmentsDialog 
-          open={attachmentsDialogOpen}
-          setOpen={setAttachmentsDialogOpen}
-          inputAttachments={inputAttachments}
-          outputAttachments={outputAttachments}
-          handleInputFileChange={handleInputFileChange}
-          handleOutputFileChange={handleOutputFileChange}
-          handleRemoveInputFile={handleRemoveInputFile}
-          handleRemoveOutputFile={handleRemoveOutputFile}
-          handleAddAttachment={handleAddAttachment}
-          getFileIcon={getFileIcon}
-          formatFileSize={formatFileSize}
-        />
-        
-        <NewAnalysisDialog 
-          open={open}
-          setOpen={setOpen}
-          onAddAnalysis={handleAddAnalysis}
-          getFileIcon={getFileIcon}
-          formatFileSize={formatFileSize}
-          analysisToEdit={analysisToEdit}
-        />
-        
-        <ReportDialog
-          analysis={selectedAnalysis}
-          open={reportDialogOpen}
-          onOpenChange={setReportDialogOpen}
-          onAnalysisUpdate={handleAnalysisUpdate}
-        />
+          </header>
+          <AnalysisStatusTabs 
+            analyses={analyses}
+            expandedItems={expandedItems}
+            toggleExpand={toggleExpand}
+            handleAttachmentClick={handleAttachmentClick}
+            handleViewReport={handleViewReport}
+            handleDeleteAttachment={handleDeleteAttachment}
+            handleEditAnalysis={handleEditAnalysis}
+            handleDeleteAnalysis={handleDeleteAnalysis}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+          <AttachmentsDialog 
+            open={attachmentsDialogOpen}
+            setOpen={setAttachmentsDialogOpen}
+            inputAttachments={inputAttachments}
+            outputAttachments={outputAttachments}
+            handleInputFileChange={handleInputFileChange}
+            handleOutputFileChange={handleOutputFileChange}
+            handleRemoveInputFile={handleRemoveInputFile}
+            handleRemoveOutputFile={handleRemoveOutputFile}
+            handleAddAttachment={handleAddAttachment}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+          />
+          <NewAnalysisDialog 
+            open={open}
+            setOpen={setOpen}
+            onAddAnalysis={handleAddAnalysis}
+            getFileIcon={getFileIcon}
+            formatFileSize={formatFileSize}
+            analysisToEdit={analysisToEdit}
+          />
+          <ReportDialog
+            analysis={selectedAnalysis}
+            open={reportDialogOpen}
+            onOpenChange={setReportDialogOpen}
+            onAnalysisUpdate={handleAnalysisUpdate}
+          />
+        </div>
       </main>
     </div>
   );

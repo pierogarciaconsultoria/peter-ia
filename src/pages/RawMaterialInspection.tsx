@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -84,24 +83,21 @@ const RawMaterialInspection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Inspeção de Matéria Prima</h1>
-              <p className="text-muted-foreground mt-1">
-                Controle as inspeções de recebimento de matérias-primas e acompanhe os resultados.
-              </p>
-            </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="flex flex-col gap-1 mb-6">
+            <h1 className="text-3xl font-bold">Inspeção de Matéria Prima</h1>
+            <p className="text-muted-foreground">
+              Controle as inspeções de recebimento de matérias-primas e acompanhe os resultados.
+            </p>
+          </div>
+          <div className="flex justify-end mb-4">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Nova Inspeção
             </Button>
           </div>
-          
           <div className="flex items-center justify-between space-x-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -117,7 +113,6 @@ const RawMaterialInspection = () => {
               <Filter className="h-4 w-4" />
             </Button>
           </div>
-          
           {loading ? (
             <Card>
               <CardContent className="p-6">

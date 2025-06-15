@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -65,24 +64,21 @@ const OrganizationContext = () => {
   const threats = swotAnalysis.filter(c => c.swot_category === 'threat');
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="md:pl-64 p-6 transition-all duration-300">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Contexto da Organização</h1>
-              <p className="text-muted-foreground mt-1">
-                Defina e acompanhe o contexto da sua organização, incluindo fatores internos e externos relevantes.
-              </p>
-            </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="flex flex-col gap-1 mb-6">
+            <h1 className="text-3xl font-bold">Contexto da Organização</h1>
+            <p className="text-muted-foreground">
+              Defina e acompanhe o contexto da sua organização, incluindo fatores internos e externos relevantes.
+            </p>
+          </div>
+          <div className="flex justify-end mb-4">
             <Button onClick={() => setFormDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Item
             </Button>
           </div>
-          
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-4 mb-6">
               <TabsTrigger value="internal_factor" className="flex items-center justify-center gap-2">
