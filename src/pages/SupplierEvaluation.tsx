@@ -8,71 +8,66 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { SupplierEvaluationForm } from "@/components/suppliers/SupplierEvaluationForm";
 import { toast } from "sonner";
 import { Supplier, Evaluation } from "@/types/supplierEvaluation";
-
 const SupplierEvaluation = () => {
   const [activeTab, setActiveTab] = useState("suppliers");
   const [showEvaluationForm, setShowEvaluationForm] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | undefined>(undefined);
 
   // Mock data for demonstration
-  const mockSuppliers: Supplier[] = [
-    { 
-      id: "1", 
-      name: "Fornecedor A Ltda", 
-      category: "Matéria Prima", 
-      rating: 8.5, 
-      status: "approved", 
-      createdAt: "2023-01-15", 
-      lastEvaluationDate: "2023-10-20" 
-    },
-    { 
-      id: "2", 
-      name: "Distribuidora B", 
-      category: "Componentes", 
-      rating: 6.8, 
-      status: "pending", 
-      createdAt: "2023-03-05"
-    },
-    { 
-      id: "3", 
-      name: "Serviços C S.A.", 
-      category: "Serviços", 
-      rating: 9.2, 
-      status: "approved", 
-      createdAt: "2022-11-30", 
-      lastEvaluationDate: "2023-11-15" 
-    },
-  ];
-
+  const mockSuppliers: Supplier[] = [{
+    id: "1",
+    name: "Fornecedor A Ltda",
+    category: "Matéria Prima",
+    rating: 8.5,
+    status: "approved",
+    createdAt: "2023-01-15",
+    lastEvaluationDate: "2023-10-20"
+  }, {
+    id: "2",
+    name: "Distribuidora B",
+    category: "Componentes",
+    rating: 6.8,
+    status: "pending",
+    createdAt: "2023-03-05"
+  }, {
+    id: "3",
+    name: "Serviços C S.A.",
+    category: "Serviços",
+    rating: 9.2,
+    status: "approved",
+    createdAt: "2022-11-30",
+    lastEvaluationDate: "2023-11-15"
+  }];
   const handleNewEvaluation = (supplier?: Supplier) => {
     setSelectedSupplier(supplier);
     setShowEvaluationForm(true);
   };
-
   const handleEvaluationSubmit = (evaluation: Partial<Evaluation>) => {
     console.log("Submitted evaluation:", evaluation);
     toast.success("Avaliação registrada com sucesso");
     setShowEvaluationForm(false);
   };
-
   const getStatusBadge = (status: Supplier['status']) => {
     const statusConfig = {
-      approved: { class: "bg-green-100 text-green-800", text: "Aprovado" },
-      pending: { class: "bg-yellow-100 text-yellow-800", text: "Pendente" },
-      rejected: { class: "bg-red-100 text-red-800", text: "Reprovado" }
+      approved: {
+        class: "bg-green-100 text-green-800",
+        text: "Aprovado"
+      },
+      pending: {
+        class: "bg-yellow-100 text-yellow-800",
+        text: "Pendente"
+      },
+      rejected: {
+        class: "bg-red-100 text-red-800",
+        text: "Reprovado"
+      }
     };
-    
     const config = statusConfig[status];
-    
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.class}`}>
+    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.class}`}>
         {config.text}
-      </span>
-    );
+      </span>;
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Remove Navigation and extra mx-auto/max-w-6xl */}
       {/* <Navigation /> */}
       
@@ -91,27 +86,7 @@ const SupplierEvaluation = () => {
             </Button>
           </div>
 
-          <Card className="mb-6 border-blue-100">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-base">
-                <ClipboardCheck className="mr-2 h-4 w-4 text-blue-500" />
-                Relação com Requisitos ISO 9001:2015
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-2">
-                Este módulo atende aos seguintes requisitos:
-              </p>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center p-2 bg-blue-50 rounded-md">
-                  <div>
-                    <p className="font-medium">8.4 - Controle de Processos, Produtos e Serviços Providos Externamente</p>
-                    <p className="text-xs text-muted-foreground">Avaliação e qualificação de fornecedores externos</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
 
           <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-3">
@@ -122,8 +97,7 @@ const SupplierEvaluation = () => {
 
             <TabsContent value="suppliers" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mockSuppliers.map((supplier) => (
-                  <Card key={supplier.id} className="overflow-hidden">
+                {mockSuppliers.map(supplier => <Card key={supplier.id} className="overflow-hidden">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{supplier.name}</CardTitle>
@@ -146,17 +120,11 @@ const SupplierEvaluation = () => {
                       </div>
                     </CardContent>
                     <div className="px-6 py-4 bg-muted/30 border-t">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => handleNewEvaluation(supplier)}
-                      >
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => handleNewEvaluation(supplier)}>
                         Realizar Avaliação
                       </Button>
                     </div>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
             </TabsContent>
 
@@ -207,20 +175,12 @@ const SupplierEvaluation = () => {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedSupplier 
-                ? `Avaliar fornecedor: ${selectedSupplier.name}` 
-                : 'Nova Avaliação de Fornecedor'}
+              {selectedSupplier ? `Avaliar fornecedor: ${selectedSupplier.name}` : 'Nova Avaliação de Fornecedor'}
             </DialogTitle>
           </DialogHeader>
-          <SupplierEvaluationForm 
-            supplier={selectedSupplier} 
-            onSubmit={handleEvaluationSubmit}
-            onCancel={() => setShowEvaluationForm(false)}
-          />
+          <SupplierEvaluationForm supplier={selectedSupplier} onSubmit={handleEvaluationSubmit} onCancel={() => setShowEvaluationForm(false)} />
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 };
-
 export default SupplierEvaluation;
