@@ -5,6 +5,7 @@ import { UserMenu } from "./navigation/UserMenu";
 import { Sidebar } from "./navigation/Sidebar";
 import { BackToHomeButton } from "./navigation/BackToHomeButton";
 import { NotificationCenter } from "./notifications/NotificationCenter";
+import { AssistantButton } from "./navigation/AssistantButton";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSidebar } from "@/contexts/SidebarContext";
 
@@ -31,6 +32,7 @@ export function Navigation() {
               <BackToHomeButton />
             </div>
             <div className="flex items-center gap-2">
+              <AssistantButton />
               <NotificationCenter />
               <UserMenu />
             </div>
