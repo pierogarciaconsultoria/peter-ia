@@ -5576,6 +5576,93 @@ export type Database = {
         }
         Relationships: []
       }
+      quality_criteria: {
+        Row: {
+          category: string
+          company_segment: string
+          created_at: string
+          description: string
+          expected_value: string
+          id: string
+          is_active: boolean
+          measurement_unit: string | null
+          name: string
+          tolerance: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          company_segment: string
+          created_at?: string
+          description: string
+          expected_value: string
+          id?: string
+          is_active?: boolean
+          measurement_unit?: string | null
+          name: string
+          tolerance?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          company_segment?: string
+          created_at?: string
+          description?: string
+          expected_value?: string
+          id?: string
+          is_active?: boolean
+          measurement_unit?: string | null
+          name?: string
+          tolerance?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quality_inspections: {
+        Row: {
+          batch_number: string
+          created_at: string
+          criteria_results: Json
+          id: string
+          inspection_date: string
+          inspection_type: string
+          inspector: string
+          observations: string | null
+          process_name: string | null
+          product_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          batch_number: string
+          created_at?: string
+          criteria_results: Json
+          id?: string
+          inspection_date: string
+          inspection_type: string
+          inspector: string
+          observations?: string | null
+          process_name?: string | null
+          product_name: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          batch_number?: string
+          created_at?: string
+          criteria_results?: Json
+          id?: string
+          inspection_date?: string
+          inspection_type?: string
+          inspector?: string
+          observations?: string | null
+          process_name?: string | null
+          product_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quality_objectives: {
         Row: {
           company_id: string | null
