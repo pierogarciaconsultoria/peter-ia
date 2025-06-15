@@ -91,12 +91,13 @@ export async function getQualityInspectionById(id: string): Promise<QualityInspe
 
 export async function createQualityInspection(inspection: Omit<QualityInspection, "id" | "created_at" | "updated_at">): Promise<QualityInspection | null> {
   // Salva inspection + criteria_results serializado
+  // O Supabase já serializa o objeto JS como JSON para campos JSONB, não precisa stringify!
   const { data, error } = await supabase
     .from("quality_inspections")
     .insert([
       {
         ...inspection,
-        criteria_results: inspection.criteria_results // passing plain object, Supabase client handles JSON
+        criteria_results: inspection.criteria_results as any, // Deixa Supabase serializar o array automaticamente
       }
     ])
     .select()
@@ -123,7 +124,7 @@ export async function updateQualityInspection(id: string, updates: Partial<Quali
   const payload = {
     ...updates,
     ...(updates.criteria_results !== undefined
-      ? { criteria_results: updates.criteria_results }
+      ? { criteria_results: updates.criteria_results as any } // Só passa o array literal/objeto, sem JSON.stringify()
       : {})
   };
   const { data, error } = await supabase
