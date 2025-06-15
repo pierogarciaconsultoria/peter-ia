@@ -1,14 +1,74 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import QualityPolicyForm from "@/components/quality-policy/QualityPolicyForm";
+import { fetchQualityPolicy, upsertQualityPolicy, QualityPolicy as QP } from "@/services/qualityPolicyService";
+import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-const QualityPolicy = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
-    <h1 className="text-3xl font-bold mb-3">Política da Qualidade</h1>
-    <p className="text-lg text-muted-foreground mb-6 max-w-xl text-center">
-      Defina e comunique a política da qualidade da sua empresa aqui.<br />
-      <span className="italic text-sm text-gray-400">Em desenvolvimento.</span>
-    </p>
-  </div>
-);
+const QualityPolicy = () => {
+  const { user, company_id } = useCurrentUser() || {};
+  const [qualityPolicy, setQualityPolicy] = useState<QP | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Busca a política existente ao montar
+  useEffect(() => {
+    async function loadPolicy() {
+      if (!company_id) return;
+      setLoading(true);
+      const policy = await fetchQualityPolicy(company_id);
+      setQualityPolicy(policy);
+      setLoading(false);
+    }
+    loadPolicy();
+  }, [company_id]);
+
+  async function handleSave(policyText: string) {
+    if (!company_id) {
+      toast.error("Empresa não identificada.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const policy = await upsertQualityPolicy(company_id, policyText, user?.id);
+      setQualityPolicy(policy);
+      setEditing(false);
+      toast.success("Política salva com sucesso!");
+    } catch (err) {
+      toast.error("Erro ao salvar a política.");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
+      <h1 className="text-3xl font-bold mb-3">Política da Qualidade</h1>
+      <Card className="max-w-2xl w-full p-7">
+        {loading ? (
+          <div className="text-center text-muted-foreground">Carregando...</div>
+        ) : (editing || !qualityPolicy) ? (
+          <QualityPolicyForm
+            value={qualityPolicy?.policy_text || ""}
+            onSave={handleSave}
+            loading={loading}
+          />
+        ) : (
+          <div>
+            <p className="text-lg mb-5 whitespace-pre-line">{qualityPolicy.policy_text}</p>
+            <div className="flex justify-end">
+              <button
+                className="text-sm text-primary underline hover:opacity-70"
+                onClick={() => setEditing(true)}
+              >
+                Editar
+              </button>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
 
 export default QualityPolicy;
