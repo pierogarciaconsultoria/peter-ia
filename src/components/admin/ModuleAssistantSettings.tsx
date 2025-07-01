@@ -1,370 +1,288 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Save, PlusCircle, Trash2 } from "lucide-react";
-import { isSuperAdminInLovable } from "@/utils/lovableEditorDetection";
-import { ModuleAssistant } from "@/types/module-assistant";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Bot, Shield, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface ModuleAssistant {
+  id: string;
+  name: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+  capabilities: string;
+  limitations: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ModuleAssistantSettingsProps {
   isAdmin: boolean;
 }
 
 export function ModuleAssistantSettings({ isAdmin }: ModuleAssistantSettingsProps) {
+  const [assistants, setAssistants] = useState<ModuleAssistant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
-  const [modules, setModules] = useState<ModuleAssistant[]>([]);
-  const [newModuleName, setNewModuleName] = useState("");
-  const [apiKeyInput, setApiKeyInput] = useState("");
-  
-  const isMasterAdmin = isAdmin || isSuperAdminInLovable();
+  const [saving, setSaving] = useState<string | null>(null);
+  const [hasOpenAIKey, setHasOpenAIKey] = useState(false);
 
-  // Verificar se a chave da API está configurada
-  const checkApiKeyStatus = async () => {
+  // Verificar se a chave OpenAI está configurada
+  const checkOpenAIKey = async () => {
     try {
-      // Use the function invoke method instead of rpc
       const { data, error } = await supabase.functions.invoke('check-secret-exists', {
-        body: { secret_name: 'OPENAI_API_KEY' }
+        body: { secretName: 'OPENAI_API_KEY' }
       });
       
-      if (error) throw error;
-      setApiKeyConfigured(!!data?.exists);
+      if (!error && data?.exists) {
+        setHasOpenAIKey(true);
+      }
     } catch (error) {
-      console.error("Erro ao verificar o status da API key:", error);
-      setApiKeyConfigured(false);
+      console.error('Erro ao verificar chave OpenAI:', error);
     }
   };
 
-  // Carregar dados dos assistentes dos módulos
-  const loadModuleAssistants = async () => {
-    setLoading(true);
+  // Carregar assistentes
+  const loadAssistants = async () => {
     try {
-      // Use custom query to get around type issues
       const { data, error } = await supabase
         .from('module_assistants')
         .select('*')
         .order('name');
-        
+
       if (error) throw error;
-      
-      setModules(data as ModuleAssistant[]);
-    } catch (error: any) {
-      console.error("Erro ao carregar dados dos assistentes:", error);
-      toast.error(`Erro ao carregar dados: ${error.message}`);
+      setAssistants(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar assistentes:', error);
+      toast.error('Erro ao carregar assistentes');
     } finally {
       setLoading(false);
     }
   };
 
-  // Configurar a chave da API
-  const configureApiKey = async () => {
-    if (!apiKeyInput.trim()) {
-      toast.error("A chave da API é obrigatória");
+  // Salvar alterações do assistente
+  const saveAssistant = async (assistant: ModuleAssistant) => {
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem modificar assistentes');
       return;
     }
-    
-    setSaving(true);
-    try {
-      const { error } = await supabase.functions.invoke('set-secret', {
-        body: { name: 'OPENAI_API_KEY', value: apiKeyInput }
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Chave da API configurada com sucesso");
-      setApiKeyInput("");
-      setApiKeyConfigured(true);
-    } catch (error: any) {
-      console.error("Erro ao configurar a chave da API:", error);
-      toast.error(`Erro ao configurar a chave: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
 
-  // Adicionar um novo assistente de módulo
-  const addModuleAssistant = async () => {
-    if (!newModuleName.trim()) {
-      toast.error("O nome do módulo é obrigatório");
-      return;
-    }
-    
-    setSaving(true);
+    setSaving(assistant.id);
     try {
-      // Use custom query to get around type issues
-      const { data, error } = await supabase
-        .from('module_assistants')
-        .insert({
-          name: newModuleName,
-          label: `Assistente para ${newModuleName}`,
-          description: `Assistente para o módulo ${newModuleName}`,
-          enabled: true,
-          capabilities: "Responder perguntas sobre o módulo, fornecer dicas de uso",
-          limitations: "Acessar dados de outros módulos, modificar configurações do sistema"
-        })
-        .select();
-        
-      if (error) throw error;
-      
-      toast.success(`Assistente do módulo "${newModuleName}" adicionado`);
-      setNewModuleName("");
-      
-      // Make sure we cast the data to the correct type
-      if (data) {
-        setModules([...modules, data[0] as ModuleAssistant]);
-      }
-    } catch (error: any) {
-      console.error("Erro ao adicionar assistente:", error);
-      toast.error(`Erro ao adicionar assistente: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Atualizar um assistente de módulo
-  const updateModuleAssistant = async (module: ModuleAssistant) => {
-    setSaving(true);
-    try {
-      // Use custom query to get around type issues
       const { error } = await supabase
         .from('module_assistants')
         .update({
-          name: module.name,
-          label: module.label,
-          description: module.description,
-          enabled: module.enabled,
-          capabilities: module.capabilities,
-          limitations: module.limitations
+          label: assistant.label,
+          description: assistant.description,
+          enabled: assistant.enabled,
+          capabilities: assistant.capabilities,
+          limitations: assistant.limitations,
+          updated_at: new Date().toISOString()
         })
-        .eq('id', module.id);
-        
+        .eq('id', assistant.id);
+
       if (error) throw error;
       
-      toast.success(`Assistente do módulo "${module.name}" atualizado`);
-      loadModuleAssistants();
-    } catch (error: any) {
-      console.error("Erro ao atualizar assistente:", error);
-      toast.error(`Erro ao atualizar assistente: ${error.message}`);
+      toast.success('Assistente atualizado com sucesso');
+      await loadAssistants();
+    } catch (error) {
+      console.error('Erro ao salvar assistente:', error);
+      toast.error('Erro ao salvar assistente');
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
 
-  // Excluir um assistente de módulo
-  const deleteModuleAssistant = async (id: string, name: string) => {
-    if (!confirm(`Tem certeza que deseja excluir o assistente do módulo "${name}"?`)) {
-      return;
-    }
-    
-    setSaving(true);
-    try {
-      // Use custom query to get around type issues
-      const { error } = await supabase
-        .from('module_assistants')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      toast.success(`Assistente do módulo "${name}" excluído`);
-      setModules(modules.filter(m => m.id !== id));
-    } catch (error: any) {
-      console.error("Erro ao excluir assistente:", error);
-      toast.error(`Erro ao excluir assistente: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
+  // Atualizar assistente no estado
+  const updateAssistant = (id: string, updates: Partial<ModuleAssistant>) => {
+    setAssistants(prev => 
+      prev.map(assistant => 
+        assistant.id === id 
+          ? { ...assistant, ...updates }
+          : assistant
+      )
+    );
   };
 
-  // Alternar o status de ativação de um assistente
-  const toggleModuleAssistant = async (module: ModuleAssistant) => {
-    const updatedModule = { ...module, enabled: !module.enabled };
-    await updateModuleAssistant(updatedModule);
-  };
-
-  // Carregar dados iniciais
   useEffect(() => {
-    if (isMasterAdmin) {
-      checkApiKeyStatus();
-      loadModuleAssistants();
-    }
-  }, [isMasterAdmin]);
+    loadAssistants();
+    checkOpenAIKey();
+  }, []);
 
-  if (!isMasterAdmin) {
-    return null;
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Acesso Restrito
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Apenas administradores podem acessar as configurações dos assistentes.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuração do Assistente Virtual</CardTitle>
-          <CardDescription>
-            Configure os assistentes virtuais para diferentes módulos da aplicação
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-4">
-          {/* Configuração da chave da API */}
-          <div className="rounded-lg border p-4">
-            <h3 className="text-lg font-medium mb-2">Chave da API OpenAI</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {apiKeyConfigured ? (
-                <>Chave da API configurada. Você pode atualizar a chave a qualquer momento.</>
-              ) : (
-                <>Configure a chave da API do ChatGPT para habilitar os assistentes virtuais.</>
-              )}
-            </p>
-            
-            <div className="flex gap-2">
-              <Input 
-                type="password"
-                placeholder="Insira a chave da API OpenAI"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={configureApiKey} 
-                disabled={!apiKeyInput.trim() || saving}
-              >
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Salvar
-              </Button>
-            </div>
-          </div>
+      <div className="flex items-center gap-3">
+        <Bot className="h-6 w-6 text-primary" />
+        <div>
+          <h3 className="text-lg font-semibold">Configurações dos Assistentes GPT</h3>
+          <p className="text-sm text-muted-foreground">
+            Configure os assistentes virtuais para cada módulo
+          </p>
+        </div>
+      </div>
 
-          {/* Adicionar novo assistente */}
-          <div className="rounded-lg border p-4">
-            <h3 className="text-lg font-medium mb-2">Adicionar Novo Assistente</h3>
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Nome do módulo"
-                value={newModuleName}
-                onChange={(e) => setNewModuleName(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                onClick={addModuleAssistant} 
-                disabled={!newModuleName.trim() || saving || !apiKeyConfigured}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Adicionar
-              </Button>
-            </div>
-          </div>
+      {!hasOpenAIKey && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Chave OpenAI não configurada!</strong> Os assistentes não funcionarão até que a chave da API seja configurada.
+            Configure em Configurações Avançadas → Secrets.
+          </AlertDescription>
+        </Alert>
+      )}
 
-          {/* Lista de assistentes */}
-          <div className="rounded-lg border p-4">
-            <h3 className="text-lg font-medium mb-2">Assistentes Configurados</h3>
-            {loading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : modules.length === 0 ? (
-              <p className="text-center py-4 text-muted-foreground">
-                Nenhum assistente configurado. Adicione um novo assistente acima.
-              </p>
-            ) : (
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-4">
-                  {modules.map((module) => (
-                    <Card key={module.id}>
-                      <CardHeader className="p-4">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-base">{module.name}</CardTitle>
-                          <div className="flex items-center gap-2">
-                            <Switch 
-                              checked={module.enabled}
-                              onCheckedChange={() => toggleModuleAssistant(module)}
-                              id={`toggle-${module.id}`}
-                            />
-                            <Label htmlFor={`toggle-${module.id}`}>
-                              {module.enabled ? "Ativo" : "Inativo"}
-                            </Label>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0 space-y-3">
-                        <div>
-                          <Label htmlFor={`label-${module.id}`}>Título Exibido</Label>
-                          <Input 
-                            id={`label-${module.id}`}
-                            value={module.label || ''}
-                            onChange={(e) => setModules(modules.map(m => 
-                              m.id === module.id ? {...m, label: e.target.value} : m
-                            ))}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`desc-${module.id}`}>Descrição</Label>
-                          <Textarea 
-                            id={`desc-${module.id}`}
-                            value={module.description || ''}
-                            onChange={(e) => setModules(modules.map(m => 
-                              m.id === module.id ? {...m, description: e.target.value} : m
-                            ))}
-                            className="mt-1"
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`capabilities-${module.id}`}>Capacidades</Label>
-                          <Textarea 
-                            id={`capabilities-${module.id}`}
-                            value={module.capabilities || ''}
-                            onChange={(e) => setModules(modules.map(m => 
-                              m.id === module.id ? {...m, capabilities: e.target.value} : m
-                            ))}
-                            className="mt-1"
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`limitations-${module.id}`}>Limitações</Label>
-                          <Textarea 
-                            id={`limitations-${module.id}`}
-                            value={module.limitations || ''}
-                            onChange={(e) => setModules(modules.map(m => 
-                              m.id === module.id ? {...m, limitations: e.target.value} : m
-                            ))}
-                            className="mt-1"
-                            rows={2}
-                          />
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0 flex justify-between">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteModuleAssistant(module.id, module.name)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Excluir
-                        </Button>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => updateModuleAssistant(module)}
-                        >
-                          <Save className="h-4 w-4 mr-1" />
-                          Salvar
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
+      {loading ? (
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {assistants.map((assistant) => (
+            <Card key={assistant.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Bot className="h-5 w-5" />
+                    {assistant.label}
+                    <Badge variant={assistant.enabled ? 'default' : 'secondary'}>
+                      {assistant.enabled ? 'Ativo' : 'Inativo'}
+                    </Badge>
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={assistant.enabled}
+                      onCheckedChange={(enabled) => 
+                        updateAssistant(assistant.id, { enabled })
+                      }
+                    />
+                    <Button
+                      onClick={() => saveAssistant(assistant)}
+                      disabled={saving === assistant.id}
+                      size="sm"
+                    >
+                      {saving === assistant.id ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                  </div>
                 </div>
-              </ScrollArea>
-            )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor={`label-${assistant.id}`}>Nome do Assistente</Label>
+                    <Input
+                      id={`label-${assistant.id}`}
+                      value={assistant.label}
+                      onChange={(e) => 
+                        updateAssistant(assistant.id, { label: e.target.value })
+                      }
+                      placeholder="Nome amigável do assistente"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`name-${assistant.id}`}>Módulo</Label>
+                    <Input
+                      id={`name-${assistant.id}`}
+                      value={assistant.name}
+                      disabled
+                      className="bg-muted"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor={`description-${assistant.id}`}>Descrição</Label>
+                  <Textarea
+                    id={`description-${assistant.id}`}
+                    value={assistant.description || ''}
+                    onChange={(e) => 
+                      updateAssistant(assistant.id, { description: e.target.value })
+                    }
+                    placeholder="Descreva o que este assistente faz..."
+                    rows={2}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor={`capabilities-${assistant.id}`}>Capacidades</Label>
+                  <Textarea
+                    id={`capabilities-${assistant.id}`}
+                    value={assistant.capabilities || ''}
+                    onChange={(e) => 
+                      updateAssistant(assistant.id, { capabilities: e.target.value })
+                    }
+                    placeholder="Liste as capacidades deste assistente..."
+                    rows={2}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor={`limitations-${assistant.id}`}>Limitações</Label>
+                  <Textarea
+                    id={`limitations-${assistant.id}`}
+                    value={assistant.limitations || ''}
+                    onChange={(e) => 
+                      updateAssistant(assistant.id, { limitations: e.target.value })
+                    }
+                    placeholder="Liste as limitações deste assistente..."
+                    rows={2}
+                  />
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  Última atualização: {new Date(assistant.updated_at).toLocaleString()}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="text-blue-800 flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Configurações Avançadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 text-sm text-blue-700">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              <span>Assistentes são contextualmente específicos para cada módulo</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              <span>Histórico de conversas é mantido por sessão</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              <span>Configurações aplicam-se imediatamente após salvar</span>
+            </div>
           </div>
         </CardContent>
       </Card>

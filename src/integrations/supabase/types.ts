@@ -185,6 +185,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "announcements_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -435,6 +442,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "candidate_assessment_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "candidate_assessment_links_recruitment_process_id_fkey"
             columns: ["recruitment_process_id"]
             isOneToOne: false
@@ -593,6 +607,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_disc_evaluations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
             referencedColumns: ["id"]
           },
         ]
@@ -961,6 +982,47 @@ export type Database = {
           },
         ]
       }
+      convites_externos: {
+        Row: {
+          created_at: string
+          criado_por: string | null
+          evento_id: string
+          expires_at: string
+          id: string
+          nome_evento: string
+          token: string
+          usado: boolean
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string | null
+          evento_id: string
+          expires_at?: string
+          id?: string
+          nome_evento: string
+          token: string
+          usado?: boolean
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string | null
+          evento_id?: string
+          expires_at?: string
+          id?: string
+          nome_evento?: string
+          token?: string
+          usado?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convites_externos_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       critical_analysis: {
         Row: {
           analysis_date: string
@@ -1274,6 +1336,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "development_plans_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "development_plans_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
@@ -1281,6 +1350,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      diagnostic_submissions: {
+        Row: {
+          analysis: Json
+          company_segment: string
+          created_at: string
+          email: string
+          employee_count: string
+          full_name: string
+          id: string
+          phone: string
+          results: Json
+          timestamp: string
+        }
+        Insert: {
+          analysis: Json
+          company_segment: string
+          created_at?: string
+          email: string
+          employee_count: string
+          full_name: string
+          id?: string
+          phone: string
+          results: Json
+          timestamp?: string
+        }
+        Update: {
+          analysis?: Json
+          company_segment?: string
+          created_at?: string
+          email?: string
+          employee_count?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          results?: Json
+          timestamp?: string
+        }
+        Relationships: []
       }
       disc_assessments: {
         Row: {
@@ -1915,28 +2023,54 @@ export type Database = {
         Row: {
           codigo: string
           criado: string
+          empresa_id: string | null
           id: string
+          latitude: number | null
+          local: string | null
+          longitude: number | null
           nome: string
+          organizador_id: string | null
+          status: string | null
           tipo: string
           user_id: string
         }
         Insert: {
           codigo: string
           criado?: string
+          empresa_id?: string | null
           id?: string
+          latitude?: number | null
+          local?: string | null
+          longitude?: number | null
           nome: string
+          organizador_id?: string | null
+          status?: string | null
           tipo: string
           user_id: string
         }
         Update: {
           codigo?: string
           criado?: string
+          empresa_id?: string | null
           id?: string
+          latitude?: number | null
+          local?: string | null
+          longitude?: number | null
           nome?: string
+          organizador_id?: string | null
+          status?: string | null
           tipo?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "eventos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       expense_categories: {
         Row: {
@@ -2123,6 +2257,13 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
             referencedColumns: ["id"]
           },
         ]
@@ -4491,6 +4632,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "job_position_training_requirements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "job_position_training_requirements_job_position_id_fkey"
             columns: ["job_position_id"]
             isOneToOne: false
@@ -4832,6 +4980,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
             referencedColumns: ["id"]
           },
           {
@@ -5434,6 +5589,13 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "onboarding_processes_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       organization_context: {
@@ -5519,31 +5681,116 @@ export type Database = {
           },
         ]
       }
+      pagamentos: {
+        Row: {
+          created_at: string | null
+          credor_id: string
+          data_pagamento: string | null
+          devedor_id: string
+          evento_id: string
+          id: string
+          observacoes: string | null
+          pago: boolean | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          credor_id: string
+          data_pagamento?: string | null
+          devedor_id: string
+          evento_id: string
+          id?: string
+          observacoes?: string | null
+          pago?: boolean | null
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          credor_id?: string
+          data_pagamento?: string | null
+          devedor_id?: string
+          evento_id?: string
+          id?: string
+          observacoes?: string | null
+          pago?: boolean | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       participantes: {
         Row: {
+          created_at: string | null
           evento_id: string
           id: string
           nome: string
+          pix_key: string | null
           tipo: string
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
+          created_at?: string | null
           evento_id: string
           id?: string
           nome: string
+          pix_key?: string | null
           tipo: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          created_at?: string | null
           evento_id?: string
           id?: string
           nome?: string
+          pix_key?: string | null
           tipo?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "participantes_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participantes_usuarios: {
+        Row: {
+          created_at: string | null
+          evento_id: string
+          id: string
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          evento_id: string
+          id?: string
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string | null
+          evento_id?: string
+          id?: string
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participantes_usuarios_evento_id_fkey"
             columns: ["evento_id"]
             isOneToOne: false
             referencedRelation: "eventos"
@@ -5694,6 +5941,13 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "performance_evaluations_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       performance_indicators: {
@@ -5804,13 +6058,6 @@ export type Database = {
             columns: ["modulo_id"]
             isOneToOne: false
             referencedRelation: "modulos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "permissoes_usuario_usuario_id_fkey"
-            columns: ["usuario_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -6646,6 +6893,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "raltec_damage_reports_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "raltec_damage_reports_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -7012,15 +7266,7 @@ export type Database = {
           titulo?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "reunioes_criado_por_fkey"
-            columns: ["criado_por"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reunioes_acoes: {
         Row: {
@@ -7969,6 +8215,13 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trial_period_evaluations_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       units: {
@@ -8141,37 +8394,34 @@ export type Database = {
       }
       usuarios: {
         Row: {
+          auth_user_id: string
+          chave_pix: string
           created_at: string | null
           email: string
-          empresa_id: string | null
           id: string
-          is_admin: boolean | null
-          is_master: boolean | null
           nome: string
-          projeto_id: string | null
           updated_at: string | null
+          whatsapp: string | null
         }
         Insert: {
-          created_at?: string | null
-          email: string
-          empresa_id?: string | null
-          id: string
-          is_admin?: boolean | null
-          is_master?: boolean | null
-          nome: string
-          projeto_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
+          auth_user_id: string
+          chave_pix?: string
           created_at?: string | null
           email?: string
-          empresa_id?: string | null
           id?: string
-          is_admin?: boolean | null
-          is_master?: boolean | null
           nome?: string
-          projeto_id?: string | null
           updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          auth_user_id?: string
+          chave_pix?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          updated_at?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -8215,7 +8465,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      view_lojadigital_audit_logs: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          empresa_id: string | null
+          empresa_nome: string | null
+          id: string | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_id: string | null
+          usuario_nome: string | null
+        }
+        Relationships: []
+      }
+      view_lojadigital_users: {
+        Row: {
+          allowed_modules: string[] | null
+          company_id: string | null
+          created_at: string | null
+          email: string | null
+          empresa_nome: string | null
+          id: string | null
+          is_company_admin: boolean | null
+          is_super_admin: boolean | null
+          role: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_profiles_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_updated_at_trigger: {
@@ -8294,10 +8582,6 @@ export type Database = {
         Args: { sql_statement: string }
         Returns: undefined
       }
-      execute_sql_with_schema: {
-        Args: { sql_statement: string; target_schema?: string }
-        Returns: Json
-      }
       generate_access_token: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -8323,6 +8607,10 @@ export type Database = {
         Returns: string
       }
       generate_unique_disc_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_unique_invite_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

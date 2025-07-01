@@ -1,7 +1,7 @@
 
 /**
  * Utility functions to detect environment and manage authentication access
- * SECURITY HARDENED VERSION - Bypass muito restritivo para produção
+ * SECURITY HARDENED VERSION - Produção segura
  */
 
 // Shared storage keys for consistent access across functions
@@ -14,150 +14,125 @@ const AUTH_STORAGE_KEYS = {
 
 /**
  * Detects if the application is running in a production environment
- * Corrigido: NUNCA considerar .lovable.app ou .lovableproject.com como produção, mesmo em deploy real!
+ * SECURITY: Restrição rigorosa para produção
  */
 export function isProductionEnvironment(): boolean {
-  // Detectar possíveis ambientes de produção reais (Vercel, Netlify, domínio próprio),
-  // mas EXCETO nos domínios de staging Lovable (.lovable.app e .lovableproject.com)
   const host = window.location.hostname;
-
-  // Staging Lovable: não é produção
-  const isLovableStaging = host.endsWith('.lovable.app') || host.endsWith('.lovableproject.com');
-
-  // Produção real: domínio próprio (exceto *.lovable.app e *.lovableproject.com)
-  const isVercel = host.includes('vercel.app');
-  const isNetlify = host.includes('netlify.app');
-  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
-
-  // Domínio customizado: não é localhost, nem domínio oficial Lovable/app, nem Vercel/Netlify
-  const isCustomDomain = !isLocalhost && !isLovableStaging && !isVercel && !isNetlify;
-
-  // NODE_ENV check
   const nodeEnvProd = process.env.NODE_ENV === 'production';
-
-  const isProduction = (nodeEnvProd && (isCustomDomain || isVercel || isNetlify)) && !isLovableStaging;
-
-  console.log('Environment check:', {
+  
+  // Domínios de desenvolvimento/staging que NUNCA são produção
+  const isLovableStaging = host.endsWith('.lovable.app') || host.endsWith('.lovableproject.com');
+  const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+  const isVercelPreview = host.includes('vercel.app') && !host.includes('peteria'); // Assumindo domínio próprio
+  const isNetlifyPreview = host.includes('netlify.app') && !host.includes('peteria');
+  
+  // Produção real: NODE_ENV=production E domínio próprio
+  const isCustomDomain = !isLocalhost && !isLovableStaging && !isVercelPreview && !isNetlifyPreview;
+  const isProduction = nodeEnvProd && isCustomDomain;
+  
+  // Log para auditoria
+  console.log('Environment detection:', {
     NODE_ENV: process.env.NODE_ENV,
     hostname: host,
-    isVercel,
-    isNetlify,
+    isProduction,
     isCustomDomain,
-    isLovableStaging,
-    isProduction
+    securityLevel: isProduction ? 'HIGH' : 'DEVELOPMENT'
   });
-
+  
   return isProduction;
 }
 
 /**
- * Verifica se estamos no ambiente de editor visual do Lovable
- * Agora aceita qualquer domínio .lovable.app OU .lovableproject.com e localhost.
+ * Verifica se estamos no ambiente de editor do Lovable
+ * SECURITY: Apenas para desenvolvimento
  */
 export function isLovableEditor(): boolean {
+  if (isProductionEnvironment()) {
+    return false; // NUNCA permitir em produção
+  }
+  
   const host = window.location.hostname;
-  // Editor Lovable: sempre que for .lovable.app, .lovableproject.com ou localhost
   const isLovableDomain = host.endsWith('.lovableproject.com') || host.endsWith('.lovable.app');
   const isLocalDevelopment = host === 'localhost' || host === '127.0.0.1';
-  const isValidEditor = isLovableDomain || isLocalDevelopment;
-
-  console.log('Lovable Editor detection:', {
-    isLocalDevelopment,
-    isLovableDomain,
-    isValidEditor,
-    hostname: host
-  });
-
-  return isValidEditor;
+  
+  return isLovableDomain || isLocalDevelopment;
 }
 
 /**
  * Checks if we're in a Lovable editor with super admin privileges
+ * SECURITY: Muito restritivo - apenas desenvolvimento com tokens específicos
  */
 export function isSuperAdminInLovable(): boolean {
+  // NEVER em produção
   if (isProductionEnvironment()) {
-    // Nunca permitir superadmin em produção real
-    console.log('Super admin denied: Production environment');
+    logSecurityEvent('SUPER_ADMIN_ATTEMPT_PRODUCTION', 'Tentativa de super admin em produção NEGADA');
     return false;
   }
-  const isEditor = isLovableEditor();
-  if (!isEditor) {
-    console.log('Super admin denied: Not in valid Lovable editor');
+  
+  // Apenas em editor Lovable válido
+  if (!isLovableEditor()) {
     return false;
   }
-  // SECURITY: Requer parâmetro específico para super admin
+  
+  // SECURITY: Requer múltiplos parâmetros específicos
   const urlParams = new URLSearchParams(window.location.search);
   const hasMasterParam = urlParams.get('master_admin') === 'true';
-  const hasSecureToken = urlParams.get('secure_token')?.length > 10;
-  const isSuperAdmin = hasMasterParam && hasSecureToken;
-
-  console.log('Super admin check:', {
-    isEditor,
-    hasMasterParam,
-    hasSecureToken,
-    isSuperAdmin
-  });
+  const hasSecureToken = urlParams.get('secure_token') === 'peter_ia_dev_2024';
+  const hasTimestamp = Math.abs(Date.now() - parseInt(urlParams.get('timestamp') || '0')) < 3600000; // 1 hora
+  
+  const isSuperAdmin = hasMasterParam && hasSecureToken && hasTimestamp;
+  
+  if (isSuperAdmin) {
+    logSecurityEvent('SUPER_ADMIN_ACCESS_GRANTED', 'Super admin access granted in development');
+  }
+  
   return isSuperAdmin;
 }
 
 /**
- * SECURITY: Removido - não mais permitir acesso livre
+ * SECURITY: Acesso livre removido completamente
  */
 export function shouldGrantFreeAccess(): boolean {
-  console.log('Free access denied: Feature disabled for security');
   return false;
 }
 
 /**
  * Centralized function to decide if authentication should be bypassed
- * Agora considera corretamente domínio do Lovable Editor.
+ * SECURITY: Muito restritivo - apenas desenvolvimento local
  */
 export function shouldBypassAuth(): boolean {
-  // Em produção real, NUNCA permitir bypass
+  // NUNCA em produção
   if (isProductionEnvironment()) {
-    console.log('Auth bypass denied: Production environment');
+    logSecurityEvent('AUTH_BYPASS_DENIED_PRODUCTION', 'Auth bypass negado em produção');
     return false;
   }
-
-  // Check if we're in Lovable environment
-  const isInLovable = isLovableEditor();
-
-  // Check for development environment
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // Apenas localhost em desenvolvimento
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-  // Permitir em Localhost OU Lovable
-  const allowBypass = isLocalhost || isInLovable;
-
-  console.log('Auth bypass check:', {
-    isDevelopment,
-    isLocalhost,
-    isInLovable,
-    allowBypass,
-    isProduction: isProductionEnvironment()
-  });
-
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  const allowBypass = isLocalhost && isDevelopment;
+  
   if (allowBypass) {
-    console.warn('SECURITY WARNING: Auth bypass granted for Lovable editor or local development only');
-    logSecurityEvent('AUTH_BYPASS_GRANTED', 'Development or Lovable editor bypass used');
+    logSecurityEvent('AUTH_BYPASS_GRANTED_DEV', 'Auth bypass concedido apenas para desenvolvimento local');
   }
-
+  
   return allowBypass;
 }
 
 /**
- * Clear all access flags - útil para limpeza de segurança
+ * Clear all access flags - para limpeza de segurança
  */
 export function clearAccessFlags(): void {
   Object.values(AUTH_STORAGE_KEYS).forEach(key => {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
   });
-  console.log('All access flags cleared for security');
+  logSecurityEvent('ACCESS_FLAGS_CLEARED', 'Flags de acesso limpos por segurança');
 }
 
 /**
- * Log de eventos de segurança
+ * Log de eventos de segurança robusto
  */
 function logSecurityEvent(action: string, details: string): void {
   const event = {
@@ -166,18 +141,74 @@ function logSecurityEvent(action: string, details: string): void {
     details,
     userAgent: navigator.userAgent,
     url: window.location.href,
-    environment: isProductionEnvironment() ? 'production' : 'development'
+    environment: isProductionEnvironment() ? 'PRODUCTION' : 'DEVELOPMENT',
+    severity: action.includes('DENIED') || action.includes('PRODUCTION') ? 'HIGH' : 'MEDIUM'
   };
-
-  console.log('Security Event:', event);
-
-  // Em produção real, enviar para servidor de logs
-  if (isProductionEnvironment()) {
-    // TODO: Implementar envio seguro para servidor de logs
-    fetch('/api/security-logs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event)
-    }).catch(err => console.error('Failed to log security event:', err));
+  
+  // Log local para desenvolvimento
+  if (event.severity === 'HIGH') {
+    console.error('🚨 SECURITY ALERT:', event);
+  } else {
+    console.warn('🔒 Security Event:', event);
   }
+  
+  // Em produção, enviar para sistema de monitoramento
+  if (isProductionEnvironment()) {
+    // Implementar envio para Sentry/LogRocket/etc
+    try {
+      fetch('/api/security-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event)
+      }).catch(err => console.error('Failed to log security event:', err));
+    } catch (error) {
+      console.error('Security logging error:', error);
+    }
+  }
+}
+
+/**
+ * Função para validar integridade do ambiente
+ */
+export function validateEnvironmentIntegrity(): {
+  isSecure: boolean;
+  warnings: string[];
+  errors: string[];
+} {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+  
+  // Verificar NODE_ENV
+  if (!process.env.NODE_ENV) {
+    warnings.push('NODE_ENV não definido');
+  }
+  
+  // Verificar se estamos em produção sem HTTPS
+  if (isProductionEnvironment() && window.location.protocol !== 'https:') {
+    errors.push('Produção deve usar HTTPS');
+  }
+  
+  // Verificar se há bypass ativo em produção
+  if (isProductionEnvironment() && (shouldBypassAuth() || isSuperAdminInLovable())) {
+    errors.push('Bypass de segurança ativo em produção');
+  }
+  
+  // Verificar localStorage para dados sensíveis
+  try {
+    const sensitiveKeys = ['password', 'token', 'secret', 'key'];
+    Object.keys(localStorage).forEach(key => {
+      if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive))) {
+        warnings.push(`Possível dado sensível no localStorage: ${key}`);
+      }
+    });
+  } catch (error) {
+    // Ignorar erros de acesso ao localStorage
+  }
+  
+  const isSecure = errors.length === 0;
+  
+  // Log do resultado da validação
+  logSecurityEvent('ENVIRONMENT_VALIDATION', `Secure: ${isSecure}, Warnings: ${warnings.length}, Errors: ${errors.length}`);
+  
+  return { isSecure, warnings, errors };
 }

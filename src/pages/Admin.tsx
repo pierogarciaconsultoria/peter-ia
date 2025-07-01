@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompanyManagement from '@/components/admin/CompanyManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import { PermissoesUsuarios } from '@/components/admin/PermissoesUsuarios';
 import { AdminAdvancedSettings } from '@/components/admin/AdminAdvancedSettings';
+import { SecurityDashboard } from '@/components/admin/SecurityDashboard';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Building2, Users, Lock } from 'lucide-react';
+import { Shield, Building2, Users, Lock, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -225,7 +227,16 @@ const Admin = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 gap-2 h-auto p-2 bg-muted">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 gap-2 h-auto p-2 bg-muted">
+          {/* Aba de Segurança - Primeira posição para destaque */}
+          <TabsTrigger 
+            value="seguranca" 
+            className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-red-600 data-[state=active]:text-white"
+          >
+            <AlertTriangle className="h-5 w-5" />
+            <span className="text-xs md:text-sm font-medium">Segurança</span>
+          </TabsTrigger>
+
           {isSuperAdmin && (
             <TabsTrigger 
               value="empresas" 
@@ -263,6 +274,12 @@ const Admin = () => {
           )}
         </TabsList>
 
+        {/* Nova Aba de Segurança */}
+        <TabsContent value="seguranca" className="space-y-6">
+          <SecurityDashboard />
+        </TabsContent>
+
+        {/* Abas existentes mantidas */}
         {isSuperAdmin && (
           <TabsContent value="empresas" className="space-y-6">
             <CompanyManagement
