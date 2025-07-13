@@ -102,7 +102,7 @@ class SecurityManager {
       try {
         // Verificar se a tabela existe e tem RLS
         const { data, error } = await supabase
-          .from(table)
+          .from(table as any)
           .select('id')
           .limit(1);
           

@@ -60,12 +60,14 @@ export function PermissoesUsuarios() {
         if (modulosError) throw modulosError;
         setModulos(modulosData || []);
         
-        // Buscar usuários
-        let query = supabase.from('usuarios').select('*');
+        // Buscar usuários da tabela user_profiles
+        let query = supabase
+          .from('user_profiles')
+          .select('id, email, first_name, last_name, company_id, is_super_admin, is_company_admin');
         
         // Se não for master, filtrar por empresa
         if (!isMaster && empresaId) {
-          query = query.eq('empresa_id', empresaId);
+          query = query.eq('company_id', empresaId);
         }
         
         const { data: usuariosData, error: usuariosError } = await query;
@@ -108,12 +110,12 @@ export function PermissoesUsuarios() {
           
           return {
             id: usuario.id,
-            nome: usuario.nome,
+            nome: `${usuario.first_name || ''} ${usuario.last_name || ''}`.trim() || usuario.email || 'Sem nome',
             email: usuario.email,
-            empresa_id: usuario.empresa_id,
-            empresa_nome: usuario.empresa_id ? empresasMap[usuario.empresa_id] : undefined,
-            is_master: usuario.is_master || false,
-            is_admin: usuario.is_admin || false,
+            empresa_id: usuario.company_id,
+            empresa_nome: usuario.company_id ? empresasMap[usuario.company_id] : undefined,
+            is_master: usuario.is_super_admin || false,
+            is_admin: usuario.is_company_admin || false,
             permissoes,
           };
         }));
