@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Control } from "react-hook-form";
 import { ActionFormValues } from "../schema/actionFormSchema";
+import { EmployeeSelectorField } from "@/components/shared/EmployeeSelectorField";
 
 interface FiveWTwoHSectionProps {
   control: Control<ActionFormValues>;
@@ -57,18 +58,12 @@ export function FiveWTwoHSection({ control }: FiveWTwoHSectionProps) {
           )}
         />
         
-        <FormField
+        <EmployeeSelectorField
           control={control}
-          name="responsible"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quem? (Who)</FormLabel>
-              <FormControl>
-                <Input placeholder="Quem é responsável" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          name="responsible_id"
+          label="Quem? (Who)"
+          placeholder="Selecione o responsável"
+          required
         />
       </div>
       

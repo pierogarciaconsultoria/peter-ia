@@ -30,7 +30,8 @@ export const actionSchema = z.object({
   what: z.string().min(3, "O que deve ser feito deve ter pelo menos 3 caracteres"),
   why: z.string().min(3, "Por que deve ser feito deve ter pelo menos 3 caracteres"),
   where: z.string().min(2, "Onde deve ser feito deve ter pelo menos 2 caracteres"),
-  responsible: z.string().min(2, "Quem é responsável deve ter pelo menos 2 caracteres"),
+  responsible_id: z.string().min(1, "Responsável deve ser selecionado"),
+  responsible: z.string().optional(), // mantém para compatibilidade
   involved_people: z.string().optional(),
   due_date: z.string().min(1, "Data de conclusão é obrigatória"),
   start_date: z.string().optional(),
@@ -60,6 +61,7 @@ export const getDefaultValues = (action?: any) => {
     what: "",
     why: "",
     where: "",
+    responsible_id: "",
     responsible: "",
     involved_people: "",
     due_date: new Date().toISOString().split("T")[0],

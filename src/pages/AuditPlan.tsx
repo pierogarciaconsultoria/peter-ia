@@ -1,28 +1,50 @@
 
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { fetchAuditPlans, createAuditPlan, AuditPlan } from "@/services/auditPlanService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { EmployeeSelectorField } from "@/components/shared/EmployeeSelectorField";
 import { toast } from "sonner";
 
-const initialForm = {
-  title: "",
-  responsible: "",
-  start_date: "",
-  end_date: "",
-  audited_areas: "",
-  team: "",
-  status: "rascunho",
-  summary: "",
-  observations: "",
-  company_id: "",
-};
+const FormSchema = z.object({
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  responsible_id: z.string().min(1, "Responsável deve ser selecionado"),
+  start_date: z.string().min(1, "Data de início é obrigatória"),
+  end_date: z.string().min(1, "Data de término é obrigatória"),
+  audited_areas: z.string().min(3, "Áreas auditadas devem ser especificadas"),
+  team: z.string().optional(),
+  status: z.enum(["rascunho", "planejada", "em_andamento", "finalizada"]),
+  summary: z.string().optional(),
+  observations: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof FormSchema>;
 
 const AuditPlanPage = () => {
   const [plans, setPlans] = useState<AuditPlan[]>([]);
-  const [form, setForm] = useState<typeof initialForm>(initialForm);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      title: "",
+      responsible_id: "",
+      start_date: "",
+      end_date: "",
+      audited_areas: "",
+      team: "",
+      status: "rascunho",
+      summary: "",
+      observations: "",
+    },
+  });
 
   useEffect(() => {
     loadPlans();
@@ -35,38 +57,26 @@ const AuditPlanPage = () => {
     setLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title || !form.responsible || !form.start_date || !form.end_date || !form.audited_areas) {
-      toast.error("Preencha todos os campos obrigatórios.");
-      return;
-    }
+  const handleSubmit = async (values: FormValues) => {
     setLoading(true);
-    // Pega company_id do localStorage/contexto (por simplicidade — melhorar depois)
-    let company_id = form.company_id;
+    
+    const company_id = localStorage.getItem("company_id") || "";
     if (!company_id) {
-      company_id = localStorage.getItem("company_id") || ""; // Ajuda em MVP
-      if (!company_id) {
-        toast.error("ID da empresa não encontrado.");
-        setLoading(false);
-        return;
-      }
+      toast.error("ID da empresa não encontrado.");
+      setLoading(false);
+      return;
     }
 
     const planData = {
-      ...form,
+      ...values,
+      responsible: "", // mantém compatibilidade
       company_id,
-      status: form.status as AuditPlan["status"],
     };
+    
     const result = await createAuditPlan(planData as any);
     if (result) {
       toast.success("Plano criado!");
-      setForm(initialForm);
+      form.reset();
       loadPlans();
     } else {
       toast.error("Erro ao criar plano.");
@@ -82,34 +92,150 @@ const AuditPlanPage = () => {
           <CardTitle>Cadastrar Novo Plano</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-            <Input name="title" value={form.title} onChange={handleInputChange} placeholder="Título*" required />
-            <Input name="responsible" value={form.responsible} onChange={handleInputChange} placeholder="Responsável*" required />
-            <Input type="date" name="start_date" value={form.start_date} onChange={handleInputChange} placeholder="Início*" required />
-            <Input type="date" name="end_date" value={form.end_date} onChange={handleInputChange} placeholder="Término*" required />
-            <Input name="audited_areas" value={form.audited_areas} onChange={handleInputChange} placeholder="Áreas auditadas*" required />
-            <Input name="team" value={form.team} onChange={handleInputChange} placeholder="Equipe" />
-            <select
-              name="status"
-              value={form.status}
-              onChange={handleInputChange}
-              className="border rounded px-2 py-2"
-            >
-              <option value="rascunho">Rascunho</option>
-              <option value="planejada">Planejada</option>
-              <option value="em_andamento">Em andamento</option>
-              <option value="finalizada">Finalizada</option>
-            </select>
-            <Input name="summary" value={form.summary} onChange={handleInputChange} placeholder="Resumo" />
-            <Input name="observations" value={form.observations} onChange={handleInputChange} placeholder="Observações" />
-            {/* Campo oculto para company_id */}
-            <input type="hidden" name="company_id" value={form.company_id} />
-            <div className="md:col-span-2 mt-2">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Título *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Título do plano de auditoria" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <EmployeeSelectorField
+                  control={form.control}
+                  name="responsible_id"
+                  label="Responsável"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Início *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Término *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="audited_areas"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Áreas Auditadas *</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Descreva as áreas que serão auditadas" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="team"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Equipe</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Membros da equipe de auditoria" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="rascunho">Rascunho</SelectItem>
+                          <SelectItem value="planejada">Planejada</SelectItem>
+                          <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                          <SelectItem value="finalizada">Finalizada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="summary"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Resumo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Resumo do plano" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="observations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Observações adicionais" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Salvando..." : "Salvar Plano"}
               </Button>
-            </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 

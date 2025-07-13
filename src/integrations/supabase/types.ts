@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       _backup_important_data: {
@@ -57,6 +62,7 @@ export type Database = {
           id: string
           priority: string
           responsible: string | null
+          responsible_id: string | null
           status: string
           title: string
         }
@@ -68,6 +74,7 @@ export type Database = {
           id?: string
           priority?: string
           responsible?: string | null
+          responsible_id?: string | null
           status?: string
           title: string
         }
@@ -79,6 +86,7 @@ export type Database = {
           id?: string
           priority?: string
           responsible?: string | null
+          responsible_id?: string | null
           status?: string
           title?: string
         }
@@ -90,6 +98,13 @@ export type Database = {
             referencedRelation: "action_plans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "action_items_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
         ]
       }
       action_plans: {
@@ -99,6 +114,7 @@ export type Database = {
           description: string | null
           id: string
           progress: number | null
+          responsible_id: string | null
           sector: string | null
           title: string
           updated_at: string
@@ -109,6 +125,7 @@ export type Database = {
           description?: string | null
           id?: string
           progress?: number | null
+          responsible_id?: string | null
           sector?: string | null
           title: string
           updated_at?: string
@@ -119,6 +136,7 @@ export type Database = {
           description?: string | null
           id?: string
           progress?: number | null
+          responsible_id?: string | null
           sector?: string | null
           title?: string
           updated_at?: string
@@ -129,6 +147,68 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "action_plans_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_logs: {
+        Row: {
+          action: string
+          company_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "view_lojadigital_users"
             referencedColumns: ["id"]
           },
         ]
@@ -300,6 +380,7 @@ export type Database = {
           id: string
           observations: string | null
           responsible: string
+          responsible_id: string | null
           start_date: string
           status: string
           summary: string | null
@@ -315,6 +396,7 @@ export type Database = {
           id?: string
           observations?: string | null
           responsible: string
+          responsible_id?: string | null
           start_date: string
           status: string
           summary?: string | null
@@ -330,6 +412,7 @@ export type Database = {
           id?: string
           observations?: string | null
           responsible?: string
+          responsible_id?: string | null
           start_date?: string
           status?: string
           summary?: string | null
@@ -345,6 +428,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "audit_plans_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audits: {
@@ -357,6 +447,7 @@ export type Database = {
           findings: string | null
           id: string
           responsible: string
+          responsible_id: string | null
           status: string
           title: string
           updated_at: string
@@ -370,6 +461,7 @@ export type Database = {
           findings?: string | null
           id?: string
           responsible: string
+          responsible_id?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -383,11 +475,73 @@ export type Database = {
           findings?: string | null
           id?: string
           responsible?: string
+          responsible_id?: string | null
           status?: string
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "audits_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          branch: string
+          company_id: string
+          created_at: string
+          current_balance: number | null
+          empresa_id: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type?: string
+          bank_name: string
+          branch: string
+          company_id: string
+          created_at?: string
+          current_balance?: number | null
+          empresa_id?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          branch?: string
+          company_id?: string
+          created_at?: string
+          current_balance?: number | null
+          empresa_id?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       candidate_assessment_links: {
         Row: {
@@ -982,6 +1136,98 @@ export type Database = {
           },
         ]
       }
+      company_environments: {
+        Row: {
+          capacity: number | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_environments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comprovantes_pagamento: {
+        Row: {
+          arquivo_nome: string
+          arquivo_url: string
+          created_at: string | null
+          enviado_em: string | null
+          id: string
+          nome: string
+          token: string
+        }
+        Insert: {
+          arquivo_nome: string
+          arquivo_url: string
+          created_at?: string | null
+          enviado_em?: string | null
+          id?: string
+          nome: string
+          token: string
+        }
+        Update: {
+          arquivo_nome?: string
+          arquivo_url?: string
+          created_at?: string | null
+          enviado_em?: string | null
+          id?: string
+          nome?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      connection_test: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       convites_externos: {
         Row: {
           created_at: string
@@ -1071,6 +1317,7 @@ export type Database = {
       customer_complaints: {
         Row: {
           assigned_to: string | null
+          assigned_to_id: string | null
           closed_at: string | null
           complaint_date: string
           contact_email: string | null
@@ -1087,6 +1334,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          assigned_to_id?: string | null
           closed_at?: string | null
           complaint_date: string
           contact_email?: string | null
@@ -1103,6 +1351,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          assigned_to_id?: string | null
           closed_at?: string | null
           complaint_date?: string
           contact_email?: string | null
@@ -1117,7 +1366,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_complaints_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_satisfaction_surveys: {
         Row: {
@@ -1235,6 +1492,7 @@ export type Database = {
           descricao: string
           evento_id: string
           id: string
+          participantes_divisao: string[] | null
           quem_pagou_id: string
           valor: number
         }
@@ -1243,6 +1501,7 @@ export type Database = {
           descricao: string
           evento_id: string
           id?: string
+          participantes_divisao?: string[] | null
           quem_pagou_id: string
           valor: number
         }
@@ -1251,6 +1510,7 @@ export type Database = {
           descricao?: string
           evento_id?: string
           id?: string
+          participantes_divisao?: string[] | null
           quem_pagou_id?: string
           valor?: number
         }
@@ -1354,6 +1614,8 @@ export type Database = {
       diagnostic_submissions: {
         Row: {
           analysis: Json
+          annual_revenue: string | null
+          company_name: string | null
           company_segment: string
           created_at: string
           email: string
@@ -1366,6 +1628,8 @@ export type Database = {
         }
         Insert: {
           analysis: Json
+          annual_revenue?: string | null
+          company_name?: string | null
           company_segment: string
           created_at?: string
           email: string
@@ -1378,6 +1642,8 @@ export type Database = {
         }
         Update: {
           analysis?: Json
+          annual_revenue?: string | null
+          company_name?: string | null
           company_segment?: string
           created_at?: string
           email?: string
@@ -1963,6 +2229,27 @@ export type Database = {
           },
         ]
       }
+      empresas: {
+        Row: {
+          cnpj: string | null
+          criada_em: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          cnpj?: string | null
+          criada_em?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          cnpj?: string | null
+          criada_em?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       equipment_calibrations: {
         Row: {
           calibration_date: string
@@ -2023,6 +2310,7 @@ export type Database = {
         Row: {
           codigo: string
           criado: string
+          data_evento: string | null
           empresa_id: string | null
           id: string
           latitude: number | null
@@ -2037,6 +2325,7 @@ export type Database = {
         Insert: {
           codigo: string
           criado?: string
+          data_evento?: string | null
           empresa_id?: string | null
           id?: string
           latitude?: number | null
@@ -2051,6 +2340,7 @@ export type Database = {
         Update: {
           codigo?: string
           criado?: string
+          data_evento?: string | null
           empresa_id?: string | null
           id?: string
           latitude?: number | null
@@ -2197,6 +2487,50 @@ export type Database = {
         }
         Relationships: []
       }
+      family_members: {
+        Row: {
+          celular: string | null
+          created_at: string
+          data_nascimento: string | null
+          id: string
+          member_id: string
+          nome: string
+          parentesco: string
+          situacao: string | null
+          updated_at: string
+        }
+        Insert: {
+          celular?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          id?: string
+          member_id: string
+          nome: string
+          parentesco: string
+          situacao?: string | null
+          updated_at?: string
+        }
+        Update: {
+          celular?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          id?: string
+          member_id?: string
+          nome?: string
+          parentesco?: string
+          situacao?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedbacks: {
         Row: {
           company_id: string
@@ -2264,6 +2598,56 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "view_lojadigital_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_categories: {
+        Row: {
+          color: string | null
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          order_index: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          order_index?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          order_index?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -4912,6 +5296,24 @@ export type Database = {
         }
         Relationships: []
       }
+      lojas: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       medical_certificates: {
         Row: {
           cid: string | null
@@ -5037,6 +5439,108 @@ export type Database = {
         }
         Relationships: []
       }
+      member_reimbursement_links: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          member_email: string
+          member_name: string
+          token: string
+          used: boolean
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          member_email: string
+          member_name: string
+          token: string
+          used?: boolean
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          member_email?: string
+          member_name?: string
+          token?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
+      member_reimbursement_requests: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          company_id: string
+          created_at: string
+          description: string
+          expense_date: string
+          expires_at: string
+          id: string
+          justification: string
+          member_email: string
+          member_name: string
+          member_phone: string | null
+          payable_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          receipt_url: string | null
+          request_type: string
+          status: string
+          token: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          company_id: string
+          created_at?: string
+          description: string
+          expense_date: string
+          expires_at?: string
+          id?: string
+          justification: string
+          member_email: string
+          member_name: string
+          member_phone?: string | null
+          payable_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          receipt_url?: string | null
+          request_type: string
+          status?: string
+          token: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          company_id?: string
+          created_at?: string
+          description?: string
+          expense_date?: string
+          expires_at?: string
+          id?: string
+          justification?: string
+          member_email?: string
+          member_name?: string
+          member_phone?: string | null
+          payable_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          receipt_url?: string | null
+          request_type?: string
+          status?: string
+          token?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           address: string | null
@@ -5159,6 +5663,41 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membros_loja: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          funcao: string | null
+          id: string
+          loja_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          funcao?: string | null
+          id?: string
+          loja_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          funcao?: string | null
+          id?: string
+          loja_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membros_loja_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
             referencedColumns: ["id"]
           },
         ]
@@ -5742,7 +6281,7 @@ export type Database = {
           id?: string
           nome: string
           pix_key?: string | null
-          tipo: string
+          tipo?: string
           user_id?: string | null
           whatsapp?: string | null
         }
@@ -6257,6 +6796,7 @@ export type Database = {
         Row: {
           company_id: string | null
           criado_em: string | null
+          email: string | null
           id: string
           nome: string | null
           user_id: string | null
@@ -6264,6 +6804,7 @@ export type Database = {
         Insert: {
           company_id?: string | null
           criado_em?: string | null
+          email?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
@@ -6271,6 +6812,7 @@ export type Database = {
         Update: {
           company_id?: string | null
           criado_em?: string | null
+          email?: string | null
           id?: string
           nome?: string | null
           user_id?: string | null
@@ -6290,6 +6832,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           description: string | null
+          empresa_id: string | null
           id: string
           name: string
           status: string
@@ -6299,6 +6842,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           description?: string | null
+          empresa_id?: string | null
           id?: string
           name: string
           status?: string
@@ -6308,6 +6852,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           description?: string | null
+          empresa_id?: string | null
           id?: string
           name?: string
           status?: string
@@ -7888,6 +8433,50 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          ends_at: string | null
+          id: string
+          payment_provider_id: string | null
+          plan: string
+          started_at: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          payment_provider_id?: string | null
+          plan?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          payment_provider_id?: string | null
+          plan?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_evaluations: {
         Row: {
           category: string
@@ -7943,6 +8532,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "supplier_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          category: string | null
+          company_id: string
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          company_id: string
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          company_id?: string
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -8308,6 +8950,7 @@ export type Database = {
       user_profiles: {
         Row: {
           allowed_modules: string[] | null
+          ativo: boolean | null
           company_id: string | null
           cpf: string | null
           created_at: string
@@ -8327,10 +8970,12 @@ export type Database = {
           role: string
           role_id: string | null
           status: string | null
+          telefone: string | null
           updated_at: string | null
         }
         Insert: {
           allowed_modules?: string[] | null
+          ativo?: boolean | null
           company_id?: string | null
           cpf?: string | null
           created_at?: string
@@ -8350,10 +8995,12 @@ export type Database = {
           role?: string
           role_id?: string | null
           status?: string | null
+          telefone?: string | null
           updated_at?: string | null
         }
         Update: {
           allowed_modules?: string[] | null
+          ativo?: boolean | null
           company_id?: string | null
           cpf?: string | null
           created_at?: string
@@ -8373,6 +9020,7 @@ export type Database = {
           role?: string
           role_id?: string | null
           status?: string | null
+          telefone?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -8392,9 +9040,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          descricao: string | null
+          id: number
+          nome: string | null
+        }
+        Insert: {
+          descricao?: string | null
+          id?: number
+          nome?: string | null
+        }
+        Update: {
+          descricao?: string | null
+          id?: number
+          nome?: string | null
+        }
+        Relationships: []
+      }
       usuarios: {
         Row: {
-          auth_user_id: string
+          auth_user_id: string | null
           chave_pix: string
           created_at: string | null
           email: string
@@ -8404,7 +9070,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
-          auth_user_id: string
+          auth_user_id?: string | null
           chave_pix?: string
           created_at?: string | null
           email?: string
@@ -8414,7 +9080,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
-          auth_user_id?: string
+          auth_user_id?: string | null
           chave_pix?: string
           created_at?: string | null
           email?: string
@@ -8510,6 +9176,10 @@ export type Database = {
         Args: { table_name: string }
         Returns: undefined
       }
+      apply_company_isolation_policy: {
+        Args: { table_name: string }
+        Returns: undefined
+      }
       audit_access_log: {
         Args: {
           table_name: string
@@ -8562,6 +9232,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_company_schema_if_not_exists: {
+        Args: { c_id: string }
+        Returns: undefined
+      }
+      create_default_financial_categories: {
+        Args: { target_company_id: string }
+        Returns: undefined
+      }
       create_get_db_version_function: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -8572,6 +9250,10 @@ export type Database = {
       }
       current_user_belongs_to_company: {
         Args: { target_company_id: string }
+        Returns: boolean
+      }
+      ensure_company_access: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       ensure_super_admin: {
@@ -8614,6 +9296,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_unique_reimbursement_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       gerar_token_de_avaliação_único: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -8625,6 +9311,10 @@ export type Database = {
           nome: string
           cnpj: string
         }[]
+      }
+      get_company_schema: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_current_user_company_id: {
         Args: Record<PropertyKey, never>
@@ -8707,10 +9397,14 @@ export type Database = {
         Returns: boolean
       }
       is_company_admin: {
-        Args: { user_id: string }
+        Args: Record<PropertyKey, never> | { user_id: string }
         Returns: boolean
       }
       is_company_admin_for: {
+        Args: { company_uuid: string }
+        Returns: boolean
+      }
+      is_company_admin_of: {
         Args: { company_uuid: string }
         Returns: boolean
       }
@@ -8734,6 +9428,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      log_admin_action: {
+        Args: {
+          action_text: string
+          details_json?: Json
+          target_company_id?: string
+        }
+        Returns: undefined
+      }
       log_security_event: {
         Args: {
           action_text: string
@@ -8745,12 +9447,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      migrate_responsible_text_to_id: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       pertence_à_empresa: {
         Args: { company_uuid: string }
         Returns: boolean
       }
       set_assessment_link_token: {
         Args: { token: string; user_id: string }
+        Returns: undefined
+      }
+      set_company_search_path: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       user_belongs_to_company: {
@@ -8793,21 +9503,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -8825,14 +9539,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -8848,14 +9564,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -8871,14 +9589,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -8886,14 +9606,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
