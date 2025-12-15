@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useHRDashboardData } from '@/hooks/useHRDashboardData';
+import { useHRDashboardMetrics } from '@/hooks/useHRDashboardMetrics';
 
 export interface DepartmentDistribution {
   name: string;
@@ -146,53 +146,52 @@ interface HRDashboardProviderProps {
 }
 
 export function HRDashboardProvider({ children }: HRDashboardProviderProps) {
-  const { data, isLoading, error, refetch } = useHRDashboardData();
+  const { metrics, isLoading, errors, refetch } = useHRDashboardMetrics();
 
   // Transform metrics to match the complete interface
   const completeMetrics: HRMetrics = {
     ...defaultMetrics,
-    // Use data from hook if available, otherwise use defaults
-    totalEmployees: data?.metrics?.totalEmployees || 0,
-    newHires: data?.metrics?.newHires || 0,
-    upcomingEvaluations: data?.metrics?.upcomingEvaluations || 0,
-    pendingTrainings: data?.metrics?.pendingTrainings || 0,
-    departments: data?.metrics?.departments || 0,
-    turnoverRate: data?.metrics?.turnoverRate || 0,
-    averageTenure: data?.metrics?.averageTenure || 0,
-    pendingRecruitments: data?.metrics?.pendingRecruitments || 0,
-    vacationRequests: data?.metrics?.vacationRequests || 0,
-    approvedPositions: data?.metrics?.approvedPositions || 0,
-    filledPositions: data?.metrics?.filledPositions || 0,
-    medicalLeaves: data?.metrics?.medicalLeaves || 0,
-    activeJobs: data?.metrics?.activeJobs || 0,
-    pendingApplications: data?.metrics?.pendingApplications || 0,
-    scheduledInterviews: data?.metrics?.scheduledInterviews || 0,
-    trialEvaluations: data?.metrics?.trialEvaluations || 0,
-    onboardingProcesses: data?.metrics?.onboardingProcesses || 0,
-    pendingOnboarding: data?.metrics?.pendingOnboarding || 0,
-    pendingEvaluations: data?.metrics?.pendingEvaluations || 0,
-    developmentPlans: data?.metrics?.developmentPlans || 0,
-    employeeCount: data?.metrics?.employeeCount || data?.metrics?.totalEmployees || 0,
-    newEmployees: data?.metrics?.newEmployees || data?.metrics?.newHires || 0,
-    openPositions: data?.metrics?.openPositions || data?.metrics?.activeJobs || 0
+    totalEmployees: metrics.employeeCount.value,
+    newHires: metrics.newEmployees.value,
+    upcomingEvaluations: metrics.upcomingEvaluations?.value || 0,
+    pendingTrainings: metrics.pendingTrainings?.value || 0,
+    departments: metrics.departments?.value || 0,
+    turnoverRate: metrics.turnoverRate?.value || 0,
+    averageTenure: metrics.averageTenure?.value || 0,
+    pendingRecruitments: metrics.pendingRecruitments?.value || 0,
+    vacationRequests: metrics.vacationRequests?.value || 0,
+    approvedPositions: metrics.approvedPositions?.value || 0,
+    filledPositions: metrics.filledPositions?.value || 0,
+    medicalLeaves: metrics.medicalLeaves?.value || 0,
+    activeJobs: metrics.openPositions.value, // Alias
+    pendingApplications: metrics.pendingApplications?.value || 0,
+    scheduledInterviews: metrics.scheduledInterviews?.value || 0,
+    trialEvaluations: metrics.trialEvaluations?.value || metrics.pendingEvaluations.value,
+    onboardingProcesses: metrics.onboardingProcesses?.value || metrics.pendingOnboarding.value,
+    pendingOnboarding: metrics.pendingOnboarding.value,
+    pendingEvaluations: metrics.pendingEvaluations.value,
+    developmentPlans: metrics.developmentPlans.value,
+    employeeCount: metrics.employeeCount.value,
+    newEmployees: metrics.newEmployees.value,
+    openPositions: metrics.openPositions.value
   };
 
   const dashboardData: HRDashboardData = {
     metrics: completeMetrics,
-    departmentDistribution: data?.data?.departmentDistribution || [],
-    turnoverData: data?.data?.turnoverData || [],
-    recruitmentStatus: data?.data?.recruitmentStatus || [],
-    trainingCompletionData: data?.data?.trainingCompletionData || [],
-    evaluationScores: data?.data?.evaluationScores || [],
-    salaryComparisonData: data?.data?.salaryComparisonData || [],
-    employeeCostsData: data?.data?.employeeCostsData || [],
-    discDistribution: data?.data?.discDistribution || []
+    departmentDistribution: [], // To be implemented or fetched separately if needed
+    turnoverData: [],
+    recruitmentStatus: [],
+    trainingCompletionData: [],
+    evaluationScores: [],
+    salaryComparisonData: [],
+    employeeCostsData: [],
+    discDistribution: []
   };
 
   const value = {
     dashboardData,
     isLoading,
-    error: error ? new Error(error) : null,
+    error: errors.length > 0 ? new Error(errors[0]) : null,
     refreshData: refetch
   };
 

@@ -35,6 +35,21 @@ export function SystemStatus({
     pendingOnboarding: "Onboarding Pendentes",
     pendingEvaluations: "Avaliações Pendentes",
     developmentPlans: "PDIs Ativos",
+    departments: "Departamentos",
+    turnoverRate: "Taxa de Turnover",
+    averageTenure: "Tempo Médio de Casa",
+    pendingRecruitments: "Recrutamentos Pendentes",
+    vacationRequests: "Solicitações de Férias",
+    approvedPositions: "Posições Aprovadas",
+    filledPositions: "Posições Preenchidas",
+    medicalLeaves: "Licenças Médicas",
+    activeJobs: "Vagas Ativas",
+    pendingApplications: "Candidaturas Pendentes",
+    scheduledInterviews: "Entrevistas Agendadas",
+    trialEvaluations: "Avaliações de Experiência",
+    onboardingProcesses: "Processos de Onboarding",
+    upcomingEvaluations: "Próximas Avaliações",
+    pendingTrainings: "Treinamentos Pendentes"
   };
 
   const getStatusBadge = (status: MetricStatus["status"]) => {
