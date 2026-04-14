@@ -96,30 +96,19 @@ const UserManagement: React.FC<UserManagementProps> = ({
         throw new Error("É necessário selecionar uma empresa");
       }
 
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newUserEmail,
-        password: newUserPassword,
-        email_confirm: true,
-        user_metadata: {
-          first_name: newUserFirstName,
-          last_name: newUserLastName
-        }
+      const { data, error } = await supabase.functions.invoke("admin-create-user", {
+        body: {
+          email: newUserEmail,
+          password: newUserPassword,
+          firstName: newUserFirstName,
+          lastName: newUserLastName,
+          companyId,
+          isCompanyAdmin: newUserIsAdmin,
+        },
       });
-      
-      if (authError) throw authError;
-      
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          company_id: companyId,
-          is_company_admin: newUserIsAdmin,
-          is_super_admin: false,
-          first_name: newUserFirstName,
-          last_name: newUserLastName
-        })
-        .eq('id', authData.user.id);
-        
-      if (profileError) throw profileError;
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Falha ao criar usuário");
       
       toast.success("Usuário criado com sucesso");
       setUserDialogOpen(false);
