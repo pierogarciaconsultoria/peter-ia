@@ -41,31 +41,6 @@ export const useLogin = () => {
       setLoading(false);
     }
   };
-  
-  // Function to directly log in as admin
-  const handleDirectAdminLogin = async () => {
-    setLoading(true);
-    setErrorDetails(null);
-    
-    try {
-      setLoginEmail("contato@pierogarcia.com.br");
-      setLoginPassword("pi391500B@");
-      
-      if (!signIn) {
-        throw new Error("signIn function is not available");
-      }
-      
-      await signIn("contato@pierogarcia.com.br", "pi391500B@");
-      toast.success("Login administrativo realizado com sucesso");
-      navigate("/admin");
-    } catch (error: any) {
-      console.error("Admin login failed:", error);
-      setErrorDetails(error.message || "Falha ao fazer login administrativo");
-      toast.error(error.message || "Falha ao fazer login administrativo");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return {
     loginEmail,
@@ -75,7 +50,6 @@ export const useLogin = () => {
     loading,
     errorDetails,
     handleLogin,
-    handleDirectAdminLogin,
     bypassAuth
   };
 };

@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { useLogin } from "@/hooks/useLogin";
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,16 +17,9 @@ export const LoginForm = () => {
     loading,
     errorDetails,
     handleLogin,
-    handleDirectAdminLogin,
     bypassAuth
   } = useLogin();
   const navigate = useNavigate();
-
-  // Helper function to set admin credentials
-  const fillAdminCredentials = () => {
-    setLoginEmail("contato@pierogarcia.com.br");
-    setLoginPassword("pi391500B@");
-  };
 
   if (bypassAuth) {
     return (
@@ -49,7 +41,7 @@ export const LoginForm = () => {
             type="button"
             variant="outline"
             className="w-full"
-            onClick={handleDirectAdminLogin}
+            onClick={() => navigate("/admin")}
           >
             Acessar Área Administrativa
           </Button>
@@ -102,19 +94,6 @@ export const LoginForm = () => {
           />
         </div>
         
-        {!process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? (
-          <div className="pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              className="w-full text-xs"
-              onClick={fillAdminCredentials}
-            >
-              Preencher como Admin
-            </Button>
-          </div>
-        ) : null}
       </CardContent>
       
       <CardFooter>
