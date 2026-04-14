@@ -47,7 +47,7 @@ export async function exportarRelatorioGeral() {
     ]);
   }
   
-  // @ts-ignore
+  // @ts-expect-error jspdf-autotable
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,

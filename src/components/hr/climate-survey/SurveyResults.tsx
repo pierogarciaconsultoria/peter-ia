@@ -80,7 +80,7 @@ export function SurveyResults({ surveyId, title, questions }: SurveyResultsProps
     
     if (filter !== "all") {
       const now = new Date();
-      let cutoffDate = new Date();
+      const cutoffDate = new Date();
       
       if (filter === "month") {
         cutoffDate.setMonth(now.getMonth() - 1);
@@ -114,7 +114,7 @@ export function SurveyResults({ surveyId, title, questions }: SurveyResultsProps
     
     if (filter !== "all") {
       const now = new Date();
-      let cutoffDate = new Date();
+      const cutoffDate = new Date();
       
       if (filter === "month") {
         cutoffDate.setMonth(now.getMonth() - 1);

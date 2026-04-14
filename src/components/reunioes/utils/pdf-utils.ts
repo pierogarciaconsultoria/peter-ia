@@ -51,7 +51,7 @@ export async function exportarRelatorioGeral() {
     ]);
   }
   
-  // @ts-ignore
+  // @ts-expect-error jspdf-autotable
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
@@ -181,7 +181,7 @@ export async function exportarRelatorioReuniao(id: string) {
     p.presente ? "Presente" : "Ausente"
   ]) || [];
   
-  // @ts-ignore
+  // @ts-expect-error jspdf-autotable
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
@@ -189,7 +189,7 @@ export async function exportarRelatorioReuniao(id: string) {
     headStyles: { fillColor: [41, 128, 185], textColor: 255 }
   });
   
-  // @ts-ignore
+  // @ts-expect-error doc.lastAutoTable
   yPos = doc.lastAutoTable.finalY + 15;
   
   // Registros individuais
@@ -264,7 +264,7 @@ export async function exportarRelatorioReuniao(id: string) {
       a.status === "cancelado" ? "Cancelado" : a.status
     ]);
     
-    // @ts-ignore
+    // @ts-expect-error jspdf-autotable
     doc.autoTable({
       head: [tableColumnAcoes],
       body: tableRowsAcoes,

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Room } from "@/services/roomService";
 
-export interface RoomFormValues extends Omit<Room, 'id'> {}
+export type RoomFormValues = Omit<Room, "id">;
 
 export function useRoomForm(room?: Room, onSubmit?: (data: Omit<Room, 'id'>) => void) {
   const [amenities, setAmenities] = useState<string[]>(room?.amenities || []);

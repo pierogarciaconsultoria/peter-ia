@@ -40,35 +40,41 @@ export function useAnalysisIntegration() {
       let success = false;
 
       switch (moduleType) {
-        case 'strategic_planning':
+        case 'strategic_planning': {
           const strategicMapping = AnalysisIntegrationService.mapStrategicPlanning(aiSuggestions);
           success = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId);
           break;
+        }
 
-        case 'risk_management':
+        case 'risk_management': {
           const risksMapping = AnalysisIntegrationService.mapRisks(aiSuggestions);
           success = await AnalysisIntegrationService.applyRisks(risksMapping, empresaId);
           break;
+        }
 
-        case 'indicators':
+        case 'indicators': {
           const indicatorsMapping = AnalysisIntegrationService.mapIndicators(aiSuggestions);
           success = await AnalysisIntegrationService.applyIndicators(indicatorsMapping, empresaId);
           break;
+        }
 
-        case 'organization_context':
+        case 'organization_context': {
           const contextMapping = AnalysisIntegrationService.mapOrganizationContext(aiSuggestions);
           success = await AnalysisIntegrationService.applyOrganizationContext(contextMapping, empresaId);
           break;
+        }
 
-        case 'processes':
+        case 'processes': {
           const processesMapping = AnalysisIntegrationService.mapProcesses(aiSuggestions, companyData);
           success = await AnalysisIntegrationService.applyProcesses(processesMapping, empresaId);
           break;
+        }
 
-        case 'action_plan':
+        case 'action_plan': {
           const actionPlanMapping = AnalysisIntegrationService.mapActionPlan(aiSuggestions);
           success = await AnalysisIntegrationService.applyActionPlan(actionPlanMapping, empresaId);
           break;
+        }
 
         default:
           toast.error('Tipo de módulo não suportado');
