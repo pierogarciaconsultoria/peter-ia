@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { ImagePlus, X, Upload, Calendar, ArrowRight } from "lucide-react";
+import { ImagePlus, X, Calendar, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/radio-group";
 import { createCustomerComplaint } from "@/services/customerComplaintService";
 import { generateRandomCode } from "@/utils/codeGenerator";
+import { getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 // Define the form schema with Zod
 const formSchema = z.object({
@@ -44,6 +44,7 @@ const formSchema = z.object({
   description: z.string().min(10, { message: "Descrição deve ter pelo menos 10 caracteres" }),
   priority: z.enum(["low", "medium", "high", "critical"]),
   assigned_to: z.string().optional(),
+  assigned_to_id: z.string().optional().or(z.literal("")),
   invoice_number: z.string().optional().or(z.literal("")),
   product: z.string().optional().or(z.literal("")),
   return_deadline: z.string().optional().or(z.literal("")),
@@ -63,6 +64,7 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { employees, loadingEmployees } = useActiveEmployees();
 
   // Initialize the form
   const form = useForm<FormValues>({
@@ -75,6 +77,7 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
       description: "",
       priority: "medium",
       assigned_to: "",
+      assigned_to_id: "",
       invoice_number: "",
       product: "",
       return_deadline: format(new Date(), "yyyy-MM-dd"),
@@ -130,6 +133,7 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
         description: values.description,
         priority: values.priority,
         assigned_to: values.assigned_to || "",
+        assigned_to_id: values.assigned_to_id || "",
         invoice_number: values.invoice_number || "",
         product: values.product || "",
         return_deadline: values.return_deadline || "",
@@ -354,13 +358,31 @@ export function CustomerComplaintForm({ onSuccess, onCancel }: CustomerComplaint
 
           <FormField
             control={form.control}
-            name="assigned_to"
+            name="assigned_to_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Responsável</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nome do responsável" {...field} />
-                </FormControl>
+                <Select
+                  onValueChange={(employeeId) => {
+                    field.onChange(employeeId);
+                    form.setValue("assigned_to", getEmployeeNameById(employees, employeeId));
+                  }}
+                  value={field.value}
+                  disabled={loadingEmployees}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name} - {employee.department}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormDescription>
                   Responsável pelo tratamento da reclamação
                 </FormDescription>

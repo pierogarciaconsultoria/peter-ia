@@ -22,11 +22,8 @@ import {
   Plus,
   Edit,
   Trash,
-  Save,
-  X,
-  AlertTriangle
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 // Mock data types and initial values
 type Emitter = { id: string; name: string };
@@ -62,12 +59,10 @@ const NonConformingProductForm = ({
     effectivenessVerification: "",
     approvalStatus: "pending", // 'pending', 'approved', 'rejected'
   });
+  const { employees, loadingEmployees } = useActiveEmployees({ enabled: open });
 
   // Mock data lists (would be fetched from database in a real implementation)
-  const [emitters, setEmitters] = useState<Emitter[]>([
-    { id: "1", name: "João Silva" },
-    { id: "2", name: "Maria Oliveira" },
-  ]);
+  const [emitters, setEmitters] = useState<Emitter[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([
     { id: "1", name: "Empresa A" },
     { id: "2", name: "Empresa B" },
@@ -77,11 +72,7 @@ const NonConformingProductForm = ({
     { id: "2", name: "Qualidade" },
     { id: "3", name: "Engenharia" },
   ]);
-  const [people, setPeople] = useState<Person[]>([
-    { id: "1", name: "Carlos Santos" },
-    { id: "2", name: "Ana Pereira" },
-    { id: "3", name: "Paulo Ferreira" },
-  ]);
+  const [people, setPeople] = useState<Person[]>([]);
   const [products, setProducts] = useState<Product[]>([
     { id: "1", name: "Produto A", code: "PA001" },
     { id: "2", name: "Componente B", code: "CB002" },
@@ -116,6 +107,17 @@ const NonConformingProductForm = ({
       }));
     }
   }, [formData.totalPieces, formData.nonConformingPieces]);
+
+  // Sync employees from "Funcionários" (Gente e Gestão) for emitter and responsible fields
+  useEffect(() => {
+    const employeeOptions = employees.map((employee) => ({
+      id: employee.id,
+      name: employee.name,
+    }));
+
+    setEmitters(employeeOptions);
+    setPeople(employeeOptions);
+  }, [employees]);
 
   // Handle input changes
   const handleChange = (field: string, value: any) => {
@@ -170,7 +172,7 @@ const NonConformingProductForm = ({
       return;
     }
 
-    const { type, item, index } = editingItem;
+    const { type, item } = editingItem;
     
     switch (type) {
       case "emitter":
@@ -327,7 +329,8 @@ const NonConformingProductForm = ({
     items: any[],
     type: string,
     valueKey: string = "id",
-    displayKey: string = "name"
+    displayKey: string = "name",
+    allowManage: boolean = true
   ) => {
     return (
       <>
@@ -336,52 +339,56 @@ const NonConformingProductForm = ({
             <SelectItem value={item[valueKey]} className="flex-1">
               {item[displayKey]}
             </SelectItem>
-            <div className="flex pr-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openEditModal(type, item);
-                }}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-destructive"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  deleteItem(type, item[valueKey]);
-                }}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+            {allowManage && (
+              <div className="flex pr-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEditModal(type, item);
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-destructive"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteItem(type, item[valueKey]);
+                  }}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         ))}
-        <div className="border-t px-2 py-1.5">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-muted-foreground"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openEditModal(type);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar novo
-          </Button>
-        </div>
+        {allowManage && (
+          <div className="border-t px-2 py-1.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-muted-foreground"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openEditModal(type);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar novo
+            </Button>
+          </div>
+        )}
       </>
     );
   };
@@ -405,12 +412,13 @@ const NonConformingProductForm = ({
                 <Select
                   value={formData.emitter}
                   onValueChange={(value) => handleChange("emitter", value)}
+                  disabled={loadingEmployees}
                 >
                   <SelectTrigger id="emitter">
-                    <SelectValue placeholder="Selecione o emitente" />
+                    <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o emitente"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {renderSelectItems(emitters, "emitter")}
+                    {renderSelectItems(emitters, "emitter", "id", "name", false)}
                   </SelectContent>
                 </Select>
               </div>
@@ -464,12 +472,13 @@ const NonConformingProductForm = ({
                 <Select
                   value={formData.responsible}
                   onValueChange={(value) => handleChange("responsible", value)}
+                  disabled={loadingEmployees}
                 >
                   <SelectTrigger id="responsible">
-                    <SelectValue placeholder="Selecione o responsável" />
+                    <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {renderSelectItems(people, "person")}
+                    {renderSelectItems(people, "person", "id", "name", false)}
                   </SelectContent>
                 </Select>
               </div>
@@ -598,6 +607,7 @@ const NonConformingProductForm = ({
                     <Select
                       value={action.responsible}
                       onValueChange={(value) => handleActionChange(index, "responsible", value)}
+                      disabled={loadingEmployees}
                     >
                       <SelectTrigger className="w-40">
                         <SelectValue placeholder="Responsável" />

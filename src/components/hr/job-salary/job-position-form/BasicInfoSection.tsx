@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { JobPosition } from "../../types";
 import { SuperiorPositionSelector } from "./SuperiorPositionSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 interface BasicInfoSectionProps {
   formData: JobPosition;
@@ -18,6 +20,13 @@ export function BasicInfoSection({
   onCheckboxChange, 
   onSuperiorPositionChange 
 }: BasicInfoSectionProps) {
+  const { employees, loadingEmployees } = useActiveEmployees();
+
+  const handleApproverChange = (employeeId: string) => {
+    const nextValue = getEmployeeNameById(employees, employeeId);
+    onChange({ target: { name: "approver", value: nextValue } } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
@@ -70,12 +79,22 @@ export function BasicInfoSection({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="approver">Responsável pela aprovação</Label>
-          <Input 
-            id="approver" 
-            name="approver" 
-            value={formData.approver} 
-            onChange={onChange} 
-          />
+          <Select
+            value={getEmployeeIdByName(employees, formData.approver)}
+            onValueChange={handleApproverChange}
+            disabled={loadingEmployees}
+          >
+            <SelectTrigger id="approver">
+              <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+            </SelectTrigger>
+            <SelectContent>
+              {employees.map((employee) => (
+                <SelectItem key={employee.id} value={employee.id}>
+                  {employee.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">

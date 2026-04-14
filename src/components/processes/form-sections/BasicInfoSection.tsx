@@ -1,5 +1,4 @@
 
-import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormSection } from "@/components/common/FormSection";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 interface BasicInfoSectionProps {
   name: string;
@@ -54,6 +54,8 @@ export function BasicInfoSection({
   processType,
   setProcessType,
 }: BasicInfoSectionProps) {
+  const { employees, loadingEmployees } = useActiveEmployees();
+
   return (
     <FormSection
       title="Informações Básicas do Processo"
@@ -78,13 +80,23 @@ export function BasicInfoSection({
             <Label htmlFor="owner">Responsável</Label>
             <FieldTooltip content="Pessoa ou departamento responsável pela execução do processo" />
           </div>
-          <Input
-            id="owner"
-            value={owner}
-            onChange={(e) => setOwner(e.target.value)}
-            placeholder="Ex: Departamento Comercial"
+          <Select
+            value={getEmployeeIdByName(employees, owner)}
+            onValueChange={(employeeId) => setOwner(getEmployeeNameById(employees, employeeId))}
             required
-          />
+            disabled={loadingEmployees}
+          >
+            <SelectTrigger id="owner" className="w-full">
+              <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+            </SelectTrigger>
+            <SelectContent>
+              {employees.map((employee) => (
+                <SelectItem key={employee.id} value={employee.id}>
+                  {employee.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

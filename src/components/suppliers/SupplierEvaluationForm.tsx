@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Supplier, Evaluation, EvaluationCriteria } from '@/types/supplierEvaluation';
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 interface SupplierEvaluationFormProps {
   supplier?: Supplier;
@@ -31,6 +31,7 @@ export const SupplierEvaluationForm: React.FC<SupplierEvaluationFormProps> = ({
   const [criteria, setCriteria] = useState<EvaluationCriteria[]>(defaultCriteria);
   const [comments, setComments] = useState<string>('');
   const [evaluator, setEvaluator] = useState<string>('');
+  const { employees, loadingEmployees } = useActiveEmployees();
 
   const handleScoreChange = (id: string, newScore: number) => {
     setCriteria(criteria.map(c => 
@@ -119,13 +120,23 @@ export const SupplierEvaluationForm: React.FC<SupplierEvaluationFormProps> = ({
             <div className="space-y-4">
               <div>
                 <Label htmlFor="evaluator">Avaliador</Label>
-                <Input 
-                  id="evaluator" 
-                  value={evaluator} 
-                  onChange={(e) => setEvaluator(e.target.value)} 
-                  placeholder="Nome do responsável pela avaliação"
+                <Select
+                  value={getEmployeeIdByName(employees, evaluator)}
+                  onValueChange={(employeeId) => setEvaluator(getEmployeeNameById(employees, employeeId))}
+                  disabled={loadingEmployees}
                   required
-                />
+                >
+                  <SelectTrigger id="evaluator">
+                    <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o avaliador"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="comments">Observações</Label>

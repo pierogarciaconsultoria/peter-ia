@@ -12,6 +12,7 @@ export interface CustomerComplaint {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
   assigned_to?: string;
+  assigned_to_id?: string;
   resolution?: string;
   created_at: string;
   updated_at: string;
@@ -68,7 +69,9 @@ export async function getCustomerComplaintById(id: string): Promise<CustomerComp
   };
 }
 
-export async function createCustomerComplaint(complaint: Omit<CustomerComplaint, 'id' | 'created_at' | 'updated_at' | 'closed_at'>): Promise<CustomerComplaint> {
+export async function createCustomerComplaint(
+  complaint: Omit<CustomerComplaint, 'id' | 'created_at' | 'updated_at' | 'closed_at'> & { assigned_to_id?: string }
+): Promise<CustomerComplaint> {
   // Gerar um código de identificação automático se não foi informado
   const complaintWithCode = {
     ...complaint,

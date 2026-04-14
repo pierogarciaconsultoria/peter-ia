@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Room, Reservation } from "@/services/roomService";
 import { addHours } from "date-fns";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { DateTimeFields } from "./DateTimeFields";
 import { AttendeesField } from "./AttendeesField";
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 interface ReservationFormProps {
   isOpen: boolean;
@@ -48,6 +49,8 @@ export function ReservationForm({
   reservation, 
   selectedRoomId 
 }: ReservationFormProps) {
+  const { employees, loadingEmployees } = useActiveEmployees({ enabled: isOpen });
+
   const form = useForm<Omit<Reservation, 'id' | 'createdAt'>>({
     defaultValues: {
       roomId: selectedRoomId || reservation?.roomId || '',
@@ -174,9 +177,24 @@ export function ReservationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Responsável</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome do responsável" {...field} />
-                  </FormControl>
+                  <Select
+                    value={getEmployeeIdByName(employees, field.value)}
+                    onValueChange={(employeeId) => field.onChange(getEmployeeNameById(employees, employeeId))}
+                    disabled={loadingEmployees}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {employees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

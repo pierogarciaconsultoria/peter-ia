@@ -1,5 +1,4 @@
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,6 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { createOrganizationContext } from "@/services/organizationContextService";
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 const formSchema = z.object({
   description: z.string({ required_error: "A descrição é obrigatória" })
@@ -29,7 +29,7 @@ const formSchema = z.object({
   analysis: z.string().optional(),
   update_date: z.date({ required_error: "A data de atualização é obrigatória" }),
   created_by: z.string({ required_error: "Responsável é obrigatório" })
-    .min(3, "O nome do responsável deve ter pelo menos 3 caracteres"),
+    .min(1, "Selecione o responsável"),
 }).refine(data => {
   // If context_type is swot, then swot_category is required
   if (data.context_type === "swot") {
@@ -49,37 +49,9 @@ interface ContextFormDialogProps {
   onSuccess?: () => void;
 }
 
-const getContextTypeLabel = (type: string) => {
-  switch (type) {
-    case "internal_factor":
-      return "Fator Interno";
-    case "external_factor":
-      return "Fator Externo";
-    case "interested_party":
-      return "Parte Interessada";
-    case "swot":
-      return "Análise SWOT";
-    default:
-      return type;
-  }
-};
-
-const getSwotCategoryLabel = (category: string) => {
-  switch (category) {
-    case "strength":
-      return "Ponto Forte";
-    case "weakness":
-      return "Ponto Fraco";
-    case "opportunity":
-      return "Oportunidade";
-    case "threat":
-      return "Ameaça";
-    default:
-      return category;
-  }
-};
-
 export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextFormDialogProps) {
+  const { employees, loadingEmployees } = useActiveEmployees({ enabled: open });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -280,13 +252,24 @@ export function ContextFormDialog({ open, onOpenChange, onSuccess }: ContextForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Responsável</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={isLoading}
-                      placeholder="Nome do responsável"
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    value={getEmployeeIdByName(employees, field.value)}
+                    onValueChange={(employeeId) => field.onChange(getEmployeeNameById(employees, employeeId))}
+                    disabled={isLoading || loadingEmployees}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {employees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { getEmployeeIdByName, getEmployeeNameById, useActiveEmployees } from "@/hooks/useActiveEmployees";
 
 const formSchema = z.object({
   title: z.string().min(3, "O título deve ter pelo menos 3 caracteres"),
@@ -20,14 +21,16 @@ const formSchema = z.object({
   impact: z.string().min(1, "Selecione o impacto"),
   status: z.string().min(1, "Selecione o status"),
   treatment: z.string().optional(),
-  responsible: z.string().min(3, "O responsável deve ter pelo menos 3 caracteres"),
+  responsible: z.string().min(1, "Selecione o responsável"),
   deadline: z.string().optional(),
 });
+type FormValues = z.infer<typeof formSchema>;
 
 export function RiskForm({ risk = null, onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { employees, loadingEmployees } = useActiveEmployees();
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: risk ? {
       title: risk.title,
@@ -56,7 +59,7 @@ export function RiskForm({ risk = null, onSuccess }) {
     }
   });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
       // Simulate API call
@@ -260,9 +263,24 @@ export function RiskForm({ risk = null, onSuccess }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Responsável</FormLabel>
-                <FormControl>
-                  <Input placeholder="Responsável pelo tratamento" {...field} />
-                </FormControl>
+                <Select
+                  value={getEmployeeIdByName(employees, field.value)}
+                  onValueChange={(employeeId) => field.onChange(getEmployeeNameById(employees, employeeId))}
+                  disabled={loadingEmployees}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingEmployees ? "Carregando colaboradores..." : "Selecione o responsável"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

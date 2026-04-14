@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OccurrenceFormValues } from "./types";
+import { getEmployeeIdByName, getEmployeeNameById } from "@/hooks/useActiveEmployees";
 
 interface Employee {
   id: string;
@@ -238,9 +239,23 @@ export function NewOccurrenceForm({ employees, onSubmit, onCancel }: NewOccurren
           render={({ field }) => (
             <FormItem>
               <FormLabel>Responsável</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Nome do responsável" />
-              </FormControl>
+              <Select
+                value={getEmployeeIdByName(employees, field.value)}
+                onValueChange={(employeeId) => field.onChange(getEmployeeNameById(employees, employeeId))}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o responsável" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
