@@ -1,13 +1,12 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompanyManagement from '@/components/admin/CompanyManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import { PermissoesUsuarios } from '@/components/admin/PermissoesUsuarios';
 import { AdminAdvancedSettings } from '@/components/admin/AdminAdvancedSettings';
-import { SecurityDashboard } from '@/components/admin/SecurityDashboard';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Building2, Users, Lock, AlertTriangle } from 'lucide-react';
+import { Shield, Building2, Users, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -210,33 +209,8 @@ const Admin = () => {
         </div>
       </div>
 
-      {/* Card de integração do Custom GPT - apenas exibição rápida/configuração */}
-      <div className="mb-8">
-        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-center gap-4">
-          <span className="text-yellow-700 font-bold text-xl">🤖</span>
-          <div>
-            <div className="font-semibold text-yellow-900">Integração com Custom GPT</div>
-            <div className="text-yellow-900/80 text-sm">
-              Para integrar seu próprio modelo GPT personalizado via API, configure o endpoint e a chave de API apropriada abaixo.
-              <br />
-              <span className="font-semibold">Ambiente:</span> <span className="ml-1 px-2 py-0.5 bg-yellow-100 rounded text-xs">{isDevBypass ? 'Desenvolvimento (Acesso Liberado)' : 'Restrito'}</span>
-            </div>
-            {/* No futuro: Adicionar campos/editáveis para URL/chave. Por enquanto, apenas informativo. */}
-          </div>
-        </div>
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 gap-2 h-auto p-2 bg-muted">
-          {/* Aba de Segurança - Primeira posição para destaque */}
-          <TabsTrigger 
-            value="seguranca" 
-            className="flex flex-col items-center gap-2 h-16 md:h-12 md:flex-row data-[state=active]:bg-red-600 data-[state=active]:text-white"
-          >
-            <AlertTriangle className="h-5 w-5" />
-            <span className="text-xs md:text-sm font-medium">Segurança</span>
-          </TabsTrigger>
-
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 h-auto p-2 bg-muted">
           {isSuperAdmin && (
             <TabsTrigger 
               value="empresas" 
@@ -273,11 +247,6 @@ const Admin = () => {
             </TabsTrigger>
           )}
         </TabsList>
-
-        {/* Nova Aba de Segurança */}
-        <TabsContent value="seguranca" className="space-y-6">
-          <SecurityDashboard />
-        </TabsContent>
 
         {/* Abas existentes mantidas */}
         {isSuperAdmin && (
