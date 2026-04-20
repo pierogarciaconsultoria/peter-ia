@@ -47,12 +47,7 @@ export const PermissionGuard = ({
     return <>{children}</>;
   }
   
-  // 2. Administradores têm acesso a tudo dentro de sua empresa
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-  
-  // 3. Para usuários comuns, verifica as permissões específicas
+  // 2. Admin da empresa também precisa respeitar a liberação do módulo
   if (!temPermissao(modulo, requerPermissao)) {
     console.log(`Acesso negado: usuário não tem permissão '${requerPermissao}' para módulo '${modulo}'`);
     return <>{fallback}</>;

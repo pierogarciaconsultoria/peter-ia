@@ -44,12 +44,7 @@ export const UnifiedPermissionGuard = ({
     return <>{children}</>;
   }
 
-  // 2. Administradores têm acesso a tudo dentro de sua empresa
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-
-  // 3. Para usuários comuns, verifica as permissões específicas
+  // 2. Admin da empresa também precisa respeitar a liberação do módulo
   if (!temPermissao(modulo, requerPermissao)) {
     return <>{fallback}</>;
   }

@@ -24,6 +24,14 @@ serve(async (req) => {
     const { companyData, analysisType = 'complete' } = await req.json();
     
     console.log('Analyzing company:', companyData);
+    const website =
+      companyData.company_website ||
+      companyData?.settings?.ai_context?.company_website ||
+      'Não informado';
+    const instagram =
+      companyData.company_instagram ||
+      companyData?.settings?.ai_context?.company_instagram ||
+      'Não informado';
 
     const analysisPrompt = `
 Você é um consultor especialista em gestão empresarial. Analise as informações da empresa abaixo e forneça sugestões detalhadas:
@@ -35,6 +43,8 @@ Você é um consultor especialista em gestão empresarial. Analise as informaç�
 - Descrição da Operação: ${companyData.company_description || 'Não informado'}
 - Problemas Operacionais: ${companyData.operational_problems || 'Não informado'}
 - Objetivos de Negócio: ${companyData.business_objectives || 'Não informado'}
+- Site da Empresa: ${website}
+- Instagram da Empresa: ${instagram}
 
 **FORNEÇA ANÁLISE E SUGESTÕES EM FORMATO JSON com as seguintes seções:**
 

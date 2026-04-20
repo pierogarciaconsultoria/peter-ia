@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ interface ManualIdentityFormProps {
   setValues: (values: string[]) => void;
   isLoading: boolean;
   isEditable: boolean;
+  autoFocusMission?: boolean;
 }
 
 export function ManualIdentityForm({
@@ -32,9 +33,19 @@ export function ManualIdentityForm({
   values,
   setValues,
   isLoading,
-  isEditable = true
+  isEditable = true,
+  autoFocusMission = false
 }: ManualIdentityFormProps) {
   const [newValue, setNewValue] = useState("");
+  const missionTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const hasFocusedMissionRef = useRef(false);
+
+  useEffect(() => {
+    if (autoFocusMission && isEditable && !isLoading && !hasFocusedMissionRef.current) {
+      missionTextareaRef.current?.focus();
+      hasFocusedMissionRef.current = true;
+    }
+  }, [autoFocusMission, isEditable, isLoading]);
 
   const addValue = () => {
     if (newValue.trim() && !values.includes(newValue.trim())) {
@@ -91,12 +102,14 @@ export function ManualIdentityForm({
                 {isEditable ? (
                   <Textarea
                     id="mission"
+                    ref={missionTextareaRef}
                     placeholder="Descreva a missão da sua organização..."
                     rows={4}
                     value={mission}
                     onChange={(e) => setMission(e.target.value)}
                     required
                     disabled={isLoading}
+                    autoFocus={autoFocusMission}
                     className="w-full"
                   />
                 ) : (

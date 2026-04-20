@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Brain, Target, FileText, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react';
+import { Loader2, Brain, Target, FileText, TrendingUp, Lightbulb } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { toast } from 'sonner';
 import { AnalysisIntegrationPanel } from './AnalysisIntegrationPanel';
+import { AnalysisIntegrationService } from '@/services/analysis-integration/analysisIntegrationService';
+import { useNavigate } from 'react-router-dom';
 
 interface AnalysisResults {
   strategic_planning: any;
@@ -22,7 +24,9 @@ interface AnalysisResults {
 
 export function IntelligentAnalysis() {
   const { empresaId } = useCurrentUser();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingCompanyData, setLoadingCompanyData] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResults | null>(null);
   const [companyData, setCompanyData] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -30,7 +34,9 @@ export function IntelligentAnalysis() {
     operational_problems: '',
     business_objectives: '',
     company_sector: '',
-    company_size: ''
+    company_size: '',
+    company_website: '',
+    company_instagram: ''
   });
 
   const sectors = [
@@ -48,6 +54,45 @@ export function IntelligentAnalysis() {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    const loadInitialCompanyData = async () => {
+      if (!empresaId) return;
+
+      setLoadingCompanyData(true);
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', empresaId)
+          .single();
+
+        if (error) throw error;
+
+        const settings = (data?.settings && typeof data.settings === 'object') ? data.settings as any : {};
+        const aiContext = (settings?.ai_context && typeof settings.ai_context === 'object')
+          ? settings.ai_context
+          : {};
+
+        setFormData(prev => ({
+          ...prev,
+          company_description: data?.company_description || '',
+          operational_problems: data?.operational_problems || '',
+          business_objectives: data?.business_objectives || '',
+          company_sector: data?.company_sector || '',
+          company_size: data?.company_size || '',
+          company_website: aiContext.company_website || '',
+          company_instagram: aiContext.company_instagram || '',
+        }));
+      } catch (error) {
+        console.error('Erro ao carregar dados da empresa para análise inteligente:', error);
+      } finally {
+        setLoadingCompanyData(false);
+      }
+    };
+
+    loadInitialCompanyData();
+  }, [empresaId]);
 
   const handleAnalyze = async () => {
     if (!formData.company_description.trim()) {
@@ -82,12 +127,52 @@ export function IntelligentAnalysis() {
       if (data.success) {
         setAnalysisResults(data.analysis);
         setCompanyData(analysisData);
-        toast.success('Análise gerada com sucesso!');
         
-        // Atualizar dados da empresa com as novas informações
+        // Aplicar automaticamente no módulo de Planejamento Estratégico
+        let strategicApplied = false;
+        try {
+          const strategicMapping = AnalysisIntegrationService.mapStrategicPlanning(data.analysis);
+          strategicApplied = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId || '');
+        } catch (integrationError) {
+          console.error('Erro ao aplicar Planejamento Estratégico automaticamente:', integrationError);
+        }
+
+        if (strategicApplied) {
+          toast.success('Análise gerada e Planejamento Estratégico preenchido automaticamente!');
+          toast.info('Revise e edite missão, visão e valores para validação humana.');
+          navigate('/strategic-planning/identity?origem=analise-inteligente');
+        } else {
+          toast.success('Análise gerada com sucesso!');
+          toast.warning('Não foi possível preencher automaticamente o Planejamento Estratégico.');
+        }
+        
+        // Atualizar dados da empresa com as novas informações e contexto digital para IA
+        const currentSettings: any =
+          currentCompanyData?.settings && typeof currentCompanyData.settings === 'object'
+            ? currentCompanyData.settings
+            : {};
+        const currentAiContext: any =
+          currentSettings?.ai_context && typeof currentSettings.ai_context === 'object'
+            ? currentSettings.ai_context
+            : {};
+
         await supabase
           .from('companies')
-          .update(formData)
+          .update({
+            company_description: formData.company_description,
+            operational_problems: formData.operational_problems,
+            business_objectives: formData.business_objectives,
+            company_sector: formData.company_sector,
+            company_size: formData.company_size,
+            settings: {
+              ...currentSettings,
+              ai_context: {
+                ...currentAiContext,
+                company_website: formData.company_website,
+                company_instagram: formData.company_instagram,
+              },
+            },
+          })
           .eq('id', empresaId);
       } else {
         throw new Error(data.error || 'Erro na análise');
@@ -144,6 +229,28 @@ export function IntelligentAnalysis() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="company_website">Site da Empresa</Label>
+              <Input
+                id="company_website"
+                type="url"
+                placeholder="https://www.suaempresa.com.br"
+                value={formData.company_website}
+                onChange={(e) => handleInputChange('company_website', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company_instagram">Instagram da Empresa</Label>
+              <Input
+                id="company_instagram"
+                placeholder="@suaempresa ou https://instagram.com/suaempresa"
+                value={formData.company_instagram}
+                onChange={(e) => handleInputChange('company_instagram', e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="description">Descrição da Operação *</Label>
             <Textarea
@@ -179,7 +286,7 @@ export function IntelligentAnalysis() {
 
           <Button 
             onClick={handleAnalyze} 
-            disabled={loading || !formData.company_description.trim()}
+            disabled={loading || loadingCompanyData || !formData.company_description.trim()}
             className="w-full"
           >
             {loading ? (

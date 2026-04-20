@@ -10,7 +10,7 @@ export const settingsItems: MenuItem[] = [
     modulo: "tarefas",
   },
   {
-    title: "Administração",
+    title: "Configuração",
     icon: Settings,
     href: "/admin",
     modulo: "admin",

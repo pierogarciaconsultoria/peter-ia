@@ -63,12 +63,11 @@ export const PermissionGuard = ({
   
   // 2. Verificação por módulo específico
   if (modulo) {
-    // Usuários master e admin têm acesso a tudo
-    if (isSuperAdmin || isAdmin) {
+    // Super admin mantém acesso irrestrito; admin da empresa respeita liberação/permissão
+    if (isSuperAdmin) {
       return <>{children}</>;
     }
     
-    // Para usuários comuns, verifica as permissões específicas
     if (!temPermissao(modulo, requerPermissao)) {
       console.log(`Acesso negado: usuário não tem permissão '${requerPermissao}' para módulo '${modulo}'`);
       return fallback || <Navigate to="/" replace />;

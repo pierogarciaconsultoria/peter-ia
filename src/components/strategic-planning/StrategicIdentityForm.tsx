@@ -1,5 +1,4 @@
 
-import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { ManualIdentityForm } from "./ManualIdentityForm";
@@ -9,6 +8,7 @@ import { IndicatorSuggestionDialog } from "./IndicatorSuggestionDialog";
 import { IdentityFormHeader } from "./components/IdentityFormHeader";
 import { IdentityEditingActions } from "./components/IdentityEditingActions";
 import { useStrategicIdentity } from "./hooks/useStrategicIdentity";
+import { useLocation } from "react-router-dom";
 
 interface StrategicIdentityFormProps {
   identity: StrategicIdentity | null;
@@ -16,6 +16,9 @@ interface StrategicIdentityFormProps {
 }
 
 export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityFormProps) {
+  const location = useLocation();
+  const autoFocusMissionFromQuery =
+    new URLSearchParams(location.search).get("origem") === "analise-inteligente";
   const {
     mission,
     setMission,
@@ -60,6 +63,7 @@ export function StrategicIdentityForm({ identity, onUpdate }: StrategicIdentityF
             setValues={setValues}
             isLoading={loading}
             isEditable={isEditing}
+            autoFocusMission={autoFocusMissionFromQuery}
           />
           
           {isEditing ? (

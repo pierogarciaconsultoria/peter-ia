@@ -28,32 +28,20 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) 
 
   // Permission checking functions
   const checkPermission = (module: string, permission: PermissionType): boolean => {
-    // Special bypass cases
     if (bypassAuth) return true;
     if (isSuperAdmin) return true;
-    if (isAdmin) return true;
-    
-    // Check specific permission
     return temPermissao(module, permission);
   };
   
   const checkMultiplePermissions = (checks: PermissionCheck[]): boolean => {
-    // Special bypass cases
     if (bypassAuth) return true;
     if (isSuperAdmin) return true;
-    if (isAdmin) return true;
-    
-    // All permissions must be granted
     return checks.every(check => temPermissao(check.module, check.permission));
   };
   
   const checkAnyPermission = (checks: PermissionCheck[]): boolean => {
-    // Special bypass cases
     if (bypassAuth) return true;
     if (isSuperAdmin) return true;
-    if (isAdmin) return true;
-    
-    // At least one permission must be granted
     return checks.some(check => temPermissao(check.module, check.permission));
   };
   

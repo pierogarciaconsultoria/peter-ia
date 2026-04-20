@@ -17,7 +17,7 @@ export interface ModuloPermissao {
 }
 
 export function useUserPermissions() {
-  const { user, isMaster, isAdmin, empresaId } = useCurrentUser();
+  const { user, isMaster, isAdmin, empresaId, userCompany } = useCurrentUser();
   const [permissoes, setPermissoes] = useState<ModuloPermissao[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -71,17 +71,15 @@ export function useUserPermissions() {
       setLoading(true);
       setError(null);
       
-      // Para master e admin, buscamos todos os módulos
-      if (isMaster || isAdmin) {
+      if (isMaster) {
         const { data: modulos, error: modulosError } = await supabase
           .from('modulos')
           .select('*')
           .eq('ativo', true);
-          
+
         if (modulosError) throw modulosError;
-        
-        // Conceder todas as permissões para master e admin
-        const permissoesCompletas = (modulos || []).map(modulo => ({
+
+        setPermissoes((modulos || []).map(modulo => ({
           id: modulo.id,
           nome: modulo.nome,
           chave: modulo.chave,
@@ -90,12 +88,30 @@ export function useUserPermissions() {
           pode_editar: true,
           pode_excluir: true,
           pode_criar: true
-        }));
-        
-        setPermissoes(permissoesCompletas);
+        })));
+      } else if (isAdmin) {
+        const modulosLiberados = new Set(userCompany?.active_modules || []);
+        const { data: modulos, error: modulosError } = await supabase
+          .from('modulos')
+          .select('*')
+          .eq('ativo', true);
+
+        if (modulosError) throw modulosError;
+
+        setPermissoes((modulos || [])
+          .filter(modulo => modulosLiberados.has(modulo.chave))
+          .map(modulo => ({
+            id: modulo.id,
+            nome: modulo.nome,
+            chave: modulo.chave,
+            descricao: modulo.descricao,
+            pode_visualizar: true,
+            pode_editar: true,
+            pode_excluir: true,
+            pode_criar: true
+          })));
       } else {
-        // Para usuários normais, buscamos as permissões específicas
-        const { data, error } = await supabase
+        const { data: usuarioPerms, error: usuarioError } = await supabase
           .from('permissoes_usuario')
           .select(`
             modulo_id,
@@ -111,22 +127,68 @@ export function useUserPermissions() {
             )
           `)
           .eq('usuario_id', user.id);
-          
-        if (error) throw error;
-        
-        // Formatar os dados para o formato esperado
-        const permissoesUsuario = (data || []).map(item => ({
-          id: item.modulos.id,
-          nome: item.modulos.nome,
-          chave: item.modulos.chave,
-          descricao: item.modulos.descricao,
-          pode_visualizar: item.pode_visualizar,
-          pode_editar: item.pode_editar,
-          pode_excluir: item.pode_excluir,
-          pode_criar: item.pode_criar,
-        }));
-        
-        setPermissoes(permissoesUsuario);
+
+        if (usuarioError) throw usuarioError;
+
+        let empresaPerms: any[] = [];
+
+        if (empresaId) {
+          const { data: empresaData, error: empresaError } = await (supabase as any)
+            .from('permissoes_empresa')
+            .select(`
+              modulo_id,
+              pode_visualizar,
+              pode_editar,
+              pode_excluir,
+              pode_criar,
+              modulos:modulo_id (
+                id,
+                nome,
+                chave,
+                descricao
+              )
+            `)
+            .eq('company_id', empresaId);
+
+          if (!empresaError && empresaData) {
+            empresaPerms = empresaData;
+          }
+        }
+
+        const combinedMap = new Map<string, ModuloPermissao>();
+
+        for (const item of empresaPerms || []) {
+          if (!item.modulos) continue;
+          combinedMap.set(item.modulo_id, {
+            id: item.modulos.id,
+            nome: item.modulos.nome,
+            chave: item.modulos.chave,
+            descricao: item.modulos.descricao,
+            pode_visualizar: !!item.pode_visualizar,
+            pode_editar: !!item.pode_editar,
+            pode_excluir: !!item.pode_excluir,
+            pode_criar: !!item.pode_criar,
+          });
+        }
+
+        for (const item of usuarioPerms || []) {
+          if (!item.modulos) continue;
+          const base = combinedMap.get(item.modulo_id);
+          const merged: ModuloPermissao = {
+            id: item.modulos.id,
+            nome: item.modulos.nome,
+            chave: item.modulos.chave,
+            descricao: item.modulos.descricao,
+            pode_visualizar: item.pode_visualizar ?? base?.pode_visualizar ?? false,
+            pode_editar: item.pode_editar ?? base?.pode_editar ?? false,
+            pode_excluir: item.pode_excluir ?? base?.pode_excluir ?? false,
+            pode_criar: item.pode_criar ?? base?.pode_criar ?? false,
+          };
+          combinedMap.set(item.modulo_id, merged);
+        }
+
+        const combinedPerms = Array.from(combinedMap.values());
+        setPermissoes(combinedPerms);
       }
     } catch (err: any) {
       console.error("Erro ao buscar permissões:", err);
@@ -138,24 +200,22 @@ export function useUserPermissions() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, isMaster, isAdmin, isLovableMaster]);
+  }, [user?.id, isMaster, isAdmin, isLovableMaster, empresaId, userCompany?.active_modules]);
 
   useEffect(() => {
     fetchPermissoes();
   }, [fetchPermissoes]);
 
-  // Verificação de permissões simplificada com memoização
+  const moduloLiberado = useCallback((modulo: string): boolean => {
+    if (isLovableMaster || isMaster) return true;
+    return (userCompany?.active_modules || []).includes(modulo);
+  }, [isLovableMaster, isMaster, userCompany?.active_modules]);
+
   const temPermissao = useCallback((modulo: string, tipo: 'visualizar' | 'editar' | 'excluir' | 'criar'): boolean => {
-    // Super Admin no Lovable Editor tem todas as permissões
-    if (isLovableMaster) return true;
-    
-    // Master tem todas as permissões automaticamente
-    if (isMaster) return true;
-    
-    // Admin tem todas as permissões para sua empresa
+    if (isLovableMaster || isMaster) return true;
+    if (!moduloLiberado(modulo)) return false;
     if (isAdmin) return true;
-    
-    // Procura pela permissão específica
+
     const permissao = permissoes.find(p => p.chave === modulo);
     if (!permissao) return false;
     
@@ -166,7 +226,7 @@ export function useUserPermissions() {
       case 'criar': return permissao.pode_criar;
       default: return false;
     }
-  }, [isMaster, isAdmin, permissoes, isLovableMaster]);
+  }, [isMaster, isAdmin, permissoes, isLovableMaster, moduloLiberado]);
 
   // Funções auxiliares para simplificar o uso
   const podeVisualizar = useCallback((modulo: string): boolean => {
