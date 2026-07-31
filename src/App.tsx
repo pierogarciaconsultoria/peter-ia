@@ -10,7 +10,17 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster as SonnerToaster } from 'sonner';
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { testConnection } from './integrations/supabase/client';
+import { supabase } from './integrations/supabase/client';
+
+const testConnection = async (): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase.auth.getSession();
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message ?? 'Unknown error' };
+  }
+};
 import { isProductionEnvironment } from './utils/lovableEditorDetection';
 
 // Import pages 
