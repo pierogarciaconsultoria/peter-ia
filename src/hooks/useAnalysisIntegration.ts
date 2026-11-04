@@ -14,7 +14,7 @@ export function useAnalysisIntegration() {
     risk_management: true,
     indicators: true,
     processes: false,
-    action_plan: false
+    action_plan: true
   });
 
   const generatePreviews = (aiSuggestions: any, companyData: any) => {
@@ -42,7 +42,8 @@ export function useAnalysisIntegration() {
       switch (moduleType) {
         case 'strategic_planning': {
           const strategicMapping = AnalysisIntegrationService.mapStrategicPlanning(aiSuggestions);
-          success = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId);
+          // Aplicação explícita pelo usuário: sobrescreve identidade e canvas existentes
+          success = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId, { overwrite: true });
           break;
         }
 

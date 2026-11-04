@@ -1,26 +1,65 @@
 
-import { IntegrationPreview } from '@/types/analysis-integration';
+import { IntegrationPreview, IntegrationItem } from '@/types/analysis-integration';
 import { StrategicPlanningMapper } from './mappers/strategicPlanningMapper';
 import { RiskMapper } from './mappers/riskMapper';
 import { IndicatorMapper } from './mappers/indicatorMapper';
 import { OrganizationContextMapper } from './mappers/organizationContextMapper';
+import { ActionPlanMapper } from './mappers/actionPlanMapper';
 
 export class PreviewGenerator {
   static generatePreviews(aiSuggestions: any, companyData: any): IntegrationPreview[] {
     const previews: IntegrationPreview[] = [];
 
-    // Preview Planejamento Estratégico
+    // Preview Planejamento Estratégico (identidade, SWOT, BSC e Canvas)
     const strategicMapping = StrategicPlanningMapper.mapStrategicPlanning(aiSuggestions);
-    if (strategicMapping.mission || strategicMapping.vision || strategicMapping.values.length > 0) {
+    const hasStrategic =
+      strategicMapping.mission || strategicMapping.vision || strategicMapping.values.length > 0 || strategicMapping.ultimate_goal || strategicMapping.pillars.length > 0 ||
+      strategicMapping.swot_items.length > 0 || strategicMapping.bsc_objectives.length > 0 || strategicMapping.canvas;
+    if (hasStrategic) {
+      const items: IntegrationItem[] = [];
+      if (strategicMapping.mission) items.push({ id: 'mission', title: 'Missão', description: strategicMapping.mission, type: 'text', data: strategicMapping.mission });
+      if (strategicMapping.vision) items.push({ id: 'vision', title: 'Visão', description: strategicMapping.vision, type: 'text', data: strategicMapping.vision });
+      if (strategicMapping.ultimate_goal) items.push({ id: 'ultimate_goal', title: 'Objetivo final', description: strategicMapping.ultimate_goal, type: 'text', data: strategicMapping.ultimate_goal });
+      if (strategicMapping.pillars.length > 0) items.push({ id: 'pillars', title: 'Pilares estratégicos', description: strategicMapping.pillars.map(p => p.name).join('; '), type: 'array', data: strategicMapping.pillars });
+      if (strategicMapping.values.length > 0) items.push({ id: 'values', title: 'Valores', description: strategicMapping.values.join(', '), type: 'array', data: strategicMapping.values });
+      if (strategicMapping.swot_items.length > 0) {
+        items.push({
+          id: 'swot',
+          title: 'Análise SWOT',
+          description: `${strategicMapping.swot_items.length} itens: ` + strategicMapping.swot_items.slice(0, 4).map(i => i.description).join('; ') + (strategicMapping.swot_items.length > 4 ? '…' : ''),
+          type: 'swot',
+          data: strategicMapping.swot_items
+        });
+      }
+      if (strategicMapping.bsc_objectives.length > 0) {
+        items.push({
+          id: 'bsc',
+          title: 'Objetivos (OKR)',
+          description: `${strategicMapping.bsc_objectives.length} objetivos com resultado-chave: ` + strategicMapping.bsc_objectives.slice(0, 4).map(o => o.title).join('; ') + (strategicMapping.bsc_objectives.length > 4 ? '…' : ''),
+          type: 'bsc',
+          data: strategicMapping.bsc_objectives
+        });
+      }
+      if (strategicMapping.canvas) {
+        items.push({ id: 'canvas', title: 'Business Model Canvas', description: strategicMapping.canvas.value_propositions || '9 blocos preenchidos', type: 'canvas', data: strategicMapping.canvas });
+      }
+      previews.push({ module: 'strategic_planning', title: 'Planejamento Estratégico', canApply: true, items });
+    }
+
+    // Preview Plano de Ação (90 dias)
+    const actionsMapping = ActionPlanMapper.mapActionPlan(aiSuggestions);
+    if (actionsMapping.length > 0) {
       previews.push({
-        module: 'strategic_planning',
-        title: 'Planejamento Estratégico',
+        module: 'action_plan',
+        title: 'Plano de Ação (90 dias)',
         canApply: true,
-        items: [
-          { id: 'mission', title: 'Missão', description: strategicMapping.mission, type: 'text', data: strategicMapping.mission },
-          { id: 'vision', title: 'Visão', description: strategicMapping.vision, type: 'text', data: strategicMapping.vision },
-          { id: 'values', title: 'Valores', description: `${strategicMapping.values.length} valores`, type: 'array', data: strategicMapping.values }
-        ]
+        items: actionsMapping.map((action, index) => ({
+          id: `action_${index}`,
+          title: action.title,
+          description: `${action.why} · prazo ${action.due_date} · prioridade ${action.priority}`,
+          type: 'action',
+          data: action
+        }))
       });
     }
 

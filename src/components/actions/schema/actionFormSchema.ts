@@ -42,6 +42,7 @@ export const actionSchema = z.object({
   priority: z.enum(actionPriorityValues as [ActionPriority, ...ActionPriority[]]),
   process_area: z.enum(processAreaValues as [ProcessArea, ...ProcessArea[]]),
   comments: z.string().optional(),
+  key_result_id: z.string().nullable().optional(),
 });
 
 export type ActionFormValues = z.infer<typeof actionSchema>;

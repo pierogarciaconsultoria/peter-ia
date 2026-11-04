@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { DiscQuestionnaireForm } from "./DiscQuestionnaireForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { AlertTriangle, Check } from "lucide-react";
-import { validateAssessmentLink, createAssessment, markAssessmentLinkAsUsed } from "@/services/discAssessmentService";
+import { validateAssessmentLink, submitDiscAssessment } from "@/services/discAssessmentService";
 import { useToast } from "@/hooks/use-toast";
 import { DiscScore } from "@/types/disc";
 import { Button } from "@/components/ui/button";
@@ -72,15 +72,8 @@ export function ExternalDiscAssessment() {
       const primaryTypeUpper = primaryType.toUpperCase() as 'D' | 'I' | 'S' | 'C';
 
       try {
-        await createAssessment({
-          name: assessmentData.name,
-          email: assessmentData.email,
-          scores,
-          primary_type: primaryTypeUpper,
-          invited_by: null
-        });
-
-        await markAssessmentLinkAsUsed(token!);
+        // Função do banco: grava na empresa do convite e consome o link
+        await submitDiscAssessment(token!, scores as unknown as Record<string, number>, primaryTypeUpper);
       } catch (error) {
         console.error("Error saving to database:", error);
         sonnerToast.warning("Avaliação salva localmente", {

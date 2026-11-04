@@ -132,14 +132,15 @@ export function IntelligentAnalysis() {
         let strategicApplied = false;
         try {
           const strategicMapping = AnalysisIntegrationService.mapStrategicPlanning(data.analysis);
-          strategicApplied = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId || '');
+          // Preenche identidade, SWOT, BSC (com KPIs) e Canvas; não sobrescreve o que já foi editado
+          strategicApplied = await AnalysisIntegrationService.applyStrategicPlanning(strategicMapping, empresaId || '', { overwrite: false });
         } catch (integrationError) {
           console.error('Erro ao aplicar Planejamento Estratégico automaticamente:', integrationError);
         }
 
         if (strategicApplied) {
-          toast.success('Análise gerada e Planejamento Estratégico preenchido automaticamente!');
-          toast.info('Revise e edite missão, visão e valores para validação humana.');
+          toast.success('Análise gerada! Identidade, SWOT, BSC e Canvas foram preenchidos no Planejamento Estratégico.');
+          toast.info('Revise as sugestões. O plano de ação de 90 dias pode ser aplicado no painel de integrações.');
           navigate('/strategic-planning/identity?origem=analise-inteligente');
         } else {
           toast.success('Análise gerada com sucesso!');

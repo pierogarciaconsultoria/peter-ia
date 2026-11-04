@@ -1,12 +1,13 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IdentityQuestionnaire } from "./questionnaire/IdentityQuestionnaire";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StrategicIdentity } from "@/types/strategic-planning";
-import { Check, FileEdit, ThumbsDown, ThumbsUp } from "lucide-react";
+import { IndicatorType } from "@/types/indicators";
+import { LoaderCircle, Sparkles } from "lucide-react";
 import { addIndicator } from "@/services/indicatorService";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface IndicatorSuggestionDialogProps {
   open: boolean;
@@ -14,78 +15,143 @@ interface IndicatorSuggestionDialogProps {
   identity: Pick<StrategicIdentity, "mission" | "vision" | "values">;
 }
 
-export function IndicatorSuggestionDialog({
-  open,
-  onClose,
-  identity
-}: IndicatorSuggestionDialogProps) {
-  const [suggestedIndicators, setSuggestedIndicators] = useState<string[]>([]);
+type SuggestedIndicator = Omit<IndicatorType, "id" | "created_at" | "updated_at">;
+
+const GOAL_TYPES: IndicatorType["goal_type"][] = ["higher_better", "lower_better", "target"];
+const CALC_TYPES: IndicatorType["calculation_type"][] = ["sum", "average"];
+
+function normalizeSuggestion(raw: any): SuggestedIndicator | null {
+  const name = raw?.name || raw?.title;
+  if (!name) return null;
+  return {
+    name,
+    description: raw.description || `Indicador estratégico: ${name}`,
+    process: raw.process || "Estratégico",
+    goal_type: GOAL_TYPES.includes(raw.goal_type) ? raw.goal_type : "higher_better",
+    goal_value: Number(raw.goal_value ?? raw.target ?? 100) || 100,
+    calculation_type: CALC_TYPES.includes(raw.calculation_type) ? raw.calculation_type : "average",
+    unit: raw.unit || "%",
+  };
+}
+
+export function IndicatorSuggestionDialog({ open, onClose, identity }: IndicatorSuggestionDialogProps) {
+  const { toast } = useToast();
+  const [suggestions, setSuggestions] = useState<SuggestedIndicator[]>([]);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [generating, setGenerating] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const handleGenerateSuggestions = async () => {
-    const { mission, vision, values } = identity;
-    const suggestions: string[] = [];
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-strategic-indicators", {
+        body: { identity },
+      });
+      if (error) throw error;
 
-    if (mission) {
-      suggestions.push(`Cumprimento da Missão: ${mission.substring(0, 50)}...`);
+      const list = (data?.indicators || [])
+        .map(normalizeSuggestion)
+        .filter((s: SuggestedIndicator | null): s is SuggestedIndicator => s !== null);
+
+      if (list.length === 0) throw new Error("A IA não retornou indicadores");
+
+      setSuggestions(list);
+      setSelected(new Set(list.map((_: SuggestedIndicator, i: number) => i)));
+    } catch (error: any) {
+      console.error("Error generating indicator suggestions:", error);
+      toast({
+        title: "Erro ao gerar sugestões",
+        description: error?.message || "Tente novamente em instantes",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
     }
-    if (vision) {
-      suggestions.push(`Alcance da Visão: ${vision.substring(0, 50)}...`);
-    }
-    values.forEach(value => {
-      suggestions.push(`Aderência ao Valor: ${value}`);
+  };
+
+  const toggle = (index: number) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index); else next.add(index);
+      return next;
     });
-
-    setSuggestedIndicators(suggestions);
   };
 
   const handleCreateIndicators = async () => {
-    await Promise.all(suggestedIndicators.map(indicatorName => {
-      return addIndicator({
-        name: indicatorName,
-        description: `Indicador estratégico para ${indicatorName}`,
-        process: "Estratégico",
-        goal_type: "higher_better",
-        goal_value: 100,
-        calculation_type: "average",
-        unit: "%"
+    setCreating(true);
+    try {
+      const chosen = suggestions.filter((_, i) => selected.has(i));
+      await Promise.all(chosen.map(indicator => addIndicator(indicator)));
+      toast({
+        title: "Indicadores criados",
+        description: `${chosen.length} indicador(es) adicionado(s) ao módulo de Indicadores`,
       });
-    }));
-    onClose();
+      setSuggestions([]);
+      onClose();
+    } catch (error) {
+      console.error("Error creating indicators:", error);
+      toast({ title: "Erro ao criar indicadores", variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[70vh] overflow-y-auto">
-        <h2 className="text-lg font-medium mb-4">
-          Sugerir Indicadores Estratégicos
-        </h2>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Sugerir Indicadores Estratégicos
+          </DialogTitle>
+          <DialogDescription>
+            A IA analisa missão, visão e valores e propõe KPIs com meta e unidade.
+            Selecione os que deseja criar no módulo de Indicadores.
+          </DialogDescription>
+        </DialogHeader>
 
-        <p className="text-sm text-muted-foreground mb-4">
-          Com base na identidade estratégica da sua organização, podemos sugerir
-          indicadores relevantes para monitorar o progresso.
-        </p>
-
-        {!suggestedIndicators.length ? (
-          <div className="flex justify-center">
-            <Button onClick={handleGenerateSuggestions}>
-              Gerar Sugestões
+        {suggestions.length === 0 ? (
+          <div className="flex justify-center py-4">
+            <Button onClick={handleGenerateSuggestions} disabled={generating}>
+              {generating ? (
+                <><LoaderCircle className="h-4 w-4 mr-2 animate-spin" /> Gerando...</>
+              ) : (
+                <><Sparkles className="h-4 w-4 mr-2" /> Gerar Sugestões com IA</>
+              )}
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-md font-medium">Indicadores Sugeridos:</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              {suggestedIndicators.map((indicator, index) => (
-                <li key={index}>{indicator}</li>
+            <div className="space-y-2">
+              {suggestions.map((indicator, index) => (
+                <label
+                  key={index}
+                  className="flex items-start gap-3 rounded-md border p-3 cursor-pointer hover:bg-muted/50"
+                >
+                  <Checkbox
+                    checked={selected.has(index)}
+                    onCheckedChange={() => toggle(index)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="flex justify-between gap-2">
+                      <span className="font-medium text-sm">{indicator.name}</span>
+                      <span className="text-xs bg-primary/10 text-primary rounded px-2 py-1 whitespace-nowrap">
+                        Meta: {indicator.goal_value} {indicator.unit}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{indicator.description}</p>
+                  </div>
+                </label>
               ))}
-            </ul>
+            </div>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
+              <Button type="button" variant="outline" onClick={() => setSuggestions([])} disabled={creating}>
+                Gerar novamente
               </Button>
-              <Button onClick={handleCreateIndicators}>
-                Criar Indicadores
+              <Button onClick={handleCreateIndicators} disabled={creating || selected.size === 0}>
+                {creating ? "Criando..." : `Criar ${selected.size} indicador(es)`}
               </Button>
             </div>
           </div>

@@ -8,6 +8,7 @@ import { QuestionDisplay } from "./QuestionDisplay";
 import { QuestionnaireProgress } from "./QuestionnaireProgress";
 import { QuestionnaireResponse } from "./QuestionnaireResponse";
 import { IdentityQuestionsType, QuestionnaireResponsesType } from "./QuestionnaireTypes";
+import { supabase } from "@/integrations/supabase/client";
 
 // Questions to guide the AI in generating strategic identity
 const MISSION_QUESTIONS = [
@@ -87,19 +88,15 @@ export function IdentityQuestionnaire({ onComplete, onCancel }: IdentityQuestion
   const generateIdentity = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('https://kxkcgbtsgfyisbrtjmvv.supabase.co/functions/v1/generate-strategic-identity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ responses }),
+      // Chama a edge function do próprio projeto, com o token do usuário logado
+      const { data, error } = await supabase.functions.invoke('generate-strategic-identity', {
+        body: { responses },
       });
 
-      if (!response.ok) {
-        throw new Error('Falha ao gerar sugestões para identidade estratégica');
+      if (error || !data?.mission) {
+        throw new Error(error?.message || 'Falha ao gerar sugestões para identidade estratégica');
       }
 
-      const data = await response.json();
       onComplete(data);
     } catch (error) {
       console.error('Erro ao gerar identidade estratégica:', error);

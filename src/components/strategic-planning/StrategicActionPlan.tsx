@@ -1,16 +1,53 @@
-
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, ArrowUpRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Dialog } from "@/components/ui/dialog";
+import { PlusCircle, ArrowUpRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { StrategicIdentity } from "@/types/strategic-planning";
-import { SwotItem } from "@/types/strategic-planning";
-import { BscPerspective } from "@/types/strategic-planning";
+import { BscObjective, StrategicIdentity, SwotItem } from "@/types/strategic-planning";
+import { Action5W2H } from "@/types/actions";
 import { getStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { getSwotItems } from "@/services/strategic-planning/swotService";
-import { getBscPerspectives } from "@/services/strategic-planning/bscService";
+import { getObjectives } from "@/services/strategic-planning/bscService";
+import { buildActionDraft, getStrategicActions, StrategicPillar } from "@/services/strategic-planning/strategicActionService";
+import { ActionForm } from "@/components/actions/ActionForm";
+
+const STATUS_LABELS: Record<Action5W2H["status"], string> = {
+  planned: "Planejada",
+  in_progress: "Em andamento",
+  completed: "Concluída",
+  delayed: "Atrasada",
+  cancelled: "Cancelada",
+};
+
+const STATUS_VARIANT: Record<Action5W2H["status"], "default" | "secondary" | "destructive" | "outline"> = {
+  planned: "outline",
+  in_progress: "default",
+  completed: "secondary",
+  delayed: "destructive",
+  cancelled: "outline",
+};
+
+interface PillarBoxProps {
+  title: string;
+  children: React.ReactNode;
+  onCreate: () => void;
+}
+
+function PillarBox({ title, children, onCreate }: PillarBoxProps) {
+  return (
+    <div className="bg-muted/30 p-4 rounded-lg flex flex-col">
+      <h4 className="font-medium mb-2">{title}</h4>
+      <div className="text-sm text-muted-foreground mb-3 flex-1">{children}</div>
+      <Button variant="outline" size="sm" className="w-full" onClick={onCreate}>
+        <PlusCircle className="h-4 w-4 mr-2" />
+        Criar ação
+      </Button>
+    </div>
+  );
+}
 
 export function StrategicActionPlan() {
   const navigate = useNavigate();
@@ -18,40 +55,48 @@ export function StrategicActionPlan() {
   const [loading, setLoading] = useState(true);
   const [identity, setIdentity] = useState<StrategicIdentity | null>(null);
   const [swotItems, setSwotItems] = useState<SwotItem[]>([]);
-  const [bscPerspectives, setBscPerspectives] = useState<BscPerspective[]>([]);
+  const [objectives, setObjectives] = useState<BscObjective[]>([]);
+  const [actions, setActions] = useState<Action5W2H[]>([]);
+  const [draft, setDraft] = useState<Partial<Action5W2H> | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch all strategic planning data
-        const [identityData, swotData, bscData] = await Promise.all([
-          getStrategicIdentity(),
-          getSwotItems(),
-          getBscPerspectives()
-        ]);
-        
-        setIdentity(identityData);
-        setSwotItems(swotData);
-        setBscPerspectives(bscData);
-      } catch (error) {
-        console.error("Error fetching strategic planning data:", error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar os dados do planejamento estratégico",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [identityData, swotData, objectiveData, actionData] = await Promise.all([
+        getStrategicIdentity(),
+        getSwotItems(),
+        getObjectives({ status: "active" }),
+        getStrategicActions().catch(() => [] as Action5W2H[]),
+      ]);
+      setIdentity(identityData);
+      setSwotItems(swotData);
+      setObjectives(objectiveData);
+      setActions(actionData);
+    } catch (error) {
+      console.error("Error fetching strategic planning data:", error);
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar os dados do planejamento estratégico",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [toast]);
 
-  const navigateToActionSchedule = (pilar: string, type: string) => {
-    // Navigate to action schedule with query params to pre-fill form
-    navigate(`/action-schedule?source=planning&pilar=${pilar}&type=${type}`);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const openDraft = (pillar: StrategicPillar) => setDraft(buildActionDraft(pillar));
+
+  const swotByCategory = (category: SwotItem["category"]) => swotItems.filter(i => i.category === category);
+
+  const swotLabels: Record<SwotItem["category"], string> = {
+    strength: "Forças",
+    weakness: "Fraquezas",
+    opportunity: "Oportunidades",
+    threat: "Ameaças",
   };
 
   if (loading) {
@@ -71,248 +116,162 @@ export function StrategicActionPlan() {
     <Card className="mb-6">
       <CardHeader className="pb-3">
         <CardTitle className="text-xl font-bold">Plano de Ação Estratégico</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Desdobre a estratégia em ações 5W2H. Iniciativas criadas a partir de um resultado-chave ficam ligadas a ele e entram no Plano de Ação com origem "Planejamento Estratégico".
+        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
-          {/* Mission, Vision, Values Section */}
+          {/* Ações já criadas a partir do planejamento */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Ações estratégicas em andamento</h3>
+            {actions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma ação com origem no planejamento estratégico ainda. Use os botões abaixo para criar a primeira.
+              </p>
+            ) : (
+              <div className="divide-y rounded-md border">
+                {actions.map(action => (
+                  <div key={action.id} className="flex items-center justify-between gap-3 p-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{action.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {action.responsible} · prazo {action.due_date ? new Date(action.due_date).toLocaleDateString("pt-BR") : "-"}
+                      </p>
+                    </div>
+                    <Badge variant={STATUS_VARIANT[action.status] || "outline"}>
+                      {STATUS_LABELS[action.status] || action.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Identidade */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Identidade Estratégica</h3>
-            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Missão</h4>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                  {identity?.mission ? identity.mission : "Não definida"}
+              <PillarBox
+                title="Missão"
+                onCreate={() => openDraft({ type: "identity", label: "Missão", text: identity?.mission || "" })}
+              >
+                <p className="line-clamp-3">{identity?.mission || "Não definida"}</p>
+              </PillarBox>
+              <PillarBox
+                title="Visão"
+                onCreate={() => openDraft({ type: "identity", label: "Visão", text: identity?.vision || "" })}
+              >
+                <p className="line-clamp-3">{identity?.vision || "Não definida"}</p>
+              </PillarBox>
+              <PillarBox
+                title="Valores"
+                onCreate={() => openDraft({ type: "identity", label: "Valores", text: (identity?.values || []).join(", ") })}
+              >
+                <p className="line-clamp-3">
+                  {identity?.values && identity.values.length > 0 ? identity.values.join(", ") : "Não definidos"}
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Missão", "identity")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
-              
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Visão</h4>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                  {identity?.vision ? identity.vision : "Não definida"}
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Visão", "identity")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
-              
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Valores</h4>
-                <div className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                  {identity?.values && identity.values.length > 0 
-                    ? identity.values.join(", ") 
-                    : "Não definidos"}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Valores", "identity")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
+              </PillarBox>
             </div>
           </div>
-          
-          {/* SWOT Analysis Section */}
+
+          {/* SWOT */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Análise SWOT</h3>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Strengths */}
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Forças</h4>
-                <ul className="text-sm text-muted-foreground mb-3 list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
-                  {swotItems.filter(item => item.category === 'strength').length > 0 ? (
-                    swotItems
-                      .filter(item => item.category === 'strength')
-                      .map(item => (
-                        <li key={item.id} className="line-clamp-2">
-                          {item.description}
-                        </li>
-                      ))
-                  ) : (
-                    <li>Nenhuma força identificada</li>
-                  )}
-                </ul>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Forças", "swot")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
-              
-              {/* Weaknesses */}
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Fraquezas</h4>
-                <ul className="text-sm text-muted-foreground mb-3 list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
-                  {swotItems.filter(item => item.category === 'weakness').length > 0 ? (
-                    swotItems
-                      .filter(item => item.category === 'weakness')
-                      .map(item => (
-                        <li key={item.id} className="line-clamp-2">
-                          {item.description}
-                        </li>
-                      ))
-                  ) : (
-                    <li>Nenhuma fraqueza identificada</li>
-                  )}
-                </ul>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Fraquezas", "swot")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
-              
-              {/* Opportunities */}
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Oportunidades</h4>
-                <ul className="text-sm text-muted-foreground mb-3 list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
-                  {swotItems.filter(item => item.category === 'opportunity').length > 0 ? (
-                    swotItems
-                      .filter(item => item.category === 'opportunity')
-                      .map(item => (
-                        <li key={item.id} className="line-clamp-2">
-                          {item.description}
-                        </li>
-                      ))
-                  ) : (
-                    <li>Nenhuma oportunidade identificada</li>
-                  )}
-                </ul>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Oportunidades", "swot")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
-              
-              {/* Threats */}
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Ameaças</h4>
-                <ul className="text-sm text-muted-foreground mb-3 list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
-                  {swotItems.filter(item => item.category === 'threat').length > 0 ? (
-                    swotItems
-                      .filter(item => item.category === 'threat')
-                      .map(item => (
-                        <li key={item.id} className="line-clamp-2">
-                          {item.description}
-                        </li>
-                      ))
-                  ) : (
-                    <li>Nenhuma ameaça identificada</li>
-                  )}
-                </ul>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigateToActionSchedule("Ameaças", "swot")}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Criar ação
-                </Button>
-              </div>
+              {(["strength", "weakness", "opportunity", "threat"] as SwotItem["category"][]).map(category => {
+                const items = swotByCategory(category);
+                return (
+                  <PillarBox
+                    key={category}
+                    title={swotLabels[category]}
+                    onCreate={() => openDraft({
+                      type: "swot",
+                      label: swotLabels[category],
+                      text: items.map(i => i.description).join("; ") || swotLabels[category],
+                    })}
+                  >
+                    <ul className="list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
+                      {items.length > 0
+                        ? items.map(item => <li key={item.id} className="line-clamp-2">{item.description}</li>)
+                        : <li>Nenhum item cadastrado</li>}
+                    </ul>
+                  </PillarBox>
+                );
+              })}
             </div>
           </div>
-          
-          {/* BSC Perspectives Section */}
+
+          {/* Objetivos e resultados-chave */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Balanced Scorecard</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {bscPerspectives.length > 0 ? (
-                bscPerspectives.map(perspective => {
-                  // Map perspective type to Portuguese name
-                  const perspectiveNames = {
-                    financial: 'Financeira',
-                    customer: 'Clientes',
-                    internal_process: 'Processos Internos',
-                    learning_growth: 'Aprendizado e Crescimento'
-                  };
-                  const perspectiveName = perspectiveNames[perspective.perspective as keyof typeof perspectiveNames];
-                  
-                  return (
-                    <div key={perspective.id} className="bg-muted/30 p-4 rounded-lg">
-                      <h4 className="font-medium mb-2">Perspectiva {perspectiveName}</h4>
-                      
-                      {perspective.objectives && perspective.objectives.length > 0 ? (
-                        <ul className="text-sm text-muted-foreground mb-3 list-disc pl-5 space-y-1 max-h-32 overflow-y-auto">
-                          {perspective.objectives.map(objective => (
-                            <li key={objective.id} className="line-clamp-2">
-                              {objective.title}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Nenhum objetivo definido
-                        </p>
-                      )}
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => navigateToActionSchedule(`BSC - ${perspectiveName}`, "bsc")}
+            <h3 className="text-lg font-semibold mb-4">Objetivos e Resultados-chave</h3>
+            {objectives.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum objetivo ativo. Crie objetivos na aba Metas.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {objectives.map(objective => (
+                  <div key={objective.id} className="bg-muted/30 p-4 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-medium flex items-center gap-1">
+                        {objective.source === "ai" && <Sparkles size={12} className="text-primary shrink-0" />}
+                        {objective.title}
+                      </h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => openDraft({ type: "bsc", label: "Objetivo", text: objective.title, objectiveId: objective.id })}
                       >
-                        <PlusCircle className="h-4 w-4 mr-2" /> 
-                        Criar ação
+                        <PlusCircle className="h-4 w-4 mr-1" /> Ação
                       </Button>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-2 text-center text-muted-foreground py-4">
-                  Nenhuma perspectiva BSC definida
-                </div>
-              )}
-            </div>
+                    {objective.measures.length > 0 && (
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {objective.measures.map(kr => {
+                          const linked = actions.filter(a => a.key_result_id === kr.id).length;
+                          return (
+                            <li key={kr.id} className="flex items-center justify-between gap-2">
+                              <span className="line-clamp-1">
+                                {kr.name}
+                                {linked > 0 && <span className="ml-1 text-xs">({linked} iniciativa{linked > 1 ? "s" : ""})</span>}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="shrink-0 h-7 text-xs"
+                                onClick={() => openDraft({ type: "kr", label: kr.name, text: kr.name, keyResultId: kr.id })}
+                              >
+                                <PlusCircle className="h-3.5 w-3.5 mr-1" /> Iniciativa
+                              </Button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          
-          {/* Action Plan Button */}
+
           <div className="flex justify-center pt-4">
-            <Button 
-              onClick={() => navigate('/action-schedule')}
-              size="lg"
-              className="gap-2"
-            >
+            <Button onClick={() => navigate("/action-schedule")} size="lg" className="gap-2">
               Ir para o Plano de Ação Completo
               <ArrowUpRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </CardContent>
+
+      <Dialog open={draft !== null} onOpenChange={(open) => { if (!open) setDraft(null); }}>
+        {draft && (
+          <ActionForm
+            action={draft as Action5W2H}
+            onClose={() => setDraft(null)}
+            afterSubmit={fetchData}
+          />
+        )}
+      </Dialog>
     </Card>
   );
 }

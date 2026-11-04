@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { requireUser, AuthError } from "../_shared/auth.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -16,6 +17,9 @@ serve(async (req) => {
   }
 
   try {
+    // Exige usuário logado (a chave anon pública não basta)
+    await requireUser(req);
+
     if (!openAIApiKey) {
       throw new Error("OPENAI_API_KEY environment variable not set");
     }
@@ -101,8 +105,8 @@ Para o tipo de cálculo (calculation_type), use:
     });
   } catch (error) {
     console.error('Error in generate-strategic-indicators function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
+      status: error instanceof AuthError ? error.status : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

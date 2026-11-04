@@ -1,85 +1,62 @@
-
+import { supabase } from "@/integrations/supabase/client";
+import { TablesInsert } from "@/integrations/supabase/types";
 import { SwotItem } from "@/types/strategic-planning";
 
-// Mock data for SWOT analysis
-const mockSwotItems: SwotItem[] = [
-  {
-    id: "1",
-    category: "strength",
-    description: "Equipe altamente qualificada",
-    impact_level: 4,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "2",
-    category: "weakness",
-    description: "Processos internos ainda não otimizados",
-    impact_level: 3,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "3",
-    category: "opportunity",
-    description: "Crescimento do mercado de produtos sustentáveis",
-    impact_level: 5,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "4",
-    category: "threat",
-    description: "Novos concorrentes entrando no mercado",
-    impact_level: 4,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
+export type SwotItemInput = Omit<TablesInsert<'swot_items'>, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'created_by'>;
 
 export async function getSwotItems(): Promise<SwotItem[]> {
-  // Return mock data
-  return Promise.resolve(mockSwotItems);
-}
+  const { data, error } = await supabase
+    .from('swot_items')
+    .select('*')
+    .order('impact_level', { ascending: false })
+    .order('created_at', { ascending: true });
 
-export async function createSwotItem(item: Omit<SwotItem, 'id' | 'created_at' | 'updated_at'>): Promise<SwotItem | null> {
-  // Mock create - in a real app this would insert into the database
-  const newItem: SwotItem = {
-    id: (mockSwotItems.length + 1).toString(),
-    ...item,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  
-  mockSwotItems.push(newItem);
-  return Promise.resolve(newItem);
-}
-
-export async function updateSwotItem(id: string, item: Partial<Omit<SwotItem, 'id' | 'created_at' | 'updated_at'>>): Promise<SwotItem | null> {
-  // Mock update - in a real app this would update the database
-  const index = mockSwotItems.findIndex(i => i.id === id);
-  
-  if (index >= 0) {
-    mockSwotItems[index] = { 
-      ...mockSwotItems[index], 
-      ...item, 
-      updated_at: new Date().toISOString() 
-    };
-    
-    return Promise.resolve(mockSwotItems[index]);
+  if (error) {
+    console.error("Error fetching SWOT items:", error);
+    throw new Error(error.message);
   }
-  
-  return Promise.resolve(null);
+  return (data ?? []) as SwotItem[];
+}
+
+export async function createSwotItem(item: SwotItemInput): Promise<SwotItem | null> {
+  const { data, error } = await supabase.from('swot_items').insert(item).select().single();
+  if (error) {
+    console.error("Error creating SWOT item:", error);
+    throw new Error(error.message);
+  }
+  return data as SwotItem;
+}
+
+/** Inserção em lote, ignorando descrições já existentes (evita duplicar ao reaplicar a IA). */
+export async function createSwotItems(items: SwotItemInput[]): Promise<SwotItem[]> {
+  if (items.length === 0) return [];
+  const existing = await getSwotItems();
+  const known = new Set(existing.map(i => `${i.category}|${i.description.trim().toLowerCase()}`));
+  const fresh = items.filter(i => !known.has(`${i.category}|${i.description.trim().toLowerCase()}`));
+  if (fresh.length === 0) return [];
+
+  const { data, error } = await supabase.from('swot_items').insert(fresh).select();
+  if (error) {
+    console.error("Error creating SWOT items:", error);
+    throw new Error(error.message);
+  }
+  return (data ?? []) as SwotItem[];
+}
+
+export async function updateSwotItem(id: string, item: Partial<SwotItemInput>): Promise<SwotItem | null> {
+  const { data, error } = await supabase.from('swot_items').update(item).eq('id', id).select().single();
+  if (error) {
+    console.error("Error updating SWOT item:", error);
+    throw new Error(error.message);
+  }
+  return data as SwotItem;
 }
 
 export async function deleteSwotItem(id: string): Promise<boolean> {
-  // Mock delete - in a real app this would delete from the database
-  const index = mockSwotItems.findIndex(i => i.id === id);
-  
-  if (index >= 0) {
-    mockSwotItems.splice(index, 1);
-    return Promise.resolve(true);
+  const { error } = await supabase.from('swot_items').delete().eq('id', id);
+  if (error) {
+    console.error("Error deleting SWOT item:", error);
+    throw new Error(error.message);
   }
-  
-  return Promise.resolve(false);
+  return true;
 }
