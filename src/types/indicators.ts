@@ -7,8 +7,10 @@ export interface IndicatorType {
   goal_value: number;
   calculation_type: 'sum' | 'average';
   unit?: string;
-  /** Responsável pelo KPI (user_profiles.id) */
+  /** Responsável pelo KPI (employees.id) */
   owner_id?: string | null;
+  /** Processo ao qual o indicador pertence (processes.id) */
+  process_id?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -27,6 +27,7 @@ import { isProductionEnvironment } from './utils/lovableEditorDetection';
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
+import Onboarding from '@/pages/Onboarding';
 import HumanResources from '@/pages/HumanResources';
 import ProcessFormPage from '@/pages/ProcessFormPage';
 import ProcessoPage from '@/pages/ProcessoPage';
@@ -140,6 +141,9 @@ function AppContent() {
             {/* Rota de autenticação */}
             <Route path="/auth" element={<Auth />} />
             
+            {/* Onboarding guiado da empresa (tela cheia, sem menu) */}
+            <Route path="/onboarding" element={<AuthGuard><Onboarding /></AuthGuard>} />
+
             {/* Rota pública para entrevista de desligamento */}
             <Route path="/exit-interview/:token" element={<ExitInterviewPage />} />
             

@@ -664,6 +664,8 @@ export type Database = {
           settings: Json
           slug: string
           updated_at: string
+          onboarding_completed_at: string | null
+          company_subsector: string | null
         }
         Insert: {
           active?: boolean
@@ -686,6 +688,8 @@ export type Database = {
           settings?: Json
           slug: string
           updated_at?: string
+          onboarding_completed_at?: string | null
+          company_subsector?: string | null
         }
         Update: {
           active?: boolean
@@ -708,6 +712,8 @@ export type Database = {
           settings?: Json
           slug?: string
           updated_at?: string
+          onboarding_completed_at?: string | null
+          company_subsector?: string | null
         }
         Relationships: []
       }
@@ -2382,6 +2388,7 @@ export type Database = {
           process: string
           unit: string | null
           updated_at: string
+          process_id: string | null
         }
         Insert: {
           calculation_type?: string
@@ -2396,6 +2403,7 @@ export type Database = {
           process?: string
           unit?: string | null
           updated_at?: string
+          process_id?: string | null
         }
         Update: {
           calculation_type?: string
@@ -2410,6 +2418,7 @@ export type Database = {
           process?: string
           unit?: string | null
           updated_at?: string
+          process_id?: string | null
         }
         Relationships: []
       }
@@ -2511,6 +2520,62 @@ export type Database = {
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processes: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          objective: string
+          owner_id: string | null
+          process_type: string
+          sort_order: number
+          source: string
+          status: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          objective?: string
+          owner_id?: string | null
+          process_type?: string
+          sort_order?: number
+          source?: string
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          objective?: string
+          owner_id?: string | null
+          process_type?: string
+          sort_order?: number
+          source?: string
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processes_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -3138,6 +3203,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          process_id: string | null
         }
         Insert: {
           category?: string
@@ -3154,6 +3220,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          process_id?: string | null
         }
         Update: {
           category?: string
@@ -3170,6 +3237,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          process_id?: string | null
         }
         Relationships: [
           {

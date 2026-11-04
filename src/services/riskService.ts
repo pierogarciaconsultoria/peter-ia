@@ -7,6 +7,8 @@ export interface Risk {
   description: string;
   category: string;
   process: string;
+  /** Processo ao qual o risco pertence (processes.id) */
+  process_id?: string | null;
   probability: number;
   impact: number;
   risk_level?: number;
