@@ -8,6 +8,7 @@ import { RequirementDialog } from "@/components/requirement-dialog/RequirementDi
 import { ChildRequirementDialog } from "@/components/child-requirement-dialog/ChildRequirementDialog";
 import { ISORequirement } from "@/utils/isoRequirements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 
 export default function Dashboard() {
   const [requirements, setRequirements] = useState(isoRequirements);
@@ -31,6 +32,7 @@ export default function Dashboard() {
   };
 
   return (
+    <OnboardingGate>
     <div className="p-6">
       <div className="max-w-6xl mx-auto">
         <CardHeader className="px-0 pt-0">
@@ -71,5 +73,6 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
     </div>
+    </OnboardingGate>
   );
 }
