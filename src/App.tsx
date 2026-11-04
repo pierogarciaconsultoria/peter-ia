@@ -107,7 +107,7 @@ function AppContent() {
     setTimeout(checkSupabaseConnection, 1000);
     
     // Setup reconnection check on window focus (com debounce)
-    let focusTimeout: NodeJS.Timeout;
+    let focusTimeout: ReturnType<typeof setTimeout> | undefined;
     const handleFocus = () => {
       clearTimeout(focusTimeout);
       focusTimeout = setTimeout(() => {

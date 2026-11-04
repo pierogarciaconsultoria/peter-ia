@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
     });
 
     // Reportar erro para serviços de monitoramento se estiver em produção
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       // Aqui você pode integrar com Sentry, LogRocket, etc.
       console.log('📊 ErrorBoundary: Reportando erro para monitoramento');
     }
@@ -106,7 +106,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 }
               </p>
               
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <Bug className="h-4 w-4 text-red-600" />
@@ -180,7 +180,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 )}
               </div>
               
-              {process.env.NODE_ENV === 'production' && (
+              {import.meta.env.PROD && (
                 <p className="text-xs text-gray-500 text-center">
                   ID do erro: {this.state.errorId}
                 </p>

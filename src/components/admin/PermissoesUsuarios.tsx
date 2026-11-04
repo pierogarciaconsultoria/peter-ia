@@ -43,12 +43,21 @@ interface EmpresaConfig {
   active_modules?: string[];
 }
 
+interface EmpresaPermissao {
+  modulo_id: string;
+  pode_visualizar: boolean;
+  pode_editar: boolean;
+  pode_excluir: boolean;
+  pode_criar: boolean;
+}
+
 export function PermissoesUsuarios() {
   const { user, isMaster, isAdmin, empresaId } = useCurrentUser();
   const { atribuirPermissao } = useUserPermissions();
   const [usuarios, setUsuarios] = useState<UsuarioPermissao[]>([]);
   const [modulos, setModulos] = useState<any[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaConfig[]>([]);
+  const [, setEmpresaPermissoes] = useState<EmpresaPermissao[]>([]);
   const [empresaSelecionada, setEmpresaSelecionada] = useState<string | "todas">("todas");
   const [abaAtiva, setAbaAtiva] = useState<"liberacao" | "usuarios">("liberacao");
   const [carregando, setCarregando] = useState(true);
