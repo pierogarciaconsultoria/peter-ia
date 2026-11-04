@@ -43,4 +43,6 @@ export interface Action5W2H {
   source?: ActionSource;
   comments?: string;
   involved_people?: string;
+  /** Iniciativa ligada a um resultado-chave (bsc_measures.id) */
+  key_result_id?: string | null;
 }

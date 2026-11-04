@@ -1,30 +1,36 @@
-
-import { BusinessModelCanvas } from "@/types/strategic-planning";
-
-// Mock data for Business Model Canvas
-const mockBusinessModelCanvas: BusinessModelCanvas = {
-  id: "1",
-  key_partners: "Fornecedores de matéria-prima sustentável, distribuidores locais",
-  key_activities: "Produção, P&D, Marketing",
-  key_resources: "Patentes, equipe qualificada, infraestrutura",
-  value_propositions: "Produtos inovadores com menor impacto ambiental",
-  customer_relationships: "Suporte contínuo, programas de fidelidade",
-  channels: "E-commerce, revendedores, venda direta",
-  customer_segments: "Consumidores conscientes, empresas com compromissos ESG",
-  cost_structure: "P&D, produção, marketing, distribuição",
-  revenue_streams: "Vendas de produtos, serviços de consultoria",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-};
+import { supabase } from "@/integrations/supabase/client";
+import { BusinessModelCanvas, BusinessModelCanvasFields } from "@/types/strategic-planning";
 
 export async function getBusinessModelCanvas(): Promise<BusinessModelCanvas | null> {
-  // Return mock data
-  return Promise.resolve(mockBusinessModelCanvas);
+  const { data, error } = await supabase
+    .from('business_model_canvas')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching business model canvas:", error);
+    throw new Error(error.message);
+  }
+  return data as BusinessModelCanvas | null;
 }
 
-export async function updateBusinessModelCanvas(canvas: Partial<BusinessModelCanvas>): Promise<BusinessModelCanvas | null> {
-  // Mock update - in a real app this would update the database
-  const updatedCanvas = { ...mockBusinessModelCanvas, ...canvas, updated_at: new Date().toISOString() };
-  
-  return Promise.resolve(updatedCanvas);
+/** Cria ou atualiza o canvas da empresa (um por empresa). */
+export async function updateBusinessModelCanvas(
+  canvas: Partial<BusinessModelCanvasFields> & { source?: 'manual' | 'ai' }
+): Promise<BusinessModelCanvas | null> {
+  const existing = await getBusinessModelCanvas();
+  const payload = { ...canvas, source: canvas.source ?? 'manual' as const };
+
+  const query = existing
+    ? supabase.from('business_model_canvas').update(payload).eq('id', existing.id)
+    : supabase.from('business_model_canvas').insert(payload);
+
+  const { data, error } = await query.select().single();
+  if (error) {
+    console.error("Error saving business model canvas:", error);
+    throw new Error(error.message);
+  }
+  return data as BusinessModelCanvas;
 }

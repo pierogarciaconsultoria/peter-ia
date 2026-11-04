@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { requireUser, AuthError } from "../_shared/auth.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -16,6 +17,9 @@ serve(async (req) => {
   }
 
   try {
+    // Exige usuário logado (a chave anon pública não basta)
+    await requireUser(req);
+
     if (!openAIApiKey) {
       throw new Error("OPENAI_API_KEY environment variable not set");
     }
@@ -33,13 +37,13 @@ Com base nas respostas fornecidas pelo cliente para as perguntas sobre identidad
 elabore sugestões para a Missão, Visão e Valores da empresa.
 
 Respostas sobre a Missão:
-${responses.mission.map((response, index) => `Pergunta ${index + 1}: ${response}`).join('\n')}
+${responses.mission.map((response: string, index: number) => `Pergunta ${index + 1}: ${response}`).join('\n')}
 
 Respostas sobre a Visão:
-${responses.vision.map((response, index) => `Pergunta ${index + 1}: ${response}`).join('\n')}
+${responses.vision.map((response: string, index: number) => `Pergunta ${index + 1}: ${response}`).join('\n')}
 
 Respostas sobre os Valores:
-${responses.values.map((response, index) => `Pergunta ${index + 1}: ${response}`).join('\n')}
+${responses.values.map((response: string, index: number) => `Pergunta ${index + 1}: ${response}`).join('\n')}
 
 Por favor, elabore:
 1. Uma declaração de Missão concisa (max. 2 parágrafos)
@@ -87,8 +91,8 @@ Formate sua resposta em JSON com o seguinte formato:
     });
   } catch (error) {
     console.error('Error in generate-strategic-identity function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
+      status: error instanceof AuthError ? error.status : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

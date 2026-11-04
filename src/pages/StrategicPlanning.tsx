@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StrategicIdentityForm } from "@/components/strategic-planning/StrategicIdentityForm";
 import { SwotAnalysis } from "@/components/strategic-planning/SwotAnalysis";
-import { BalancedScorecard } from "@/components/strategic-planning/BalancedScorecard";
 import { BusinessModelCanvas } from "@/components/strategic-planning/BusinessModelCanvas";
 import { StrategicActionPlan } from "@/components/strategic-planning/StrategicActionPlan";
+import { StrategyTab } from "@/components/strategic-planning/okr/StrategyTab";
+import { GoalsBoard } from "@/components/strategic-planning/okr/GoalsBoard";
+import { KpiBoard } from "@/components/strategic-planning/okr/KpiBoard";
 import { getStrategicIdentity } from "@/services/strategic-planning/strategicIdentityService";
 import { getSwotItems } from "@/services/strategic-planning/swotService";
 import { getBscPerspectives } from "@/services/strategic-planning/bscService";
-import { getBusinessModelCanvas } from "@/services/strategicPlanningService";
+import { getBusinessModelCanvas } from "@/services/strategic-planning/businessModelCanvasService";
 import { exportStrategicPlanningToPDF } from "@/components/strategic-planning/utils/pdf-export";
 import { StrategicIdentity } from "@/types/strategic-planning";
 import { Button } from "@/components/ui/button";
@@ -47,7 +49,7 @@ const StrategicPlanning = () => {
   // Set active tab based on URL param
   useEffect(() => {
     if (tab) {
-      setActiveTab(tab);
+      setActiveTab(tab === "bsc" ? "goals" : tab);
     }
   }, [tab]);
 
@@ -79,9 +81,9 @@ const StrategicPlanning = () => {
         <div className="w-full max-w-full px-4 sm:px-6 py-6 space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Planejamento Estratégico</h1>
+              <h1 className="text-3xl font-bold">Estratégia e Metas</h1>
               <p className="text-muted-foreground mt-1">
-                Defina e acompanhe a estratégia da sua organização
+                Estratégia, objetivos (OKR), KPIs e check-ins ligados ao seu sistema de gestão
               </p>
             </div>
             
@@ -97,11 +99,13 @@ const StrategicPlanning = () => {
           </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="identity">Identidade Estratégica</TabsTrigger>
-              <TabsTrigger value="swot">Análise SWOT</TabsTrigger>
-              <TabsTrigger value="bsc">Balanced Scorecard</TabsTrigger>
-              <TabsTrigger value="canvas">Business Model Canvas</TabsTrigger>
+            <TabsList className="mb-6 flex-wrap h-auto">
+              <TabsTrigger value="identity">Identidade</TabsTrigger>
+              <TabsTrigger value="strategy">Estratégia</TabsTrigger>
+              <TabsTrigger value="swot">SWOT</TabsTrigger>
+              <TabsTrigger value="goals">Metas</TabsTrigger>
+              <TabsTrigger value="kpis">KPIs</TabsTrigger>
+              <TabsTrigger value="canvas">Canvas</TabsTrigger>
               <TabsTrigger value="action_plan">Plano de Ação</TabsTrigger>
             </TabsList>
             
@@ -120,8 +124,16 @@ const StrategicPlanning = () => {
               <SwotAnalysis />
             </TabsContent>
             
-            <TabsContent value="bsc">
-              <BalancedScorecard />
+            <TabsContent value="strategy">
+              <StrategyTab />
+            </TabsContent>
+
+            <TabsContent value="goals">
+              <GoalsBoard />
+            </TabsContent>
+
+            <TabsContent value="kpis">
+              <KpiBoard />
             </TabsContent>
             
             <TabsContent value="canvas">

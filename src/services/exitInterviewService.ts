@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 import { ExitInterview, CreateExitInterviewData, ExitInterviewFormData } from "@/types/exitInterviews";
 
 export class ExitInterviewService {
@@ -27,30 +28,24 @@ export class ExitInterviewService {
     return (data || []) as ExitInterview[];
   }
 
-  // Buscar entrevista por token (acesso público)
+  // Buscar entrevista por token (acesso público): função do banco, sem leitura direta da tabela
   static async getExitInterviewByToken(token: string): Promise<ExitInterview | null> {
-    const { data, error } = await supabase
-      .from('hr_exit_interviews')
-      .select('*')
-      .eq('token', token)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc('get_exit_interview_by_token', { p_token: token });
 
     if (error) throw error;
-    return data as ExitInterview | null;
+    const rows = (data ?? []) as unknown as ExitInterview[];
+    return rows[0] ?? null;
   }
 
-  // Submeter respostas da entrevista
+  // Submeter respostas da entrevista: a função valida o token e só grava os campos do formulário
   static async submitExitInterview(token: string, formData: ExitInterviewFormData): Promise<void> {
-    const { error } = await supabase
-      .from('hr_exit_interviews')
-      .update({
-        ...formData,
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .eq('token', token);
+    const { data, error } = await supabase.rpc('submit_exit_interview', {
+      p_token: token,
+      p_answers: formData as unknown as Json,
+    });
 
     if (error) throw error;
+    if (!data) throw new Error('Link de entrevista inválido ou expirado');
   }
 
   // Atualizar status para "enviado"

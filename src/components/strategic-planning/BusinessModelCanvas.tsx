@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Save, Edit } from "lucide-react";
-import { BusinessModelCanvas as BusinessCanvasType } from "@/types/strategic-planning";
+import { BusinessModelCanvas as BusinessCanvasType, BusinessModelCanvasFields } from "@/types/strategic-planning";
 import { getBusinessModelCanvas, updateBusinessModelCanvas } from "@/services/strategicPlanningService";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ export function BusinessModelCanvas() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<BusinessCanvasType>>({
+  const [formData, setFormData] = useState<Partial<BusinessModelCanvasFields>>({
     key_partners: "",
     key_activities: "",
     key_resources: "",
